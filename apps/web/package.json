@@ -8,9 +8,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint --max-warnings 0",
-    "check-types": "next typegen && tsc --noEmit"
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@repo/shared-types": "*",
     "@repo/ui": "*",
     "next": "16.1.5",
     "react": "^19.2.0",

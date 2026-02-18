@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Document {
+  id         String   @id @default(uuid())
+  title      String
+  sourceType String
+  sourceUrl  String?
+  rawContent String
+  status     String   @default("PENDING")
+  createdAt  DateTime @default(now())
+
+  chunks Chunk[]
+
+  @@map("documents")
+}
+
+model Chunk {
+  id          String   @id @default(uuid())
+  documentId  String
+  content     String
+  startOffset Int
+  endOffset   Int
+  createdAt   DateTime @default(now())
+
+  document        Document         @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  chunkTags       ChunkTag[]
+  notes           Note[]
+  importanceScore ImportanceScore?
+  reviews         Review[]
+
+  @@index([documentId])
+  @@map("chunks")
+}
+
+model Tag {
+  id   String @id @default(uuid())
+  name String @unique
+
+  chunkTags ChunkTag[]
+
+  @@index([name])
+  @@map("tags")
+}
+
+model ChunkTag {
+  chunkId String
+  tagId   String
+
+  chunk Chunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([chunkId, tagId])
+  @@index([chunkId, tagId])
+  @@map("chunk_tags")
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  chunkId   String
+  content   String
+  createdAt DateTime @default(now())
+
+  chunk Chunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+
+  @@map("notes")
+}
+
+model ImportanceScore {
+  chunkId String @id
+  score   Int
+
+  chunk Chunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+
+  @@map("importance_scores")
+}
+
+model Review {
+  id             String   @id @default(uuid())
+  chunkId        String
+  lastReviewedAt DateTime @default(now())
+  reviewScore    Int      @default(0)
+
+  chunk Chunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+
+  @@index([chunkId])
+  @@map("reviews")
+}
+
+model Concept {
+  id    String @id @default(uuid())
+  label String @unique
+
+  relationsFrom ConceptRelation[] @relation("FromConcept")
+  relationsTo   ConceptRelation[] @relation("ToConcept")
+
+  @@index([label])
+  @@map("concepts")
+}
+
+model ConceptRelation {
+  id            String @id @default(uuid())
+  fromConceptId String
+  toConceptId   String
+  relationType  String
+
+  fromConcept Concept @relation("FromConcept", fields: [fromConceptId], references: [id], onDelete: Cascade)
+  toConcept   Concept @relation("ToConcept", fields: [toConceptId], references: [id], onDelete: Cascade)
+
+  @@unique([fromConceptId, toConceptId, relationType])
+  @@map("concept_relations")
+}

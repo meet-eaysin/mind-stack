@@ -1,0 +1,58 @@
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../../../prisma/prisma.service.js";
+import type { QueryRepository } from "../domain/query-repository.interface.js";
+
+@Injectable()
+export class PrismaQueryRepository implements QueryRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findChunksByIds(
+    chunkIds: string[]
+  ): Promise<
+    Array<{
+      chunkId: string;
+      content: string;
+      documentTitle: string;
+      importanceScore: number | null;
+      tags: string[];
+      createdAt: Date;
+    }>
+  > {
+    const chunks = await this.prisma.chunk.findMany({
+      where: { id: { in: chunkIds } },
+      include: {
+        document: { select: { title: true } },
+        chunkTags: { include: { tag: true } },
+        importanceScore: true,
+      },
+    });
+
+    return chunks.map((c) => ({
+      chunkId: c.id,
+      content: c.content,
+      documentTitle: c.document.title,
+      importanceScore: c.importanceScore?.score ?? null,
+      tags: c.chunkTags.map((ct) => ct.tag.name),
+      createdAt: c.createdAt,
+    }));
+  }
+
+  async findChunksByTags(tags: string[]): Promise<string[]> {
+    const rows = await this.prisma.chunkTag.findMany({
+      where: { tag: { name: { in: tags } } },
+      select: { chunkId: true },
+      distinct: ["chunkId"],
+    });
+    return rows.map((r) => r.chunkId);
+  }
+
+  async findChunksByDateRange(from: Date, to: Date): Promise<string[]> {
+    const rows = await this.prisma.chunk.findMany({
+      where: {
+        createdAt: { gte: from, lte: to },
+      },
+      select: { id: true },
+    });
+    return rows.map((r) => r.id);
+  }
+}
