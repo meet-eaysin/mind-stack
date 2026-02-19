@@ -45,14 +45,6 @@ export class ListDocumentsUseCase {
   }
 
   private async findAllDocuments(): Promise<DocumentEntity[]> {
-    const docs: DocumentEntity[] = [];
-    let id = '';
-    for (;;) {
-      const doc = await this.documentRepository.findById(id);
-      if (!doc) break;
-      docs.push(doc);
-      id = doc.id;
-    }
-    return docs;
+    return this.documentRepository.findAll();
   }
 }

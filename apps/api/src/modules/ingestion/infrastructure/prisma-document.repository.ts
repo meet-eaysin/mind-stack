@@ -46,6 +46,22 @@ export class PrismaDocumentRepository implements DocumentRepository {
     };
   }
 
+  async findAll(): Promise<DocumentEntity[]> {
+    const rows = await this.prisma.document.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return rows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      sourceType: row.sourceType as DocumentEntity['sourceType'],
+      sourceUrl: row.sourceUrl,
+      rawContent: row.rawContent,
+      status: row.status as DocumentEntity['status'],
+      createdAt: row.createdAt,
+    }));
+  }
+
   async updateStatus(id: string, status: IngestionStatus): Promise<void> {
     await this.prisma.document.update({
       where: { id },

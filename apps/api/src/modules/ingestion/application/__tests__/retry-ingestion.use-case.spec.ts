@@ -39,6 +39,10 @@ class FakeDocumentRepository implements DocumentRepository {
     return Promise.resolve(this.documents.get(id) ?? null);
   }
 
+  findAll(): Promise<DocumentEntity[]> {
+    return Promise.resolve(Array.from(this.documents.values()));
+  }
+
   updateStatus(id: string, status: IngestionStatus): Promise<void> {
     const doc = this.documents.get(id);
     if (doc) {

@@ -34,7 +34,6 @@ function createDocumentFixture(
  */
 class FakeDocumentRepository implements DocumentRepository {
   private readonly documents: DocumentEntity[] = [];
-  private findByIdCallCount = 0;
 
   seed(docs: DocumentEntity[]): void {
     this.documents.push(...docs);
@@ -45,18 +44,16 @@ class FakeDocumentRepository implements DocumentRepository {
     return Promise.resolve(document);
   }
 
-  findById(_id: string): Promise<DocumentEntity | null> {
-    const doc = this.documents[this.findByIdCallCount] ?? null;
-    this.findByIdCallCount += 1;
-    return Promise.resolve(doc);
+  findById(id: string): Promise<DocumentEntity | null> {
+    return Promise.resolve(this.documents.find((d) => d.id === id) ?? null);
+  }
+
+  findAll(): Promise<DocumentEntity[]> {
+    return Promise.resolve(this.documents);
   }
 
   updateStatus(_id: string, _status: IngestionStatus): Promise<void> {
     return Promise.resolve();
-  }
-
-  resetCallCount(): void {
-    this.findByIdCallCount = 0;
   }
 }
 
