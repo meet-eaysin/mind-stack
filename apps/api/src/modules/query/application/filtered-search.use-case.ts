@@ -1,14 +1,14 @@
-import type { EmbeddingProvider } from "@repo/embeddings";
-import type { VectorStore } from "@repo/vector-store";
-import type { QueryRepository } from "../domain/query-repository.interface.js";
-import { rankResults } from "../domain/ranking.service.js";
-import type { ChunkReference } from "@repo/shared-types";
+import type { EmbeddingProvider } from '@repo/embeddings';
+import type { VectorStore } from '@repo/vector-store';
+import type { QueryRepository } from '../domain/query-repository.interface.js';
+import { rankResults } from '../domain/ranking.service.js';
+import type { ChunkReference } from '@repo/shared-types';
 
 export class FilteredSearchUseCase {
   constructor(
     private readonly embeddingProvider: EmbeddingProvider,
     private readonly vectorStore: VectorStore,
-    private readonly queryRepository: QueryRepository
+    private readonly queryRepository: QueryRepository,
   ) {}
 
   async execute(input: {
@@ -24,8 +24,9 @@ export class FilteredSearchUseCase {
     let allowedChunkIds: Set<string> | undefined;
 
     if (input.tags && input.tags.length > 0) {
-      const tagChunkIds =
-        await this.queryRepository.findChunksByTags(input.tags);
+      const tagChunkIds = await this.queryRepository.findChunksByTags(
+        input.tags,
+      );
       allowedChunkIds = new Set(tagChunkIds);
     }
 
@@ -34,12 +35,12 @@ export class FilteredSearchUseCase {
       const to = input.toDate ? new Date(input.toDate) : new Date();
       const dateChunkIds = await this.queryRepository.findChunksByDateRange(
         from,
-        to
+        to,
       );
       const dateSet = new Set(dateChunkIds);
       if (allowedChunkIds) {
         allowedChunkIds = new Set(
-          [...allowedChunkIds].filter((id) => dateSet.has(id))
+          [...allowedChunkIds].filter((id) => dateSet.has(id)),
         );
       } else {
         allowedChunkIds = dateSet;
@@ -65,7 +66,7 @@ export class FilteredSearchUseCase {
       return {
         chunkId: vr.id,
         content: detail?.content ?? vr.content,
-        documentTitle: detail?.documentTitle ?? "",
+        documentTitle: detail?.documentTitle ?? '',
         vectorScore: vr.score,
         importanceScore: detail?.importanceScore ?? null,
         tags: detail?.tags ?? [],

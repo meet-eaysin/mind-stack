@@ -1,11 +1,11 @@
-import type { LLMProvider } from "@repo/llm";
-import type { AskQuestionResponse } from "@repo/shared-types";
-import { SemanticSearchUseCase } from "./semantic-search.use-case.js";
+import type { LLMProvider } from '@repo/llm';
+import type { AskQuestionResponse } from '@repo/shared-types';
+import { SemanticSearchUseCase } from './semantic-search.use-case.js';
 
 export class AskQuestionUseCase {
   constructor(
     private readonly llmProvider: LLMProvider,
-    private readonly semanticSearch: SemanticSearchUseCase
+    private readonly semanticSearch: SemanticSearchUseCase,
   ) {}
 
   async execute(input: {
@@ -26,27 +26,24 @@ export class AskQuestionUseCase {
     }
 
     const contextBlock = citations
-      .map(
-        (c, i) =>
-          `[${i + 1}] (Source: ${c.documentTitle})\n${c.content}`
-      )
-      .join("\n\n");
+      .map((c, i) => `[${i + 1}] (Source: ${c.documentTitle})\n${c.content}`)
+      .join('\n\n');
 
     const systemPrompt = [
-      "You are a knowledgeable assistant that answers questions based on the provided context.",
-      "Always cite your sources using [N] notation referring to the context blocks.",
+      'You are a knowledgeable assistant that answers questions based on the provided context.',
+      'Always cite your sources using [N] notation referring to the context blocks.',
       "If the context doesn't contain enough information, say so clearly.",
-      "Be concise and accurate.",
-    ].join("\n");
+      'Be concise and accurate.',
+    ].join('\n');
 
     const prompt = [
-      "Context:",
+      'Context:',
       contextBlock,
-      "",
+      '',
       `Question: ${input.question}`,
-      "",
-      "Answer with citations:",
-    ].join("\n");
+      '',
+      'Answer with citations:',
+    ].join('\n');
 
     const response = await this.llmProvider.generate({
       prompt,

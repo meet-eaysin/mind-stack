@@ -1,13 +1,13 @@
-import type { EmbeddingProvider } from "@repo/embeddings";
-import type { VectorStore } from "@repo/vector-store";
-import type { QueryRepository } from "../domain/query-repository.interface.js";
-import type { ChunkReference } from "@repo/shared-types";
+import type { EmbeddingProvider } from '@repo/embeddings';
+import type { VectorStore } from '@repo/vector-store';
+import type { QueryRepository } from '../domain/query-repository.interface.js';
+import type { ChunkReference } from '@repo/shared-types';
 
 export class RetrieveChunksUseCase {
   constructor(
     private readonly embeddingProvider: EmbeddingProvider,
     private readonly vectorStore: VectorStore,
-    private readonly queryRepository: QueryRepository
+    private readonly queryRepository: QueryRepository,
   ) {}
 
   async execute(input: {
@@ -28,7 +28,7 @@ export class RetrieveChunksUseCase {
       return {
         chunkId: vr.id,
         content: detail?.content ?? vr.content,
-        documentTitle: detail?.documentTitle ?? "",
+        documentTitle: detail?.documentTitle ?? '',
         score: vr.score,
         tags: detail?.tags ?? [],
       };

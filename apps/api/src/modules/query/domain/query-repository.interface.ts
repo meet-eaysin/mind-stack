@@ -1,4 +1,3 @@
-
 export interface SearchResultEntity {
   chunkId: string;
   content: string;
@@ -12,9 +11,7 @@ export interface SearchResultEntity {
 }
 
 export interface QueryRepository {
-  findChunksByIds(
-    chunkIds: string[]
-  ): Promise<
+  findChunksByIds(chunkIds: string[]): Promise<
     Array<{
       chunkId: string;
       content: string;

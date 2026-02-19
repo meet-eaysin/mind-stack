@@ -7,7 +7,7 @@ const logger = createLogger("DailyReviewJob");
 const DEFAULT_REVIEW_SCORE = 0;
 
 export async function handleDailyReviewJob(
-  prisma: PrismaClient
+  prisma: PrismaClient,
 ): Promise<void> {
   const chunksWithoutReview = await prisma.chunk.findMany({
     where: {

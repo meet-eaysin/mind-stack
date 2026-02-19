@@ -1,4 +1,4 @@
-import type { RelationType } from "@repo/shared-types";
+import type { RelationType } from '@repo/shared-types';
 
 export interface ConceptEntity {
   id: string;
@@ -17,13 +17,13 @@ export interface ConceptRepository {
   createRelation(
     fromId: string,
     toId: string,
-    relationType: RelationType
+    relationType: RelationType,
   ): Promise<ConceptRelationEntity>;
   findAll(): Promise<ConceptEntity[]>;
   findAllRelations(): Promise<ConceptRelationEntity[]>;
   findNeighborhood(
     conceptId: string,
-    depth: number
+    depth: number,
   ): Promise<{
     concepts: ConceptEntity[];
     relations: ConceptRelationEntity[];

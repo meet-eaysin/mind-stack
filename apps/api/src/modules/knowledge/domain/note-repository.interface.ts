@@ -1,4 +1,4 @@
-import type { NoteEntity } from "./note.entity.js";
+import type { NoteEntity } from './note.entity.js';
 
 export interface NoteRepository {
   create(chunkId: string, content: string): Promise<NoteEntity>;

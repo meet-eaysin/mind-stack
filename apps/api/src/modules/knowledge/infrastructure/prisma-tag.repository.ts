@@ -1,8 +1,8 @@
-import { Injectable } from "@nestjs/common";
-import { randomUUID } from "node:crypto";
-import { PrismaService } from "../../../prisma/prisma.service.js";
-import type { TagRepository } from "../domain/tag-repository.interface.js";
-import type { TagEntity } from "../domain/tag.entity.js";
+import { Injectable } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
+import { PrismaService } from '../../../prisma/prisma.service.js';
+import type { TagRepository } from '../domain/tag-repository.interface.js';
+import type { TagEntity } from '../domain/tag.entity.js';
 
 @Injectable()
 export class PrismaTagRepository implements TagRepository {
@@ -28,10 +28,7 @@ export class PrismaTagRepository implements TagRepository {
     });
   }
 
-  async removeTagFromChunk(
-    chunkId: string,
-    tagName: string
-  ): Promise<void> {
+  async removeTagFromChunk(chunkId: string, tagName: string): Promise<void> {
     const tag = await this.prisma.tag.findUnique({
       where: { name: tagName },
     });

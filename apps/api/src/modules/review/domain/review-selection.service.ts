@@ -1,11 +1,11 @@
-import type { ReviewEntity } from "./review-repository.interface.js";
+import type { ReviewEntity } from './review-repository.interface.js';
 
 const MIN_INTERVAL_DAYS = 1;
 const SCORE_MULTIPLIER = 2;
 
 export function selectChunksForReview(
   reviews: ReviewEntity[],
-  limit: number
+  limit: number,
 ): ReviewEntity[] {
   const now = Date.now();
 

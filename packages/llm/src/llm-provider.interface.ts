@@ -19,6 +19,6 @@ export interface StreamChunk {
 export interface LLMProvider {
   generate(request: GenerationRequest): Promise<GenerationResponse>;
   generateStream(
-    request: GenerationRequest
+    request: GenerationRequest,
   ): AsyncGenerator<StreamChunk, void, undefined>;
 }

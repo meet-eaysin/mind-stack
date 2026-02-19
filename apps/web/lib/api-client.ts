@@ -24,12 +24,10 @@ import type {
   ConceptNeighborhoodRequest,
 } from "@repo/shared-types";
 
-const API_BASE = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:4000/api";
+const API_BASE =
+  process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:4000/api";
 
-async function request<T>(
-  path: string,
-  options: RequestInit = {}
-): Promise<T> {
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE}${path}`;
   const response = await fetch(url, {
     ...options,
@@ -64,7 +62,9 @@ export function ingestUrl(data: IngestUrlRequest): Promise<IngestionResponse> {
   return post("/ingest/url", data);
 }
 
-export function ingestText(data: IngestTextRequest): Promise<IngestionResponse> {
+export function ingestText(
+  data: IngestTextRequest,
+): Promise<IngestionResponse> {
   return post("/ingest/text", data);
 }
 
@@ -73,14 +73,12 @@ export function ingestPdf(data: IngestPdfRequest): Promise<IngestionResponse> {
 }
 
 export function ingestYoutube(
-  data: IngestYoutubeRequest
+  data: IngestYoutubeRequest,
 ): Promise<IngestionResponse> {
   return post("/ingest/youtube", data);
 }
 
-export function retryIngestion(
-  documentId: string
-): Promise<IngestionResponse> {
+export function retryIngestion(documentId: string): Promise<IngestionResponse> {
   return post(`/ingest/retry/${documentId}`, {});
 }
 
@@ -88,7 +86,7 @@ export function retryIngestion(
 
 export function listDocuments(
   page: number = 1,
-  pageSize: number = 20
+  pageSize: number = 20,
 ): Promise<DocumentListResponse> {
   return get(`/knowledge/documents?page=${page}&pageSize=${pageSize}`);
 }
@@ -108,15 +106,13 @@ export function removeTag(data: AddTagRequest): Promise<{ success: boolean }> {
   });
 }
 
-export function addNote(
-  data: AddNoteRequest
-): Promise<{ noteId: string }> {
+export function addNote(data: AddNoteRequest): Promise<{ noteId: string }> {
   return post("/knowledge/notes", data);
 }
 
 export function updateNote(
   noteId: string,
-  content: string
+  content: string,
 ): Promise<{ success: boolean }> {
   return request(`/knowledge/notes/${noteId}`, {
     method: "PUT",
@@ -125,7 +121,7 @@ export function updateNote(
 }
 
 export function updateImportance(
-  data: UpdateImportanceRequest
+  data: UpdateImportanceRequest,
 ): Promise<{ success: boolean }> {
   return post("/knowledge/importance", data);
 }
@@ -133,25 +129,25 @@ export function updateImportance(
 // ── Query ──
 
 export function semanticSearch(
-  data: SemanticSearchRequest
+  data: SemanticSearchRequest,
 ): Promise<SearchResponse> {
   return post("/query/search", data);
 }
 
 export function filteredSearch(
-  data: FilteredSearchRequest
+  data: FilteredSearchRequest,
 ): Promise<SearchResponse> {
   return post("/query/search/filtered", data);
 }
 
 export function askQuestion(
-  data: AskQuestionRequest
+  data: AskQuestionRequest,
 ): Promise<AskQuestionResponse> {
   return post("/query/ask", data);
 }
 
 export function retrieveChunks(
-  data: SemanticSearchRequest
+  data: SemanticSearchRequest,
 ): Promise<SearchResponse> {
   return post("/query/retrieve", data);
 }
@@ -163,7 +159,7 @@ export function getDailyReview(): Promise<DailyReviewResponse> {
 }
 
 export function submitReviewFeedback(
-  data: SubmitReviewFeedbackRequest
+  data: SubmitReviewFeedbackRequest,
 ): Promise<{ success: boolean }> {
   return post("/review/feedback", data);
 }
@@ -175,7 +171,7 @@ export function getGraph(): Promise<GraphResponse> {
 }
 
 export function getConceptNeighborhood(
-  data: ConceptNeighborhoodRequest
+  data: ConceptNeighborhoodRequest,
 ): Promise<GraphResponse> {
   return post("/graph/neighborhood", data);
 }
@@ -183,13 +179,13 @@ export function getConceptNeighborhood(
 // ── Export ──
 
 export function exportMarkdown(
-  data: ExportMarkdownRequest
+  data: ExportMarkdownRequest,
 ): Promise<ExportMarkdownResponse> {
   return post("/export/markdown", data);
 }
 
 export function exportNotion(
-  data: ExportNotionRequest
+  data: ExportNotionRequest,
 ): Promise<ExportNotionResponse> {
   return post("/export/notion", data);
 }

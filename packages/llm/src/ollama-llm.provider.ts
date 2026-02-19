@@ -50,7 +50,7 @@ export class OllamaLLMProvider implements LLMProvider {
   }
 
   async *generateStream(
-    request: GenerationRequest
+    request: GenerationRequest,
   ): AsyncGenerator<StreamChunk, void, undefined> {
     const response = await fetch(`${this.baseUrl}/api/generate`, {
       method: "POST",

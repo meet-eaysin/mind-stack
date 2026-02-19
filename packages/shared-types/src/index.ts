@@ -1,10 +1,15 @@
-export { SOURCE_TYPE, INGESTION_STATUS, RELATION_TYPE, JOB_TYPE } from "./enums.js";
+export {
+  SOURCE_TYPE,
+  INGESTION_STATUS,
+  RELATION_TYPE,
+  JOB_TYPE,
+} from "./enums";
 export type {
   SourceType,
   IngestionStatus,
   RelationType,
   JobType,
-} from "./enums.js";
+} from "./enums";
 
 export type {
   IngestUrlRequest,
@@ -40,4 +45,4 @@ export type {
   ExportNotionResponse,
   NotionBlock,
   PaginationQuery,
-} from "./dto.js";
+} from "./dto";

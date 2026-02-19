@@ -35,7 +35,7 @@ async function main(): Promise<void> {
 
   const vectorStore = new ChromaVectorStore(
     config.CHROMA_URL,
-    config.CHROMA_COLLECTION
+    config.CHROMA_COLLECTION,
   );
 
   const worker = new Worker(
@@ -48,10 +48,7 @@ async function main(): Promise<void> {
 
       switch (job.name) {
         case JOB_TYPE.CHUNKING:
-          await handleChunkingJob(
-            job.data as { documentId: string },
-            prisma
-          );
+          await handleChunkingJob(job.data as { documentId: string }, prisma);
           break;
 
         case JOB_TYPE.EMBEDDING:
@@ -59,7 +56,7 @@ async function main(): Promise<void> {
             job.data as { documentId: string },
             prisma,
             embeddingProvider,
-            vectorStore
+            vectorStore,
           );
           break;
 
@@ -67,7 +64,7 @@ async function main(): Promise<void> {
           await handleConceptExtractionJob(
             job.data as { documentId: string },
             prisma,
-            llmProvider
+            llmProvider,
           );
           break;
 
@@ -79,7 +76,7 @@ async function main(): Promise<void> {
           logger.warn(`Unknown job type: ${job.name}`);
       }
     },
-    { connection: connection as unknown as ConnectionOptions, concurrency: 2 }
+    { connection: connection as unknown as ConnectionOptions, concurrency: 2 },
   );
 
   worker.on("completed", (job) => {

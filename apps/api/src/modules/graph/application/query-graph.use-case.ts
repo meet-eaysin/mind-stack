@@ -1,5 +1,5 @@
-import type { ConceptRepository } from "../domain/concept-repository.interface.js";
-import type { GraphResponse } from "@repo/shared-types";
+import type { ConceptRepository } from '../domain/concept-repository.interface.js';
+import type { GraphResponse } from '@repo/shared-types';
 
 export class QueryGraphUseCase {
   constructor(private readonly conceptRepository: ConceptRepository) {}
@@ -13,7 +13,7 @@ export class QueryGraphUseCase {
         id: c.id,
         label: c.label,
         chunkCount: await this.conceptRepository.countChunksForConcept(c.id),
-      }))
+      })),
     );
 
     const edges = relations.map((r) => ({

@@ -1,4 +1,4 @@
-import type { SourceType, IngestionStatus } from "@repo/shared-types";
+import type { SourceType, IngestionStatus } from '@repo/shared-types';
 
 export interface DocumentEntity {
   id: string;
@@ -23,7 +23,7 @@ export function createDocument(params: {
     sourceType: params.sourceType,
     sourceUrl: params.sourceUrl,
     rawContent: params.rawContent,
-    status: "PENDING",
+    status: 'PENDING',
     createdAt: new Date(),
   };
 }

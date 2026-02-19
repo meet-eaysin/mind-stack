@@ -22,7 +22,7 @@ export interface VectorStore {
   upsert(documents: VectorDocument[]): Promise<void>;
   query(
     embedding: number[],
-    options: VectorSearchOptions
+    options: VectorSearchOptions,
   ): Promise<VectorSearchResult[]>;
   delete(ids: string[]): Promise<void>;
   count(): Promise<number>;

@@ -1,6 +1,6 @@
-import type { ConceptRepository } from "../domain/concept-repository.interface.js";
-import type { LLMProvider } from "@repo/llm";
-import type { RelationType } from "@repo/shared-types";
+import type { ConceptRepository } from '../domain/concept-repository.interface.js';
+import type { LLMProvider } from '@repo/llm';
+import type { RelationType } from '@repo/shared-types';
 
 interface ExtractedConcept {
   label: string;
@@ -13,7 +13,7 @@ interface ExtractedConcept {
 export class BuildGraphUseCase {
   constructor(
     private readonly conceptRepository: ConceptRepository,
-    private readonly llmProvider: LLMProvider
+    private readonly llmProvider: LLMProvider,
   ) {}
 
   async execute(input: {
@@ -23,33 +23,29 @@ export class BuildGraphUseCase {
     const extracted = await this.extractConcepts(input.chunkContent);
 
     for (const concept of extracted) {
-      const source = await this.conceptRepository.findOrCreate(
-        concept.label
-      );
+      const source = await this.conceptRepository.findOrCreate(concept.label);
 
       for (const relation of concept.relations) {
         const target = await this.conceptRepository.findOrCreate(
-          relation.target
+          relation.target,
         );
         await this.conceptRepository.createRelation(
           source.id,
           target.id,
-          relation.type
+          relation.type,
         );
       }
     }
   }
 
-  private async extractConcepts(
-    content: string
-  ): Promise<ExtractedConcept[]> {
+  private async extractConcepts(content: string): Promise<ExtractedConcept[]> {
     const systemPrompt = [
-      "Extract key technical concepts and their relationships from the text.",
-      "Return a JSON array of objects with:",
+      'Extract key technical concepts and their relationships from the text.',
+      'Return a JSON array of objects with:',
       '  - "label": concept name (string)',
       '  - "relations": array of { "target": string, "type": "RELATES_TO" | "IS_PART_OF" | "DEPENDS_ON" | "SIMILAR_TO" | "LEADS_TO" }',
-      "Return ONLY valid JSON, no markdown or explanation.",
-    ].join("\n");
+      'Return ONLY valid JSON, no markdown or explanation.',
+    ].join('\n');
 
     const response = await this.llmProvider.generate({
       prompt: content.substring(0, 2000),

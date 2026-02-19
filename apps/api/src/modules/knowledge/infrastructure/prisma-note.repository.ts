@@ -1,8 +1,8 @@
-import { Injectable } from "@nestjs/common";
-import { randomUUID } from "node:crypto";
-import { PrismaService } from "../../../prisma/prisma.service.js";
-import type { NoteRepository } from "../domain/note-repository.interface.js";
-import type { NoteEntity } from "../domain/note.entity.js";
+import { Injectable } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
+import { PrismaService } from '../../../prisma/prisma.service.js';
+import type { NoteRepository } from '../domain/note-repository.interface.js';
+import type { NoteEntity } from '../domain/note.entity.js';
 
 @Injectable()
 export class PrismaNoteRepository implements NoteRepository {
@@ -36,7 +36,7 @@ export class PrismaNoteRepository implements NoteRepository {
   async findByChunkId(chunkId: string): Promise<NoteEntity | null> {
     const row = await this.prisma.note.findFirst({
       where: { chunkId },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
     if (!row) return null;
     return {

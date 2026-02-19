@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsInt, Min, Max, IsArray } from "class-validator";
+import {
+  IsString,
+  IsOptional,
+  IsInt,
+  Min,
+  Max,
+  IsArray,
+} from 'class-validator';
 
 export class SemanticSearchDto {
   @IsString()

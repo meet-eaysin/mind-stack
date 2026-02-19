@@ -26,10 +26,7 @@ export default function ReviewPage(): React.JSX.Element {
     }
   }
 
-  async function handleFeedback(
-    chunkId: string,
-    score: number
-  ): Promise<void> {
+  async function handleFeedback(chunkId: string, score: number): Promise<void> {
     await submitReviewFeedback({ chunkId, score });
     setItems((prev) => prev.filter((item) => item.chunkId !== chunkId));
   }
@@ -61,10 +58,18 @@ export default function ReviewPage(): React.JSX.Element {
                 <strong>{item.documentTitle}</strong>
               </div>
               <p style={{ color: "#444" }}>{item.summary}</p>
-              <p style={{ fontSize: "0.875rem", color: "#888", fontStyle: "italic" }}>
+              <p
+                style={{
+                  fontSize: "0.875rem",
+                  color: "#888",
+                  fontStyle: "italic",
+                }}
+              >
                 {item.reason}
               </p>
-              <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
+              <div
+                style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}
+              >
                 {[1, 2, 3, 4, 5].map((score) => (
                   <button
                     key={score}

@@ -1,17 +1,17 @@
-import { Module } from "@nestjs/common";
-import { KnowledgeController } from "./knowledge.controller.js";
-import { PrismaChunkRepository } from "../infrastructure/prisma-chunk.repository.js";
-import { PrismaTagRepository } from "../infrastructure/prisma-tag.repository.js";
-import { PrismaNoteRepository } from "../infrastructure/prisma-note.repository.js";
-import { PrismaDocumentRepository } from "../../ingestion/infrastructure/prisma-document.repository.js";
-import { ListDocumentsUseCase } from "../application/list-documents.use-case.js";
-import { ViewDocumentUseCase } from "../application/view-document.use-case.js";
-import { AddTagUseCase } from "../application/add-tag.use-case.js";
-import { RemoveTagUseCase } from "../application/remove-tag.use-case.js";
-import { AddNoteUseCase } from "../application/add-note.use-case.js";
-import { UpdateNoteUseCase } from "../application/update-note.use-case.js";
-import { UpdateImportanceUseCase } from "../application/update-importance.use-case.js";
-import { IngestionModule } from "../../ingestion/presentation/ingestion.module.js";
+import { Module } from '@nestjs/common';
+import { KnowledgeController } from './knowledge.controller.js';
+import { PrismaChunkRepository } from '../infrastructure/prisma-chunk.repository.js';
+import { PrismaTagRepository } from '../infrastructure/prisma-tag.repository.js';
+import { PrismaNoteRepository } from '../infrastructure/prisma-note.repository.js';
+import { PrismaDocumentRepository } from '../../ingestion/infrastructure/prisma-document.repository.js';
+import { ListDocumentsUseCase } from '../application/list-documents.use-case.js';
+import { ViewDocumentUseCase } from '../application/view-document.use-case.js';
+import { AddTagUseCase } from '../application/add-tag.use-case.js';
+import { RemoveTagUseCase } from '../application/remove-tag.use-case.js';
+import { AddNoteUseCase } from '../application/add-note.use-case.js';
+import { UpdateNoteUseCase } from '../application/update-note.use-case.js';
+import { UpdateImportanceUseCase } from '../application/update-importance.use-case.js';
+import { IngestionModule } from '../../ingestion/presentation/ingestion.module.js';
 
 @Module({
   imports: [IngestionModule],
@@ -24,7 +24,7 @@ import { IngestionModule } from "../../ingestion/presentation/ingestion.module.j
       provide: ListDocumentsUseCase,
       useFactory: (
         docRepo: PrismaDocumentRepository,
-        chunkRepo: PrismaChunkRepository
+        chunkRepo: PrismaChunkRepository,
       ) => new ListDocumentsUseCase(docRepo, chunkRepo),
       inject: [PrismaDocumentRepository, PrismaChunkRepository],
     },
@@ -32,14 +32,13 @@ import { IngestionModule } from "../../ingestion/presentation/ingestion.module.j
       provide: ViewDocumentUseCase,
       useFactory: (
         docRepo: PrismaDocumentRepository,
-        chunkRepo: PrismaChunkRepository
+        chunkRepo: PrismaChunkRepository,
       ) => new ViewDocumentUseCase(docRepo, chunkRepo),
       inject: [PrismaDocumentRepository, PrismaChunkRepository],
     },
     {
       provide: AddTagUseCase,
-      useFactory: (tagRepo: PrismaTagRepository) =>
-        new AddTagUseCase(tagRepo),
+      useFactory: (tagRepo: PrismaTagRepository) => new AddTagUseCase(tagRepo),
       inject: [PrismaTagRepository],
     },
     {

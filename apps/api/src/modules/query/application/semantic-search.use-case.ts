@@ -1,14 +1,14 @@
-import type { EmbeddingProvider } from "@repo/embeddings";
-import type { VectorStore } from "@repo/vector-store";
-import type { QueryRepository } from "../domain/query-repository.interface.js";
-import { rankResults } from "../domain/ranking.service.js";
-import type { ChunkReference } from "@repo/shared-types";
+import type { EmbeddingProvider } from '@repo/embeddings';
+import type { VectorStore } from '@repo/vector-store';
+import type { QueryRepository } from '../domain/query-repository.interface.js';
+import { rankResults } from '../domain/ranking.service.js';
+import type { ChunkReference } from '@repo/shared-types';
 
 export class SemanticSearchUseCase {
   constructor(
     private readonly embeddingProvider: EmbeddingProvider,
     private readonly vectorStore: VectorStore,
-    private readonly queryRepository: QueryRepository
+    private readonly queryRepository: QueryRepository,
   ) {}
 
   async execute(input: {
@@ -29,7 +29,7 @@ export class SemanticSearchUseCase {
       return {
         chunkId: vr.id,
         content: detail?.content ?? vr.content,
-        documentTitle: detail?.documentTitle ?? "",
+        documentTitle: detail?.documentTitle ?? '',
         vectorScore: vr.score,
         importanceScore: detail?.importanceScore ?? null,
         tags: detail?.tags ?? [],

@@ -22,10 +22,16 @@ export default function RootLayout({
             color: "#fff",
           }}
         >
-          <a href="/" style={{ color: "#fff", textDecoration: "none", fontWeight: 700 }}>
+          <a
+            href="/"
+            style={{ color: "#fff", textDecoration: "none", fontWeight: 700 }}
+          >
             🧠 Mind Stack
           </a>
-          <a href="/documents" style={{ color: "#ccc", textDecoration: "none" }}>
+          <a
+            href="/documents"
+            style={{ color: "#ccc", textDecoration: "none" }}
+          >
             Documents
           </a>
           <a href="/review" style={{ color: "#ccc", textDecoration: "none" }}>

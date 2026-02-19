@@ -1,5 +1,5 @@
-import type { QueryRepository } from "../../query/domain/query-repository.interface.js";
-import { chunksToMarkdown } from "../domain/export.service.js";
+import type { QueryRepository } from '../../query/domain/query-repository.interface.js';
+import { chunksToMarkdown } from '../domain/export.service.js';
 
 export class ExportMarkdownUseCase {
   constructor(private readonly queryRepository: QueryRepository) {}
@@ -12,7 +12,7 @@ export class ExportMarkdownUseCase {
         content: c.content,
         documentTitle: c.documentTitle,
         tags: c.tags,
-      }))
+      })),
     );
   }
 }

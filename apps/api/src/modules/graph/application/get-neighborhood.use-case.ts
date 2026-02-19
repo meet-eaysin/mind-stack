@@ -1,5 +1,5 @@
-import type { ConceptRepository } from "../domain/concept-repository.interface.js";
-import type { GraphResponse } from "@repo/shared-types";
+import type { ConceptRepository } from '../domain/concept-repository.interface.js';
+import type { GraphResponse } from '@repo/shared-types';
 
 export class GetNeighborhoodUseCase {
   constructor(private readonly conceptRepository: ConceptRepository) {}
@@ -10,17 +10,14 @@ export class GetNeighborhoodUseCase {
   }): Promise<GraphResponse> {
     const depth = input.depth ?? 2;
     const { concepts, relations } =
-      await this.conceptRepository.findNeighborhood(
-        input.conceptId,
-        depth
-      );
+      await this.conceptRepository.findNeighborhood(input.conceptId, depth);
 
     const nodes = await Promise.all(
       concepts.map(async (c) => ({
         id: c.id,
         label: c.label,
         chunkCount: await this.conceptRepository.countChunksForConcept(c.id),
-      }))
+      })),
     );
 
     const edges = relations.map((r) => ({

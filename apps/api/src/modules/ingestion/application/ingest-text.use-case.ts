@@ -1,12 +1,12 @@
-import { randomUUID } from "node:crypto";
-import type { DocumentRepository } from "../domain/document-repository.interface.js";
-import type { IngestionJobProducer } from "../infrastructure/ingestion-job.producer.js";
-import { createDocument } from "../domain/document.entity.js";
+import { randomUUID } from 'node:crypto';
+import type { DocumentRepository } from '../domain/document-repository.interface.js';
+import type { IngestionJobProducer } from '../infrastructure/ingestion-job.producer.js';
+import { createDocument } from '../domain/document.entity.js';
 
 export class IngestTextUseCase {
   constructor(
     private readonly documentRepository: DocumentRepository,
-    private readonly jobProducer: IngestionJobProducer
+    private readonly jobProducer: IngestionJobProducer,
   ) {}
 
   async execute(input: {
@@ -16,7 +16,7 @@ export class IngestTextUseCase {
     const document = createDocument({
       id: randomUUID(),
       title: input.title,
-      sourceType: "TEXT",
+      sourceType: 'TEXT',
       sourceUrl: null,
       rawContent: input.content,
     });

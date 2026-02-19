@@ -1,6 +1,6 @@
-import type { DocumentRepository } from "../../ingestion/domain/document-repository.interface.js";
-import type { DocumentEntity } from "../../ingestion/domain/document.entity.js";
-import type { ChunkRepository } from "../domain/chunk-repository.interface.js";
+import type { DocumentRepository } from '../../ingestion/domain/document-repository.interface.js';
+import type { DocumentEntity } from '../../ingestion/domain/document.entity.js';
+import type { ChunkRepository } from '../domain/chunk-repository.interface.js';
 
 interface DocumentListItem {
   id: string;
@@ -14,7 +14,7 @@ interface DocumentListItem {
 export class ListDocumentsUseCase {
   constructor(
     private readonly documentRepository: DocumentRepository,
-    private readonly chunkRepository: ChunkRepository
+    private readonly chunkRepository: ChunkRepository,
   ) {}
 
   async execute(input: {
@@ -46,7 +46,7 @@ export class ListDocumentsUseCase {
 
   private async findAllDocuments(): Promise<DocumentEntity[]> {
     const docs: DocumentEntity[] = [];
-    let id = "";
+    let id = '';
     for (;;) {
       const doc = await this.documentRepository.findById(id);
       if (!doc) break;

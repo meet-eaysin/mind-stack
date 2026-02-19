@@ -1,6 +1,6 @@
-import type { QueryRepository } from "../../query/domain/query-repository.interface.js";
-import { chunksToNotionBlocks } from "../domain/export.service.js";
-import type { NotionBlock } from "@repo/shared-types";
+import type { QueryRepository } from '../../query/domain/query-repository.interface.js';
+import { chunksToNotionBlocks } from '../domain/export.service.js';
+import type { NotionBlock } from '@repo/shared-types';
 
 export class ExportNotionUseCase {
   constructor(private readonly queryRepository: QueryRepository) {}
@@ -13,7 +13,7 @@ export class ExportNotionUseCase {
         content: c.content,
         documentTitle: c.documentTitle,
         tags: c.tags,
-      }))
+      })),
     );
   }
 }

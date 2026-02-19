@@ -1,4 +1,4 @@
-import type { SearchResultEntity } from "./query-repository.interface.js";
+import type { SearchResultEntity } from './query-repository.interface.js';
 
 const IMPORTANCE_WEIGHT = 0.2;
 const TAG_MATCH_WEIGHT = 0.15;
@@ -16,7 +16,7 @@ export function rankResults(
     tags: string[];
     createdAt: Date;
     queryTags?: string[] | undefined;
-  }>
+  }>,
 ): SearchResultEntity[] {
   const now = Date.now();
 
@@ -31,10 +31,9 @@ export function rankResults(
         ? matchingTags / r.queryTags.length
         : 0;
 
-      const ageInDays =
-        (now - r.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+      const ageInDays = (now - r.createdAt.getTime()) / (1000 * 60 * 60 * 24);
       const recencyDecay = Math.exp(
-        (-Math.LN2 * ageInDays) / RECENCY_HALF_LIFE_DAYS
+        (-Math.LN2 * ageInDays) / RECENCY_HALF_LIFE_DAYS,
       );
 
       const finalScore =

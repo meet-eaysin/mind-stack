@@ -1,8 +1,8 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../../../prisma/prisma.service.js";
-import type { DocumentRepository } from "../domain/document-repository.interface.js";
-import type { DocumentEntity } from "../domain/document.entity.js";
-import type { IngestionStatus } from "@repo/shared-types";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../../prisma/prisma.service.js';
+import type { DocumentRepository } from '../domain/document-repository.interface.js';
+import type { DocumentEntity } from '../domain/document.entity.js';
+import type { IngestionStatus } from '@repo/shared-types';
 
 @Injectable()
 export class PrismaDocumentRepository implements DocumentRepository {
@@ -23,10 +23,10 @@ export class PrismaDocumentRepository implements DocumentRepository {
     return {
       id: row.id,
       title: row.title,
-      sourceType: row.sourceType as DocumentEntity["sourceType"],
+      sourceType: row.sourceType as DocumentEntity['sourceType'],
       sourceUrl: row.sourceUrl,
       rawContent: row.rawContent,
-      status: row.status as DocumentEntity["status"],
+      status: row.status as DocumentEntity['status'],
       createdAt: row.createdAt,
     };
   }
@@ -38,10 +38,10 @@ export class PrismaDocumentRepository implements DocumentRepository {
     return {
       id: row.id,
       title: row.title,
-      sourceType: row.sourceType as DocumentEntity["sourceType"],
+      sourceType: row.sourceType as DocumentEntity['sourceType'],
       sourceUrl: row.sourceUrl,
       rawContent: row.rawContent,
-      status: row.status as DocumentEntity["status"],
+      status: row.status as DocumentEntity['status'],
       createdAt: row.createdAt,
     };
   }

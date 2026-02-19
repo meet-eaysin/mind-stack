@@ -1,12 +1,12 @@
-import { NestFactory } from "@nestjs/core";
-import { ValidationPipe } from "@nestjs/common";
-import { AppModule } from "./app.module.js";
-import { loadConfig } from "@repo/config";
-import { createLogger } from "@repo/logger";
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import { AppModule } from './app.module.js';
+import { loadConfig } from '@repo/config';
+import { createLogger } from '@repo/logger';
 
 async function bootstrap(): Promise<void> {
   const config = loadConfig();
-  const logger = createLogger("API");
+  const logger = createLogger('API');
 
   const app = await NestFactory.create(AppModule);
 
@@ -23,12 +23,12 @@ async function bootstrap(): Promise<void> {
       transformOptions: {
         enableImplicitConversion: true,
       },
-    })
+    }),
   );
 
-  app.setGlobalPrefix("api");
+  app.setGlobalPrefix('api');
 
-  await app.listen(config.API_PORT, "0.0.0.0");
+  await app.listen(config.API_PORT, '0.0.0.0');
   logger.info(`API server running on http://0.0.0.0:${config.API_PORT}`);
 }
 

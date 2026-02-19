@@ -1,10 +1,10 @@
-import { Injectable } from "@nestjs/common";
-import { randomUUID } from "node:crypto";
-import { PrismaService } from "../../../prisma/prisma.service.js";
+import { Injectable } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
+import { PrismaService } from '../../../prisma/prisma.service.js';
 import type {
   ReviewRepository,
   ReviewEntity,
-} from "../domain/review-repository.interface.js";
+} from '../domain/review-repository.interface.js';
 
 @Injectable()
 export class PrismaReviewRepository implements ReviewRepository {
@@ -13,7 +13,7 @@ export class PrismaReviewRepository implements ReviewRepository {
   async findByChunkId(chunkId: string): Promise<ReviewEntity | null> {
     const row = await this.prisma.review.findFirst({
       where: { chunkId },
-      orderBy: { lastReviewedAt: "desc" },
+      orderBy: { lastReviewedAt: 'desc' },
     });
     if (!row) return null;
     return {
@@ -62,7 +62,7 @@ export class PrismaReviewRepository implements ReviewRepository {
 
   async findDueForReview(limit: number): Promise<ReviewEntity[]> {
     const rows = await this.prisma.review.findMany({
-      orderBy: { lastReviewedAt: "asc" },
+      orderBy: { lastReviewedAt: 'asc' },
       take: limit,
     });
     return rows.map((r) => ({

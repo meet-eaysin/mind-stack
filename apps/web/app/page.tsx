@@ -43,7 +43,10 @@ export default function SearchPage(): React.JSX.Element {
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
       <h1>Search & Chat</h1>
 
-      <form onSubmit={(e) => void handleSubmit(e)} style={{ marginBottom: "2rem" }}>
+      <form
+        onSubmit={(e) => void handleSubmit(e)}
+        style={{ marginBottom: "2rem" }}
+      >
         <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
           <button
             type="button"
@@ -111,7 +114,14 @@ export default function SearchPage(): React.JSX.Element {
       </form>
 
       {error ? (
-        <div style={{ color: "red", padding: "1rem", background: "#fee", borderRadius: 4 }}>
+        <div
+          style={{
+            color: "red",
+            padding: "1rem",
+            background: "#fee",
+            borderRadius: 4,
+          }}
+        >
           {error}
         </div>
       ) : null}

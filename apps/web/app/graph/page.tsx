@@ -28,9 +28,7 @@ export default function GraphPage(): React.JSX.Element {
   }
 
   function getConnectedEdges(nodeId: string): ConceptEdge[] {
-    return edges.filter(
-      (e) => e.fromId === nodeId || e.toId === nodeId
-    );
+    return edges.filter((e) => e.fromId === nodeId || e.toId === nodeId);
   }
 
   function getConnectedNodes(nodeId: string): ConceptNode[] {
@@ -71,11 +69,8 @@ export default function GraphPage(): React.JSX.Element {
                   style={{
                     padding: "0.5rem 1rem",
                     background:
-                      selectedNode?.id === node.id
-                        ? "#333"
-                        : "#f0f0f0",
-                    color:
-                      selectedNode?.id === node.id ? "#fff" : "#333",
+                      selectedNode?.id === node.id ? "#333" : "#f0f0f0",
+                    color: selectedNode?.id === node.id ? "#fff" : "#333",
                     border: "1px solid #ddd",
                     borderRadius: 20,
                     cursor: "pointer",
@@ -103,10 +98,8 @@ export default function GraphPage(): React.JSX.Element {
                   {getConnectedNodes(selectedNode.id).map((n) => {
                     const edge = edges.find(
                       (e) =>
-                        (e.fromId === selectedNode.id &&
-                          e.toId === n.id) ||
-                        (e.toId === selectedNode.id &&
-                          e.fromId === n.id)
+                        (e.fromId === selectedNode.id && e.toId === n.id) ||
+                        (e.toId === selectedNode.id && e.fromId === n.id),
                     );
                     return (
                       <li key={n.id}>
@@ -122,7 +115,13 @@ export default function GraphPage(): React.JSX.Element {
                         >
                           {n.label}
                         </button>
-                        <span style={{ color: "#888", fontSize: "0.75rem", marginLeft: "0.5rem" }}>
+                        <span
+                          style={{
+                            color: "#888",
+                            fontSize: "0.75rem",
+                            marginLeft: "0.5rem",
+                          }}
+                        >
                           {edge?.relationType ?? ""}
                         </span>
                       </li>

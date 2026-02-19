@@ -1,13 +1,13 @@
-import { Module } from "@nestjs/common";
-import { GraphController } from "./graph.controller.js";
-import { PrismaConceptRepository } from "../infrastructure/prisma-concept.repository.js";
-import { BuildGraphUseCase } from "../application/build-graph.use-case.js";
-import { QueryGraphUseCase } from "../application/query-graph.use-case.js";
-import { GetNeighborhoodUseCase } from "../application/get-neighborhood.use-case.js";
-import { QueryModule } from "../../query/presentation/query.module.js";
-import type { LLMProvider } from "@repo/llm";
+import { Module } from '@nestjs/common';
+import { GraphController } from './graph.controller.js';
+import { PrismaConceptRepository } from '../infrastructure/prisma-concept.repository.js';
+import { BuildGraphUseCase } from '../application/build-graph.use-case.js';
+import { QueryGraphUseCase } from '../application/query-graph.use-case.js';
+import { GetNeighborhoodUseCase } from '../application/get-neighborhood.use-case.js';
+import { QueryModule } from '../../query/presentation/query.module.js';
+import type { LLMProvider } from '@repo/llm';
 
-const LLM_PROVIDER = Symbol("LLMProvider");
+import { LLM_PROVIDER } from '../../../common/tokens.js';
 
 @Module({
   imports: [QueryModule],
@@ -16,10 +16,8 @@ const LLM_PROVIDER = Symbol("LLMProvider");
     PrismaConceptRepository,
     {
       provide: BuildGraphUseCase,
-      useFactory: (
-        conceptRepo: PrismaConceptRepository,
-        llm: LLMProvider
-      ) => new BuildGraphUseCase(conceptRepo, llm),
+      useFactory: (conceptRepo: PrismaConceptRepository, llm: LLMProvider) =>
+        new BuildGraphUseCase(conceptRepo, llm),
       inject: [PrismaConceptRepository, LLM_PROVIDER],
     },
     {

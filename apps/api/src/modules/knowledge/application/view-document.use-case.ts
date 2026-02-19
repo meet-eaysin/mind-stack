@@ -1,12 +1,15 @@
-import type { DocumentRepository } from "../../ingestion/domain/document-repository.interface.js";
-import type { ChunkRepository, ChunkWithMeta } from "../domain/chunk-repository.interface.js";
-import type { DocumentDetailResponse, ChunkResponse } from "@repo/shared-types";
-import type { SourceType } from "@repo/shared-types";
+import type { DocumentRepository } from '../../ingestion/domain/document-repository.interface.js';
+import type {
+  ChunkRepository,
+  ChunkWithMeta,
+} from '../domain/chunk-repository.interface.js';
+import type { DocumentDetailResponse, ChunkResponse } from '@repo/shared-types';
+import type { SourceType } from '@repo/shared-types';
 
 export class ViewDocumentUseCase {
   constructor(
     private readonly documentRepository: DocumentRepository,
-    private readonly chunkRepository: ChunkRepository
+    private readonly chunkRepository: ChunkRepository,
   ) {}
 
   async execute(documentId: string): Promise<DocumentDetailResponse> {
@@ -15,9 +18,8 @@ export class ViewDocumentUseCase {
       throw new Error(`Document not found: ${documentId}`);
     }
 
-    const chunksWithMeta = await this.chunkRepository.findByDocumentId(
-      documentId
-    );
+    const chunksWithMeta =
+      await this.chunkRepository.findByDocumentId(documentId);
 
     const chunks: ChunkResponse[] = chunksWithMeta.map(
       (cwm: ChunkWithMeta) => ({
@@ -29,7 +31,7 @@ export class ViewDocumentUseCase {
         note: cwm.note,
         importanceScore: cwm.importanceScore,
         createdAt: cwm.chunk.createdAt.toISOString(),
-      })
+      }),
     );
 
     return {

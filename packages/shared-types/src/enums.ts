@@ -25,8 +25,7 @@ export const RELATION_TYPE = {
   LEADS_TO: "LEADS_TO",
 } as const;
 
-export type RelationType =
-  (typeof RELATION_TYPE)[keyof typeof RELATION_TYPE];
+export type RelationType = (typeof RELATION_TYPE)[keyof typeof RELATION_TYPE];
 
 export const JOB_TYPE = {
   CHUNKING: "CHUNKING",

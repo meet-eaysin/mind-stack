@@ -1,4 +1,4 @@
-import { IsString, IsInt, Min, Max } from "class-validator";
+import { IsString, IsInt, Min, Max } from 'class-validator';
 
 export class SubmitReviewFeedbackDto {
   @IsString()

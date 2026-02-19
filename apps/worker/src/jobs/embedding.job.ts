@@ -18,7 +18,7 @@ export async function handleEmbeddingJob(
   data: { documentId: string },
   prisma: PrismaClient,
   embeddingProvider: EmbeddingProvider,
-  vectorStore: VectorStore
+  vectorStore: VectorStore,
 ): Promise<void> {
   const chunks = await prisma.chunk.findMany({
     where: { documentId: data.documentId },
@@ -41,22 +41,24 @@ export async function handleEmbeddingJob(
 
     const embeddings = await embeddingProvider.embedBatch(texts);
 
-    const documents: VectorDocument[] = batch.map((chunk: ChunkWithDetails, idx: number) => {
-      const embeddingResult = embeddings[idx];
-      if (!embeddingResult) {
-        throw new Error(`No embedding returned for chunk ${chunk.id}`);
-      }
-      return {
-        id: chunk.id,
-        embedding: embeddingResult.embedding,
-        content: chunk.content,
-        metadata: {
-          documentId: chunk.documentId,
-          documentTitle: chunk.document.title,
-          tags: chunk.chunkTags.map((ct) => ct.tag.name).join(","),
-        },
-      };
-    });
+    const documents: VectorDocument[] = batch.map(
+      (chunk: ChunkWithDetails, idx: number) => {
+        const embeddingResult = embeddings[idx];
+        if (!embeddingResult) {
+          throw new Error(`No embedding returned for chunk ${chunk.id}`);
+        }
+        return {
+          id: chunk.id,
+          embedding: embeddingResult.embedding,
+          content: chunk.content,
+          metadata: {
+            documentId: chunk.documentId,
+            documentTitle: chunk.document.title,
+            tags: chunk.chunkTags.map((ct) => ct.tag.name).join(","),
+          },
+        };
+      },
+    );
 
     await vectorStore.upsert(documents);
 

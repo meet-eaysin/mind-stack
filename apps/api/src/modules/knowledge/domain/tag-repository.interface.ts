@@ -1,4 +1,4 @@
-import type { TagEntity } from "./tag.entity.js";
+import type { TagEntity } from './tag.entity.js';
 
 export interface TagRepository {
   findOrCreate(name: string): Promise<TagEntity>;

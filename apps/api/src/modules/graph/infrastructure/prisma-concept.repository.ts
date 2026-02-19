@@ -1,12 +1,12 @@
-import { Injectable } from "@nestjs/common";
-import { randomUUID } from "node:crypto";
-import { PrismaService } from "../../../prisma/prisma.service.js";
+import { Injectable } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
+import { PrismaService } from '../../../prisma/prisma.service.js';
 import type {
   ConceptRepository,
   ConceptEntity,
   ConceptRelationEntity,
-} from "../domain/concept-repository.interface.js";
-import type { RelationType } from "@repo/shared-types";
+} from '../domain/concept-repository.interface.js';
+import type { RelationType } from '@repo/shared-types';
 
 @Injectable()
 export class PrismaConceptRepository implements ConceptRepository {
@@ -27,7 +27,7 @@ export class PrismaConceptRepository implements ConceptRepository {
   async createRelation(
     fromId: string,
     toId: string,
-    relationType: RelationType
+    relationType: RelationType,
   ): Promise<ConceptRelationEntity> {
     const existing = await this.prisma.conceptRelation.findUnique({
       where: {
@@ -82,7 +82,7 @@ export class PrismaConceptRepository implements ConceptRepository {
 
   async findNeighborhood(
     conceptId: string,
-    depth: number
+    depth: number,
   ): Promise<{
     concepts: ConceptEntity[];
     relations: ConceptRelationEntity[];

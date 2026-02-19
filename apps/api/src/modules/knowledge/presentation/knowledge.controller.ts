@@ -7,18 +7,18 @@ import {
   Body,
   Param,
   Query,
-} from "@nestjs/common";
+} from '@nestjs/common';
 import type {
   DocumentListResponse,
   DocumentDetailResponse,
-} from "@repo/shared-types";
-import { ListDocumentsUseCase } from "../application/list-documents.use-case.js";
-import { ViewDocumentUseCase } from "../application/view-document.use-case.js";
-import { AddTagUseCase } from "../application/add-tag.use-case.js";
-import { RemoveTagUseCase } from "../application/remove-tag.use-case.js";
-import { AddNoteUseCase } from "../application/add-note.use-case.js";
-import { UpdateNoteUseCase } from "../application/update-note.use-case.js";
-import { UpdateImportanceUseCase } from "../application/update-importance.use-case.js";
+} from '@repo/shared-types';
+import { ListDocumentsUseCase } from '../application/list-documents.use-case.js';
+import { ViewDocumentUseCase } from '../application/view-document.use-case.js';
+import { AddTagUseCase } from '../application/add-tag.use-case.js';
+import { RemoveTagUseCase } from '../application/remove-tag.use-case.js';
+import { AddNoteUseCase } from '../application/add-note.use-case.js';
+import { UpdateNoteUseCase } from '../application/update-note.use-case.js';
+import { UpdateImportanceUseCase } from '../application/update-importance.use-case.js';
 import {
   AddTagDto,
   RemoveTagDto,
@@ -26,9 +26,9 @@ import {
   UpdateNoteDto,
   UpdateImportanceDto,
   PaginationQueryDto,
-} from "./knowledge.dtos.js";
+} from './knowledge.dtos.js';
 
-@Controller("knowledge")
+@Controller('knowledge')
 export class KnowledgeController {
   constructor(
     private readonly listDocuments: ListDocumentsUseCase,
@@ -37,12 +37,12 @@ export class KnowledgeController {
     private readonly removeTag: RemoveTagUseCase,
     private readonly addNote: AddNoteUseCase,
     private readonly updateNote: UpdateNoteUseCase,
-    private readonly updateImportance: UpdateImportanceUseCase
+    private readonly updateImportance: UpdateImportanceUseCase,
   ) {}
 
-  @Get("documents")
+  @Get('documents')
   async list(
-    @Query() query: PaginationQueryDto
+    @Query() query: PaginationQueryDto,
   ): Promise<DocumentListResponse> {
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 20;
@@ -51,7 +51,8 @@ export class KnowledgeController {
       documents: result.documents.map((d) => ({
         id: d.id,
         title: d.title,
-        sourceType: d.sourceType as DocumentListResponse["documents"][number]["sourceType"],
+        sourceType:
+          d.sourceType as DocumentListResponse['documents'][number]['sourceType'],
         sourceUrl: d.sourceUrl,
         chunkCount: d.chunkCount,
         createdAt: d.createdAt.toISOString(),
@@ -62,45 +63,41 @@ export class KnowledgeController {
     };
   }
 
-  @Get("documents/:id")
-  async detail(
-    @Param("id") id: string
-  ): Promise<DocumentDetailResponse> {
+  @Get('documents/:id')
+  async detail(@Param('id') id: string): Promise<DocumentDetailResponse> {
     return this.viewDocument.execute(id);
   }
 
-  @Post("tags")
+  @Post('tags')
   async createTag(@Body() dto: AddTagDto): Promise<{ success: boolean }> {
     await this.addTag.execute(dto);
     return { success: true };
   }
 
-  @Delete("tags")
-  async deleteTag(
-    @Body() dto: RemoveTagDto
-  ): Promise<{ success: boolean }> {
+  @Delete('tags')
+  async deleteTag(@Body() dto: RemoveTagDto): Promise<{ success: boolean }> {
     await this.removeTag.execute(dto);
     return { success: true };
   }
 
-  @Post("notes")
+  @Post('notes')
   async createNote(@Body() dto: AddNoteDto): Promise<{ noteId: string }> {
     const note = await this.addNote.execute(dto);
     return { noteId: note.id };
   }
 
-  @Put("notes/:id")
+  @Put('notes/:id')
   async editNote(
-    @Param("id") id: string,
-    @Body() dto: UpdateNoteDto
+    @Param('id') id: string,
+    @Body() dto: UpdateNoteDto,
   ): Promise<{ success: boolean }> {
     await this.updateNote.execute({ noteId: id, content: dto.content });
     return { success: true };
   }
 
-  @Post("importance")
+  @Post('importance')
   async setImportance(
-    @Body() dto: UpdateImportanceDto
+    @Body() dto: UpdateImportanceDto,
   ): Promise<{ success: boolean }> {
     await this.updateImportance.execute(dto);
     return { success: true };

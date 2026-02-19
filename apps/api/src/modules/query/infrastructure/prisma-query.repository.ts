@@ -1,14 +1,12 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../../../prisma/prisma.service.js";
-import type { QueryRepository } from "../domain/query-repository.interface.js";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../../prisma/prisma.service.js';
+import type { QueryRepository } from '../domain/query-repository.interface.js';
 
 @Injectable()
 export class PrismaQueryRepository implements QueryRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findChunksByIds(
-    chunkIds: string[]
-  ): Promise<
+  async findChunksByIds(chunkIds: string[]): Promise<
     Array<{
       chunkId: string;
       content: string;
@@ -41,7 +39,7 @@ export class PrismaQueryRepository implements QueryRepository {
     const rows = await this.prisma.chunkTag.findMany({
       where: { tag: { name: { in: tags } } },
       select: { chunkId: true },
-      distinct: ["chunkId"],
+      distinct: ['chunkId'],
     });
     return rows.map((r) => r.chunkId);
   }

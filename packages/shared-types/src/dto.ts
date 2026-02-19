@@ -1,4 +1,4 @@
-import type { SourceType, IngestionStatus, RelationType } from "./enums.js";
+import type { SourceType, IngestionStatus, RelationType } from "./enums";
 
 // ── Ingestion DTOs ──
 

@@ -52,7 +52,7 @@ export class ChromaVectorStore implements VectorStore {
 
   async query(
     embedding: number[],
-    options: VectorSearchOptions
+    options: VectorSearchOptions,
   ): Promise<VectorSearchResult[]> {
     const collection = await this.getCollection();
 

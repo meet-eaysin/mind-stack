@@ -17,7 +17,7 @@ interface ExtractedConcept {
 export async function handleConceptExtractionJob(
   data: { documentId: string },
   prisma: PrismaClient,
-  llmProvider: LLMProvider
+  llmProvider: LLMProvider,
 ): Promise<void> {
   const chunks = await prisma.chunk.findMany({
     where: { documentId: data.documentId },
@@ -60,7 +60,7 @@ export async function handleConceptExtractionJob(
 
 async function findOrCreateConcept(
   prisma: PrismaClient,
-  label: string
+  label: string,
 ): Promise<{ id: string; label: string }> {
   const existing = await prisma.concept.findUnique({
     where: { label },
@@ -74,7 +74,7 @@ async function findOrCreateConcept(
 
 async function extractConcepts(
   content: string,
-  llmProvider: LLMProvider
+  llmProvider: LLMProvider,
 ): Promise<ExtractedConcept[]> {
   const systemPrompt = [
     "Extract key technical concepts and their relationships from the text.",

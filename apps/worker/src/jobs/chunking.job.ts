@@ -9,7 +9,7 @@ const CHUNK_OVERLAP = 50;
 
 export async function handleChunkingJob(
   data: { documentId: string },
-  prisma: PrismaClient
+  prisma: PrismaClient,
 ): Promise<void> {
   const document = await prisma.document.findUnique({
     where: { id: data.documentId },
@@ -69,7 +69,7 @@ interface ChunkData {
 function splitIntoChunks(
   text: string,
   chunkSize: number,
-  overlap: number
+  overlap: number,
 ): ChunkData[] {
   const chunks: ChunkData[] = [];
   const sentences = text.split(/(?<=[.!?])\s+/);

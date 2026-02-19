@@ -53,7 +53,13 @@ export default function DocumentsPage(): React.JSX.Element {
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <h1>Documents</h1>
         <button
           onClick={() => setShowIngest(!showIngest)}
@@ -117,7 +123,12 @@ export default function DocumentsPage(): React.JSX.Element {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://..."
-              style={{ width: "100%", padding: "0.5rem", marginBottom: "0.5rem", boxSizing: "border-box" }}
+              style={{
+                width: "100%",
+                padding: "0.5rem",
+                marginBottom: "0.5rem",
+                boxSizing: "border-box",
+              }}
             />
           ) : null}
 
@@ -126,7 +137,12 @@ export default function DocumentsPage(): React.JSX.Element {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Title"
-            style={{ width: "100%", padding: "0.5rem", marginBottom: "0.5rem", boxSizing: "border-box" }}
+            style={{
+              width: "100%",
+              padding: "0.5rem",
+              marginBottom: "0.5rem",
+              boxSizing: "border-box",
+            }}
           />
 
           {ingestType === "text" ? (
@@ -135,7 +151,12 @@ export default function DocumentsPage(): React.JSX.Element {
               onChange={(e) => setContent(e.target.value)}
               placeholder="Paste content here..."
               rows={6}
-              style={{ width: "100%", padding: "0.5rem", marginBottom: "0.5rem", boxSizing: "border-box" }}
+              style={{
+                width: "100%",
+                padding: "0.5rem",
+                marginBottom: "0.5rem",
+                boxSizing: "border-box",
+              }}
             />
           ) : null}
 

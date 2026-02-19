@@ -1,4 +1,4 @@
-import type { ChunkEntity } from "./chunk.entity.js";
+import type { ChunkEntity } from './chunk.entity.js';
 
 export interface ChunkWithMeta {
   chunk: ChunkEntity;
@@ -12,7 +12,7 @@ export interface ChunkRepository {
   findById(chunkId: string): Promise<ChunkWithMeta | null>;
   createMany(
     documentId: string,
-    chunks: Array<{ content: string; startOffset: number; endOffset: number }>
+    chunks: Array<{ content: string; startOffset: number; endOffset: number }>,
   ): Promise<ChunkEntity[]>;
   updateImportance(chunkId: string, score: number): Promise<void>;
 }

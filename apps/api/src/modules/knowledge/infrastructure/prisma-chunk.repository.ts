@@ -1,11 +1,11 @@
-import { Injectable } from "@nestjs/common";
-import { randomUUID } from "node:crypto";
-import { PrismaService } from "../../../prisma/prisma.service.js";
+import { Injectable } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
+import { PrismaService } from '../../../prisma/prisma.service.js';
 import type {
   ChunkRepository,
   ChunkWithMeta,
-} from "../domain/chunk-repository.interface.js";
-import type { ChunkEntity } from "../domain/chunk.entity.js";
+} from '../domain/chunk-repository.interface.js';
+import type { ChunkEntity } from '../domain/chunk.entity.js';
 
 @Injectable()
 export class PrismaChunkRepository implements ChunkRepository {
@@ -19,7 +19,7 @@ export class PrismaChunkRepository implements ChunkRepository {
         notes: true,
         importanceScore: true,
       },
-      orderBy: { startOffset: "asc" },
+      orderBy: { startOffset: 'asc' },
     });
 
     return rows.map((row) => ({
@@ -66,7 +66,7 @@ export class PrismaChunkRepository implements ChunkRepository {
 
   async createMany(
     documentId: string,
-    chunks: Array<{ content: string; startOffset: number; endOffset: number }>
+    chunks: Array<{ content: string; startOffset: number; endOffset: number }>,
   ): Promise<ChunkEntity[]> {
     const created: ChunkEntity[] = [];
 
