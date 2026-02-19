@@ -1,10 +1,10 @@
 import type { DocumentRepository } from '../domain/document-repository.interface.js';
-import type { IngestionJobProducer } from '../infrastructure/ingestion-job.producer.js';
+import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port.js';
 
 export class RetryIngestionUseCase {
   constructor(
     private readonly documentRepository: DocumentRepository,
-    private readonly jobProducer: IngestionJobProducer,
+    private readonly jobProducer: IngestionJobProducerPort,
   ) {}
 
   async execute(documentId: string): Promise<void> {

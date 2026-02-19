@@ -4,7 +4,6 @@ import type {
   ChunkWithMeta,
 } from '../domain/chunk-repository.interface.js';
 import type { DocumentDetailResponse, ChunkResponse } from '@repo/shared-types';
-import type { SourceType } from '@repo/shared-types';
 
 export class ViewDocumentUseCase {
   constructor(
@@ -37,7 +36,7 @@ export class ViewDocumentUseCase {
     return {
       id: doc.id,
       title: doc.title,
-      sourceType: doc.sourceType as SourceType,
+      sourceType: doc.sourceType,
       sourceUrl: doc.sourceUrl,
       rawContent: doc.rawContent,
       chunks,

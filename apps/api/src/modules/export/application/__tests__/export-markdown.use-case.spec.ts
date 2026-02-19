@@ -1,0 +1,92 @@
+import { ExportMarkdownUseCase } from '../export-markdown.use-case.js';
+import type { QueryRepository } from '../../../query/domain/query-repository.interface.js';
+
+// ── Fakes ──
+
+class FakeQueryRepository implements QueryRepository {
+  private chunks: Array<{
+    chunkId: string;
+    content: string;
+    documentTitle: string;
+    importanceScore: number | null;
+    tags: string[];
+    createdAt: Date;
+  }> = [];
+
+  seed(
+    chunks: Array<{
+      chunkId: string;
+      content: string;
+      documentTitle: string;
+      importanceScore: number | null;
+      tags: string[];
+      createdAt: Date;
+    }>,
+  ): void {
+    this.chunks = chunks;
+  }
+
+  findChunksByIds(chunkIds: string[]): Promise<
+    Array<{
+      chunkId: string;
+      content: string;
+      documentTitle: string;
+      importanceScore: number | null;
+      tags: string[];
+      createdAt: Date;
+    }>
+  > {
+    return Promise.resolve(
+      this.chunks.filter((c) => chunkIds.includes(c.chunkId)),
+    );
+  }
+
+  findChunksByTags(_tags: string[]): Promise<string[]> {
+    return Promise.resolve([]);
+  }
+
+  findChunksByDateRange(_from: Date, _to: Date): Promise<string[]> {
+    return Promise.resolve([]);
+  }
+}
+
+// ── Tests ──
+
+describe('ExportMarkdownUseCase', () => {
+  let useCase: ExportMarkdownUseCase;
+  let queryRepository: FakeQueryRepository;
+
+  beforeEach(() => {
+    queryRepository = new FakeQueryRepository();
+    useCase = new ExportMarkdownUseCase(queryRepository);
+  });
+
+  it('should fetch chunks and return formatted markdown', async () => {
+    queryRepository.seed([
+      {
+        chunkId: 'chunk-1',
+        content: 'TypeScript is great',
+        documentTitle: 'TS Guide',
+        importanceScore: 3,
+        tags: ['typescript', 'guide'],
+        createdAt: new Date('2025-01-01T00:00:00Z'),
+      },
+    ]);
+
+    const result = await useCase.execute(['chunk-1']);
+
+    expect(result).toContain('# Exported Knowledge');
+    expect(result).toContain('## TS Guide');
+    expect(result).toContain('TypeScript is great');
+    expect(result).toContain('**Tags:** typescript, guide');
+  });
+
+  it('should return a header-only markdown when no chunks match', async () => {
+    queryRepository.seed([]);
+
+    const result = await useCase.execute(['nonexistent']);
+
+    expect(result).toContain('# Exported Knowledge');
+    expect(result).not.toContain('##');
+  });
+});

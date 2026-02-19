@@ -1,12 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import type { DocumentRepository } from '../domain/document-repository.interface.js';
-import type { IngestionJobProducer } from '../infrastructure/ingestion-job.producer.js';
+import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port.js';
 import { createDocument } from '../domain/document.entity.js';
 
 export class IngestYoutubeUseCase {
   constructor(
     private readonly documentRepository: DocumentRepository,
-    private readonly jobProducer: IngestionJobProducer,
+    private readonly jobProducer: IngestionJobProducerPort,
   ) {}
 
   async execute(input: {

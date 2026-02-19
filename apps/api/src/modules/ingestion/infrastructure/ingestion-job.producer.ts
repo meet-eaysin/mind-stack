@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
 import { JOB_TYPE } from '@repo/shared-types';
+import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port.js';
 
 export const INGESTION_QUEUE = 'ingestion';
 
@@ -10,7 +11,7 @@ interface ChunkingJobData {
 }
 
 @Injectable()
-export class IngestionJobProducer {
+export class IngestionJobProducer implements IngestionJobProducerPort {
   constructor(@InjectQueue(INGESTION_QUEUE) private readonly queue: Queue) {}
 
   async enqueueChunkingJob(documentId: string): Promise<void> {
