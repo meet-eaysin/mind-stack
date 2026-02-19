@@ -9,6 +9,15 @@
     "./nextjs.json": "./nextjs.json",
     "./react-library.json": "./react-library.json"
   },
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "*",
+    "eslint": "^9.39.1",
+    "typescript": "^5.9.2"
+  },
   "publishConfig": {
     "access": "public"
   }

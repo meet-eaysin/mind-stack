@@ -2659,6 +2659,10 @@ __metadata:
 "@repo/typescript-config@npm:*, @repo/typescript-config@workspace:^, @repo/typescript-config@workspace:packages/typescript-config":
   version: 0.0.0-use.local
   resolution: "@repo/typescript-config@workspace:packages/typescript-config"
+  dependencies:
+    "@repo/eslint-config": "npm:*"
+    eslint: "npm:^9.39.1"
+    typescript: "npm:^5.9.2"
   languageName: unknown
   linkType: soft
 

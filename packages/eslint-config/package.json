@@ -8,6 +8,10 @@
     "./next-js": "./next.js",
     "./react-internal": "./react-internal.js"
   },
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "clean": "rm -rf dist"
+  },
   "dependencies": {
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-turbo": "^2.7.1",
