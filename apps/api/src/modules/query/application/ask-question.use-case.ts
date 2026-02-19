@@ -56,4 +56,66 @@ export class AskQuestionUseCase {
       citations,
     };
   }
+
+  async *executeStream(input: {
+    question: string;
+    tags?: string[];
+    topK?: number;
+  }): AsyncGenerator<
+    | { type: 'citations'; data: any[] }
+    | { type: 'text'; data: string }
+    | { type: 'done' },
+    void,
+    undefined
+  > {
+    const citations = await this.semanticSearch.execute({
+      query: input.question,
+      topK: input.topK ?? 5,
+    });
+
+    if (citations.length === 0) {
+      yield {
+        type: 'text',
+        data: "I don't have enough information to answer this question.",
+      };
+      yield { type: 'done' };
+      return;
+    }
+
+    yield { type: 'citations', data: citations };
+
+    const contextBlock = citations
+      .map((c, i) => `[${i + 1}] (Source: ${c.documentTitle})\n${c.content}`)
+      .join('\n\n');
+
+    const systemPrompt = [
+      'You are a knowledgeable assistant that answers questions based on the provided context.',
+      'Always cite your sources using [N] notation referring to the context blocks.',
+      "If the context doesn't contain enough information, say so clearly.",
+      'Be concise and accurate.',
+    ].join('\n');
+
+    const prompt = [
+      'Context:',
+      contextBlock,
+      '',
+      `Question: ${input.question}`,
+      '',
+      'Answer with citations:',
+    ].join('\n');
+
+    const stream = this.llmProvider.generateStream({
+      prompt,
+      systemPrompt,
+      temperature: 0.3,
+    });
+
+    for await (const chunk of stream) {
+      if (chunk.text) {
+        yield { type: 'text', data: chunk.text };
+      }
+    }
+
+    yield { type: 'done' };
+  }
 }

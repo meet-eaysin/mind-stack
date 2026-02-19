@@ -1,4 +1,4 @@
-import { Worker, type ConnectionOptions } from "bullmq";
+import { Worker, Queue } from "bullmq";
 import IORedis from "ioredis";
 import { loadConfig } from "@repo/config";
 import { createLogger } from "@repo/logger";
@@ -21,6 +21,10 @@ async function main(): Promise<void> {
 
   const connection = new IORedis(config.REDIS_URL, {
     maxRetriesPerRequest: null,
+  });
+
+  const ingestionQueue = new Queue("ingestion", {
+    connection: connection as any,
   });
 
   const embeddingProvider = new OllamaEmbeddingProvider({
@@ -48,24 +52,21 @@ async function main(): Promise<void> {
 
       switch (job.name) {
         case JOB_TYPE.CHUNKING:
-          await handleChunkingJob(job.data as { documentId: string }, prisma);
+          await handleChunkingJob(job as any, prisma, ingestionQueue);
           break;
 
         case JOB_TYPE.EMBEDDING:
           await handleEmbeddingJob(
-            job.data as { documentId: string },
+            job as any,
             prisma,
             embeddingProvider,
             vectorStore,
+            ingestionQueue,
           );
           break;
 
         case JOB_TYPE.CONCEPT_EXTRACTION:
-          await handleConceptExtractionJob(
-            job.data as { documentId: string },
-            prisma,
-            llmProvider,
-          );
+          await handleConceptExtractionJob(job as any, prisma, llmProvider);
           break;
 
         case JOB_TYPE.DAILY_REVIEW:
@@ -76,7 +77,7 @@ async function main(): Promise<void> {
           logger.warn(`Unknown job type: ${job.name}`);
       }
     },
-    { connection: connection as unknown as ConnectionOptions, concurrency: 2 },
+    { connection: connection as any, concurrency: 2 },
   );
 
   worker.on("completed", (job) => {

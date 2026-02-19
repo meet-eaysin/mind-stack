@@ -1,4 +1,13 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Sse,
+  MessageEvent,
+  Query,
+} from '@nestjs/common';
+import { Observable, from } from 'rxjs';
+import { map } from 'rxjs/operators';
 import type { SearchResponse, AskQuestionResponse } from '@repo/shared-types';
 import { SemanticSearchUseCase } from '../application/semantic-search.use-case.js';
 import { FilteredSearchUseCase } from '../application/filtered-search.use-case.js';
@@ -36,6 +45,13 @@ export class QueryController {
   @Post('ask')
   async ask(@Body() dto: AskQuestionDto): Promise<AskQuestionResponse> {
     return this.askQuestion.execute(dto);
+  }
+
+  @Sse('ask/stream')
+  askStream(@Query() dto: AskQuestionDto): Observable<MessageEvent> {
+    return from(this.askQuestion.executeStream(dto)).pipe(
+      map((chunk) => ({ data: chunk }) as MessageEvent),
+    );
   }
 
   @Post('retrieve')

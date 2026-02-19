@@ -2,6 +2,8 @@ import type { PrismaClient, Prisma } from "@repo/database";
 import type { EmbeddingProvider } from "@repo/embeddings";
 import type { VectorStore, VectorDocument } from "@repo/vector-store";
 import { createLogger } from "@repo/logger";
+import { Job, Queue } from "bullmq";
+import { JOB_TYPE } from "@repo/shared-types";
 
 const logger = createLogger("EmbeddingJob");
 
@@ -15,13 +17,15 @@ type ChunkWithDetails = Prisma.ChunkGetPayload<{
 const BATCH_SIZE = 10;
 
 export async function handleEmbeddingJob(
-  data: { documentId: string },
+  job: Job<{ documentId: string }, any, string>,
   prisma: PrismaClient,
   embeddingProvider: EmbeddingProvider,
   vectorStore: VectorStore,
+  ingestionQueue: Queue,
 ): Promise<void> {
+  const { documentId } = job.data;
   const chunks = await prisma.chunk.findMany({
-    where: { documentId: data.documentId },
+    where: { documentId },
     include: {
       document: { select: { title: true } },
       chunkTags: { include: { tag: true } },
@@ -30,7 +34,7 @@ export async function handleEmbeddingJob(
 
   if (chunks.length === 0) {
     logger.warn("No chunks found for document", {
-      documentId: data.documentId,
+      documentId,
     });
     return;
   }
@@ -63,14 +67,16 @@ export async function handleEmbeddingJob(
     await vectorStore.upsert(documents);
 
     logger.debug("Embedded batch", {
-      documentId: data.documentId,
+      documentId,
       batchStart: i,
       batchSize: batch.length,
     });
   }
 
+  await ingestionQueue.add(JOB_TYPE.CONCEPT_EXTRACTION, { documentId });
+
   logger.info("Embedding completed", {
-    documentId: data.documentId,
+    documentId,
     chunkCount: chunks.length,
   });
 }

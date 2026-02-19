@@ -8,6 +8,8 @@ import { QueryModule } from './modules/query/presentation/query.module.js';
 import { ReviewModule } from './modules/review/presentation/review.module.js';
 import { GraphModule } from './modules/graph/presentation/graph.module.js';
 import { ExportModule } from './modules/export/presentation/export.module.js';
+import { APP_GUARD } from '@nestjs/core';
+import { ApiKeyGuard } from './common/guards/api-key.guard.js';
 import { loadConfig } from '@repo/config';
 
 @Module({
@@ -25,6 +27,12 @@ import { loadConfig } from '@repo/config';
     ReviewModule,
     GraphModule,
     ExportModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ApiKeyGuard,
+    },
   ],
 })
 export class AppModule {}

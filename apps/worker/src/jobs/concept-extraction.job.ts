@@ -3,6 +3,7 @@ import type { LLMProvider } from "@repo/llm";
 import { createLogger } from "@repo/logger";
 import { randomUUID } from "node:crypto";
 import type { RelationType } from "@repo/shared-types";
+import { Job } from "bullmq";
 
 const logger = createLogger("ConceptExtractionJob");
 
@@ -15,12 +16,13 @@ interface ExtractedConcept {
 }
 
 export async function handleConceptExtractionJob(
-  data: { documentId: string },
+  job: Job<{ documentId: string }, any, string>,
   prisma: PrismaClient,
   llmProvider: LLMProvider,
 ): Promise<void> {
+  const { documentId } = job.data;
   const chunks = await prisma.chunk.findMany({
-    where: { documentId: data.documentId },
+    where: { documentId },
   });
 
   for (const chunk of chunks) {
@@ -53,7 +55,7 @@ export async function handleConceptExtractionJob(
   }
 
   logger.info("Concept extraction completed", {
-    documentId: data.documentId,
+    documentId,
     chunkCount: chunks.length,
   });
 }

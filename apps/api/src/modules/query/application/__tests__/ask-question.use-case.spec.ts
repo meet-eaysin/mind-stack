@@ -133,4 +133,20 @@ describe('AskQuestionUseCase', () => {
       topK: 5,
     });
   });
+
+  it('should yield citations then text chunks during streaming', async () => {
+    const citations = [createChunkReferenceFixture({ chunkId: 'c1' })];
+    semanticSearch.setResults(citations);
+    llmProvider.setResponse('Streamed answer');
+
+    const chunks: any[] = [];
+    for await (const chunk of useCase.executeStream({ question: 'test' })) {
+      chunks.push(chunk);
+    }
+
+    expect(chunks).toHaveLength(3); // citations, text, done
+    expect(chunks[0]).toEqual({ type: 'citations', data: citations });
+    expect(chunks[1]).toEqual({ type: 'text', data: 'Streamed answer' });
+    expect(chunks[2]).toEqual({ type: 'done' });
+  });
 });

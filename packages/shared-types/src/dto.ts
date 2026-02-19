@@ -130,6 +130,11 @@ export interface AskQuestionResponse {
   citations: ChunkReference[];
 }
 
+export type StreamingAskResponseChunk =
+  | { type: "citations"; data: ChunkReference[] }
+  | { type: "text"; data: string }
+  | { type: "done" };
+
 // ── Review DTOs ──
 
 export interface ReviewItem {

@@ -1,6 +1,8 @@
 import { Prisma, PrismaClient } from "@repo/database";
 import { createLogger } from "@repo/logger";
 import { randomUUID } from "node:crypto";
+import { Job, Queue } from "bullmq";
+import { JOB_TYPE } from "@repo/shared-types";
 
 const logger = createLogger("ChunkingJob");
 
@@ -8,19 +10,21 @@ const CHUNK_SIZE = 500;
 const CHUNK_OVERLAP = 50;
 
 export async function handleChunkingJob(
-  data: { documentId: string },
+  job: Job<{ documentId: string }, any, string>,
   prisma: PrismaClient,
+  ingestionQueue: Queue,
 ): Promise<void> {
+  const { documentId } = job.data;
   const document = await prisma.document.findUnique({
-    where: { id: data.documentId },
+    where: { id: documentId },
   });
 
   if (!document) {
-    throw new Error(`Document not found: ${data.documentId}`);
+    throw new Error(`Document not found: ${documentId}`);
   }
 
   await prisma.document.update({
-    where: { id: data.documentId },
+    where: { id: documentId },
     data: { status: "PROCESSING" },
   });
 
@@ -33,7 +37,7 @@ export async function handleChunkingJob(
         await tx.chunk.create({
           data: {
             id: randomUUID(),
-            documentId: data.documentId,
+            documentId: documentId,
             content: chunk.content,
             startOffset: chunk.startOffset,
             endOffset: chunk.endOffset,
@@ -43,17 +47,19 @@ export async function handleChunkingJob(
     });
 
     await prisma.document.update({
-      where: { id: data.documentId },
+      where: { id: documentId },
       data: { status: "COMPLETED" },
     });
 
+    await ingestionQueue.add(JOB_TYPE.EMBEDDING, { documentId });
+
     logger.info("Chunking completed", {
-      documentId: data.documentId,
+      documentId: documentId,
       chunkCount: chunks.length,
     });
   } catch (error) {
     await prisma.document.update({
-      where: { id: data.documentId },
+      where: { id: documentId },
       data: { status: "FAILED" },
     });
     throw error;
