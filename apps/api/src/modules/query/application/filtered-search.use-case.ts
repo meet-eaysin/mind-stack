@@ -79,12 +79,19 @@ export class FilteredSearchUseCase {
 
     const ranked = rankResults(merged);
 
-    return ranked.map((r) => ({
-      chunkId: r.chunkId,
-      content: r.content,
-      documentTitle: r.documentTitle,
-      score: r.finalScore,
-      tags: r.tags,
-    }));
+    const unique = new Map<string, ChunkReference>();
+    for (const r of ranked) {
+      if (!unique.has(r.chunkId)) {
+        unique.set(r.chunkId, {
+          chunkId: r.chunkId,
+          content: r.content,
+          documentTitle: r.documentTitle,
+          score: r.finalScore,
+          tags: r.tags,
+        });
+      }
+    }
+
+    return Array.from(unique.values()).slice(0, topK);
   }
 }

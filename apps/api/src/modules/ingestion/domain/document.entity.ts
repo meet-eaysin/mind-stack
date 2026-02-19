@@ -23,7 +23,7 @@ export function createDocument(params: {
     sourceType: params.sourceType,
     sourceUrl: params.sourceUrl,
     rawContent: params.rawContent,
-    status: 'PENDING',
+    status: 'INGESTED',
     createdAt: new Date(),
   };
 }

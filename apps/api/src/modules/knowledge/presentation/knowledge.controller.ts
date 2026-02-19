@@ -63,8 +63,19 @@ export class KnowledgeController {
   }
 
   @Get('documents/:id')
-  async detail(@Param('id') id: string): Promise<DocumentDetailResponse> {
-    return this.viewDocument.execute(id);
+  async detail(
+    @Param('id') id: string,
+  ): Promise<{ document: DocumentDetailResponse }> {
+    const document = await this.viewDocument.execute(id);
+    return { document };
+  }
+
+  @Get('documents/:id/status')
+  async getStatus(@Param('id') id: string): Promise<{ status: string }> {
+    const document = await this.viewDocument.execute(id);
+    return {
+      status: document.status,
+    };
   }
 
   @Post('tags')

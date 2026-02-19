@@ -8,9 +8,11 @@ export const SOURCE_TYPE = {
 export type SourceType = (typeof SOURCE_TYPE)[keyof typeof SOURCE_TYPE];
 
 export const INGESTION_STATUS = {
-  PENDING: "PENDING",
-  PROCESSING: "PROCESSING",
-  COMPLETED: "COMPLETED",
+  INGESTED: "INGESTED",
+  CHUNKING: "CHUNKING",
+  EMBEDDING: "EMBEDDING",
+  GRAPH_BUILDING: "GRAPH_BUILDING",
+  READY: "READY",
   FAILED: "FAILED",
 } as const;
 

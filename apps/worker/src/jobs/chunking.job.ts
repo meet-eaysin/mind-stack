@@ -20,12 +20,25 @@ export async function handleChunkingJob(
   });
 
   if (!document) {
+    logger.error("Document not found", { documentId });
     throw new Error(`Document not found: ${documentId}`);
+  }
+
+  // Idempotency check: if chunks already exist, we might be retrying.
+  const existingChunks = await prisma.chunk.count({ where: { documentId } });
+  if (existingChunks > 0) {
+    logger.info("Chunks already exist, skipping chunking", { documentId });
+    await prisma.document.update({
+      where: { id: documentId },
+      data: { status: "EMBEDDING" },
+    });
+    await ingestionQueue.add(JOB_TYPE.EMBEDDING, { documentId });
+    return;
   }
 
   await prisma.document.update({
     where: { id: documentId },
-    data: { status: "PROCESSING" },
+    data: { status: "CHUNKING" },
   });
 
   try {
@@ -48,7 +61,7 @@ export async function handleChunkingJob(
 
     await prisma.document.update({
       where: { id: documentId },
-      data: { status: "COMPLETED" },
+      data: { status: "EMBEDDING" },
     });
 
     await ingestionQueue.add(JOB_TYPE.EMBEDDING, { documentId });
@@ -58,10 +71,12 @@ export async function handleChunkingJob(
       chunkCount: chunks.length,
     });
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
     await prisma.document.update({
       where: { id: documentId },
       data: { status: "FAILED" },
     });
+    logger.error("Chunking failed", { documentId, error: message });
     throw error;
   }
 }

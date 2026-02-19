@@ -27,7 +27,7 @@ export class IngestionController {
     const result = await this.ingestUrl.execute(dto);
     return {
       documentId: result.documentId,
-      status: 'PENDING',
+      status: 'INGESTED',
       message: 'Document ingestion started',
     };
   }
@@ -37,7 +37,7 @@ export class IngestionController {
     const result = await this.ingestText.execute(dto);
     return {
       documentId: result.documentId,
-      status: 'PENDING',
+      status: 'INGESTED',
       message: 'Text ingestion started',
     };
   }
@@ -47,7 +47,7 @@ export class IngestionController {
     const result = await this.ingestPdf.execute(dto);
     return {
       documentId: result.documentId,
-      status: 'PENDING',
+      status: 'INGESTED',
       message: 'PDF ingestion started',
     };
   }
@@ -59,7 +59,7 @@ export class IngestionController {
     const result = await this.ingestYoutube.execute(dto);
     return {
       documentId: result.documentId,
-      status: 'PENDING',
+      status: 'INGESTED',
       message: 'YouTube transcript ingestion started',
     };
   }
@@ -71,7 +71,7 @@ export class IngestionController {
     await this.retryIngestion.execute(documentId);
     return {
       documentId,
-      status: 'PENDING',
+      status: 'INGESTED',
       message: 'Ingestion retry started',
     };
   }

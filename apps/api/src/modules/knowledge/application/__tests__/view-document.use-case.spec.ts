@@ -19,7 +19,7 @@ function createDocumentFixture(
     sourceType: 'URL',
     sourceUrl: 'https://example.com',
     rawContent: 'raw content here',
-    status: 'COMPLETED',
+    status: 'READY',
     createdAt: new Date('2025-01-01T00:00:00Z'),
     ...overrides,
   };

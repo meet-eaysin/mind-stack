@@ -17,7 +17,7 @@ export class RetryIngestionUseCase {
       throw new Error(`Cannot retry document with status: ${document.status}`);
     }
 
-    await this.documentRepository.updateStatus(documentId, 'PENDING');
+    await this.documentRepository.updateStatus(documentId, 'INGESTED');
     await this.jobProducer.enqueueChunkingJob(documentId);
   }
 }

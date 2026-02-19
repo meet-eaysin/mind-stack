@@ -1,8 +1,8 @@
+import type { IngestionStatus } from '@repo/shared-types';
 import { IngestUrlUseCase } from '../ingest-url.use-case.js';
 import type { DocumentRepository } from '../../domain/document-repository.interface.js';
 import type { IngestionJobProducerPort } from '../../domain/ingestion-job-producer.port.js';
 import type { DocumentEntity } from '../../domain/document.entity.js';
-import type { IngestionStatus } from '@repo/shared-types';
 
 jest.mock('jsdom', () => ({
   JSDOM: jest.fn().mockImplementation(() => ({
@@ -110,7 +110,7 @@ describe('IngestUrlUseCase', () => {
       sourceType: 'URL' as const,
       sourceUrl: 'https://example.com/already-here',
       rawContent: 'content',
-      status: 'COMPLETED' as const,
+      status: 'READY' as IngestionStatus,
       createdAt: new Date(),
     };
     documentRepository.saved.push(existingDoc);

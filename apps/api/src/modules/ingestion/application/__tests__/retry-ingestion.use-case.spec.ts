@@ -1,8 +1,8 @@
+import type { IngestionStatus } from '@repo/shared-types';
 import { RetryIngestionUseCase } from '../retry-ingestion.use-case.js';
 import type { DocumentRepository } from '../../domain/document-repository.interface.js';
 import type { IngestionJobProducerPort } from '../../domain/ingestion-job-producer.port.js';
 import type { DocumentEntity } from '../../domain/document.entity.js';
-import type { IngestionStatus } from '@repo/shared-types';
 
 // ── Fixtures ──
 
@@ -103,11 +103,14 @@ describe('RetryIngestionUseCase', () => {
   });
 
   it('should throw when the document status is not FAILED', async () => {
-    const doc = createDocumentFixture({ id: 'doc-ok', status: 'COMPLETED' });
+    const doc = createDocumentFixture({
+      id: 'doc-ok',
+      status: 'READY' as IngestionStatus,
+    });
     documentRepository.seed(doc);
 
     await expect(useCase.execute('doc-ok')).rejects.toThrow(
-      'Cannot retry document with status: COMPLETED',
+      'Cannot retry document with status: READY',
     );
   });
 });

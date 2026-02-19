@@ -41,12 +41,32 @@ export class SemanticSearchUseCase {
 
     const ranked = rankResults(merged);
 
-    return ranked.map((r) => ({
-      chunkId: r.chunkId,
-      content: r.content,
-      documentTitle: r.documentTitle,
-      score: r.finalScore,
-      tags: r.tags,
-    }));
+    const uniqueIds = new Set<string>();
+    const uniqueContent = new Set<string>();
+    const finalizedRes: ChunkReference[] = [];
+
+    for (const r of ranked) {
+      if (uniqueIds.has(r.chunkId)) continue;
+
+      const normalizedContent = r.content
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, ' ');
+      if (uniqueContent.has(normalizedContent)) continue;
+
+      uniqueIds.add(r.chunkId);
+      uniqueContent.add(normalizedContent);
+      finalizedRes.push({
+        chunkId: r.chunkId,
+        content: r.content,
+        documentTitle: r.documentTitle,
+        score: r.finalScore,
+        tags: r.tags,
+      });
+
+      if (finalizedRes.length >= topK) break;
+    }
+
+    return finalizedRes;
   }
 }

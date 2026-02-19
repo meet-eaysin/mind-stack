@@ -29,7 +29,10 @@ export class AskQuestionUseCase {
     }
 
     const contextBlock = citations
-      .map((c, i) => `[${i + 1}] (Source: ${c.documentTitle})\n${c.content}`)
+      .map(
+        (c, i) =>
+          `[${i + 1}] (Source: ${c.documentTitle})\n${c.content.trim()}`,
+      )
       .join('\n\n');
 
     const systemPrompt = [
