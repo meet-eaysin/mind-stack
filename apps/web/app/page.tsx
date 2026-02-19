@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { ChunkReference, AskQuestionResponse } from "@repo/shared-types";
-import { askQuestion, semanticSearch } from "../lib/api-client";
+import { askQuestion, semanticSearch } from "@/lib/api-client";
 
 export default function SearchPage(): React.JSX.Element {
   const [query, setQuery] = useState("");

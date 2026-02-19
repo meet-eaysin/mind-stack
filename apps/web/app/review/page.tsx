@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { ReviewItem } from "@repo/shared-types";
-import { getDailyReview, submitReviewFeedback } from "../../lib/api-client";
+import { getDailyReview, submitReviewFeedback } from "@/lib/api-client";
 
 export default function ReviewPage(): React.JSX.Element {
   const [items, setItems] = useState<ReviewItem[]>([]);

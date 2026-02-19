@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { ConceptNode, ConceptEdge } from "@repo/shared-types";
-import { getGraph } from "../../lib/api-client";
+import { getGraph } from "@/lib/api-client";
 
 export default function GraphPage(): React.JSX.Element {
   const [nodes, setNodes] = useState<ConceptNode[]>([]);

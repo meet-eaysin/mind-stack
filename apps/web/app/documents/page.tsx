@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { DocumentListItem } from "@repo/shared-types";
-import { listDocuments, ingestUrl, ingestText } from "../../lib/api-client";
+import { listDocuments, ingestUrl, ingestText } from "@/lib/api-client";
 
 export default function DocumentsPage(): React.JSX.Element {
   const [documents, setDocuments] = useState<DocumentListItem[]>([]);

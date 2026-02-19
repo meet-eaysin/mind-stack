@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { BullModule } from "@nestjs/bullmq";
+import { ConfigModule } from "@nestjs/config";
 import { PrismaModule } from "./prisma/prisma.module.js";
 import { IngestionModule } from "./modules/ingestion/presentation/ingestion.module.js";
 import { KnowledgeModule } from "./modules/knowledge/presentation/knowledge.module.js";
@@ -11,6 +12,7 @@ import { loadConfig } from "@repo/config";
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     BullModule.forRoot({
       connection: {

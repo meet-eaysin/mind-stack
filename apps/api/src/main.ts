@@ -28,8 +28,8 @@ async function bootstrap(): Promise<void> {
 
   app.setGlobalPrefix("api");
 
-  await app.listen(config.API_PORT);
-  logger.info(`API server running on port ${config.API_PORT}`);
+  await app.listen(config.API_PORT, "0.0.0.0");
+  logger.info(`API server running on http://0.0.0.0:${config.API_PORT}`);
 }
 
 void bootstrap();

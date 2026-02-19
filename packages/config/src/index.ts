@@ -32,9 +32,13 @@ export function loadConfig(): AppConfig {
     return cachedConfig;
   }
 
-  // Load .env from root
-  dotenv.config({ path: path.join(process.cwd(), "../../.env") });
-  dotenv.config({ path: path.join(process.cwd(), ".env") }); // Also try local
+  // Load .env from root (look up to 5 levels)
+  let currentDir = process.cwd();
+  for (let i = 0; i < 5; i++) {
+    const envPath = path.join(currentDir, ".env");
+    dotenv.config({ path: envPath });
+    currentDir = path.dirname(currentDir);
+  }
 
   const parsed = envSchema.safeParse(process.env);
   if (!parsed.success) {
