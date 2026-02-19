@@ -189,14 +189,25 @@ async function extractConcepts(
     const extracted: ExtractedConcept[] = [];
 
     for (const line of lines) {
+      // Remove leading bullet points/numbers
       const cleanLine = line.replace(/^[*•\d.-]+\s*/, "").trim();
+      if (cleanLine.length === 0) continue;
+
+      // If line is short enough, use it entirely
       if (
         cleanLine.length > 2 &&
         cleanLine.length < 50 &&
         !cleanLine.includes("{")
       ) {
-        // High heuristic: short lines in a chatty response might be concepts
         extracted.push({ label: cleanLine, relations: [] });
+        continue;
+      }
+
+      // If line contains a colon (like "Concept: Description"), take the first part
+      const colonIdx = cleanLine.indexOf(":");
+      if (colonIdx > 2 && colonIdx < 50) {
+        const label = cleanLine.substring(0, colonIdx).trim();
+        extracted.push({ label, relations: [] });
       }
     }
 
