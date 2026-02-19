@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "dev": "tsx watch src/main.ts",
     "start": "node dist/main.js",
-    "check-types": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint --max-warnings 0",
-    "test": "echo 'No tests found' && exit 0"
+    "test": "echo 'No tests found' && exit 0",
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "@repo/config": "*",

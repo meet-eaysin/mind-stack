@@ -1,5 +1,5 @@
 {
-  "extends": "@repo/typescript-config/base.json",
+  "extends": "@repo/typescript-config/nestjs.json",
   "compilerOptions": {
     "outDir": "./dist",
     "baseUrl": "./",
@@ -12,11 +12,7 @@
       "@repo/logger": ["../../packages/logger/src/index.ts"],
       "@repo/shared-types": ["../../packages/shared-types/src/index.ts"],
       "@repo/vector-store": ["../../packages/vector-store/src/index.ts"]
-    },
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "sourceMap": true
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

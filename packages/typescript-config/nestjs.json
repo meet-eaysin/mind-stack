@@ -10,7 +10,6 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "outDir": "./dist",
     "incremental": true,
     "noEmit": false
   }

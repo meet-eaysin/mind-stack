@@ -1,10 +1,7 @@
 {
-  "extends": "@repo/typescript-config/base.json",
+  "extends": "@repo/typescript-config/nestjs.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "module": "CommonJS",
-    "moduleResolution": "Node",
-    "esModuleInterop": true,
     "baseUrl": "./",
     "paths": {
       "@repo/config": ["../../packages/config/src/index.ts"],

@@ -40,6 +40,7 @@ export class ViewDocumentUseCase {
       sourceUrl: doc.sourceUrl,
       rawContent: doc.rawContent,
       chunks,
+      status: doc.status,
       createdAt: doc.createdAt.toISOString(),
     };
   }

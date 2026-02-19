@@ -62,6 +62,7 @@ export type DocumentDetailResponse = {
   title: string;
   sourceType: SourceType;
   sourceUrl: string | null;
+  status: IngestionStatus;
   rawContent: string;
   chunks: ChunkResponse[];
   createdAt: string;

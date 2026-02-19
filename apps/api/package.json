@@ -7,16 +7,20 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "dev": "nest start --watch",
     "start": "nest start",
-    "start:dev": "nest start --watch --exec \"tsx\"",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "start:prod": "node dist/main.js",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "clean": "rm -rf dist",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:push": "prisma db push",
-    "check-types": "tsc --noEmit"
+    "prisma:push": "prisma db push"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
@@ -42,11 +46,11 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
+    "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
@@ -88,7 +92,7 @@
     "testEnvironment": "node",
     "moduleNameMapper": {
       "^@modules/(.*)$": "<rootDir>/modules/$1",
-      "^(\\.\\.?\\/.*)\\.js$": "$1",
+      "^(\\.\\.\\/.*)\\.js$": "$1",
       "^@repo/shared-types$": "<rootDir>/../../../packages/shared-types/src/index.ts",
       "^@repo/llm$": "<rootDir>/../../../packages/llm/src/index.ts",
       "^@repo/embeddings$": "<rootDir>/../../../packages/embeddings/src/index.ts",

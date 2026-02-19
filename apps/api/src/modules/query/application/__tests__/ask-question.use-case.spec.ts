@@ -6,7 +6,10 @@ import type {
   GenerationResponse,
   StreamChunk,
 } from '@repo/llm';
-import type { ChunkReference } from '@repo/shared-types';
+import type {
+  ChunkReference,
+  StreamingAskResponseChunk,
+} from '@repo/shared-types';
 
 // ── Fixtures ──
 
@@ -139,7 +142,7 @@ describe('AskQuestionUseCase', () => {
     semanticSearch.setResults(citations);
     llmProvider.setResponse('Streamed answer');
 
-    const chunks: any[] = [];
+    const chunks: StreamingAskResponseChunk[] = [];
     for await (const chunk of useCase.executeStream({ question: 'test' })) {
       chunks.push(chunk);
     }

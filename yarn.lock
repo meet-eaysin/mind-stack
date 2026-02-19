@@ -874,7 +874,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/eslintrc@npm:^3.2.0, @eslint/eslintrc@npm:^3.3.1":
+"@eslint/eslintrc@npm:^3.3.1":
   version: 3.3.3
   resolution: "@eslint/eslintrc@npm:3.3.3"
   dependencies:
@@ -2558,10 +2558,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@repo/config@workspace:packages/config"
   dependencies:
+    "@repo/eslint-config": "npm:*"
     "@repo/typescript-config": "npm:*"
     "@types/dotenv": "npm:^8.2.3"
     "@types/node": "npm:^22.15.3"
     dotenv: "npm:^17.3.1"
+    eslint: "npm:^9.39.1"
     typescript: "npm:5.9.2"
     zod: "npm:^3.23.8"
   languageName: unknown
@@ -2572,8 +2574,10 @@ __metadata:
   resolution: "@repo/database@workspace:packages/database"
   dependencies:
     "@prisma/client": "npm:6.4.1"
+    "@repo/eslint-config": "npm:*"
     "@repo/typescript-config": "npm:*"
     "@types/node": "npm:^22.15.3"
+    eslint: "npm:^9.39.1"
     prisma: "npm:6.4.1"
     typescript: "npm:5.9.2"
   languageName: unknown
@@ -2584,9 +2588,11 @@ __metadata:
   resolution: "@repo/embeddings@workspace:packages/embeddings"
   dependencies:
     "@repo/config": "npm:*"
+    "@repo/eslint-config": "npm:*"
     "@repo/logger": "npm:*"
     "@repo/typescript-config": "npm:*"
     "@types/node": "npm:^22.15.3"
+    eslint: "npm:^9.39.1"
     typescript: "npm:5.9.2"
     zod: "npm:^3.23.8"
   languageName: unknown
@@ -2600,7 +2606,6 @@ __metadata:
     "@next/eslint-plugin-next": "npm:^15.5.0"
     eslint: "npm:^9.39.1"
     eslint-config-prettier: "npm:^10.1.1"
-    eslint-plugin-only-warn: "npm:^1.1.0"
     eslint-plugin-react: "npm:^7.37.5"
     eslint-plugin-react-hooks: "npm:^5.2.0"
     eslint-plugin-turbo: "npm:^2.7.1"
@@ -2615,9 +2620,11 @@ __metadata:
   resolution: "@repo/llm@workspace:packages/llm"
   dependencies:
     "@repo/config": "npm:*"
+    "@repo/eslint-config": "npm:*"
     "@repo/logger": "npm:*"
     "@repo/typescript-config": "npm:*"
     "@types/node": "npm:^22.15.3"
+    eslint: "npm:^9.39.1"
     typescript: "npm:5.9.2"
     zod: "npm:^3.23.8"
   languageName: unknown
@@ -2627,8 +2634,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@repo/logger@workspace:packages/logger"
   dependencies:
+    "@repo/eslint-config": "npm:*"
     "@repo/typescript-config": "npm:*"
     "@types/node": "npm:^22.15.3"
+    eslint: "npm:^9.39.1"
     pino: "npm:^9.6.0"
     pino-pretty: "npm:^13.0.0"
     typescript: "npm:5.9.2"
@@ -2639,8 +2648,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@repo/shared-types@workspace:packages/shared-types"
   dependencies:
+    "@repo/eslint-config": "npm:*"
     "@repo/typescript-config": "npm:*"
     "@types/node": "npm:^22.15.3"
+    eslint: "npm:^9.39.1"
     typescript: "npm:5.9.2"
   languageName: unknown
   linkType: soft
@@ -2672,10 +2683,12 @@ __metadata:
   resolution: "@repo/vector-store@workspace:packages/vector-store"
   dependencies:
     "@repo/config": "npm:*"
+    "@repo/eslint-config": "npm:*"
     "@repo/logger": "npm:*"
     "@repo/typescript-config": "npm:*"
     "@types/node": "npm:^22.15.3"
     chromadb: "npm:^1.9.2"
+    eslint: "npm:^9.39.1"
     typescript: "npm:5.9.2"
     zod: "npm:^3.23.8"
   languageName: unknown
@@ -3764,7 +3777,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "api@workspace:apps/api"
   dependencies:
-    "@eslint/eslintrc": "npm:^3.2.0"
     "@eslint/js": "npm:^9.18.0"
     "@mozilla/readability": "npm:^0.6.0"
     "@nestjs/bullmq": "npm:^11.0.0"
@@ -3778,6 +3790,7 @@ __metadata:
     "@repo/config": "npm:*"
     "@repo/database": "npm:*"
     "@repo/embeddings": "npm:*"
+    "@repo/eslint-config": "npm:*"
     "@repo/llm": "npm:*"
     "@repo/logger": "npm:*"
     "@repo/shared-types": "npm:*"
@@ -7955,7 +7968,6 @@ __metadata:
   resolution: "mind-stack@workspace:."
   dependencies:
     prettier: "npm:^3.7.4"
-    tsx: "npm:^4.21.0"
     turbo: "npm:^2.8.9"
     typescript: "npm:5.9.2"
   languageName: unknown
