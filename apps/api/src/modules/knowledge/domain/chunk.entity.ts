@@ -1,8 +1,8 @@
-export interface ChunkEntity {
+export type ChunkEntity = {
   id: string;
   documentId: string;
   content: string;
   startOffset: number;
   endOffset: number;
   createdAt: Date;
-}
+};

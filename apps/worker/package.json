@@ -7,7 +7,8 @@
     "dev": "tsx watch src/main.ts",
     "start": "node dist/main.js",
     "check-types": "tsc --noEmit",
-    "lint": "eslint --max-warnings 0"
+    "lint": "eslint --max-warnings 0",
+    "test": "echo 'No tests found' && exit 0"
   },
   "dependencies": {
     "@repo/config": "*",
@@ -18,12 +19,21 @@
     "@repo/shared-types": "*",
     "@repo/vector-store": "*",
     "bullmq": "^5.34.0",
-    "ioredis": "5.6.0"
+    "ioredis": "^5.9.3",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@repo/typescript-config": "*",
+    "@repo/eslint-config": "workspace:^",
+    "@repo/typescript-config": "workspace:^",
     "@types/node": "^22.15.3",
+    "eslint": "^10.0.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-only-warn": "^1.1.0",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-turbo": "^2.8.10",
+    "globals": "^17.3.0",
     "tsx": "^4.19.0",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "typescript-eslint": "^8.56.0"
   }
 }

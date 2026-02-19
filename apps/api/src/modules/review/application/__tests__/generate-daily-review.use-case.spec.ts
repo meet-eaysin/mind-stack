@@ -3,7 +3,10 @@ import type {
   ReviewRepository,
   ReviewEntity,
 } from '../../domain/review-repository.interface.js';
-import type { QueryRepository } from '../../../query/domain/query-repository.interface.js';
+import type {
+  QueryRepository,
+  QueryChunkDetail,
+} from '../../../query/domain/query-repository.interface.js';
 
 // ── Fixtures ──
 
@@ -61,38 +64,13 @@ class FakeReviewRepository implements ReviewRepository {
 }
 
 class FakeQueryRepository implements QueryRepository {
-  private chunks: Array<{
-    chunkId: string;
-    content: string;
-    documentTitle: string;
-    importanceScore: number | null;
-    tags: string[];
-    createdAt: Date;
-  }> = [];
+  private chunks: QueryChunkDetail[] = [];
 
-  seed(
-    chunks: Array<{
-      chunkId: string;
-      content: string;
-      documentTitle: string;
-      importanceScore: number | null;
-      tags: string[];
-      createdAt: Date;
-    }>,
-  ): void {
+  seed(chunks: QueryChunkDetail[]): void {
     this.chunks = chunks;
   }
 
-  findChunksByIds(chunkIds: string[]): Promise<
-    Array<{
-      chunkId: string;
-      content: string;
-      documentTitle: string;
-      importanceScore: number | null;
-      tags: string[];
-      createdAt: Date;
-    }>
-  > {
+  findChunksByIds(chunkIds: string[]): Promise<QueryChunkDetail[]> {
     return Promise.resolve(
       this.chunks.filter((c) => chunkIds.includes(c.chunkId)),
     );
@@ -145,6 +123,8 @@ describe('GenerateDailyReviewUseCase', () => {
         importanceScore: 3,
         tags: ['ts'],
         createdAt: new Date('2025-01-01T00:00:00Z'),
+        hasNote: false,
+        reviewCount: 0,
       },
       {
         chunkId: 'chunk-2',
@@ -153,6 +133,8 @@ describe('GenerateDailyReviewUseCase', () => {
         importanceScore: 4,
         tags: ['nest'],
         createdAt: new Date('2025-01-01T00:00:00Z'),
+        hasNote: false,
+        reviewCount: 0,
       },
     ]);
 

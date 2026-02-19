@@ -1,17 +1,23 @@
+import { z } from "zod";
 import { createLogger } from "@repo/logger";
-import type {
-  EmbeddingProvider,
-  EmbeddingResult,
+import {
+  type EmbeddingProvider,
+  type EmbeddingResult,
 } from "./embedding-provider.interface.js";
 
-export interface OllamaEmbeddingOptions {
+export type OllamaEmbeddingOptions = {
   baseUrl: string;
   model: string;
   dimensions?: number;
-}
+};
+
+const EmbeddingResponseSchema = z.object({
+  embedding: z.array(z.number()),
+});
+
+const logger = createLogger("OllamaEmbeddingProvider");
 
 export class OllamaEmbeddingProvider implements EmbeddingProvider {
-  private readonly logger = createLogger("OllamaEmbeddingProvider");
   private readonly baseUrl: string;
   private readonly model: string;
   private readonly dims: number;
@@ -20,7 +26,7 @@ export class OllamaEmbeddingProvider implements EmbeddingProvider {
     this.baseUrl = options.baseUrl;
     this.model = options.model;
     this.dims = options.dimensions ?? 768;
-    this.logger.info(`Initialized with model: ${this.model}`);
+    logger.info(`Initialized with model: ${this.model}`);
   }
 
   getDimensions(): number {
@@ -30,6 +36,7 @@ export class OllamaEmbeddingProvider implements EmbeddingProvider {
   async embed(text: string): Promise<EmbeddingResult> {
     const response = await fetch(`${this.baseUrl}/api/embeddings`, {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: this.model,
         prompt: text,
@@ -40,7 +47,9 @@ export class OllamaEmbeddingProvider implements EmbeddingProvider {
       throw new Error(`Ollama embedding failed: ${response.statusText}`);
     }
 
-    const data = (await response.json()) as { embedding: number[] };
+    const rawData: unknown = await response.json();
+    const data = EmbeddingResponseSchema.parse(rawData);
+
     return {
       embedding: data.embedding,
       dimensions: this.dims,

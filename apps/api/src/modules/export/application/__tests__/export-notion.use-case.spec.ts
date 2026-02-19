@@ -1,41 +1,19 @@
 import { ExportNotionUseCase } from '../export-notion.use-case.js';
-import type { QueryRepository } from '../../../query/domain/query-repository.interface.js';
+import type {
+  QueryRepository,
+  QueryChunkDetail,
+} from '../../../query/domain/query-repository.interface.js';
 
 // ── Fakes ──
 
 class FakeQueryRepository implements QueryRepository {
-  private chunks: Array<{
-    chunkId: string;
-    content: string;
-    documentTitle: string;
-    importanceScore: number | null;
-    tags: string[];
-    createdAt: Date;
-  }> = [];
+  private chunks: QueryChunkDetail[] = [];
 
-  seed(
-    chunks: Array<{
-      chunkId: string;
-      content: string;
-      documentTitle: string;
-      importanceScore: number | null;
-      tags: string[];
-      createdAt: Date;
-    }>,
-  ): void {
+  seed(chunks: QueryChunkDetail[]): void {
     this.chunks = chunks;
   }
 
-  findChunksByIds(chunkIds: string[]): Promise<
-    Array<{
-      chunkId: string;
-      content: string;
-      documentTitle: string;
-      importanceScore: number | null;
-      tags: string[];
-      createdAt: Date;
-    }>
-  > {
+  findChunksByIds(chunkIds: string[]): Promise<QueryChunkDetail[]> {
     return Promise.resolve(
       this.chunks.filter((c) => chunkIds.includes(c.chunkId)),
     );
@@ -70,6 +48,8 @@ describe('ExportNotionUseCase', () => {
         importanceScore: 4,
         tags: ['nestjs'],
         createdAt: new Date('2025-01-01T00:00:00Z'),
+        hasNote: false,
+        reviewCount: 0,
       },
     ]);
 

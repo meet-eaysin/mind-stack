@@ -1,14 +1,14 @@
 import pino from "pino";
 
-export interface Logger {
-  info(msg: string, data?: Record<string, unknown>): void;
-  error(msg: string, data?: Record<string, unknown>): void;
-  warn(msg: string, data?: Record<string, unknown>): void;
-  debug(msg: string, data?: Record<string, unknown>): void;
+export type Logger = {
+  info(message: string, context?: Record<string, unknown>): void;
+  error(message: string, context?: Record<string, unknown>): void;
+  warn(message: string, context?: Record<string, unknown>): void;
+  debug(message: string, context?: Record<string, unknown>): void;
   trace(msg: string, data?: Record<string, unknown>): void;
   fatal(msg: string, data?: Record<string, unknown>): void;
   child(bindings: Record<string, unknown>): Logger;
-}
+};
 
 function wrapPino(base: pino.Logger): Logger {
   return {

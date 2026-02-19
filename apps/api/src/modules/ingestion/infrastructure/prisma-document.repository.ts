@@ -2,11 +2,31 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import type { DocumentRepository } from '../domain/document-repository.interface.js';
 import type { DocumentEntity } from '../domain/document.entity.js';
-import type { IngestionStatus } from '@repo/shared-types';
+import { type IngestionStatus, type SourceType } from '@repo/shared-types';
 
 @Injectable()
 export class PrismaDocumentRepository implements DocumentRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  private mapToDomain(row: {
+    id: string;
+    title: string;
+    sourceType: string;
+    sourceUrl: string | null;
+    rawContent: string;
+    status: string;
+    createdAt: Date;
+  }): DocumentEntity {
+    return {
+      id: row.id,
+      title: row.title,
+      sourceType: row.sourceType as SourceType,
+      sourceUrl: row.sourceUrl,
+      rawContent: row.rawContent,
+      status: row.status as IngestionStatus,
+      createdAt: row.createdAt,
+    };
+  }
 
   async save(document: DocumentEntity): Promise<DocumentEntity> {
     const row = await this.prisma.document.create({
@@ -20,30 +40,14 @@ export class PrismaDocumentRepository implements DocumentRepository {
       },
     });
 
-    return {
-      id: row.id,
-      title: row.title,
-      sourceType: row.sourceType as DocumentEntity['sourceType'],
-      sourceUrl: row.sourceUrl,
-      rawContent: row.rawContent,
-      status: row.status as DocumentEntity['status'],
-      createdAt: row.createdAt,
-    };
+    return this.mapToDomain(row);
   }
 
   async findById(id: string): Promise<DocumentEntity | null> {
     const row = await this.prisma.document.findUnique({ where: { id } });
     if (!row) return null;
 
-    return {
-      id: row.id,
-      title: row.title,
-      sourceType: row.sourceType as DocumentEntity['sourceType'],
-      sourceUrl: row.sourceUrl,
-      rawContent: row.rawContent,
-      status: row.status as DocumentEntity['status'],
-      createdAt: row.createdAt,
-    };
+    return this.mapToDomain(row);
   }
 
   async findAll(): Promise<DocumentEntity[]> {
@@ -51,15 +55,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
       orderBy: { createdAt: 'desc' },
     });
 
-    return rows.map((row) => ({
-      id: row.id,
-      title: row.title,
-      sourceType: row.sourceType as DocumentEntity['sourceType'],
-      sourceUrl: row.sourceUrl,
-      rawContent: row.rawContent,
-      status: row.status as DocumentEntity['status'],
-      createdAt: row.createdAt,
-    }));
+    return rows.map((row) => this.mapToDomain(row));
   }
 
   async findBySourceUrl(url: string): Promise<DocumentEntity | null> {
@@ -68,15 +64,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
     });
     if (!row) return null;
 
-    return {
-      id: row.id,
-      title: row.title,
-      sourceType: row.sourceType as DocumentEntity['sourceType'],
-      sourceUrl: row.sourceUrl,
-      rawContent: row.rawContent,
-      status: row.status as DocumentEntity['status'],
-      createdAt: row.createdAt,
-    };
+    return this.mapToDomain(row);
   }
 
   async updateStatus(id: string, status: IngestionStatus): Promise<void> {

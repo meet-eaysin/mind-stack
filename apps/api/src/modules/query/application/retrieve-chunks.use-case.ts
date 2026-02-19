@@ -17,7 +17,7 @@ export class RetrieveChunksUseCase {
     const topK = input.topK ?? 10;
     const { embedding } = await this.embeddingProvider.embed(input.query);
 
-    const vectorResults = await this.vectorStore.query(embedding, { topK });
+    const vectorResults = await this.vectorStore.search(embedding, { topK });
     if (vectorResults.length === 0) return [];
 
     const chunkIds = vectorResults.map((r) => r.id);

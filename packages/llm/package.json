@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@repo/config": "*",
-    "@repo/logger": "*"
+    "@repo/logger": "*",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@repo/typescript-config": "*",

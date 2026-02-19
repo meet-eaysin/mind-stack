@@ -12,6 +12,20 @@ import type { RelationType } from '@repo/shared-types';
 export class PrismaConceptRepository implements ConceptRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  private mapRelation(r: {
+    id: string;
+    fromConceptId: string;
+    toConceptId: string;
+    relationType: string;
+  }): ConceptRelationEntity {
+    return {
+      id: r.id,
+      fromConceptId: r.fromConceptId,
+      toConceptId: r.toConceptId,
+      relationType: r.relationType as RelationType,
+    };
+  }
+
   async findOrCreate(label: string): Promise<ConceptEntity> {
     const existing = await this.prisma.concept.findUnique({
       where: { label },
@@ -40,12 +54,7 @@ export class PrismaConceptRepository implements ConceptRepository {
     });
 
     if (existing) {
-      return {
-        id: existing.id,
-        fromConceptId: existing.fromConceptId,
-        toConceptId: existing.toConceptId,
-        relationType: existing.relationType as RelationType,
-      };
+      return this.mapRelation(existing);
     }
 
     const created = await this.prisma.conceptRelation.create({
@@ -57,12 +66,7 @@ export class PrismaConceptRepository implements ConceptRepository {
       },
     });
 
-    return {
-      id: created.id,
-      fromConceptId: created.fromConceptId,
-      toConceptId: created.toConceptId,
-      relationType: created.relationType as RelationType,
-    };
+    return this.mapRelation(created);
   }
 
   async findAll(): Promise<ConceptEntity[]> {
@@ -72,12 +76,7 @@ export class PrismaConceptRepository implements ConceptRepository {
 
   async findAllRelations(): Promise<ConceptRelationEntity[]> {
     const rows = await this.prisma.conceptRelation.findMany();
-    return rows.map((r) => ({
-      id: r.id,
-      fromConceptId: r.fromConceptId,
-      toConceptId: r.toConceptId,
-      relationType: r.relationType as RelationType,
-    }));
+    return rows.map((r) => this.mapRelation(r));
   }
 
   async findNeighborhood(
@@ -105,12 +104,7 @@ export class PrismaConceptRepository implements ConceptRepository {
 
       const nextIds: string[] = [];
       for (const r of relations) {
-        const mapped: ConceptRelationEntity = {
-          id: r.id,
-          fromConceptId: r.fromConceptId,
-          toConceptId: r.toConceptId,
-          relationType: r.relationType as RelationType,
-        };
+        const mapped = this.mapRelation(r);
         allRelations.push(mapped);
 
         if (!visitedIds.has(r.fromConceptId)) {

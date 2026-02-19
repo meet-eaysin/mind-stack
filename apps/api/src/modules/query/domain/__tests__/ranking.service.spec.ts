@@ -11,6 +11,8 @@ function createRankInput(
     importanceScore: number | null;
     tags: string[];
     createdAt: Date;
+    hasNote: boolean;
+    reviewCount: number;
     queryTags: string[];
   }> = {},
 ): {
@@ -21,6 +23,8 @@ function createRankInput(
   importanceScore: number | null;
   tags: string[];
   createdAt: Date;
+  hasNote: boolean;
+  reviewCount: number;
   queryTags?: string[];
 } {
   return {
@@ -31,6 +35,8 @@ function createRankInput(
     importanceScore: 3,
     tags: [],
     createdAt: new Date(),
+    hasNote: false,
+    reviewCount: 0,
     ...overrides,
   };
 }

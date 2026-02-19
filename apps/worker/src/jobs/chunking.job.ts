@@ -10,7 +10,7 @@ const CHUNK_SIZE = 500;
 const CHUNK_OVERLAP = 50;
 
 export async function handleChunkingJob(
-  job: Job<{ documentId: string }, any, string>,
+  job: Job<{ documentId: string }, void, string>,
   prisma: PrismaClient,
   ingestionQueue: Queue,
 ): Promise<void> {
@@ -66,11 +66,11 @@ export async function handleChunkingJob(
   }
 }
 
-interface ChunkData {
+type ChunkData = {
   content: string;
   startOffset: number;
   endOffset: number;
-}
+};
 
 function splitIntoChunks(
   text: string,

@@ -47,7 +47,7 @@ export class FilteredSearchUseCase {
       }
     }
 
-    const vectorResults = await this.vectorStore.query(embedding, {
+    const vectorResults = await this.vectorStore.search(embedding, {
       topK: topK * 3,
     });
 

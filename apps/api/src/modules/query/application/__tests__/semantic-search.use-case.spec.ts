@@ -6,7 +6,10 @@ import type {
   VectorSearchResult,
   VectorSearchOptions,
 } from '@repo/vector-store';
-import type { QueryRepository } from '../../domain/query-repository.interface.js';
+import type {
+  QueryRepository,
+  QueryChunkDetail,
+} from '../../domain/query-repository.interface.js';
 
 // ── Fakes ──
 
@@ -45,7 +48,7 @@ class FakeVectorStore implements VectorStore {
     return Promise.resolve();
   }
 
-  query(
+  search(
     _embedding: number[],
     _options: VectorSearchOptions,
   ): Promise<VectorSearchResult[]> {
@@ -62,44 +65,13 @@ class FakeVectorStore implements VectorStore {
 }
 
 class FakeQueryRepository implements QueryRepository {
-  private chunks: Array<{
-    chunkId: string;
-    content: string;
-    documentTitle: string;
-    importanceScore: number | null;
-    tags: string[];
-    createdAt: Date;
-    hasNote: boolean;
-    reviewCount: number;
-  }> = [];
+  private chunks: QueryChunkDetail[] = [];
 
-  seed(
-    chunks: Array<{
-      chunkId: string;
-      content: string;
-      documentTitle: string;
-      importanceScore: number | null;
-      tags: string[];
-      createdAt: Date;
-      hasNote: boolean;
-      reviewCount: number;
-    }>,
-  ): void {
+  seed(chunks: QueryChunkDetail[]): void {
     this.chunks = chunks;
   }
 
-  findChunksByIds(chunkIds: string[]): Promise<
-    Array<{
-      chunkId: string;
-      content: string;
-      documentTitle: string;
-      importanceScore: number | null;
-      tags: string[];
-      createdAt: Date;
-      hasNote: boolean;
-      reviewCount: number;
-    }>
-  > {
+  findChunksByIds(chunkIds: string[]): Promise<QueryChunkDetail[]> {
     return Promise.resolve(
       this.chunks.filter((c) => chunkIds.includes(c.chunkId)),
     );
@@ -180,12 +152,12 @@ describe('SemanticSearchUseCase', () => {
   });
 
   it('should default topK to 10 when not provided', async () => {
-    const querySpy = jest.spyOn(vectorStore, 'query');
+    const searchSpy = jest.spyOn(vectorStore, 'search');
     vectorStore.setResults([]);
 
     await useCase.execute({ query: 'test' });
 
-    expect(querySpy).toHaveBeenCalledWith(
+    expect(searchSpy).toHaveBeenCalledWith(
       expect.any(Array),
       expect.objectContaining({ topK: 10 }),
     );

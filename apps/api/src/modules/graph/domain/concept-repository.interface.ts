@@ -1,18 +1,18 @@
 import type { RelationType } from '@repo/shared-types';
 
-export interface ConceptEntity {
+export type ConceptEntity = {
   id: string;
   label: string;
-}
+};
 
-export interface ConceptRelationEntity {
+export type ConceptRelationEntity = {
   id: string;
   fromConceptId: string;
   toConceptId: string;
   relationType: RelationType;
-}
+};
 
-export interface ConceptRepository {
+export type ConceptRepository = {
   findOrCreate(label: string): Promise<ConceptEntity>;
   createRelation(
     fromId: string,
@@ -29,4 +29,4 @@ export interface ConceptRepository {
     relations: ConceptRelationEntity[];
   }>;
   countChunksForConcept(conceptId: string): Promise<number>;
-}
+};

@@ -1,5 +1,4 @@
-import { Worker, Queue } from "bullmq";
-import IORedis from "ioredis";
+import { Worker, Queue, ConnectionOptions } from "bullmq";
 import { loadConfig } from "@repo/config";
 import { createLogger } from "@repo/logger";
 import { OllamaEmbeddingProvider } from "@repo/embeddings";
@@ -19,12 +18,22 @@ async function main(): Promise<void> {
   const prisma = new PrismaClient();
   await prisma.$connect();
 
-  const connection = new IORedis(config.REDIS_URL, {
+  const redisUrl = new URL(config.REDIS_URL);
+  const connection: ConnectionOptions = {
+    host: redisUrl.hostname,
+    port: Number(redisUrl.port),
     maxRetriesPerRequest: null,
-  });
+  };
+
+  if (redisUrl.password) {
+    connection.password = redisUrl.password;
+  }
+  if (redisUrl.username) {
+    connection.username = redisUrl.username;
+  }
 
   const ingestionQueue = new Queue("ingestion", {
-    connection: connection as any,
+    connection,
   });
 
   const embeddingProvider = new OllamaEmbeddingProvider({
@@ -42,22 +51,22 @@ async function main(): Promise<void> {
     config.CHROMA_COLLECTION,
   );
 
-  const worker = new Worker(
+  const worker = new Worker<{ documentId: string }, void, string>(
     "ingestion",
     async (job) => {
       logger.info(`Processing job ${job.name}`, {
         jobId: job.id,
-        data: job.data as Record<string, unknown>,
+        data: job.data,
       });
 
       switch (job.name) {
         case JOB_TYPE.CHUNKING:
-          await handleChunkingJob(job as any, prisma, ingestionQueue);
+          await handleChunkingJob(job, prisma, ingestionQueue);
           break;
 
         case JOB_TYPE.EMBEDDING:
           await handleEmbeddingJob(
-            job as any,
+            job,
             prisma,
             embeddingProvider,
             vectorStore,
@@ -66,7 +75,7 @@ async function main(): Promise<void> {
           break;
 
         case JOB_TYPE.CONCEPT_EXTRACTION:
-          await handleConceptExtractionJob(job as any, prisma, llmProvider);
+          await handleConceptExtractionJob(job, prisma, llmProvider);
           break;
 
         case JOB_TYPE.DAILY_REVIEW:
@@ -77,7 +86,7 @@ async function main(): Promise<void> {
           logger.warn(`Unknown job type: ${job.name}`);
       }
     },
-    { connection: connection as any, concurrency: 2 },
+    { connection, concurrency: 2 },
   );
 
   worker.on("completed", (job) => {
@@ -96,8 +105,8 @@ async function main(): Promise<void> {
   const shutdown = async (): Promise<void> => {
     logger.info("Shutting down worker...");
     await worker.close();
+    await ingestionQueue.close();
     await prisma.$disconnect();
-    connection.disconnect();
     process.exit(0);
   };
 

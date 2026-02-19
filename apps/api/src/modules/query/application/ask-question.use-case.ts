@@ -1,5 +1,8 @@
 import type { LLMProvider } from '@repo/llm';
-import type { AskQuestionResponse } from '@repo/shared-types';
+import {
+  type AskQuestionResponse,
+  type StreamingAskResponseChunk,
+} from '@repo/shared-types';
 import { SemanticSearchUseCase } from './semantic-search.use-case.js';
 
 export class AskQuestionUseCase {
@@ -61,13 +64,7 @@ export class AskQuestionUseCase {
     question: string;
     tags?: string[];
     topK?: number;
-  }): AsyncGenerator<
-    | { type: 'citations'; data: any[] }
-    | { type: 'text'; data: string }
-    | { type: 'done' },
-    void,
-    undefined
-  > {
+  }): AsyncGenerator<StreamingAskResponseChunk, void, undefined> {
     const citations = await this.semanticSearch.execute({
       query: input.question,
       topK: input.topK ?? 5,

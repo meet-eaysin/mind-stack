@@ -6,9 +6,9 @@ import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.
 
 export const INGESTION_QUEUE = 'ingestion';
 
-interface ChunkingJobData {
+type ChunkingJobData = {
   documentId: string;
-}
+};
 
 @Injectable()
 export class IngestionJobProducer implements IngestionJobProducerPort {

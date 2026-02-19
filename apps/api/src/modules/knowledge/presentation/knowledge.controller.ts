@@ -51,8 +51,7 @@ export class KnowledgeController {
       documents: result.documents.map((d) => ({
         id: d.id,
         title: d.title,
-        sourceType:
-          d.sourceType as DocumentListResponse['documents'][number]['sourceType'],
+        sourceType: d.sourceType,
         sourceUrl: d.sourceUrl,
         chunkCount: d.chunkCount,
         createdAt: d.createdAt.toISOString(),

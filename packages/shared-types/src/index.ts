@@ -32,6 +32,7 @@ export type {
   ChunkReference,
   SearchResponse,
   AskQuestionResponse,
+  StreamingAskResponseChunk,
   ReviewItem,
   DailyReviewResponse,
   SubmitReviewFeedbackRequest,

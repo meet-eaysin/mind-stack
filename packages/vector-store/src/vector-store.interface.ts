@@ -1,29 +1,28 @@
-export interface VectorDocument {
+export type VectorDocument = {
   id: string;
   embedding: number[];
-  metadata: Record<string, string | number | boolean>;
   content: string;
-}
+  metadata?: Record<string, string | number | boolean>;
+};
 
-export interface VectorSearchResult {
+export type VectorSearchResult = {
   id: string;
-  score: number;
-  metadata: Record<string, string | number | boolean>;
   content: string;
-}
+  metadata: Record<string, string | number | boolean>;
+  score: number;
+};
 
-export interface VectorSearchOptions {
-  topK: number;
+export type VectorSearchOptions = {
+  topK?: number;
   filter?: Record<string, string | number | boolean>;
-  minScore?: number;
-}
+};
 
-export interface VectorStore {
+export type VectorStore = {
   upsert(documents: VectorDocument[]): Promise<void>;
-  query(
-    embedding: number[],
-    options: VectorSearchOptions,
+  search(
+    query: number[],
+    options?: VectorSearchOptions,
   ): Promise<VectorSearchResult[]>;
   delete(ids: string[]): Promise<void>;
   count(): Promise<number>;
-}
+};

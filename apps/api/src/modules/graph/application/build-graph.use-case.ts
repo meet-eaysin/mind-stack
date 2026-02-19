@@ -1,14 +1,33 @@
+import { z } from 'zod';
 import type { ConceptRepository } from '../domain/concept-repository.interface.js';
 import type { LLMProvider } from '@repo/llm';
-import type { RelationType } from '@repo/shared-types';
+import { type RelationType, RELATION_TYPE } from '@repo/shared-types';
 
-interface ExtractedConcept {
+type ExtractedConcept = {
   label: string;
   relations: Array<{
     target: string;
     type: RelationType;
   }>;
-}
+};
+
+const ExtractedConceptSchema = z.object({
+  label: z.string(),
+  relations: z.array(
+    z.object({
+      target: z.string(),
+      type: z.enum([
+        RELATION_TYPE.RELATES_TO,
+        RELATION_TYPE.IS_PART_OF,
+        RELATION_TYPE.DEPENDS_ON,
+        RELATION_TYPE.SIMILAR_TO,
+        RELATION_TYPE.LEADS_TO,
+      ] as const),
+    }),
+  ),
+});
+
+const ExtractedConceptsSchema = z.array(ExtractedConceptSchema);
 
 export class BuildGraphUseCase {
   constructor(
@@ -54,9 +73,14 @@ export class BuildGraphUseCase {
     });
 
     try {
-      const parsed = JSON.parse(response.text) as ExtractedConcept[];
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
+      const rawBody = response.text.trim();
+      // Basic check for JSON array
+      if (!rawBody.startsWith('[')) return [];
+
+      const parsed: unknown = JSON.parse(rawBody);
+      return ExtractedConceptsSchema.parse(parsed);
+    } catch (_error) {
+      // In case of LLM hallucination or invalid JSON, return empty
       return [];
     }
   }

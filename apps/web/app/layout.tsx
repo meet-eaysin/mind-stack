@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Mind Stack - Second Brain",
@@ -22,24 +23,27 @@ export default function RootLayout({
             color: "#fff",
           }}
         >
-          <a
+          <Link
             href="/"
             style={{ color: "#fff", textDecoration: "none", fontWeight: 700 }}
           >
             🧠 Mind Stack
-          </a>
-          <a
+          </Link>
+          <Link
             href="/documents"
             style={{ color: "#ccc", textDecoration: "none" }}
           >
             Documents
-          </a>
-          <a href="/review" style={{ color: "#ccc", textDecoration: "none" }}>
+          </Link>
+          <Link
+            href="/review"
+            style={{ color: "#ccc", textDecoration: "none" }}
+          >
             Daily Review
-          </a>
-          <a href="/graph" style={{ color: "#ccc", textDecoration: "none" }}>
+          </Link>
+          <Link href="/graph" style={{ color: "#ccc", textDecoration: "none" }}>
             Graph
-          </a>
+          </Link>
         </nav>
         <main style={{ padding: "2rem" }}>{children}</main>
       </body>

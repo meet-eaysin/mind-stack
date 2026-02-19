@@ -2,51 +2,51 @@ import type { SourceType, IngestionStatus, RelationType } from "./enums";
 
 // ── Ingestion DTOs ──
 
-export interface IngestUrlRequest {
+export type IngestUrlRequest = {
   url: string;
   title?: string | undefined;
-}
+};
 
-export interface IngestTextRequest {
+export type IngestTextRequest = {
   title: string;
   content: string;
-}
+};
 
-export interface IngestPdfRequest {
+export type IngestPdfRequest = {
   title: string;
   fileBase64: string;
-}
+};
 
-export interface IngestYoutubeRequest {
+export type IngestYoutubeRequest = {
   url: string;
   title?: string | undefined;
-}
+};
 
-export interface IngestionResponse {
+export type IngestionResponse = {
   documentId: string;
   status: IngestionStatus;
   message: string;
-}
+};
 
 // ── Knowledge DTOs ──
 
-export interface DocumentListItem {
+export type DocumentListItem = {
   id: string;
   title: string;
   sourceType: SourceType;
   sourceUrl: string | null;
   chunkCount: number;
   createdAt: string;
-}
+};
 
-export interface DocumentListResponse {
+export type DocumentListResponse = {
   documents: DocumentListItem[];
   total: number;
   page: number;
   pageSize: number;
-}
+};
 
-export interface ChunkResponse {
+export type ChunkResponse = {
   id: string;
   content: string;
   startOffset: number;
@@ -55,9 +55,9 @@ export interface ChunkResponse {
   note: string | null;
   importanceScore: number | null;
   createdAt: string;
-}
+};
 
-export interface DocumentDetailResponse {
+export type DocumentDetailResponse = {
   id: string;
   title: string;
   sourceType: SourceType;
@@ -65,70 +65,70 @@ export interface DocumentDetailResponse {
   rawContent: string;
   chunks: ChunkResponse[];
   createdAt: string;
-}
+};
 
-export interface AddTagRequest {
+export type AddTagRequest = {
   chunkId: string;
   tagName: string;
-}
+};
 
-export interface RemoveTagRequest {
+export type RemoveTagRequest = {
   chunkId: string;
   tagName: string;
-}
+};
 
-export interface AddNoteRequest {
+export type AddNoteRequest = {
   chunkId: string;
   content: string;
-}
+};
 
-export interface UpdateNoteRequest {
+export type UpdateNoteRequest = {
   noteId: string;
   content: string;
-}
+};
 
-export interface UpdateImportanceRequest {
+export type UpdateImportanceRequest = {
   chunkId: string;
   score: number;
-}
+};
 
 // ── Query DTOs ──
 
-export interface SemanticSearchRequest {
+export type SemanticSearchRequest = {
   query: string;
   topK?: number | undefined;
-}
+};
 
-export interface FilteredSearchRequest {
+export type FilteredSearchRequest = {
   query: string;
   tags?: string[] | undefined;
   fromDate?: string | undefined;
   toDate?: string | undefined;
   topK?: number | undefined;
-}
+};
 
-export interface AskQuestionRequest {
+export type AskQuestionRequest = {
   question: string;
   tags?: string[] | undefined;
   topK?: number | undefined;
-}
+};
 
-export interface ChunkReference {
+export type ChunkReference = {
   chunkId: string;
   content: string;
   documentTitle: string;
   score: number;
   tags: string[];
-}
+};
 
-export interface SearchResponse {
+export type SearchResponse = {
   chunks: ChunkReference[];
-}
+};
 
-export interface AskQuestionResponse {
+export type AskQuestionResponse = {
   answer: string;
   citations: ChunkReference[];
-}
+};
 
 export type StreamingAskResponseChunk =
   | { type: "citations"; data: ChunkReference[] }
@@ -137,76 +137,76 @@ export type StreamingAskResponseChunk =
 
 // ── Review DTOs ──
 
-export interface ReviewItem {
+export type ReviewItem = {
   chunkId: string;
   content: string;
   documentTitle: string;
   summary: string;
   reason: string;
   lastReviewedAt: string | null;
-}
+};
 
-export interface DailyReviewResponse {
+export type DailyReviewResponse = {
   items: ReviewItem[];
   date: string;
-}
+};
 
-export interface SubmitReviewFeedbackRequest {
+export type SubmitReviewFeedbackRequest = {
   chunkId: string;
   score: number;
-}
+};
 
 // ── Graph DTOs ──
 
-export interface ConceptNode {
+export type ConceptNode = {
   id: string;
   label: string;
   chunkCount: number;
-}
+};
 
-export interface ConceptEdge {
+export type ConceptEdge = {
   fromId: string;
   toId: string;
   relationType: RelationType;
-}
+};
 
-export interface GraphResponse {
+export type GraphResponse = {
   nodes: ConceptNode[];
   edges: ConceptEdge[];
-}
+};
 
-export interface ConceptNeighborhoodRequest {
+export type ConceptNeighborhoodRequest = {
   conceptId: string;
   depth?: number | undefined;
-}
+};
 
 // ── Export DTOs ──
 
-export interface ExportMarkdownRequest {
+export type ExportMarkdownRequest = {
   chunkIds: string[];
-}
+};
 
-export interface ExportMarkdownResponse {
+export type ExportMarkdownResponse = {
   markdown: string;
-}
+};
 
-export interface ExportNotionRequest {
+export type ExportNotionRequest = {
   chunkIds: string[];
-}
+};
 
-export interface ExportNotionResponse {
+export type ExportNotionResponse = {
   payload: NotionBlock[];
-}
+};
 
-export interface NotionBlock {
+export type NotionBlock = {
   type: string;
   content: string;
   metadata: Record<string, string>;
-}
+};
 
 // ── Pagination ──
 
-export interface PaginationQuery {
+export type PaginationQuery = {
   page?: number | undefined;
   pageSize?: number | undefined;
-}
+};

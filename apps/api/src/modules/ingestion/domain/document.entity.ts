@@ -1,6 +1,6 @@
 import type { SourceType, IngestionStatus } from '@repo/shared-types';
 
-export interface DocumentEntity {
+export type DocumentEntity = {
   id: string;
   title: string;
   sourceType: SourceType;
@@ -8,7 +8,7 @@ export interface DocumentEntity {
   rawContent: string;
   status: IngestionStatus;
   createdAt: Date;
-}
+};
 
 export function createDocument(params: {
   id: string;

@@ -1,32 +1,42 @@
+import { z } from "zod";
 import { createLogger } from "@repo/logger";
-import type {
-  GenerationRequest,
-  GenerationResponse,
-  LLMProvider,
-  StreamChunk,
+import {
+  type GenerationRequest,
+  type GenerationResponse,
+  type LLMProvider,
+  type StreamChunk,
 } from "./llm-provider.interface.js";
 
-export interface OllamaLLMOptions {
+export type OllamaLLMOptions = {
   baseUrl: string;
   model: string;
-}
+};
+
+const GenerateResponseSchema = z.object({
+  response: z.string(),
+  done: z.boolean(),
+  done_reason: z.string().optional(),
+  eval_count: z.number().optional(),
+});
+
+const StreamResponseSchema = z.object({
+  response: z.string(),
+  done: z.boolean(),
+});
+
+const logger = createLogger("OllamaLLMProvider");
 
 export class OllamaLLMProvider implements LLMProvider {
-  private readonly logger = createLogger("OllamaLLMProvider");
-  private readonly baseUrl: string;
-  private readonly model: string;
-
-  constructor(options: OllamaLLMOptions) {
-    this.baseUrl = options.baseUrl;
-    this.model = options.model;
-    this.logger.info(`Initialized with model: ${this.model}`);
+  constructor(private readonly options: OllamaLLMOptions) {
+    logger.info(`Initialized with model: ${this.options.model}`);
   }
 
   async generate(request: GenerationRequest): Promise<GenerationResponse> {
-    const response = await fetch(`${this.baseUrl}/api/generate`, {
+    const response = await fetch(`${this.options.baseUrl}/api/generate`, {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: this.model,
+        model: this.options.model,
         prompt: request.prompt,
         system: request.systemPrompt,
         stream: false,
@@ -41,21 +51,29 @@ export class OllamaLLMProvider implements LLMProvider {
       throw new Error(`Ollama generation failed: ${response.statusText}`);
     }
 
-    const data = (await response.json()) as { response: string };
+    const rawData: unknown = await response.json();
+    const data = GenerateResponseSchema.parse(rawData);
+
     return {
       text: data.response,
-      finishReason: "stop",
-      tokenCount: 0, // Ollama doesn't always provide this in non-stream, default to 0
+      finishReason:
+        data.done_reason === "stop"
+          ? "stop"
+          : data.done_reason === "length"
+            ? "length"
+            : "stop",
+      tokenCount: data.eval_count ?? 0,
     };
   }
 
   async *generateStream(
     request: GenerationRequest,
   ): AsyncGenerator<StreamChunk, void, undefined> {
-    const response = await fetch(`${this.baseUrl}/api/generate`, {
+    const response = await fetch(`${this.options.baseUrl}/api/generate`, {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: this.model,
+        model: this.options.model,
         prompt: request.prompt,
         system: request.systemPrompt,
         stream: true,
@@ -67,7 +85,9 @@ export class OllamaLLMProvider implements LLMProvider {
     });
 
     if (!response.ok || !response.body) {
-      throw new Error(`Ollama stream failed: ${response.statusText}`);
+      throw new Error(
+        `Ollama stream generation failed: ${response.statusText}`,
+      );
     }
 
     const reader = response.body.getReader();
@@ -79,20 +99,18 @@ export class OllamaLLMProvider implements LLMProvider {
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n").filter((l) => l.trim());
+        const lines = chunk.split("\n").filter((line) => line.trim() !== "");
 
         for (const line of lines) {
           try {
-            const data = JSON.parse(line) as {
-              response: string;
-              done: boolean;
-            };
+            const rawData: unknown = JSON.parse(line);
+            const data = StreamResponseSchema.parse(rawData);
             yield {
               text: data.response,
               done: data.done,
             };
           } catch (e) {
-            this.logger.error(`Failed to parse Ollama stream chunk: ${e}`);
+            logger.error("Failed to parse Ollama stream chunk", { error: e });
           }
         }
       }

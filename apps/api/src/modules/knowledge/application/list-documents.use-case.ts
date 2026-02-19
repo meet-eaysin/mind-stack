@@ -1,15 +1,16 @@
+import { type SourceType } from '@repo/shared-types';
 import type { DocumentRepository } from '../../ingestion/domain/document-repository.interface.js';
 import type { DocumentEntity } from '../../ingestion/domain/document.entity.js';
 import type { ChunkRepository } from '../domain/chunk-repository.interface.js';
 
-interface DocumentListItem {
+type DocumentListItem = {
   id: string;
   title: string;
-  sourceType: string;
+  sourceType: SourceType;
   sourceUrl: string | null;
   chunkCount: number;
   createdAt: Date;
-}
+};
 
 export class ListDocumentsUseCase {
   constructor(

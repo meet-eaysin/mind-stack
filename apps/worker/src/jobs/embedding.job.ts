@@ -17,7 +17,7 @@ type ChunkWithDetails = Prisma.ChunkGetPayload<{
 const BATCH_SIZE = 10;
 
 export async function handleEmbeddingJob(
-  job: Job<{ documentId: string }, any, string>,
+  job: Job<{ documentId: string }, void, string>,
   prisma: PrismaClient,
   embeddingProvider: EmbeddingProvider,
   vectorStore: VectorStore,

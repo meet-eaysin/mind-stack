@@ -1,23 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
-import type { QueryRepository } from '../domain/query-repository.interface.js';
+import type {
+  QueryRepository,
+  QueryChunkDetail,
+} from '../domain/query-repository.interface.js';
 
 @Injectable()
 export class PrismaQueryRepository implements QueryRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findChunksByIds(chunkIds: string[]): Promise<
-    Array<{
-      chunkId: string;
-      content: string;
-      documentTitle: string;
-      importanceScore: number | null;
-      tags: string[];
-      createdAt: Date;
-      hasNote: boolean;
-      reviewCount: number;
-    }>
-  > {
+  async findChunksByIds(chunkIds: string[]): Promise<QueryChunkDetail[]> {
     const chunks = await this.prisma.chunk.findMany({
       where: { id: { in: chunkIds } },
       include: {

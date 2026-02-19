@@ -1,108 +1,103 @@
-import { ChromaClient } from "chromadb";
-import type { Collection } from "chromadb";
+import { ChromaClient, type Collection, type Metadata } from "chromadb";
 import { createLogger } from "@repo/logger";
-import type {
-  VectorStore,
-  VectorDocument,
-  VectorSearchResult,
-  VectorSearchOptions,
+import {
+  type VectorDocument,
+  type VectorSearchOptions,
+  type VectorSearchResult,
+  type VectorStore,
 } from "./vector-store.interface.js";
 
+const logger = createLogger("ChromaVectorStore");
+
 export class ChromaVectorStore implements VectorStore {
-  private readonly logger = createLogger("ChromaVectorStore");
   private readonly client: ChromaClient;
   private readonly collectionName: string;
-  private collection: Collection | undefined;
+  private collection: Collection | null = null;
 
-  constructor(chromaUrl: string, collectionName: string) {
-    this.client = new ChromaClient({ path: chromaUrl });
+  constructor(url: string, collectionName: string) {
+    this.client = new ChromaClient({ path: url });
     this.collectionName = collectionName;
   }
 
   private async getCollection(): Promise<Collection> {
-    if (!this.collection) {
+    if (this.collection) return this.collection;
+
+    try {
       this.collection = await this.client.getOrCreateCollection({
         name: this.collectionName,
         metadata: { "hnsw:space": "cosine" },
       });
+      return this.collection;
+    } catch (error) {
+      logger.error("Failed to get Chroma collection", { error });
+      throw error;
     }
-    return this.collection;
   }
 
   async upsert(documents: VectorDocument[]): Promise<void> {
-    if (documents.length === 0) return;
+    const col = await this.getCollection();
 
-    const collection = await this.getCollection();
-
-    const BATCH_SIZE = 100;
-    for (let i = 0; i < documents.length; i += BATCH_SIZE) {
-      const batch = documents.slice(i, i + BATCH_SIZE);
-      await collection.upsert({
-        ids: batch.map((d) => d.id),
-        embeddings: batch.map((d) => d.embedding),
-        metadatas: batch.map((d) => d.metadata),
-        documents: batch.map((d) => d.content),
-      });
-    }
-
-    this.logger.debug("Upserted documents to vector store", {
-      count: documents.length,
+    await col.upsert({
+      ids: documents.map((doc) => doc.id),
+      embeddings: documents.map((doc) => doc.embedding),
+      metadatas: documents.map((doc) => (doc.metadata ?? {}) as Metadata),
+      documents: documents.map((doc) => doc.content),
     });
   }
 
-  async query(
-    embedding: number[],
-    options: VectorSearchOptions,
+  async search(
+    query: number[],
+    options: VectorSearchOptions = { topK: 5 },
   ): Promise<VectorSearchResult[]> {
-    const collection = await this.getCollection();
+    const col = await this.getCollection();
 
-    const results = await collection.query({
-      queryEmbeddings: [embedding],
-      nResults: options.topK,
+    const results = await col.query({
+      queryEmbeddings: [query],
+      nResults: options.topK ?? 5,
       ...(options.filter ? { where: options.filter } : {}),
     });
 
-    const ids = results.ids[0] ?? [];
-    const distances = results.distances?.[0] ?? [];
-    const metadatas = results.metadatas?.[0] ?? [];
-    const documents = results.documents?.[0] ?? [];
+    if (!results.ids[0] || !results.documents[0] || !results.metadatas[0]) {
+      return [];
+    }
 
     const searchResults: VectorSearchResult[] = [];
+    const ids = results.ids[0];
+    const docs = results.documents[0];
+    const metadatas = results.metadatas[0];
+    const distances = results.distances ? results.distances[0] : null;
 
     for (let i = 0; i < ids.length; i++) {
       const id = ids[i];
-      const distance = distances[i];
+      const doc = docs[i];
       const metadata = metadatas[i];
-      const content = documents[i];
+      const distance = distances ? distances[i] : 0;
 
-      if (id === undefined || distance === undefined) continue;
-
-      const score = 1 - distance;
-
-      if (options.minScore !== undefined && score < options.minScore) continue;
-
-      searchResults.push({
-        id,
-        score,
-        metadata: (metadata ?? {}) as Record<string, string | number | boolean>,
-        content: content ?? "",
-      });
+      if (
+        id !== undefined &&
+        doc !== null &&
+        doc !== undefined &&
+        metadata !== null
+      ) {
+        searchResults.push({
+          id,
+          content: doc,
+          metadata: metadata as Record<string, string | number | boolean>,
+          score: distance !== undefined ? 1 - distance : 0,
+        });
+      }
     }
 
     return searchResults;
   }
 
   async delete(ids: string[]): Promise<void> {
-    if (ids.length === 0) return;
-    const collection = await this.getCollection();
-    await collection.delete({ ids });
-    this.logger.debug("Deleted documents from vector store", {
-      count: ids.length,
-    });
+    const col = await this.getCollection();
+    await col.delete({ ids });
   }
 
   async count(): Promise<number> {
-    const collection = await this.getCollection();
-    return collection.count();
+    const col = await this.getCollection();
+    return col.count();
   }
 }

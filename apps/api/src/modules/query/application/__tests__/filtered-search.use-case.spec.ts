@@ -6,7 +6,10 @@ import type {
   VectorSearchResult,
   VectorSearchOptions,
 } from '@repo/vector-store';
-import type { QueryRepository } from '../../domain/query-repository.interface.js';
+import type {
+  QueryRepository,
+  QueryChunkDetail,
+} from '../../domain/query-repository.interface.js';
 
 // ── Fakes ──
 
@@ -45,7 +48,7 @@ class FakeVectorStore implements VectorStore {
     return Promise.resolve();
   }
 
-  query(
+  search(
     _embedding: number[],
     _options: VectorSearchOptions,
   ): Promise<VectorSearchResult[]> {
@@ -62,32 +65,12 @@ class FakeVectorStore implements VectorStore {
 }
 
 class FakeQueryRepository implements QueryRepository {
-  private chunks: Array<{
-    chunkId: string;
-    content: string;
-    documentTitle: string;
-    importanceScore: number | null;
-    tags: string[];
-    createdAt: Date;
-    hasNote: boolean;
-    reviewCount: number;
-  }> = [];
+  private chunks: QueryChunkDetail[] = [];
 
   private tagChunkIds: Map<string, string[]> = new Map();
   private dateRangeChunkIds: string[] = [];
 
-  seedChunks(
-    chunks: Array<{
-      chunkId: string;
-      content: string;
-      documentTitle: string;
-      importanceScore: number | null;
-      tags: string[];
-      createdAt: Date;
-      hasNote: boolean;
-      reviewCount: number;
-    }>,
-  ): void {
+  seedChunks(chunks: QueryChunkDetail[]): void {
     this.chunks = chunks;
   }
 
@@ -99,18 +82,7 @@ class FakeQueryRepository implements QueryRepository {
     this.dateRangeChunkIds = chunkIds;
   }
 
-  findChunksByIds(chunkIds: string[]): Promise<
-    Array<{
-      chunkId: string;
-      content: string;
-      documentTitle: string;
-      importanceScore: number | null;
-      tags: string[];
-      createdAt: Date;
-      hasNote: boolean;
-      reviewCount: number;
-    }>
-  > {
+  findChunksByIds(chunkIds: string[]): Promise<QueryChunkDetail[]> {
     return Promise.resolve(
       this.chunks.filter((c) => chunkIds.includes(c.chunkId)),
     );
