@@ -8,23 +8,26 @@ import type { IngestionStatus } from '@repo/shared-types';
 
 class FakeDocumentRepository implements DocumentRepository {
   readonly saved: DocumentEntity[] = [];
-  readonly documents: DocumentEntity[] = []; // Renamed from 'saved' to 'documents'
 
   save(document: DocumentEntity): Promise<DocumentEntity> {
-    this.documents.push(document); // Updated to use 'documents'
+    this.saved.push(document);
     return Promise.resolve(document);
   }
 
   findById(id: string): Promise<DocumentEntity | null> {
-    return Promise.resolve(this.documents.find((d) => d.id === id) ?? null);
+    return Promise.resolve(this.saved.find((d) => d.id === id) ?? null);
   }
 
   findAll(): Promise<DocumentEntity[]> {
-    return Promise.resolve(this.documents);
+    return Promise.resolve(this.saved);
+  }
+
+  findBySourceUrl(url: string): Promise<DocumentEntity | null> {
+    return Promise.resolve(this.saved.find((d) => d.sourceUrl === url) ?? null);
   }
 
   updateStatus(_id: string, _status: IngestionStatus): Promise<void> {
-    const doc = this.documents.find((d) => d.id === _id); // Updated to use 'documents'
+    const doc = this.saved.find((d) => d.id === _id);
     if (doc) {
       doc.status = _status;
     }

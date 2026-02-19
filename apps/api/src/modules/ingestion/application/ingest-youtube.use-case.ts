@@ -13,6 +13,11 @@ export class IngestYoutubeUseCase {
     url: string;
     title?: string;
   }): Promise<{ documentId: string }> {
+    const existing = await this.documentRepository.findBySourceUrl(input.url);
+    if (existing) {
+      return { documentId: existing.id };
+    }
+
     const videoId = this.extractVideoId(input.url);
     const transcript = await this.fetchTranscript(videoId);
 

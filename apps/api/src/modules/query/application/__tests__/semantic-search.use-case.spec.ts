@@ -69,6 +69,8 @@ class FakeQueryRepository implements QueryRepository {
     importanceScore: number | null;
     tags: string[];
     createdAt: Date;
+    hasNote: boolean;
+    reviewCount: number;
   }> = [];
 
   seed(
@@ -79,6 +81,8 @@ class FakeQueryRepository implements QueryRepository {
       importanceScore: number | null;
       tags: string[];
       createdAt: Date;
+      hasNote: boolean;
+      reviewCount: number;
     }>,
   ): void {
     this.chunks = chunks;
@@ -92,6 +96,8 @@ class FakeQueryRepository implements QueryRepository {
       importanceScore: number | null;
       tags: string[];
       createdAt: Date;
+      hasNote: boolean;
+      reviewCount: number;
     }>
   > {
     return Promise.resolve(
@@ -141,6 +147,8 @@ describe('SemanticSearchUseCase', () => {
         importanceScore: 4,
         tags: ['ts'],
         createdAt: new Date('2025-01-01T00:00:00Z'),
+        hasNote: false,
+        reviewCount: 0,
       },
       {
         chunkId: 'chunk-2',
@@ -149,6 +157,8 @@ describe('SemanticSearchUseCase', () => {
         importanceScore: 2,
         tags: [],
         createdAt: new Date('2025-01-01T00:00:00Z'),
+        hasNote: false,
+        reviewCount: 0,
       },
     ]);
 

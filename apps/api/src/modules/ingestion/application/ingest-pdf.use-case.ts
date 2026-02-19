@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { PDFParse } from 'pdf-parse';
 import type { DocumentRepository } from '../domain/document-repository.interface.js';
 import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port.js';
 import { createDocument } from '../domain/document.entity.js';
@@ -14,7 +15,9 @@ export class IngestPdfUseCase {
     fileBase64: string;
   }): Promise<{ documentId: string }> {
     const buffer = Buffer.from(input.fileBase64, 'base64');
-    const rawContent = buffer.toString('utf-8');
+    const parser = new PDFParse({ data: new Uint8Array(buffer) });
+    const result = await parser.getText();
+    const rawContent = result.text;
 
     const document = createDocument({
       id: randomUUID(),

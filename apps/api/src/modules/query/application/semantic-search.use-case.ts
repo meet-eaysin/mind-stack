@@ -34,6 +34,8 @@ export class SemanticSearchUseCase {
         importanceScore: detail?.importanceScore ?? null,
         tags: detail?.tags ?? [],
         createdAt: detail?.createdAt ?? new Date(),
+        hasNote: detail?.hasNote ?? false,
+        reviewCount: detail?.reviewCount ?? 0,
       };
     });
 

@@ -3,7 +3,8 @@ import type { SearchResultEntity } from './query-repository.interface.js';
 const IMPORTANCE_WEIGHT = 0.2;
 const TAG_MATCH_WEIGHT = 0.15;
 const RECENCY_WEIGHT = 0.1;
-const VECTOR_WEIGHT = 0.55;
+const INTERACTION_WEIGHT = 0.05;
+const VECTOR_WEIGHT = 0.5;
 const RECENCY_HALF_LIFE_DAYS = 30;
 
 export function rankResults(
@@ -15,6 +16,8 @@ export function rankResults(
     importanceScore: number | null;
     tags: string[];
     createdAt: Date;
+    hasNote: boolean;
+    reviewCount: number;
     queryTags?: string[] | undefined;
   }>,
 ): SearchResultEntity[] {
@@ -36,11 +39,15 @@ export function rankResults(
         (-Math.LN2 * ageInDays) / RECENCY_HALF_LIFE_DAYS,
       );
 
+      const interactionBoost =
+        (r.hasNote ? 0.5 : 0) + Math.min(r.reviewCount * 0.1, 0.5);
+
       const finalScore =
         VECTOR_WEIGHT * r.vectorScore +
         IMPORTANCE_WEIGHT * normalizedImportance +
         TAG_MATCH_WEIGHT * tagMatchBoost +
-        RECENCY_WEIGHT * recencyDecay;
+        RECENCY_WEIGHT * recencyDecay +
+        INTERACTION_WEIGHT * interactionBoost;
 
       return {
         chunkId: r.chunkId,

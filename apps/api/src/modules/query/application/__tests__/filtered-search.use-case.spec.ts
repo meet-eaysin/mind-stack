@@ -69,6 +69,8 @@ class FakeQueryRepository implements QueryRepository {
     importanceScore: number | null;
     tags: string[];
     createdAt: Date;
+    hasNote: boolean;
+    reviewCount: number;
   }> = [];
 
   private tagChunkIds: Map<string, string[]> = new Map();
@@ -82,6 +84,8 @@ class FakeQueryRepository implements QueryRepository {
       importanceScore: number | null;
       tags: string[];
       createdAt: Date;
+      hasNote: boolean;
+      reviewCount: number;
     }>,
   ): void {
     this.chunks = chunks;
@@ -103,6 +107,8 @@ class FakeQueryRepository implements QueryRepository {
       importanceScore: number | null;
       tags: string[];
       createdAt: Date;
+      hasNote: boolean;
+      reviewCount: number;
     }>
   > {
     return Promise.resolve(
@@ -160,6 +166,8 @@ describe('FilteredSearchUseCase', () => {
         importanceScore: 3,
         tags: ['typescript'],
         createdAt: new Date('2025-01-01T00:00:00Z'),
+        hasNote: false,
+        reviewCount: 0,
       },
       {
         chunkId: 'chunk-3',
@@ -168,6 +176,8 @@ describe('FilteredSearchUseCase', () => {
         importanceScore: 2,
         tags: ['typescript'],
         createdAt: new Date('2025-01-01T00:00:00Z'),
+        hasNote: false,
+        reviewCount: 0,
       },
     ]);
 
@@ -197,6 +207,8 @@ describe('FilteredSearchUseCase', () => {
         importanceScore: 3,
         tags: [],
         createdAt: new Date('2025-06-01T00:00:00Z'),
+        hasNote: false,
+        reviewCount: 0,
       },
     ]);
 

@@ -4,6 +4,18 @@ import type { IngestionJobProducerPort } from '../../domain/ingestion-job-produc
 import type { DocumentEntity } from '../../domain/document.entity.js';
 import type { IngestionStatus } from '@repo/shared-types';
 
+jest.mock('pdf-parse', () => {
+  return {
+    PDFParse: jest.fn().mockImplementation(() => {
+      return {
+        getText: jest.fn().mockResolvedValue({
+          text: 'Extracted PDF text content',
+        }),
+      };
+    }),
+  };
+});
+
 // ── Fakes ──
 
 class FakeDocumentRepository implements DocumentRepository {
@@ -20,6 +32,10 @@ class FakeDocumentRepository implements DocumentRepository {
 
   findAll(): Promise<DocumentEntity[]> {
     return Promise.resolve(this.saved);
+  }
+
+  findBySourceUrl(url: string): Promise<DocumentEntity | null> {
+    return Promise.resolve(this.saved.find((d) => d.sourceUrl === url) ?? null);
   }
 
   updateStatus(_id: string, _status: IngestionStatus): Promise<void> {
@@ -70,7 +86,7 @@ describe('IngestPdfUseCase', () => {
     expect(saved?.title).toBe('My PDF');
     expect(saved?.sourceType).toBe('PDF');
     expect(saved?.sourceUrl).toBeNull();
-    expect(saved?.rawContent).toBe(textContent);
+    expect(saved?.rawContent).toBe('Extracted PDF text content');
     expect(saved?.status).toBe('PENDING');
 
     expect(jobProducer.enqueuedIds).toHaveLength(1);

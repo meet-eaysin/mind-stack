@@ -69,6 +69,8 @@ class FakeQueryRepository implements QueryRepository {
     importanceScore: number | null;
     tags: string[];
     createdAt: Date;
+    hasNote: boolean;
+    reviewCount: number;
   }> = [];
 
   seed(
@@ -79,6 +81,8 @@ class FakeQueryRepository implements QueryRepository {
       importanceScore: number | null;
       tags: string[];
       createdAt: Date;
+      hasNote: boolean;
+      reviewCount: number;
     }>,
   ): void {
     this.chunks = chunks;
@@ -92,6 +96,8 @@ class FakeQueryRepository implements QueryRepository {
       importanceScore: number | null;
       tags: string[];
       createdAt: Date;
+      hasNote: boolean;
+      reviewCount: number;
     }>
   > {
     return Promise.resolve(
@@ -139,6 +145,8 @@ describe('RetrieveChunksUseCase', () => {
         importanceScore: 4,
         tags: ['test'],
         createdAt: new Date('2025-01-01T00:00:00Z'),
+        hasNote: false,
+        reviewCount: 0,
       },
     ]);
 

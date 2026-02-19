@@ -19,6 +19,8 @@ export interface QueryRepository {
       importanceScore: number | null;
       tags: string[];
       createdAt: Date;
+      hasNote: boolean;
+      reviewCount: number;
     }>
   >;
   findChunksByTags(tags: string[]): Promise<string[]>;

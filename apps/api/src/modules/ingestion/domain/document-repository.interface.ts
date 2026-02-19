@@ -5,5 +5,6 @@ export interface DocumentRepository {
   save(document: DocumentEntity): Promise<DocumentEntity>;
   findById(id: string): Promise<DocumentEntity | null>;
   findAll(): Promise<DocumentEntity[]>;
+  findBySourceUrl(url: string): Promise<DocumentEntity | null>;
   updateStatus(id: string, status: IngestionStatus): Promise<void>;
 }

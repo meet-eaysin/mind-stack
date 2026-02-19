@@ -4,6 +4,21 @@ import type { IngestionJobProducerPort } from '../../domain/ingestion-job-produc
 import type { DocumentEntity } from '../../domain/document.entity.js';
 import type { IngestionStatus } from '@repo/shared-types';
 
+jest.mock('jsdom', () => ({
+  JSDOM: jest.fn().mockImplementation(() => ({
+    window: { document: {} },
+  })),
+}));
+
+jest.mock('@mozilla/readability', () => ({
+  Readability: jest.fn().mockImplementation(() => ({
+    parse: jest.fn().mockReturnValue({
+      title: 'Mocked Title',
+      textContent: 'Mocked Content',
+    }),
+  })),
+}));
+
 // ── Fakes ──
 
 class FakeDocumentRepository implements DocumentRepository {
@@ -20,6 +35,10 @@ class FakeDocumentRepository implements DocumentRepository {
 
   findAll(): Promise<DocumentEntity[]> {
     return Promise.resolve(this.saved);
+  }
+
+  findBySourceUrl(url: string): Promise<DocumentEntity | null> {
+    return Promise.resolve(this.saved.find((d) => d.sourceUrl === url) ?? null);
   }
 
   updateStatus(_id: string, _status: IngestionStatus): Promise<void> {
@@ -58,7 +77,10 @@ describe('IngestUrlUseCase', () => {
   });
 
   it('should fetch the URL content, save the document, and enqueue a chunking job', async () => {
-    const fakeResponse = new Response('fetched content', { status: 200 });
+    const fakeResponse = new Response(
+      '<html><body><h1>Title</h1><p>Content</p></body></html>',
+      { status: 200 },
+    );
     jest.spyOn(globalThis, 'fetch').mockResolvedValueOnce(fakeResponse);
 
     const result = await useCase.execute({
@@ -71,7 +93,7 @@ describe('IngestUrlUseCase', () => {
 
     const saved = documentRepository.saved[0];
     expect(saved).toBeDefined();
-    expect(saved?.rawContent).toBe('fetched content');
+    expect(saved?.rawContent).toBe('Mocked Content');
     expect(saved?.title).toBe('My Article');
     expect(saved?.sourceType).toBe('URL');
     expect(saved?.sourceUrl).toBe('https://example.com/article');
@@ -81,14 +103,35 @@ describe('IngestUrlUseCase', () => {
     expect(jobProducer.enqueuedIds[0]).toBe(result.documentId);
   });
 
-  it('should use the hostname as the title when no title is provided', async () => {
+  it('should return existing documentId if URL is already ingested', async () => {
+    const existingDoc = {
+      id: 'existing-id',
+      title: 'Existing',
+      sourceType: 'URL' as const,
+      sourceUrl: 'https://example.com/already-here',
+      rawContent: 'content',
+      status: 'COMPLETED' as const,
+      createdAt: new Date(),
+    };
+    documentRepository.saved.push(existingDoc);
+
+    const result = await useCase.execute({
+      url: 'https://example.com/already-here',
+    });
+
+    expect(result.documentId).toBe('existing-id');
+    expect(documentRepository.saved).toHaveLength(1); // No new document saved
+    expect(jobProducer.enqueuedIds).toHaveLength(0); // No new job enqueued
+  });
+
+  it('should use the article title as the title when no title is provided', async () => {
     const fakeResponse = new Response('content', { status: 200 });
     jest.spyOn(globalThis, 'fetch').mockResolvedValueOnce(fakeResponse);
 
     await useCase.execute({ url: 'https://example.com/page' });
 
     const saved = documentRepository.saved[0];
-    expect(saved?.title).toBe('example.com');
+    expect(saved?.title).toBe('Mocked Title');
   });
 
   it('should throw when the fetch fails', async () => {

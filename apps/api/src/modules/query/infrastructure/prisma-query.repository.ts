@@ -14,6 +14,8 @@ export class PrismaQueryRepository implements QueryRepository {
       importanceScore: number | null;
       tags: string[];
       createdAt: Date;
+      hasNote: boolean;
+      reviewCount: number;
     }>
   > {
     const chunks = await this.prisma.chunk.findMany({
@@ -22,6 +24,8 @@ export class PrismaQueryRepository implements QueryRepository {
         document: { select: { title: true } },
         chunkTags: { include: { tag: true } },
         importanceScore: true,
+        notes: { select: { id: true } },
+        reviews: { select: { id: true } },
       },
     });
 
@@ -32,6 +36,8 @@ export class PrismaQueryRepository implements QueryRepository {
       importanceScore: c.importanceScore?.score ?? null,
       tags: c.chunkTags.map((ct) => ct.tag.name),
       createdAt: c.createdAt,
+      hasNote: c.notes.length > 0,
+      reviewCount: c.reviews.length,
     }));
   }
 
