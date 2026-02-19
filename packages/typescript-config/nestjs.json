@@ -10,7 +10,6 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "incremental": true,
     "noEmit": false
   }
 }
