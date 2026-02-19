@@ -15,7 +15,7 @@ export function rankResults(
     importanceScore: number | null;
     tags: string[];
     createdAt: Date;
-    queryTags?: string[];
+    queryTags?: string[] | undefined;
   }>
 ): SearchResultEntity[] {
   const now = Date.now();

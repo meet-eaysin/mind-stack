@@ -4,7 +4,7 @@ import type { SourceType, IngestionStatus, RelationType } from "./enums.js";
 
 export interface IngestUrlRequest {
   url: string;
-  title?: string;
+  title?: string | undefined;
 }
 
 export interface IngestTextRequest {
@@ -19,7 +19,7 @@ export interface IngestPdfRequest {
 
 export interface IngestYoutubeRequest {
   url: string;
-  title?: string;
+  title?: string | undefined;
 }
 
 export interface IngestionResponse {
@@ -96,21 +96,21 @@ export interface UpdateImportanceRequest {
 
 export interface SemanticSearchRequest {
   query: string;
-  topK?: number;
+  topK?: number | undefined;
 }
 
 export interface FilteredSearchRequest {
   query: string;
-  tags?: string[];
-  fromDate?: string;
-  toDate?: string;
-  topK?: number;
+  tags?: string[] | undefined;
+  fromDate?: string | undefined;
+  toDate?: string | undefined;
+  topK?: number | undefined;
 }
 
 export interface AskQuestionRequest {
   question: string;
-  tags?: string[];
-  topK?: number;
+  tags?: string[] | undefined;
+  topK?: number | undefined;
 }
 
 export interface ChunkReference {
@@ -172,7 +172,7 @@ export interface GraphResponse {
 
 export interface ConceptNeighborhoodRequest {
   conceptId: string;
-  depth?: number;
+  depth?: number | undefined;
 }
 
 // ── Export DTOs ──
@@ -202,6 +202,6 @@ export interface NotionBlock {
 // ── Pagination ──
 
 export interface PaginationQuery {
-  page?: number;
-  pageSize?: number;
+  page?: number | undefined;
+  pageSize?: number | undefined;
 }

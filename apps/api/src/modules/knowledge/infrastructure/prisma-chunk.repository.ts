@@ -16,7 +16,7 @@ export class PrismaChunkRepository implements ChunkRepository {
       where: { documentId },
       include: {
         chunkTags: { include: { tag: true } },
-        note: true,
+        notes: true,
         importanceScore: true,
       },
       orderBy: { startOffset: "asc" },
@@ -32,7 +32,7 @@ export class PrismaChunkRepository implements ChunkRepository {
         createdAt: row.createdAt,
       },
       tags: row.chunkTags.map((ct) => ct.tag.name),
-      note: row.note?.content ?? null,
+      note: row.notes[0]?.content ?? null,
       importanceScore: row.importanceScore?.score ?? null,
     }));
   }
@@ -42,7 +42,7 @@ export class PrismaChunkRepository implements ChunkRepository {
       where: { id: chunkId },
       include: {
         chunkTags: { include: { tag: true } },
-        note: true,
+        notes: true,
         importanceScore: true,
       },
     });
@@ -59,7 +59,7 @@ export class PrismaChunkRepository implements ChunkRepository {
         createdAt: row.createdAt,
       },
       tags: row.chunkTags.map((ct) => ct.tag.name),
-      note: row.note?.content ?? null,
+      note: row.notes[0]?.content ?? null,
       importanceScore: row.importanceScore?.score ?? null,
     };
   }

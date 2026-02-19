@@ -4,8 +4,10 @@ import type {
   EmbeddingResult,
 } from "./embedding-provider.interface.js";
 
-interface OllamaEmbedResponse {
-  embeddings: number[][];
+export interface OllamaEmbeddingOptions {
+  baseUrl: string;
+  model: string;
+  dimensions?: number;
 }
 
 export class OllamaEmbeddingProvider implements EmbeddingProvider {
@@ -14,10 +16,11 @@ export class OllamaEmbeddingProvider implements EmbeddingProvider {
   private readonly model: string;
   private readonly dims: number;
 
-  constructor(baseUrl: string, model: string, dimensions: number = 768) {
-    this.baseUrl = baseUrl;
-    this.model = model;
-    this.dims = dimensions;
+  constructor(options: OllamaEmbeddingOptions) {
+    this.baseUrl = options.baseUrl;
+    this.model = options.model;
+    this.dims = options.dimensions ?? 768;
+    this.logger.info(`Initialized with model: ${this.model}`);
   }
 
   getDimensions(): number {
@@ -25,36 +28,26 @@ export class OllamaEmbeddingProvider implements EmbeddingProvider {
   }
 
   async embed(text: string): Promise<EmbeddingResult> {
-    const results = await this.embedBatch([text]);
-    const first = results[0];
-    if (!first) {
-      throw new Error("Embedding returned no results");
-    }
-    return first;
-  }
-
-  async embedBatch(texts: string[]): Promise<EmbeddingResult[]> {
-    const response = await fetch(`${this.baseUrl}/api/embed`, {
+    const response = await fetch(`${this.baseUrl}/api/embeddings`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: this.model,
-        input: texts,
+        prompt: text,
       }),
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(
-        `Ollama embed failed: ${response.status} ${errorText}`
-      );
+      throw new Error(`Ollama embedding failed: ${response.statusText}`);
     }
 
-    const data = (await response.json()) as OllamaEmbedResponse;
+    const data = (await response.json()) as { embedding: number[] };
+    return {
+      embedding: data.embedding,
+      dimensions: this.dims,
+    };
+  }
 
-    return data.embeddings.map((embedding) => ({
-      embedding,
-      dimensions: embedding.length,
-    }));
+  async embedBatch(texts: string[]): Promise<EmbeddingResult[]> {
+    return Promise.all(texts.map((t) => this.embed(t)));
   }
 }

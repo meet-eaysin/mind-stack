@@ -7,10 +7,10 @@ import { OllamaLLMProvider } from "@repo/llm";
 import { ChromaVectorStore } from "@repo/vector-store";
 import { PrismaClient } from "@repo/database";
 import { JOB_TYPE } from "@repo/shared-types";
-import { handleChunkingJob } from "./jobs/chunking.job.js";
-import { handleEmbeddingJob } from "./jobs/embedding.job.js";
-import { handleConceptExtractionJob } from "./jobs/concept-extraction.job.js";
-import { handleDailyReviewJob } from "./jobs/daily-review.job.js";
+import { handleChunkingJob } from "./jobs/chunking.job";
+import { handleEmbeddingJob } from "./jobs/embedding.job";
+import { handleConceptExtractionJob } from "./jobs/concept-extraction.job";
+import { handleDailyReviewJob } from "./jobs/daily-review.job";
 
 const logger = createLogger("Worker");
 
@@ -23,15 +23,15 @@ async function main(): Promise<void> {
     maxRetriesPerRequest: null,
   });
 
-  const embeddingProvider = new OllamaEmbeddingProvider(
-    config.OLLAMA_BASE_URL,
-    config.OLLAMA_EMBED_MODEL
-  );
+  const embeddingProvider = new OllamaEmbeddingProvider({
+    baseUrl: config.OLLAMA_BASE_URL,
+    model: config.OLLAMA_EMBED_MODEL,
+  });
 
-  const llmProvider = new OllamaLLMProvider(
-    config.OLLAMA_BASE_URL,
-    config.OLLAMA_MODEL
-  );
+  const llmProvider = new OllamaLLMProvider({
+    baseUrl: config.OLLAMA_BASE_URL,
+    model: config.OLLAMA_MODEL,
+  });
 
   const vectorStore = new ChromaVectorStore(
     config.CHROMA_URL,

@@ -1,4 +1,4 @@
-import type { ChunkReference, NotionBlock } from "@repo/shared-types";
+import type { NotionBlock } from "@repo/shared-types";
 
 export function chunksToMarkdown(
   chunks: Array<{

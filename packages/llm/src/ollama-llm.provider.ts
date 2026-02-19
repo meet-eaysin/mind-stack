@@ -6,23 +6,9 @@ import type {
   StreamChunk,
 } from "./llm-provider.interface.js";
 
-interface OllamaGenerateBody {
+export interface OllamaLLMOptions {
+  baseUrl: string;
   model: string;
-  prompt: string;
-  system?: string;
-  stream: boolean;
-  options?: {
-    temperature?: number;
-    num_predict?: number;
-  };
-}
-
-interface OllamaGenerateResponse {
-  model: string;
-  response: string;
-  done: boolean;
-  total_duration?: number;
-  eval_count?: number;
 }
 
 export class OllamaLLMProvider implements LLMProvider {
@@ -30,104 +16,84 @@ export class OllamaLLMProvider implements LLMProvider {
   private readonly baseUrl: string;
   private readonly model: string;
 
-  constructor(baseUrl: string, model: string) {
-    this.baseUrl = baseUrl;
-    this.model = model;
+  constructor(options: OllamaLLMOptions) {
+    this.baseUrl = options.baseUrl;
+    this.model = options.model;
+    this.logger.info(`Initialized with model: ${this.model}`);
   }
 
   async generate(request: GenerationRequest): Promise<GenerationResponse> {
-    const body: OllamaGenerateBody = {
-      model: this.model,
-      prompt: request.prompt,
-      stream: false,
-      ...(request.systemPrompt ? { system: request.systemPrompt } : {}),
-      options: {
-        ...(request.temperature !== undefined
-          ? { temperature: request.temperature }
-          : {}),
-        ...(request.maxTokens !== undefined
-          ? { num_predict: request.maxTokens }
-          : {}),
-      },
-    };
-
     const response = await fetch(`${this.baseUrl}/api/generate`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        model: this.model,
+        prompt: request.prompt,
+        system: request.systemPrompt,
+        stream: false,
+        options: {
+          temperature: request.temperature,
+          num_predict: request.maxTokens,
+        },
+      }),
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Ollama generate failed: ${response.status} ${errorText}`);
+      throw new Error(`Ollama generation failed: ${response.statusText}`);
     }
 
-    const data = (await response.json()) as OllamaGenerateResponse;
-
+    const data = (await response.json()) as { response: string };
     return {
       text: data.response,
-      finishReason: data.done ? "stop" : "length",
-      tokenCount: data.eval_count ?? 0,
+      finishReason: "stop",
+      tokenCount: 0, // Ollama doesn't always provide this in non-stream, default to 0
     };
   }
 
   async *generateStream(
     request: GenerationRequest
   ): AsyncGenerator<StreamChunk, void, undefined> {
-    const body: OllamaGenerateBody = {
-      model: this.model,
-      prompt: request.prompt,
-      stream: true,
-      ...(request.systemPrompt ? { system: request.systemPrompt } : {}),
-      options: {
-        ...(request.temperature !== undefined
-          ? { temperature: request.temperature }
-          : {}),
-        ...(request.maxTokens !== undefined
-          ? { num_predict: request.maxTokens }
-          : {}),
-      },
-    };
-
     const response = await fetch(`${this.baseUrl}/api/generate`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        model: this.model,
+        prompt: request.prompt,
+        system: request.systemPrompt,
+        stream: true,
+        options: {
+          temperature: request.temperature,
+          num_predict: request.maxTokens,
+        },
+      }),
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(
-        `Ollama stream failed: ${response.status} ${errorText}`
-      );
-    }
-
-    if (!response.body) {
-      throw new Error("Ollama stream response has no body");
+    if (!response.ok || !response.body) {
+      throw new Error(`Ollama stream failed: ${response.statusText}`);
     }
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    let buffer = "";
 
     try {
-      for (;;) {
+      while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n").filter((l) => l.trim());
 
         for (const line of lines) {
-          const trimmed = line.trim();
-          if (trimmed.length === 0) continue;
-
-          const chunk = JSON.parse(trimmed) as OllamaGenerateResponse;
-          yield {
-            text: chunk.response,
-            done: chunk.done,
-          };
+          try {
+            const data = JSON.parse(line) as {
+              response: string;
+              done: boolean;
+            };
+            yield {
+              text: data.response,
+              done: data.done,
+            };
+          } catch (e) {
+            this.logger.error(`Failed to parse Ollama stream chunk: ${e}`);
+          }
         }
       }
     } finally {

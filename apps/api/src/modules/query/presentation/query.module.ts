@@ -1,10 +1,10 @@
 import { Module } from "@nestjs/common";
-import { QueryController } from "./query.controller.js";
-import { PrismaQueryRepository } from "../infrastructure/prisma-query.repository.js";
-import { SemanticSearchUseCase } from "../application/semantic-search.use-case.js";
-import { FilteredSearchUseCase } from "../application/filtered-search.use-case.js";
-import { AskQuestionUseCase } from "../application/ask-question.use-case.js";
-import { RetrieveChunksUseCase } from "../application/retrieve-chunks.use-case.js";
+import { QueryController } from "./query.controller";
+import { PrismaQueryRepository } from "../infrastructure/prisma-query.repository";
+import { SemanticSearchUseCase } from "../application/semantic-search.use-case";
+import { FilteredSearchUseCase } from "../application/filtered-search.use-case";
+import { AskQuestionUseCase } from "../application/ask-question.use-case";
+import { RetrieveChunksUseCase } from "../application/retrieve-chunks.use-case";
 import { loadConfig } from "@repo/config";
 import { OllamaEmbeddingProvider } from "@repo/embeddings";
 import { OllamaLLMProvider } from "@repo/llm";
@@ -25,20 +25,20 @@ const VECTOR_STORE = Symbol("VectorStore");
       provide: EMBEDDING_PROVIDER,
       useFactory: () => {
         const config = loadConfig();
-        return new OllamaEmbeddingProvider(
-          config.OLLAMA_BASE_URL,
-          config.OLLAMA_EMBED_MODEL
-        );
+        return new OllamaEmbeddingProvider({
+          baseUrl: config.OLLAMA_BASE_URL,
+          model: config.OLLAMA_EMBED_MODEL,
+        });
       },
     },
     {
       provide: LLM_PROVIDER,
       useFactory: () => {
         const config = loadConfig();
-        return new OllamaLLMProvider(
-          config.OLLAMA_BASE_URL,
-          config.OLLAMA_MODEL
-        );
+        return new OllamaLLMProvider({
+          baseUrl: config.OLLAMA_BASE_URL,
+          model: config.OLLAMA_MODEL,
+        });
       },
     },
     {

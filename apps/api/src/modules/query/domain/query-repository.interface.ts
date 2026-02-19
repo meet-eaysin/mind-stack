@@ -1,4 +1,3 @@
-import type { ChunkReference } from "@repo/shared-types";
 
 export interface SearchResultEntity {
   chunkId: string;

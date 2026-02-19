@@ -1,5 +1,5 @@
 import type { LLMProvider } from "@repo/llm";
-import type { ChunkReference, AskQuestionResponse } from "@repo/shared-types";
+import type { AskQuestionResponse } from "@repo/shared-types";
 import { SemanticSearchUseCase } from "./semantic-search.use-case.js";
 
 export class AskQuestionUseCase {
