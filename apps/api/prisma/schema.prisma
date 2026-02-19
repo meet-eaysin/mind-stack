@@ -1,20 +1,20 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-}
-
 model Document {
-  id         String   @id @default(uuid())
-  title      String
-  sourceType String
-  sourceUrl  String?
-  rawContent String
-  status     String   @default("PENDING")
-  createdAt  DateTime @default(now())
+  id          String   @id @default(uuid())
+  title       String
+  sourceType  String   @map("source_type")
+  sourceUrl   String?  @map("source_url")
+  rawContent  String   @map("raw_content")
+  status      String   @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  createdAt   DateTime @default(now()) @map("created_at")
 
   chunks Chunk[]
 
@@ -23,13 +23,13 @@ model Document {
 
 model Chunk {
   id          String   @id @default(uuid())
-  documentId  String
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId  String   @map("document_id")
   content     String
-  startOffset Int
-  endOffset   Int
-  createdAt   DateTime @default(now())
+  startOffset Int      @map("start_offset")
+  endOffset   Int      @map("end_offset")
+  createdAt   DateTime @default(now()) @map("created_at")
 
-  document        Document         @relation(fields: [documentId], references: [id], onDelete: Cascade)
   chunkTags       ChunkTag[]
   notes           Note[]
   importanceScore ImportanceScore?
@@ -50,11 +50,10 @@ model Tag {
 }
 
 model ChunkTag {
-  chunkId String
-  tagId   String
-
-  chunk Chunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
-  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  chunk   Chunk  @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  chunkId String @map("chunk_id")
+  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tagId   String @map("tag_id")
 
   @@id([chunkId, tagId])
   @@index([chunkId, tagId])
@@ -63,31 +62,28 @@ model ChunkTag {
 
 model Note {
   id        String   @id @default(uuid())
-  chunkId   String
+  chunk     Chunk    @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  chunkId   String   @unique @map("chunk_id")
   content   String
-  createdAt DateTime @default(now())
-
-  chunk Chunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@map("notes")
 }
 
 model ImportanceScore {
-  chunkId String @id
-  score   Int
-
-  chunk Chunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  chunk   Chunk  @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  chunkId String @unique @map("chunk_id")
+  score   Int // 1-5
 
   @@map("importance_scores")
 }
 
 model Review {
   id             String   @id @default(uuid())
-  chunkId        String
-  lastReviewedAt DateTime @default(now())
-  reviewScore    Int      @default(0)
-
-  chunk Chunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  chunk          Chunk    @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  chunkId        String   @map("chunk_id")
+  lastReviewedAt DateTime @default(now()) @map("last_reviewed_at")
+  reviewScore    Int      @map("review_score") // 0-5
 
   @@index([chunkId])
   @@map("reviews")
@@ -97,21 +93,20 @@ model Concept {
   id    String @id @default(uuid())
   label String @unique
 
-  relationsFrom ConceptRelation[] @relation("FromConcept")
-  relationsTo   ConceptRelation[] @relation("ToConcept")
+  fromRelations ConceptRelation[] @relation("FromConcept")
+  toRelations   ConceptRelation[] @relation("ToConcept")
 
   @@index([label])
   @@map("concepts")
 }
 
 model ConceptRelation {
-  id            String @id @default(uuid())
-  fromConceptId String
-  toConceptId   String
-  relationType  String
-
-  fromConcept Concept @relation("FromConcept", fields: [fromConceptId], references: [id], onDelete: Cascade)
-  toConcept   Concept @relation("ToConcept", fields: [toConceptId], references: [id], onDelete: Cascade)
+  id            String  @id @default(uuid())
+  fromConcept   Concept @relation("FromConcept", fields: [fromConceptId], references: [id], onDelete: Cascade)
+  fromConceptId String  @map("from_concept_id")
+  toConcept     Concept @relation("ToConcept", fields: [toConceptId], references: [id], onDelete: Cascade)
+  toConceptId   String  @map("to_concept_id")
+  relationType  String  @map("relation_type")
 
   @@unique([fromConceptId, toConceptId, relationType])
   @@map("concept_relations")

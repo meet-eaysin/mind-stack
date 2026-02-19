@@ -31,7 +31,7 @@ model Chunk {
   createdAt   DateTime @default(now()) @map("created_at")
 
   chunkTags       ChunkTag[]
-  note            Note?
+  notes           Note[]
   importanceScore ImportanceScore?
   reviews         Review[]
 
