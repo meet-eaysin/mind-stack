@@ -95,10 +95,9 @@ export class BuildGraphUseCase {
       }
 
       if (!rawBody.startsWith('[')) {
-        console.warn(
-          `GRAPH_EXTRACT: Invalid JSON format (no starting [): ${rawBody.substring(0, 50)}...`,
+        throw new Error(
+          `Invalid JSON format from LLM: ${rawBody.substring(0, 50)}...`,
         );
-        return [];
       }
 
       const parsed: unknown = JSON.parse(rawBody);
@@ -111,7 +110,9 @@ export class BuildGraphUseCase {
       console.error(
         `GRAPH_EXTRACT: Failed to parse concepts: ${error instanceof Error ? error.message : String(error)}`,
       );
-      return [];
+      throw new Error(
+        `Graph extraction failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 }

@@ -35,6 +35,13 @@ export default function SearchPage() {
   const [streamAnswer, setStreamAnswer] = useState("");
   const [streamCitations, setStreamCitations] = useState<ChunkReference[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [chatHistory, setChatHistory] = useState<
+    {
+      question: string;
+      answer: string;
+      citations: ChunkReference[];
+    }[]
+  >([]);
 
   const search = useSearch();
   const filteredSearch = useFilteredSearch();
@@ -57,6 +64,10 @@ export default function SearchPage() {
       setStreamAnswer("");
       setStreamCitations([]);
       setIsStreaming(true);
+      let finalAnswer = "";
+      let finalCitations: ChunkReference[] = [];
+      const currentQuery = query;
+
       const eventSource = searchApi.askStream(query);
       eventSource.onmessage = (event) => {
         try {
@@ -65,11 +76,22 @@ export default function SearchPage() {
           if (chunk.success) {
             const data = chunk.data as StreamingAskResponseChunk;
             if (data.type === "text") {
-              setStreamAnswer((prev) => prev + data.data);
+              finalAnswer += data.data;
+              setStreamAnswer(finalAnswer);
             } else if (data.type === "citations") {
-              setStreamCitations(data.data);
+              finalCitations = data.data;
+              setStreamCitations(finalCitations);
             } else if (data.type === "done") {
               setIsStreaming(false);
+              setChatHistory((prev) => [
+                ...prev,
+                {
+                  question: currentQuery,
+                  answer: finalAnswer,
+                  citations: finalCitations,
+                },
+              ]);
+              setQuery("");
               eventSource.close();
             }
           }
@@ -195,7 +217,43 @@ export default function SearchPage() {
           </div>
         )}
 
-        {/* Streaming result */}
+        {/* Chat History for Stream Mode */}
+        {mode === "stream" && chatHistory.length > 0 && (
+          <div className="space-y-6 mb-6">
+            {chatHistory.map((chat, idx) => (
+              <div
+                key={idx}
+                className="space-y-4"
+                data-testid={`history-item-${idx}`}
+              >
+                <div className="flex justify-end">
+                  <div className="rounded-lg bg-primary text-primary-foreground px-4 py-2 max-w-[80%] text-sm">
+                    {chat.question}
+                  </div>
+                </div>
+                <div className="rounded-lg border bg-card p-4">
+                  <h3 className="mb-2 text-sm font-semibold">AI Answer</h3>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                    {chat.answer}
+                  </p>
+                </div>
+                {chat.citations.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-muted-foreground">
+                      Citations
+                    </h4>
+                    {chat.citations.map((c) => (
+                      <ChunkResult key={c.chunkId} chunk={c} />
+                    ))}
+                  </div>
+                )}
+                <Separator />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Current Streaming result */}
         {(streamAnswer || isStreaming) && mode === "stream" && (
           <div className="space-y-4" data-testid="stream-result">
             <div className="rounded-lg border bg-card p-4">

@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/api-client";
 import { ENDPOINTS } from "@/constents/endpoints";
+import { env } from "@/config/env";
 import * as schemas from "../schemas/search.schemas";
 import type {
   SemanticSearchRequest,
@@ -38,7 +39,7 @@ export const searchApi = {
       tags.forEach((tag) => params.append("tags", tag));
     }
     return new EventSource(
-      `${ENDPOINTS.QUERY.ASK_STREAM}?${params.toString()}`,
+      `${env.NEXT_PUBLIC_API_URL}${ENDPOINTS.QUERY.ASK_STREAM}?${params.toString()}`,
     );
   },
 
