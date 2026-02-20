@@ -44,7 +44,7 @@ export function useIngestionStatus(documentId: string | null) {
     queryKey: QUERY_KEYS.KNOWLEDGE.STATUS(documentId || ""),
     queryFn: () => ingestionApi.getStatus(documentId!),
     enabled: !!documentId && status !== "READY" && status !== "FAILED",
-    refetchInterval: (query: any) => {
+    refetchInterval: (query) => {
       const data = query.state.data as DocumentStatusResponse | undefined;
       if (data?.status === "READY" || data?.status === "FAILED") {
         return false;

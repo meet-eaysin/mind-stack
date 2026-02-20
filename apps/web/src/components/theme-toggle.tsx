@@ -16,9 +16,8 @@ import { META_THEME_COLORS, useMetaColor } from "@/hooks/use-meta-colors";
 
 export function ThemeToggle({
   className,
-  onClick,
   ...props
-}: React.ComponentProps<typeof Button>) {
+}: Omit<React.ComponentProps<typeof Button>, "onClick">) {
   const { setTheme, resolvedTheme, theme } = useTheme();
   const { setMetaColor } = useMetaColor();
 
