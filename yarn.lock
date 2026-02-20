@@ -944,6 +944,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@hookform/resolvers@npm:^5.2.2":
+  version: 5.2.2
+  resolution: "@hookform/resolvers@npm:5.2.2"
+  dependencies:
+    "@standard-schema/utils": "npm:^0.3.0"
+  peerDependencies:
+    react-hook-form: ^7.55.0
+  checksum: 10c0/0692cd61dcc2a70cbb27b88a37f733c39e97f555c036ba04a81bd42b0467461cfb6bafacb46c16f173672f9c8a216bd7928a2330d4e49c700d130622bf1defaf
+  languageName: node
+  linkType: hard
+
 "@humanfs/core@npm:^0.19.1":
   version: 0.19.1
   resolution: "@humanfs/core@npm:0.19.1"
@@ -2723,12 +2734,56 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@standard-schema/utils@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "@standard-schema/utils@npm:0.3.0"
+  checksum: 10c0/6eb74cd13e52d5fc74054df51e37d947ef53f3ab9e02c085665dcca3c38c60ece8d735cebbdf18fbb13c775fbcb9becb3f53109b0e092a63f0f7389ce0993fd0
+  languageName: node
+  linkType: hard
+
 "@swc/helpers@npm:0.5.15":
   version: 0.5.15
   resolution: "@swc/helpers@npm:0.5.15"
   dependencies:
     tslib: "npm:^2.8.0"
   checksum: 10c0/33002f74f6f885f04c132960835fdfc474186983ea567606db62e86acd0680ca82f34647e8e610f4e1e422d1c16fce729dde22cd3b797ab1fd9061a825dabca4
+  languageName: node
+  linkType: hard
+
+"@tanstack/query-core@npm:5.90.20":
+  version: 5.90.20
+  resolution: "@tanstack/query-core@npm:5.90.20"
+  checksum: 10c0/70637dfcecd5ed9d810629aa27f1632af8a4bcd083e75cf29408d058c32f8234704a3231ec280e2c4016ea0485b16124fdf70ab97793b5a7b670f43f7659e9fe
+  languageName: node
+  linkType: hard
+
+"@tanstack/query-devtools@npm:5.93.0":
+  version: 5.93.0
+  resolution: "@tanstack/query-devtools@npm:5.93.0"
+  checksum: 10c0/0024cef103f48c50f3932f6bfe5d77b4fde25be49d43486f8ef7ec7108d2c1bd999ebc7a46309f0504bf081daa7217b36637e9436d67f9a1599c89a385d078ee
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query-devtools@npm:^5.91.3":
+  version: 5.91.3
+  resolution: "@tanstack/react-query-devtools@npm:5.91.3"
+  dependencies:
+    "@tanstack/query-devtools": "npm:5.93.0"
+  peerDependencies:
+    "@tanstack/react-query": ^5.90.20
+    react: ^18 || ^19
+  checksum: 10c0/cbd9ce85698511e80955f2c7d0fa7395f3230b34a8cbfb6be1712d49393fc4e06a0a2b5ecd734dff9e803834a7c2c347c954ca4b76f961ccf4c31be39e7ac0bc
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:^5.90.21":
+  version: 5.90.21
+  resolution: "@tanstack/react-query@npm:5.90.21"
+  dependencies:
+    "@tanstack/query-core": "npm:5.90.20"
+  peerDependencies:
+    react: ^18 || ^19
+  checksum: 10c0/e8994c57f6ceb2c886a4d6486a8c6a3f89bc6b1220de3e732448d7fcbeb386e9358f03c73804de72004c6ac2668d0bf1b44cedbb273d3e4b33afcbaee7b7d24d
   languageName: node
   linkType: hard
 
@@ -7784,6 +7839,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lucide-react@npm:^0.575.0":
+  version: 0.575.0
+  resolution: "lucide-react@npm:0.575.0"
+  peerDependencies:
+    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/4f42e81c88f60c8f904b178c0b28e8ac9a99da8ef24eba5f26ed97b63124304a847baea2f71125629a272df58dbb61cd799ff6a7e4878e5a4c28d8a699b84730
+  languageName: node
+  linkType: hard
+
 "luxon@npm:^3.2.1":
   version: 3.7.2
   resolution: "luxon@npm:3.7.2"
@@ -9045,6 +9109,15 @@ __metadata:
   peerDependencies:
     react: ^19.2.4
   checksum: 10c0/f0c63f1794dedb154136d4d0f59af00b41907f4859571c155940296808f4b94bf9c0c20633db75b5b2112ec13d8d7dd4f9bf57362ed48782f317b11d05a44f35
+  languageName: node
+  linkType: hard
+
+"react-hook-form@npm:^7.71.1":
+  version: 7.71.1
+  resolution: "react-hook-form@npm:7.71.1"
+  peerDependencies:
+    react: ^16.8.0 || ^17 || ^18 || ^19
+  checksum: 10c0/6c8fc0fa740d299481de3ed32bae98f7c6331240822c602363e5cd221746d875dc3c5e65d0039902b7f7a44dc9ac9a4932e00e9ad9af3051bed1987858ce78c7
   languageName: node
   linkType: hard
 
@@ -10889,18 +10962,24 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web@workspace:apps/web"
   dependencies:
+    "@hookform/resolvers": "npm:^5.2.2"
     "@repo/eslint-config": "npm:*"
     "@repo/shared-types": "npm:*"
     "@repo/typescript-config": "npm:*"
     "@repo/ui": "npm:*"
+    "@tanstack/react-query": "npm:^5.90.21"
+    "@tanstack/react-query-devtools": "npm:^5.91.3"
     "@types/node": "npm:^22.15.3"
     "@types/react": "npm:19.2.2"
     "@types/react-dom": "npm:19.2.2"
     eslint: "npm:^9.39.1"
+    lucide-react: "npm:^0.575.0"
     next: "npm:16.1.5"
     react: "npm:^19.2.0"
     react-dom: "npm:^19.2.0"
+    react-hook-form: "npm:^7.71.1"
     typescript: "npm:5.9.2"
+    zod: "npm:3.24.1"
   languageName: unknown
   linkType: soft
 
@@ -11270,6 +11349,13 @@ __metadata:
   version: 2.1.3
   resolution: "yoctocolors-cjs@npm:2.1.3"
   checksum: 10c0/584168ef98eb5d913473a4858dce128803c4a6cd87c0f09e954fa01126a59a33ab9e513b633ad9ab953786ed16efdd8c8700097a51635aafaeed3fef7712fa79
+  languageName: node
+  linkType: hard
+
+"zod@npm:3.24.1":
+  version: 3.24.1
+  resolution: "zod@npm:3.24.1"
+  checksum: 10c0/0223d21dbaa15d8928fe0da3b54696391d8e3e1e2d0283a1a070b5980a1dbba945ce631c2d1eccc088fdbad0f2dfa40155590bf83732d3ac4fcca2cc9237591b
   languageName: node
   linkType: hard
 

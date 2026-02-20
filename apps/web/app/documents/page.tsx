@@ -1,227 +1,83 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import type { DocumentListItem } from "@repo/shared-types";
-import { listDocuments, ingestUrl, ingestText } from "@/lib/api-client";
+import React, { useState } from "react";
+import { Plus, Search, Database } from "lucide-react";
+import Link from "next/link";
+import { DocumentList } from "@/features/documents/components/document-list";
+import { DocumentView } from "@/features/documents/components/document-view";
 
 export default function DocumentsPage(): React.JSX.Element {
-  const [documents, setDocuments] = useState<DocumentListItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showIngest, setShowIngest] = useState(false);
-  const [ingestType, setIngestType] = useState<"url" | "text">("url");
-  const [url, setUrl] = useState("");
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [ingesting, setIngesting] = useState(false);
+  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
-    void loadDocuments();
-  }, []);
-
-  async function loadDocuments(): Promise<void> {
-    setLoading(true);
-    try {
-      const result = await listDocuments();
-      setDocuments(result.documents);
-    } catch {
-      // silently handle
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleIngest(e: React.FormEvent): Promise<void> {
-    e.preventDefault();
-    setIngesting(true);
-    try {
-      if (ingestType === "url") {
-        await ingestUrl({ url, title: title || undefined });
-      } else {
-        await ingestText({ title, content });
-      }
-      setShowIngest(false);
-      setUrl("");
-      setTitle("");
-      setContent("");
-      await loadDocuments();
-    } catch {
-      // silently handle
-    } finally {
-      setIngesting(false);
-    }
+  if (selectedDocId) {
+    return (
+      <div className="max-w-5xl mx-auto py-8 px-4">
+        <DocumentView
+          documentId={selectedDocId}
+          onBack={() => {
+            setSelectedDocId(null);
+          }}
+        />
+      </div>
+    );
   }
 
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <h1>Documents</h1>
-        <button
-          onClick={() => setShowIngest(!showIngest)}
-          style={{
-            padding: "0.5rem 1rem",
-            background: "#333",
-            color: "#fff",
-            border: "none",
-            borderRadius: 4,
-            cursor: "pointer",
-          }}
-        >
-          + Ingest
-        </button>
-      </div>
+    <div className="max-w-6xl mx-auto py-8 px-4 space-y-8 animate-in fade-in duration-700">
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-8 border-b border-gray-800">
+        <div className="space-y-1">
+          <h1 className="text-4xl font-extrabold text-white tracking-tight">
+            Your Knowledge
+          </h1>
+          <p className="text-gray-400">
+            Manage and explore your digested documents.
+          </p>
+        </div>
 
-      {showIngest ? (
-        <form
-          onSubmit={(e) => void handleIngest(e)}
-          style={{
-            padding: "1.5rem",
-            background: "#f8f9fa",
-            borderRadius: 8,
-            marginBottom: "2rem",
-          }}
+        <Link
+          href="/"
+          className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-blue-900/20 group"
         >
-          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
-            <button
-              type="button"
-              onClick={() => setIngestType("url")}
-              style={{
-                padding: "0.25rem 0.75rem",
-                background: ingestType === "url" ? "#333" : "#eee",
-                color: ingestType === "url" ? "#fff" : "#333",
-                border: "none",
-                borderRadius: 4,
-                cursor: "pointer",
-              }}
-            >
-              URL
-            </button>
-            <button
-              type="button"
-              onClick={() => setIngestType("text")}
-              style={{
-                padding: "0.25rem 0.75rem",
-                background: ingestType === "text" ? "#333" : "#eee",
-                color: ingestType === "text" ? "#fff" : "#333",
-                border: "none",
-                borderRadius: 4,
-                cursor: "pointer",
-              }}
-            >
-              Text
-            </button>
+          <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
+          Ingest New
+        </Link>
+      </header>
+
+      <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex-1 space-y-6">
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
+            <input
+              type="text"
+              placeholder="Search documents by title..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-gray-900 border border-gray-800 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none hover:border-gray-700 transition-all text-white"
+            />
           </div>
 
-          {ingestType === "url" ? (
-            <input
-              type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://..."
-              style={{
-                width: "100%",
-                padding: "0.5rem",
-                marginBottom: "0.5rem",
-                boxSizing: "border-box",
-              }}
-            />
-          ) : null}
+          <DocumentList searchTerm={searchTerm} onSelect={setSelectedDocId} />
+        </div>
 
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Title"
-            style={{
-              width: "100%",
-              padding: "0.5rem",
-              marginBottom: "0.5rem",
-              boxSizing: "border-box",
-            }}
-          />
-
-          {ingestType === "text" ? (
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Paste content here..."
-              rows={6}
-              style={{
-                width: "100%",
-                padding: "0.5rem",
-                marginBottom: "0.5rem",
-                boxSizing: "border-box",
-              }}
-            />
-          ) : null}
-
-          <button
-            type="submit"
-            disabled={ingesting}
-            style={{
-              padding: "0.5rem 1.5rem",
-              background: "#333",
-              color: "#fff",
-              border: "none",
-              borderRadius: 4,
-              cursor: ingesting ? "wait" : "pointer",
-            }}
-          >
-            {ingesting ? "Ingesting..." : "Ingest"}
-          </button>
-        </form>
-      ) : null}
-
-      {loading ? (
-        <p>Loading...</p>
-      ) : documents.length === 0 ? (
-        <p style={{ color: "#888" }}>No documents yet. Ingest something!</p>
-      ) : (
-        <div>
-          {documents.map((doc) => (
-            <div
-              key={doc.id}
-              style={{
-                padding: "1rem",
-                border: "1px solid #eee",
-                borderRadius: 8,
-                marginBottom: "0.75rem",
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <strong>{doc.title}</strong>
-                <span
-                  style={{
-                    padding: "0.125rem 0.5rem",
-                    background: "#e2e8f0",
-                    borderRadius: 12,
-                    fontSize: "0.75rem",
-                  }}
-                >
-                  {doc.sourceType}
+        <aside className="w-full md:w-80 space-y-6">
+          <div className="p-6 bg-blue-900/10 border border-blue-900/30 rounded-2xl">
+            <h4 className="font-bold text-blue-400 mb-2 flex items-center gap-2">
+              <Database className="w-4 h-4" />
+              Stats
+            </h4>
+            <div className="space-y-4 pt-2">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-400">Total Documents</span>
+                <span className="text-white font-mono">
+                  {/* We could query separate stats or get from list response if exposing it from hook */}
+                  --
                 </span>
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginTop: "0.5rem",
-                  color: "#888",
-                  fontSize: "0.875rem",
-                }}
-              >
-                <span>{doc.chunkCount} chunks</span>
-                <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
-              </div>
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

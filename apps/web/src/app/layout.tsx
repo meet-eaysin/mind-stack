@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
-import { Providers } from "@/app/providers";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "Mind Stack - Second Brain",
