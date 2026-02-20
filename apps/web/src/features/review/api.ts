@@ -13,4 +13,11 @@ export const reviewApi = {
       { chunkId, score },
       schemas.SuccessResponseSchema,
     ),
+
+  updateScore: (chunkId: string, score: number): Promise<SuccessResponse> =>
+    apiClient.post(
+      ENDPOINTS.review.score,
+      { chunkId, score },
+      schemas.SuccessResponseSchema,
+    ),
 };

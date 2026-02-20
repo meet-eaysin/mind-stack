@@ -3,6 +3,7 @@ import { searchApi } from "./api";
 import type { ApiError } from "@/api/client";
 import type {
   SearchResponse,
+  RetrieveResponse,
   AskQuestionResponse,
   FilteredSearchRequest,
 } from "@/types/api";
@@ -31,5 +32,15 @@ export function useAskQuestion() {
   >({
     mutationFn: ({ question, tags, topK }) =>
       searchApi.ask(question, tags, topK),
+  });
+}
+
+export function useRetrieve() {
+  return useMutation<
+    RetrieveResponse,
+    ApiError,
+    { query: string; topK?: number }
+  >({
+    mutationFn: ({ query, topK }) => searchApi.retrieve(query, topK),
   });
 }

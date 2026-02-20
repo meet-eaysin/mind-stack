@@ -16,7 +16,18 @@ export function DocumentList({
   searchTerm,
   onSelect,
 }: DocumentListProps): React.JSX.Element {
-  const { data, isLoading, error, refetch } = useDocuments(1, 100, searchTerm);
+  const [page, setPage] = React.useState(1);
+  const pageSize = 10;
+
+  React.useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
+
+  const { data, isLoading, error, refetch } = useDocuments(
+    page,
+    pageSize,
+    searchTerm,
+  );
 
   if (isLoading) {
     return <DocumentListSkeleton />;
@@ -92,6 +103,32 @@ export function DocumentList({
           <ChevronRight className="w-5 h-5 text-gray-700 group-hover:text-blue-500 transition-all group-hover:translate-x-1" />
         </button>
       ))}
+
+      {data && data.total > pageSize && (
+        <div className="flex justify-between items-center mt-6 pt-6 border-t border-gray-800">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-4 py-2 bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg disabled:opacity-50 disabled:pointer-events-none transition-all"
+            type="button"
+          >
+            Previous
+          </button>
+          <span className="text-gray-500 text-sm font-medium">
+            Page {page} of {Math.ceil(data.total / pageSize)}
+          </span>
+          <button
+            onClick={() =>
+              setPage((p) => Math.min(Math.ceil(data.total / pageSize), p + 1))
+            }
+            disabled={page === Math.ceil(data.total / pageSize)}
+            className="px-4 py-2 bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg disabled:opacity-50 disabled:pointer-events-none transition-all"
+            type="button"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }

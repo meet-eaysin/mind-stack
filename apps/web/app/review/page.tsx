@@ -9,7 +9,11 @@ import {
   Star,
   CheckCircle2,
 } from "lucide-react";
-import { useDailyReview, useSubmitFeedback } from "@/features/review/hooks";
+import {
+  useDailyReview,
+  useSubmitFeedback,
+  useUpdateReviewScore,
+} from "@/features/review/hooks";
 import { DocumentListSkeleton } from "@/components/skeletons";
 import { ApiError as ApiErrorUI } from "@/components/api-error";
 import type { ReviewItem } from "@/types/api";
@@ -20,6 +24,7 @@ export default function ReviewPage(): React.JSX.Element {
 
   const { data, isLoading, error, refetch } = useDailyReview();
   const submitFeedback = useSubmitFeedback();
+  const updateScoreMut = useUpdateReviewScore();
 
   const items: ReviewItem[] = (data?.items ?? []).filter(
     (item) => !dismissed.has(item.chunkId),
@@ -30,6 +35,10 @@ export default function ReviewPage(): React.JSX.Element {
     // Optimistic immediate hide
     setDismissed((prev) => new Set(prev).add(chunkId));
     submitFeedback.mutate({ chunkId, score });
+  };
+
+  const handleUpdateScore = (chunkId: string, score: number) => {
+    updateScoreMut.mutate({ chunkId, score });
   };
 
   return (
@@ -141,6 +150,26 @@ export default function ReviewPage(): React.JSX.Element {
                         <span className="hidden group-hover/btn:block text-[10px]">
                           {score}
                         </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="px-6 py-3 bg-gray-900 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-800/50">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase">
+                    Adjust Base Importance
+                  </span>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((score) => (
+                      <button
+                        key={score}
+                        onClick={() => handleUpdateScore(item.chunkId, score)}
+                        disabled={updateScoreMut.isPending}
+                        className="w-6 h-6 rounded-full border border-gray-700 text-gray-400 text-[10px] hover:bg-indigo-600 hover:border-indigo-500 hover:text-white transition-all font-bold flex items-center justify-center disabled:opacity-50"
+                        type="button"
+                        aria-label={`Set base score to ${score}`}
+                      >
+                        {score}
                       </button>
                     ))}
                   </div>

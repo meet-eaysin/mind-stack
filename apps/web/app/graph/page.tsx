@@ -12,8 +12,13 @@ import {
   BookOpen,
   Search,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
-import { useGraph, useNeighborhood } from "@/features/graph/hooks";
+import {
+  useGraph,
+  useNeighborhood,
+  useBuildGraph,
+} from "@/features/graph/hooks";
 import { GraphSkeleton } from "@/components/skeletons";
 import { ApiError as ApiErrorUI } from "@/components/api-error";
 import Link from "next/link";
@@ -28,6 +33,7 @@ export default function GraphPage(): React.JSX.Element {
     selectedNode?.id ?? null,
     1,
   );
+  const buildMutation = useBuildGraph();
 
   const nodes = data?.nodes ?? [];
   const edges = data?.edges ?? [];
@@ -60,6 +66,19 @@ export default function GraphPage(): React.JSX.Element {
             type="button"
           >
             Full Map
+          </button>
+          <button
+            onClick={() => buildMutation.mutate({ forceRebuild: true })}
+            disabled={buildMutation.isPending}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-all disabled:opacity-50 flex items-center gap-2"
+            type="button"
+          >
+            {buildMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Layers className="w-4 h-4" />
+            )}
+            Build Graph
           </button>
           <button
             onClick={() => void refetch()}

@@ -19,6 +19,7 @@ export const ENDPOINTS = {
     search: "/query/search",
     filtered: "/query/search/filtered",
     ask: "/query/ask",
+    askStream: "/query/ask/stream",
     retrieve: "/query/retrieve",
   },
   review: {

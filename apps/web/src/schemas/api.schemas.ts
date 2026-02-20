@@ -87,6 +87,11 @@ export const DocumentListItemSchema = z.object({
   createdAt: z.string(),
 });
 
+export const DocumentListRequestSchema = z.object({
+  page: z.number().optional(),
+  pageSize: z.number().optional(),
+});
+
 export const DocumentListResponseSchema = z.object({
   documents: z.array(DocumentListItemSchema),
   total: z.number(),
@@ -169,10 +174,23 @@ export const SearchResponseSchema = z.object({
   chunks: z.array(ChunkReferenceSchema),
 });
 
+export const RetrieveResponseSchema = z.object({
+  chunks: z.array(ChunkReferenceSchema),
+});
+
 export const AskQuestionResponseSchema = z.object({
   answer: z.string(),
   citations: z.array(ChunkReferenceSchema),
 });
+
+export const StreamingAskResponseChunkSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("citations"),
+    data: z.array(ChunkReferenceSchema),
+  }),
+  z.object({ type: z.literal("text"), data: z.string() }),
+  z.object({ type: z.literal("done") }),
+]);
 
 // ── Review Schemas ──
 
@@ -195,6 +213,11 @@ export const SubmitFeedbackRequestSchema = z.object({
   score: z.number().min(1).max(5),
 });
 
+export const UpdateReviewScoreRequestSchema = z.object({
+  chunkId: z.string(),
+  score: z.number().min(1).max(5),
+});
+
 // ── Graph Schemas ──
 
 export const GraphNodeSchema = z.object({
@@ -206,7 +229,7 @@ export const GraphNodeSchema = z.object({
 export const GraphEdgeSchema = z.object({
   fromId: z.string(),
   toId: z.string(),
-  relationType: z.string(), // Keeping loose for flexibility, or use RelationTypeSchema if strict
+  relationType: RelationTypeSchema,
 });
 
 export const GraphResponseSchema = z.object({
@@ -216,6 +239,10 @@ export const GraphResponseSchema = z.object({
 
 export const BuildGraphRequestSchema = z.object({
   forceRebuild: z.boolean().optional(),
+});
+
+export const BuildGraphResponseSchema = z.object({
+  success: z.boolean(),
 });
 
 export const NeighborhoodRequestSchema = z.object({

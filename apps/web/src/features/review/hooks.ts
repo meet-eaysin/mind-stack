@@ -26,3 +26,18 @@ export function useSubmitFeedback() {
     },
   });
 }
+
+export function useUpdateReviewScore() {
+  const queryClient = useQueryClient();
+  return useMutation<
+    { success: boolean },
+    ApiError,
+    { chunkId: string; score: number }
+  >({
+    mutationFn: ({ chunkId, score }) => reviewApi.updateScore(chunkId, score),
+    onSuccess: () => {
+      // Refresh the daily review list since scores might have changed prioritisation
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.review.daily });
+    },
+  });
+}

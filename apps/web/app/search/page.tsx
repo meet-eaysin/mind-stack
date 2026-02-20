@@ -6,7 +6,9 @@ import {
   useSearch,
   useFilteredSearch,
   useAskQuestion,
+  useRetrieve,
 } from "@/features/search/hooks";
+import { searchApi } from "@/features/search/api";
 import { documentsApi } from "@/features/documents/api";
 import { SearchFilters } from "@/features/search/components/search-filters";
 import { SearchResultsList } from "@/features/search/components/search-results-list";
@@ -16,12 +18,15 @@ import type { ChunkReference } from "@/types/api";
 
 export default function SearchPage(): React.JSX.Element {
   const [searchTerm, setSearchTerm] = useState("");
-  const [mode, setMode] = useState<"search" | "ask">("search");
+  const [mode, setMode] = useState<
+    "search" | "retrieve" | "ask" | "ask-stream"
+  >("search");
 
   // State for results
   const [results, setResults] = useState<ChunkReference[]>([]);
   const [citations, setCitations] = useState<ChunkReference[]>([]);
   const [answer, setAnswer] = useState<string | null>(null);
+  const [isStreaming, setIsStreaming] = useState(false);
 
   // UI State
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -40,11 +45,14 @@ export default function SearchPage(): React.JSX.Element {
   const searchMutation = useSearch();
   const filteredSearchMutation = useFilteredSearch();
   const askMutation = useAskQuestion();
+  const retrieveMutation = useRetrieve();
 
   const loading =
     searchMutation.isPending ||
     filteredSearchMutation.isPending ||
-    askMutation.isPending;
+    askMutation.isPending ||
+    retrieveMutation.isPending ||
+    isStreaming;
 
   useEffect(() => {
     loadTags();
@@ -101,7 +109,13 @@ export default function SearchPage(): React.JSX.Element {
           });
         }
         setResults(res.chunks);
-      } else {
+      } else if (mode === "retrieve") {
+        const res = await retrieveMutation.mutateAsync({
+          query: searchTerm,
+          topK: 10,
+        });
+        setResults(res.chunks);
+      } else if (mode === "ask") {
         const res = await askMutation.mutateAsync({
           question: searchTerm,
           topK: 5,
@@ -110,6 +124,30 @@ export default function SearchPage(): React.JSX.Element {
         setAnswer(res.answer);
         setCitations(res.citations);
         setResults(res.citations);
+      } else if (mode === "ask-stream") {
+        setIsStreaming(true);
+        setAnswer("");
+        const source = searchApi.askStream(searchTerm, selectedTags, 5);
+        source.onmessage = (evt) => {
+          try {
+            const chunk = JSON.parse(evt.data);
+            if (chunk.type === "text") {
+              setAnswer((prev) => (prev ?? "") + chunk.data);
+            } else if (chunk.type === "citations") {
+              setCitations(chunk.data);
+              setResults(chunk.data);
+            } else if (chunk.type === "done") {
+              source.close();
+              setIsStreaming(false);
+            }
+          } catch (e) {
+            console.error("Stream parse error", e);
+          }
+        };
+        source.onerror = () => {
+          source.close();
+          setIsStreaming(false);
+        };
       }
     } catch (_err) {
       // Error is handled by mutation state
@@ -117,7 +155,10 @@ export default function SearchPage(): React.JSX.Element {
   };
 
   const currentError =
-    searchMutation.error || filteredSearchMutation.error || askMutation.error;
+    searchMutation.error ||
+    filteredSearchMutation.error ||
+    askMutation.error ||
+    retrieveMutation.error;
 
   const scrollToChunk = (chunkId: string) => {
     const el = chunkRefs.current[chunkId];
@@ -148,12 +189,27 @@ export default function SearchPage(): React.JSX.Element {
             Semantic Search
           </button>
           <button
+            onClick={() => setMode("retrieve")}
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${mode === "retrieve" ? "bg-gray-800 text-white" : "text-gray-500 hover:text-gray-300"}`}
+            type="button"
+          >
+            Direct Retrieve
+          </button>
+          <button
             onClick={() => setMode("ask")}
             className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${mode === "ask" ? "bg-blue-600 text-white" : "text-gray-500 hover:text-gray-300"}`}
             type="button"
           >
             <Sparkles className="w-4 h-4" />
             Ask AI
+          </button>
+          <button
+            onClick={() => setMode("ask-stream")}
+            className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${mode === "ask-stream" ? "bg-indigo-600 text-white" : "text-gray-500 hover:text-gray-300"}`}
+            type="button"
+          >
+            <Sparkles className="w-4 h-4" />
+            Ask AI (Stream)
           </button>
         </div>
 
@@ -212,9 +268,9 @@ export default function SearchPage(): React.JSX.Element {
         {/* Left Panel: Search Results / Citations */}
         <SearchResultsList
           results={results}
-          loading={loading}
+          loading={loading && mode !== "ask-stream"} // Show results early during streaming if available
           error={currentError}
-          mode={mode}
+          mode={mode.includes("ask") ? "ask" : "search"}
           onScrollTo={scrollToChunk}
           onRetry={() =>
             handleSearch({ preventDefault: () => {} } as React.FormEvent)
@@ -231,7 +287,7 @@ export default function SearchPage(): React.JSX.Element {
           loading={loading}
           error={askMutation.error} // Strict error from mutation
           citations={citations}
-          mode={mode}
+          mode={mode.includes("ask") ? "ask" : "search"}
           onScrollTo={scrollToChunk}
           onExport={() => setIsExportOpen(true)}
         />

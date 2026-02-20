@@ -33,6 +33,9 @@ export type DocumentStatusResponse = z.infer<
 >;
 
 // Knowledge Requests
+export type DocumentListRequest = z.infer<
+  typeof schemas.DocumentListRequestSchema
+>;
 export type AddTagRequest = z.infer<typeof schemas.AddTagRequestSchema>;
 export type RemoveTagRequest = z.infer<typeof schemas.RemoveTagRequestSchema>;
 export type AddNoteRequest = z.infer<typeof schemas.AddNoteRequestSchema>;
@@ -54,8 +57,12 @@ export type AskQuestionRequest = z.infer<
 
 // Query Responses
 export type SearchResponse = z.infer<typeof schemas.SearchResponseSchema>;
+export type RetrieveResponse = z.infer<typeof schemas.RetrieveResponseSchema>;
 export type AskQuestionResponse = z.infer<
   typeof schemas.AskQuestionResponseSchema
+>;
+export type StreamingAskResponseChunk = z.infer<
+  typeof schemas.StreamingAskResponseChunkSchema
 >;
 
 // Review Models
@@ -66,12 +73,18 @@ export type DailyReviewResponse = z.infer<
 export type SubmitFeedbackRequest = z.infer<
   typeof schemas.SubmitFeedbackRequestSchema
 >;
+export type UpdateReviewScoreRequest = z.infer<
+  typeof schemas.UpdateReviewScoreRequestSchema
+>;
 
 // Graph Models
 export type GraphNode = z.infer<typeof schemas.GraphNodeSchema>;
 export type GraphEdge = z.infer<typeof schemas.GraphEdgeSchema>;
 export type GraphResponse = z.infer<typeof schemas.GraphResponseSchema>;
 export type BuildGraphRequest = z.infer<typeof schemas.BuildGraphRequestSchema>;
+export type BuildGraphResponse = z.infer<
+  typeof schemas.BuildGraphResponseSchema
+>;
 export type NeighborhoodRequest = z.infer<
   typeof schemas.NeighborhoodRequestSchema
 >;

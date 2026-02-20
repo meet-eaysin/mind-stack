@@ -1,8 +1,18 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { graphApi } from "./api";
 import { QUERY_KEYS } from "@/api/query-keys";
 import type { ApiError } from "@/api/client";
-import type { GraphResponse } from "@/types/api";
+import type { GraphResponse, BuildGraphResponse } from "@/types/api";
+
+export function useBuildGraph() {
+  const queryClient = useQueryClient();
+  return useMutation<BuildGraphResponse, ApiError, { forceRebuild?: boolean }>({
+    mutationFn: ({ forceRebuild }) => graphApi.build(forceRebuild),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.graph.all });
+    },
+  });
+}
 
 export function useGraph() {
   return useQuery<GraphResponse, ApiError>({

@@ -6,6 +6,7 @@ import type {
   FilteredSearchRequest,
   AskQuestionRequest,
   SearchResponse,
+  RetrieveResponse,
   AskQuestionResponse,
 } from "@/types/api";
 
@@ -29,5 +30,20 @@ export const searchApi = {
       ENDPOINTS.query.ask,
       { question, tags, topK },
       schemas.AskQuestionResponseSchema,
+    ),
+
+  askStream: (question: string, tags?: string[], topK: number = 5) => {
+    const params = new URLSearchParams({ question, topK: topK.toString() });
+    if (tags && tags.length > 0) {
+      tags.forEach((tag) => params.append("tags", tag));
+    }
+    return new EventSource(`${ENDPOINTS.query.askStream}?${params.toString()}`);
+  },
+
+  retrieve: (query: string, topK: number = 10) =>
+    apiClient.post<RetrieveResponse, SemanticSearchRequest>(
+      ENDPOINTS.query.retrieve,
+      { query, topK },
+      schemas.RetrieveResponseSchema,
     ),
 };
