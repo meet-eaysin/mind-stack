@@ -14,9 +14,7 @@ import {
 } from '../../src/common/tokens.js';
 import { PrismaQueryRepository } from '../../src/modules/query/infrastructure/prisma-query.repository.js';
 import { PrismaReviewRepository } from '../../src/modules/review/infrastructure/prisma-review.repository.js';
-import { ChunkingProcessor } from '../../src/modules/ingestion/infrastructure/processors/chunking.processor.js';
-import { EmbeddingProcessor } from '../../src/modules/ingestion/infrastructure/processors/embedding.processor.js';
-import { ConceptExtractionProcessor } from '../../src/modules/ingestion/infrastructure/processors/concept-extraction.processor.js';
+import { IngestionProcessor } from '../../src/modules/ingestion/infrastructure/processors/ingestion.processor.js';
 import type { DocumentEntity } from '../../src/modules/ingestion/domain/document.entity.js';
 import type { IngestionStatus, SourceType } from '@repo/shared-types';
 
@@ -51,6 +49,7 @@ jest.mock('@mozilla/readability', () => ({
 
 describe('Feature Flows (e2e)', () => {
   let app: INestApplication<Server>;
+  let docId: string;
 
   // Mocked state
   const documents: DocumentEntity[] = [];
@@ -149,11 +148,7 @@ describe('Feature Flows (e2e)', () => {
       .useValue(mockQueryRepo)
       .overrideProvider(PrismaReviewRepository)
       .useValue(mockReviewRepo)
-      .overrideProvider(ChunkingProcessor)
-      .useValue({ process: jest.fn(), onModuleInit: jest.fn() })
-      .overrideProvider(EmbeddingProcessor)
-      .useValue({ process: jest.fn(), onModuleInit: jest.fn() })
-      .overrideProvider(ConceptExtractionProcessor)
+      .overrideProvider(IngestionProcessor)
       .useValue({ process: jest.fn(), onModuleInit: jest.fn() })
       .compile();
 
@@ -180,7 +175,7 @@ describe('Feature Flows (e2e)', () => {
       console.error('Ingest Error Body:', ingestRes.body);
     }
     expect(ingestRes.status).toBe(201);
-    const docId = (ingestRes.body as { documentId: string }).documentId;
+    docId = (ingestRes.body as { documentId: string }).documentId;
     expect(docId).toBeDefined();
 
     const statusRes: SupertestResponse = await request(app.getHttpServer()).get(
@@ -202,7 +197,7 @@ describe('Feature Flows (e2e)', () => {
   it('Flow 2: Annotating and Searching', async () => {
     const noteRes: SupertestResponse = await request(app.getHttpServer())
       .post('/knowledge/notes')
-      .send({ chunkId: 'c1', content: 'Important note' });
+      .send({ documentId: docId || 'doc1', content: 'Important note' });
 
     expect(noteRes.status).toBe(201);
     expect((noteRes.body as { noteId: string }).noteId).toBeDefined();

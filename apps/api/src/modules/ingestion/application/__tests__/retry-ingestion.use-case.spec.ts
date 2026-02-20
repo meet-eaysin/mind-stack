@@ -62,6 +62,14 @@ class FakeDocumentRepository implements DocumentRepository {
     return Promise.resolve();
   }
 
+  updateImportance(_id: string, _score: number): Promise<void> {
+    return Promise.resolve();
+  }
+
+  getImportance(_id: string): Promise<number | null> {
+    return Promise.resolve(null);
+  }
+
   getDocument(id: string): DocumentEntity | undefined {
     return this.documents.get(id);
   }

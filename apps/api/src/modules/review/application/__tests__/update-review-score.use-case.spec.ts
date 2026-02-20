@@ -10,15 +10,15 @@ class FakeReviewRepository implements ReviewRepository {
   private readonly reviews: Map<string, ReviewEntity> = new Map();
 
   seed(review: ReviewEntity): void {
-    this.reviews.set(review.chunkId, review);
+    this.reviews.set(review.documentId, review);
   }
 
-  findByChunkId(chunkId: string): Promise<ReviewEntity | null> {
-    return Promise.resolve(this.reviews.get(chunkId) ?? null);
+  findByDocumentId(documentId: string): Promise<ReviewEntity | null> {
+    return Promise.resolve(this.reviews.get(documentId) ?? null);
   }
 
-  upsert(chunkId: string, score: number): Promise<ReviewEntity> {
-    const existing = this.reviews.get(chunkId);
+  upsert(documentId: string, score: number): Promise<ReviewEntity> {
+    const existing = this.reviews.get(documentId);
     if (existing) {
       existing.reviewScore = score;
       existing.lastReviewedAt = new Date();
@@ -26,11 +26,11 @@ class FakeReviewRepository implements ReviewRepository {
     }
     const review: ReviewEntity = {
       id: `review-new`,
-      chunkId,
+      documentId,
       lastReviewedAt: new Date(),
       reviewScore: score,
     };
-    this.reviews.set(chunkId, review);
+    this.reviews.set(documentId, review);
     return Promise.resolve(review);
   }
 
@@ -57,20 +57,20 @@ describe('UpdateReviewScoreUseCase', () => {
   it('should update the review score for an existing review', async () => {
     reviewRepository.seed({
       id: 'r1',
-      chunkId: 'chunk-1',
+      documentId: 'doc-1',
       lastReviewedAt: new Date('2025-01-01T00:00:00Z'),
       reviewScore: 2,
     });
 
-    await useCase.execute({ chunkId: 'chunk-1', score: 4 });
+    await useCase.execute({ documentId: 'doc-1', score: 4 });
 
-    const review = await reviewRepository.findByChunkId('chunk-1');
+    const review = await reviewRepository.findByDocumentId('doc-1');
     expect(review?.reviewScore).toBe(4);
   });
 
-  it('should throw when no review exists for the given chunk', async () => {
+  it('should throw when no review exists for the given document', async () => {
     await expect(
-      useCase.execute({ chunkId: 'nonexistent', score: 3 }),
-    ).rejects.toThrow('No review found for chunk: nonexistent');
+      useCase.execute({ documentId: 'nonexistent', score: 3 }),
+    ).rejects.toThrow('No review found for document: nonexistent');
   });
 });

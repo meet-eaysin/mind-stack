@@ -12,30 +12,30 @@ export class PrismaReviewRepository implements ReviewRepository {
 
   private mapToDomain(row: {
     id: string;
-    chunkId: string;
+    documentId: string;
     lastReviewedAt: Date;
     reviewScore: number;
   }): ReviewEntity {
     return {
       id: row.id,
-      chunkId: row.chunkId,
+      documentId: row.documentId,
       lastReviewedAt: row.lastReviewedAt,
       reviewScore: row.reviewScore,
     };
   }
 
-  async findByChunkId(chunkId: string): Promise<ReviewEntity | null> {
+  async findByDocumentId(documentId: string): Promise<ReviewEntity | null> {
     const row = await this.prisma.review.findFirst({
-      where: { chunkId },
+      where: { documentId },
       orderBy: { lastReviewedAt: 'desc' },
     });
     if (!row) return null;
     return this.mapToDomain(row);
   }
 
-  async upsert(chunkId: string, score: number): Promise<ReviewEntity> {
+  async upsert(documentId: string, score: number): Promise<ReviewEntity> {
     const existing = await this.prisma.review.findFirst({
-      where: { chunkId },
+      where: { documentId },
     });
 
     if (existing) {
@@ -52,7 +52,7 @@ export class PrismaReviewRepository implements ReviewRepository {
     const row = await this.prisma.review.create({
       data: {
         id: randomUUID(),
-        chunkId,
+        documentId,
         reviewScore: score,
       },
     });

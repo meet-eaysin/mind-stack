@@ -33,8 +33,15 @@ import { IngestionModule } from '../../ingestion/presentation/ingestion.module.j
       useFactory: (
         docRepo: PrismaDocumentRepository,
         chunkRepo: PrismaChunkRepository,
-      ) => new ViewDocumentUseCase(docRepo, chunkRepo),
-      inject: [PrismaDocumentRepository, PrismaChunkRepository],
+        tagRepo: PrismaTagRepository,
+        noteRepo: PrismaNoteRepository,
+      ) => new ViewDocumentUseCase(docRepo, chunkRepo, tagRepo, noteRepo),
+      inject: [
+        PrismaDocumentRepository,
+        PrismaChunkRepository,
+        PrismaTagRepository,
+        PrismaNoteRepository,
+      ],
     },
     {
       provide: AddTagUseCase,
@@ -61,9 +68,9 @@ import { IngestionModule } from '../../ingestion/presentation/ingestion.module.j
     },
     {
       provide: UpdateImportanceUseCase,
-      useFactory: (chunkRepo: PrismaChunkRepository) =>
-        new UpdateImportanceUseCase(chunkRepo),
-      inject: [PrismaChunkRepository],
+      useFactory: (docRepo: PrismaDocumentRepository) =>
+        new UpdateImportanceUseCase(docRepo),
+      inject: [PrismaDocumentRepository],
     },
   ],
   exports: [PrismaChunkRepository, PrismaTagRepository],

@@ -1,9 +1,10 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, BookOpen, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDocument } from "../hooks";
 import { getApiErrorMessage } from "@/lib/api-client";
 import { ChunkCard } from "./chunk-card";
@@ -72,11 +73,32 @@ export function DocumentDetail({
 
       <Separator />
 
-      <div className="space-y-3" data-testid="chunk-list">
-        {doc.chunks.map((chunk) => (
-          <ChunkCard key={chunk.id} chunk={chunk} />
-        ))}
-      </div>
+      <Tabs defaultValue="reading" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="reading" className="gap-2">
+            <BookOpen className="size-4" /> Reading View
+          </TabsTrigger>
+          <TabsTrigger value="analysis" className="gap-2">
+            <Layers className="size-4" /> Analysis View
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="reading" className="mt-0 outline-none">
+          <div className="rounded-lg border bg-card p-6 shadow-sm">
+            <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap leading-relaxed">
+              {doc.rawContent}
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="analysis" className="mt-0 outline-none">
+          <div className="space-y-3" data-testid="chunk-list">
+            {doc.chunks.map((chunk) => (
+              <ChunkCard key={chunk.id} chunk={chunk} />
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

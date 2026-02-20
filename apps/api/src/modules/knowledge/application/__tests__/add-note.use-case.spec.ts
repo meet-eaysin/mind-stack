@@ -8,11 +8,11 @@ class FakeNoteRepository implements NoteRepository {
   private readonly notes: NoteEntity[] = [];
   private idCounter = 0;
 
-  create(chunkId: string, content: string): Promise<NoteEntity> {
+  createForDocument(documentId: string, content: string): Promise<NoteEntity> {
     this.idCounter += 1;
     const note: NoteEntity = {
       id: `note-${String(this.idCounter)}`,
-      chunkId,
+      documentId,
       content,
       createdAt: new Date(),
     };
@@ -29,9 +29,9 @@ class FakeNoteRepository implements NoteRepository {
     return Promise.resolve(note);
   }
 
-  findByChunkId(chunkId: string): Promise<NoteEntity | null> {
+  findByDocumentId(documentId: string): Promise<NoteEntity | null> {
     return Promise.resolve(
-      this.notes.find((n) => n.chunkId === chunkId) ?? null,
+      this.notes.find((n) => n.documentId === documentId) ?? null,
     );
   }
 }
@@ -49,23 +49,23 @@ describe('AddNoteUseCase', () => {
 
   it('should create a note and return the NoteEntity', async () => {
     const result = await useCase.execute({
-      chunkId: 'chunk-abc',
+      documentId: 'doc-abc',
       content: 'This is important',
     });
 
     expect(result.id).toBeDefined();
-    expect(result.chunkId).toBe('chunk-abc');
+    expect(result.documentId).toBe('doc-abc');
     expect(result.content).toBe('This is important');
     expect(result.createdAt).toBeInstanceOf(Date);
   });
 
   it('should persist the note in the repository', async () => {
     await useCase.execute({
-      chunkId: 'chunk-xyz',
+      documentId: 'doc-xyz',
       content: 'Saved note',
     });
 
-    const found = await noteRepository.findByChunkId('chunk-xyz');
+    const found = await noteRepository.findByDocumentId('doc-xyz');
     expect(found).not.toBeNull();
     expect(found?.content).toBe('Saved note');
   });

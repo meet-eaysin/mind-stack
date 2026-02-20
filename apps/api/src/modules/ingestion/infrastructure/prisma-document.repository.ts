@@ -93,4 +93,19 @@ export class PrismaDocumentRepository implements DocumentRepository {
       data: { status },
     });
   }
+
+  async updateImportance(id: string, score: number): Promise<void> {
+    await this.prisma.importanceScore.upsert({
+      where: { documentId: id },
+      create: { documentId: id, score },
+      update: { score },
+    });
+  }
+
+  async getImportance(id: string): Promise<number | null> {
+    const row = await this.prisma.importanceScore.findUnique({
+      where: { documentId: id },
+    });
+    return row?.score ?? null;
+  }
 }

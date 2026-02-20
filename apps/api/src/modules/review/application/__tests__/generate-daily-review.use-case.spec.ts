@@ -3,10 +3,8 @@ import type {
   ReviewRepository,
   ReviewEntity,
 } from '../../domain/review-repository.interface.js';
-import type {
-  QueryRepository,
-  QueryChunkDetail,
-} from '../../../query/domain/query-repository.interface.js';
+import type { DocumentRepository } from '../../../ingestion/domain/document-repository.interface.js';
+import type { DocumentEntity } from '../../../ingestion/domain/document.entity.js';
 
 // ── Fixtures ──
 
@@ -15,7 +13,7 @@ function createReviewFixture(
 ): ReviewEntity {
   return {
     id: 'review-1',
-    chunkId: 'chunk-1',
+    documentId: 'doc-1',
     lastReviewedAt: new Date('2020-01-01T00:00:00Z'),
     reviewScore: 0,
     ...overrides,
@@ -31,14 +29,14 @@ class FakeReviewRepository implements ReviewRepository {
     this.reviews = reviews;
   }
 
-  findByChunkId(chunkId: string): Promise<ReviewEntity | null> {
+  findByDocumentId(documentId: string): Promise<ReviewEntity | null> {
     return Promise.resolve(
-      this.reviews.find((r) => r.chunkId === chunkId) ?? null,
+      this.reviews.find((r) => r.documentId === documentId) ?? null,
     );
   }
 
-  upsert(chunkId: string, score: number): Promise<ReviewEntity> {
-    const existing = this.reviews.find((r) => r.chunkId === chunkId);
+  upsert(documentId: string, score: number): Promise<ReviewEntity> {
+    const existing = this.reviews.find((r) => r.documentId === documentId);
     if (existing) {
       existing.reviewScore = score;
       existing.lastReviewedAt = new Date();
@@ -46,7 +44,7 @@ class FakeReviewRepository implements ReviewRepository {
     }
     const review: ReviewEntity = {
       id: `review-${String(this.reviews.length + 1)}`,
-      chunkId,
+      documentId,
       lastReviewedAt: new Date(),
       reviewScore: score,
     };
@@ -63,25 +61,15 @@ class FakeReviewRepository implements ReviewRepository {
   }
 }
 
-class FakeQueryRepository implements QueryRepository {
-  private chunks: QueryChunkDetail[] = [];
+class FakeDocumentRepository implements Partial<DocumentRepository> {
+  private documents: DocumentEntity[] = [];
 
-  seed(chunks: QueryChunkDetail[]): void {
-    this.chunks = chunks;
+  seed(docs: DocumentEntity[]): void {
+    this.documents = docs;
   }
 
-  findChunksByIds(chunkIds: string[]): Promise<QueryChunkDetail[]> {
-    return Promise.resolve(
-      this.chunks.filter((c) => chunkIds.includes(c.chunkId)),
-    );
-  }
-
-  findChunksByTags(_tags: string[]): Promise<string[]> {
-    return Promise.resolve([]);
-  }
-
-  findChunksByDateRange(_from: Date, _to: Date): Promise<string[]> {
-    return Promise.resolve([]);
+  findById(id: string): Promise<DocumentEntity | null> {
+    return Promise.resolve(this.documents.find((d) => d.id === id) ?? null);
   }
 }
 
@@ -90,12 +78,15 @@ class FakeQueryRepository implements QueryRepository {
 describe('GenerateDailyReviewUseCase', () => {
   let useCase: GenerateDailyReviewUseCase;
   let reviewRepository: FakeReviewRepository;
-  let queryRepository: FakeQueryRepository;
+  let documentRepository: FakeDocumentRepository;
 
   beforeEach(() => {
     reviewRepository = new FakeReviewRepository();
-    queryRepository = new FakeQueryRepository();
-    useCase = new GenerateDailyReviewUseCase(reviewRepository, queryRepository);
+    documentRepository = new FakeDocumentRepository();
+    useCase = new GenerateDailyReviewUseCase(
+      reviewRepository,
+      documentRepository as unknown as DocumentRepository,
+    );
   });
 
   it('should select overdue reviews and return enriched items', async () => {
@@ -103,39 +94,37 @@ describe('GenerateDailyReviewUseCase', () => {
     reviewRepository.seed([
       createReviewFixture({
         id: 'r1',
-        chunkId: 'chunk-1',
+        documentId: 'doc-1',
         lastReviewedAt: longAgo,
         reviewScore: 0,
       }),
       createReviewFixture({
         id: 'r2',
-        chunkId: 'chunk-2',
+        documentId: 'doc-2',
         lastReviewedAt: longAgo,
         reviewScore: 1,
       }),
     ]);
 
-    queryRepository.seed([
+    documentRepository.seed([
       {
-        chunkId: 'chunk-1',
-        content: 'Content about TypeScript',
-        documentTitle: 'TS Guide',
-        importanceScore: 3,
-        tags: ['ts'],
+        id: 'doc-1',
+        title: 'TS Guide',
+        sourceType: 'TEXT',
+        sourceUrl: null,
+        rawContent: 'Content about TypeScript',
+        status: 'READY',
         createdAt: new Date('2025-01-01T00:00:00Z'),
-        hasNote: false,
-        reviewCount: 0,
-      },
+      } as DocumentEntity,
       {
-        chunkId: 'chunk-2',
-        content: 'Content about NestJS',
-        documentTitle: 'NestJS Guide',
-        importanceScore: 4,
-        tags: ['nest'],
+        id: 'doc-2',
+        title: 'NestJS Guide',
+        sourceType: 'TEXT',
+        sourceUrl: null,
+        rawContent: 'Content about NestJS',
+        status: 'READY',
         createdAt: new Date('2025-01-01T00:00:00Z'),
-        hasNote: false,
-        reviewCount: 0,
-      },
+      } as DocumentEntity,
     ]);
 
     const result = await useCase.execute(5);
@@ -153,7 +142,7 @@ describe('GenerateDailyReviewUseCase', () => {
   it('should return empty items when no reviews are overdue', async () => {
     reviewRepository.seed([
       createReviewFixture({
-        chunkId: 'chunk-1',
+        documentId: 'doc-1',
         lastReviewedAt: new Date(),
         reviewScore: 0,
       }),

@@ -2,7 +2,7 @@ import { IsString, IsInt, Min, Max } from 'class-validator';
 
 export class SubmitReviewFeedbackDto {
   @IsString()
-  chunkId!: string;
+  documentId!: string;
 
   @IsInt()
   @Min(0)

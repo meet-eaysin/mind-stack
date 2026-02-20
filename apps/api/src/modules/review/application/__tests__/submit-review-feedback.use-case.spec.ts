@@ -10,16 +10,16 @@ class FakeReviewRepository implements ReviewRepository {
   private readonly reviews: Map<string, ReviewEntity> = new Map();
   private idCounter = 0;
 
-  findByChunkId(chunkId: string): Promise<ReviewEntity | null> {
+  findByDocumentId(documentId: string): Promise<ReviewEntity | null> {
     for (const review of this.reviews.values()) {
-      if (review.chunkId === chunkId) return Promise.resolve(review);
+      if (review.documentId === documentId) return Promise.resolve(review);
     }
     return Promise.resolve(null);
   }
 
-  upsert(chunkId: string, score: number): Promise<ReviewEntity> {
+  upsert(documentId: string, score: number): Promise<ReviewEntity> {
     for (const review of this.reviews.values()) {
-      if (review.chunkId === chunkId) {
+      if (review.documentId === documentId) {
         review.reviewScore = score;
         review.lastReviewedAt = new Date();
         return Promise.resolve(review);
@@ -28,7 +28,7 @@ class FakeReviewRepository implements ReviewRepository {
     this.idCounter += 1;
     const review: ReviewEntity = {
       id: `review-${String(this.idCounter)}`,
-      chunkId,
+      documentId,
       lastReviewedAt: new Date(),
       reviewScore: score,
     };
@@ -44,9 +44,9 @@ class FakeReviewRepository implements ReviewRepository {
     return Promise.resolve([...this.reviews.values()]);
   }
 
-  getByChunkId(chunkId: string): ReviewEntity | undefined {
+  getByDocumentId(documentId: string): ReviewEntity | undefined {
     for (const review of this.reviews.values()) {
-      if (review.chunkId === chunkId) return review;
+      if (review.documentId === documentId) return review;
     }
     return undefined;
   }
@@ -64,36 +64,36 @@ describe('SubmitReviewFeedbackUseCase', () => {
   });
 
   it('should upsert a review with the given score', async () => {
-    await useCase.execute({ chunkId: 'chunk-1', score: 3 });
+    await useCase.execute({ documentId: 'doc-1', score: 3 });
 
-    const review = reviewRepository.getByChunkId('chunk-1');
+    const review = reviewRepository.getByDocumentId('doc-1');
     expect(review).toBeDefined();
     expect(review?.reviewScore).toBe(3);
   });
 
   it('should throw when the score is below 0', async () => {
     await expect(
-      useCase.execute({ chunkId: 'chunk-1', score: -1 }),
+      useCase.execute({ documentId: 'doc-1', score: -1 }),
     ).rejects.toThrow('Review score must be between 0 and 5');
   });
 
   it('should throw when the score is above 5', async () => {
     await expect(
-      useCase.execute({ chunkId: 'chunk-1', score: 6 }),
+      useCase.execute({ documentId: 'doc-1', score: 6 }),
     ).rejects.toThrow('Review score must be between 0 and 5');
   });
 
   it('should accept boundary score of 0', async () => {
-    await useCase.execute({ chunkId: 'chunk-1', score: 0 });
+    await useCase.execute({ documentId: 'doc-1', score: 0 });
 
-    const review = reviewRepository.getByChunkId('chunk-1');
+    const review = reviewRepository.getByDocumentId('doc-1');
     expect(review?.reviewScore).toBe(0);
   });
 
   it('should accept boundary score of 5', async () => {
-    await useCase.execute({ chunkId: 'chunk-1', score: 5 });
+    await useCase.execute({ documentId: 'doc-1', score: 5 });
 
-    const review = reviewRepository.getByChunkId('chunk-1');
+    const review = reviewRepository.getByDocumentId('doc-1');
     expect(review?.reviewScore).toBe(5);
   });
 });

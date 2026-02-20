@@ -5,9 +5,12 @@ export class AddNoteUseCase {
   constructor(private readonly noteRepository: NoteRepository) {}
 
   async execute(input: {
-    chunkId: string;
+    documentId: string;
     content: string;
   }): Promise<NoteEntity> {
-    return this.noteRepository.create(input.chunkId, input.content);
+    return this.noteRepository.createForDocument(
+      input.documentId,
+      input.content,
+    );
   }
 }

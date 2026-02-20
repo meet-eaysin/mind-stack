@@ -1,6 +1,6 @@
 export interface NoteEntity {
   id: string;
-  chunkId: string;
+  documentId: string;
   content: string;
   createdAt: Date;
 }

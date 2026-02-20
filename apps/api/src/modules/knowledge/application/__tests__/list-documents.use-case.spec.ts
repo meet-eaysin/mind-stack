@@ -1,10 +1,7 @@
 import { ListDocumentsUseCase } from '../list-documents.use-case.js';
 import type { DocumentRepository } from '../../../ingestion/domain/document-repository.interface.js';
 import type { DocumentEntity } from '../../../ingestion/domain/document.entity.js';
-import type {
-  ChunkRepository,
-  ChunkWithMeta,
-} from '../../domain/chunk-repository.interface.js';
+import type { ChunkRepository } from '../../domain/chunk-repository.interface.js';
 import type { ChunkEntity } from '../../domain/chunk.entity.js';
 import type { IngestionStatus } from '@repo/shared-types';
 
@@ -27,11 +24,6 @@ function createDocumentFixture(
 
 // ── Fakes ──
 
-/**
- * The production ListDocumentsUseCase uses a `findAllDocuments` private method
- * that calls `findById` in a loop starting with an empty-string id.
- * This fake matches that behavior by returning documents sequentially.
- */
 class FakeDocumentRepository implements DocumentRepository {
   private readonly documents: DocumentEntity[] = [];
 
@@ -61,33 +53,36 @@ class FakeDocumentRepository implements DocumentRepository {
   updateStatus(_id: string, _status: IngestionStatus): Promise<void> {
     return Promise.resolve();
   }
+
+  updateImportance(_id: string, _score: number): Promise<void> {
+    return Promise.resolve();
+  }
+
+  getImportance(_id: string): Promise<number | null> {
+    return Promise.resolve(null);
+  }
 }
 
 class FakeChunkRepository implements ChunkRepository {
-  private readonly chunksByDoc: Map<string, ChunkWithMeta[]> = new Map();
+  private readonly chunksByDoc: Map<string, ChunkEntity[]> = new Map();
 
   seed(documentId: string, count: number): void {
-    const chunks: ChunkWithMeta[] = Array.from({ length: count }, (_, i) => ({
-      chunk: {
-        id: `chunk-${documentId}-${String(i)}`,
-        documentId,
-        content: `content ${String(i)}`,
-        startOffset: i * 100,
-        endOffset: (i + 1) * 100,
-        createdAt: new Date('2025-01-01T00:00:00Z'),
-      },
-      tags: [],
-      note: null,
-      importanceScore: null,
+    const chunks: ChunkEntity[] = Array.from({ length: count }, (_, i) => ({
+      id: `chunk-${documentId}-${String(i)}`,
+      documentId,
+      content: `content ${String(i)}`,
+      startOffset: i * 100,
+      endOffset: (i + 1) * 100,
+      createdAt: new Date('2025-01-01T00:00:00Z'),
     }));
     this.chunksByDoc.set(documentId, chunks);
   }
 
-  findByDocumentId(documentId: string): Promise<ChunkWithMeta[]> {
+  findByDocumentId(documentId: string): Promise<ChunkEntity[]> {
     return Promise.resolve(this.chunksByDoc.get(documentId) ?? []);
   }
 
-  findById(_chunkId: string): Promise<ChunkWithMeta | null> {
+  findById(_chunkId: string): Promise<ChunkEntity | null> {
     return Promise.resolve(null);
   }
 
@@ -96,10 +91,6 @@ class FakeChunkRepository implements ChunkRepository {
     _chunks: Array<{ content: string; startOffset: number; endOffset: number }>,
   ): Promise<ChunkEntity[]> {
     return Promise.resolve([]);
-  }
-
-  updateImportance(_chunkId: string, _score: number): Promise<void> {
-    return Promise.resolve();
   }
 }
 

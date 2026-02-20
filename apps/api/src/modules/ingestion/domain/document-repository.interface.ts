@@ -7,4 +7,6 @@ export type DocumentRepository = {
   findAll(): Promise<DocumentEntity[]>;
   findBySourceUrl(url: string): Promise<DocumentEntity | null>;
   updateStatus(id: string, status: IngestionStatus): Promise<void>;
+  updateImportance(id: string, score: number): Promise<void>;
+  getImportance(id: string): Promise<number | null>;
 };

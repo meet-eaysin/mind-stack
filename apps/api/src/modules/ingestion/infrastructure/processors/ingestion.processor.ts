@@ -96,24 +96,22 @@ export class IngestionProcessor extends WorkerHost {
         return;
       }
 
-      const texts = chunksWithMeta.map((c) => c.chunk.content);
+      const texts = chunksWithMeta.map((c) => c.content);
       const embeddingResults = await this.embeddingProvider.embedBatch(texts);
 
       const vectorDocs = chunksWithMeta.map((cwm, i) => {
         const result: EmbeddingResult | undefined = embeddingResults[i];
         if (!result) {
-          throw new Error(
-            `Failed to generate embedding for chunk: ${cwm.chunk.id}`,
-          );
+          throw new Error(`Failed to generate embedding for chunk: ${cwm.id}`);
         }
         return {
-          id: cwm.chunk.id,
+          id: cwm.id,
           embedding: result.embedding,
-          content: cwm.chunk.content,
+          content: cwm.content,
           metadata: {
             documentId: documentId,
-            startOffset: cwm.chunk.startOffset,
-            endOffset: cwm.chunk.endOffset,
+            startOffset: cwm.startOffset,
+            endOffset: cwm.endOffset,
           },
         };
       });
@@ -139,8 +137,8 @@ export class IngestionProcessor extends WorkerHost {
         await this.chunkRepository.findByDocumentId(documentId);
       for (const cwm of chunksWithMeta) {
         await this.buildGraph.execute({
-          chunkId: cwm.chunk.id,
-          chunkContent: cwm.chunk.content,
+          chunkId: cwm.id,
+          chunkContent: cwm.content,
         });
       }
 

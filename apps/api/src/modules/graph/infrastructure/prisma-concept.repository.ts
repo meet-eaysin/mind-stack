@@ -139,9 +139,9 @@ export class PrismaConceptRepository implements ConceptRepository {
     });
     if (!concept) return 0;
 
-    const count = await this.prisma.chunkTag.count({
+    const count = await this.prisma.conceptChunk.count({
       where: {
-        tag: { name: concept.label },
+        conceptId: concept.id,
       },
     });
     return count;
@@ -156,25 +156,17 @@ export class PrismaConceptRepository implements ConceptRepository {
       throw new Error(`Concept with id ${conceptId} not found`);
     }
 
-    // Upsert a Tag using the concept's label to satisfy the schema definition
-    const tag = await this.prisma.tag.upsert({
-      where: { name: concept.label },
-      update: {},
-      create: { id: randomUUID(), name: concept.label },
-    });
-
-    // Link the Chunk to the Tag if it doesn't exist
-    await this.prisma.chunkTag.upsert({
+    await this.prisma.conceptChunk.upsert({
       where: {
-        chunkId_tagId: {
+        chunkId_conceptId: {
           chunkId,
-          tagId: tag.id,
+          conceptId: concept.id,
         },
       },
       update: {},
       create: {
         chunkId,
-        tagId: tag.id,
+        conceptId: concept.id,
       },
     });
   }
@@ -191,9 +183,9 @@ export class PrismaConceptRepository implements ConceptRepository {
     });
     if (!concept) return [];
 
-    const chunkTags = await this.prisma.chunkTag.findMany({
+    const conceptChunks = await this.prisma.conceptChunk.findMany({
       where: {
-        tag: { name: concept.label },
+        conceptId: concept.id,
       },
       include: {
         chunk: {
@@ -205,10 +197,10 @@ export class PrismaConceptRepository implements ConceptRepository {
       take: 5,
     });
 
-    return chunkTags.map((ct) => ({
-      id: ct.chunk.id,
-      content: ct.chunk.content,
-      documentTitle: ct.chunk.document.title,
+    return conceptChunks.map((cc) => ({
+      id: cc.chunk.id,
+      content: cc.chunk.content,
+      documentTitle: cc.chunk.document.title,
     }));
   }
 }

@@ -8,15 +8,19 @@ generator client {
 }
 
 model Document {
-  id          String   @id @default(uuid())
-  title       String
-  sourceType  String   @map("source_type")
-  sourceUrl   String?  @map("source_url")
-  rawContent  String   @map("raw_content")
-  status      String   @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
-  createdAt   DateTime @default(now()) @map("created_at")
+  id         String   @id @default(uuid())
+  title      String
+  sourceType String   @map("source_type")
+  sourceUrl  String?  @map("source_url")
+  rawContent String   @map("raw_content")
+  status     String   @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  createdAt  DateTime @default(now()) @map("created_at")
 
-  chunks Chunk[]
+  chunks          Chunk[]
+  DocumentTag     DocumentTag[]
+  Note            Note?
+  ImportanceScore ImportanceScore?
+  Review          Review[]
 
   @@map("documents")
 }
@@ -30,10 +34,7 @@ model Chunk {
   endOffset   Int      @map("end_offset")
   createdAt   DateTime @default(now()) @map("created_at")
 
-  chunkTags       ChunkTag[]
-  notes           Note[]
-  importanceScore ImportanceScore?
-  reviews         Review[]
+  conceptChunks ConceptChunk[]
 
   @@index([documentId])
   @@map("chunks")
@@ -43,49 +44,61 @@ model Tag {
   id   String @id @default(uuid())
   name String @unique
 
-  chunkTags ChunkTag[]
+  documentTags DocumentTag[]
 
   @@index([name])
   @@map("tags")
 }
 
-model ChunkTag {
-  chunk   Chunk  @relation(fields: [chunkId], references: [id], onDelete: Cascade)
-  chunkId String @map("chunk_id")
-  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
-  tagId   String @map("tag_id")
+model DocumentTag {
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId String   @map("document_id")
+  tag        Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tagId      String   @map("tag_id")
 
-  @@id([chunkId, tagId])
-  @@index([chunkId, tagId])
-  @@map("chunk_tags")
+  @@id([documentId, tagId])
+  @@index([documentId, tagId])
+  @@map("document_tags")
+}
+
+model ConceptChunk {
+  chunk     Chunk   @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  chunkId   String  @map("chunk_id")
+  concept   Concept @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+  conceptId String  @map("concept_id")
+
+  @@id([chunkId, conceptId])
+  @@index([chunkId, conceptId])
+  @@map("concept_chunks")
 }
 
 model Note {
-  id        String   @id @default(uuid())
-  chunk     Chunk    @relation(fields: [chunkId], references: [id], onDelete: Cascade)
-  chunkId   String   @unique @map("chunk_id")
-  content   String
-  createdAt DateTime @default(now()) @map("created_at")
+  id         String   @id @default(uuid())
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId String   @unique @map("document_id")
+  content    String
+  createdAt  DateTime @default(now()) @map("created_at")
 
   @@map("notes")
 }
 
 model ImportanceScore {
-  chunk   Chunk  @relation(fields: [chunkId], references: [id], onDelete: Cascade)
-  chunkId String @unique @map("chunk_id")
-  score   Int // 1-5
+  id         String   @id @default(uuid())
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId String   @unique @map("document_id")
+  score      Int // 1-5
 
   @@map("importance_scores")
 }
 
 model Review {
   id             String   @id @default(uuid())
-  chunk          Chunk    @relation(fields: [chunkId], references: [id], onDelete: Cascade)
-  chunkId        String   @map("chunk_id")
+  document       Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId     String   @map("document_id")
   lastReviewedAt DateTime @default(now()) @map("last_reviewed_at")
   reviewScore    Int      @map("review_score") // 0-5
 
-  @@index([chunkId])
+  @@index([documentId])
   @@map("reviews")
 }
 
@@ -95,6 +108,7 @@ model Concept {
 
   fromRelations ConceptRelation[] @relation("FromConcept")
   toRelations   ConceptRelation[] @relation("ToConcept")
+  conceptChunks ConceptChunk[]
 
   @@index([label])
   @@map("concepts")

@@ -2,7 +2,7 @@ import { IsString, IsInt, Min, Max, IsOptional } from 'class-validator';
 
 export class AddTagDto {
   @IsString()
-  chunkId!: string;
+  documentId!: string;
 
   @IsString()
   tagName!: string;
@@ -10,7 +10,7 @@ export class AddTagDto {
 
 export class RemoveTagDto {
   @IsString()
-  chunkId!: string;
+  documentId!: string;
 
   @IsString()
   tagName!: string;
@@ -18,7 +18,7 @@ export class RemoveTagDto {
 
 export class AddNoteDto {
   @IsString()
-  chunkId!: string;
+  documentId!: string;
 
   @IsString()
   content!: string;
@@ -31,7 +31,7 @@ export class UpdateNoteDto {
 
 export class UpdateImportanceDto {
   @IsString()
-  chunkId!: string;
+  documentId!: string;
 
   @IsInt()
   @Min(1)

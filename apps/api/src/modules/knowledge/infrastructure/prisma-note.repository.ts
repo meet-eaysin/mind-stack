@@ -8,13 +8,16 @@ import type { NoteEntity } from '../domain/note.entity.js';
 export class PrismaNoteRepository implements NoteRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(chunkId: string, content: string): Promise<NoteEntity> {
+  async createForDocument(
+    documentId: string,
+    content: string,
+  ): Promise<NoteEntity> {
     const row = await this.prisma.note.create({
-      data: { id: randomUUID(), chunkId, content },
+      data: { id: randomUUID(), documentId, content },
     });
     return {
       id: row.id,
-      chunkId: row.chunkId,
+      documentId: row.documentId,
       content: row.content,
       createdAt: row.createdAt,
     };
@@ -27,21 +30,21 @@ export class PrismaNoteRepository implements NoteRepository {
     });
     return {
       id: row.id,
-      chunkId: row.chunkId,
+      documentId: row.documentId,
       content: row.content,
       createdAt: row.createdAt,
     };
   }
 
-  async findByChunkId(chunkId: string): Promise<NoteEntity | null> {
+  async findByDocumentId(documentId: string): Promise<NoteEntity | null> {
     const row = await this.prisma.note.findFirst({
-      where: { chunkId },
+      where: { documentId },
       orderBy: { createdAt: 'desc' },
     });
     if (!row) return null;
     return {
       id: row.id,
-      chunkId: row.chunkId,
+      documentId: row.documentId,
       content: row.content,
       createdAt: row.createdAt,
     };

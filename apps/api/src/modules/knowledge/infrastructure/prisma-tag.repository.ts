@@ -20,28 +20,31 @@ export class PrismaTagRepository implements TagRepository {
     return { id: created.id, name: created.name };
   }
 
-  async addTagToChunk(chunkId: string, tagId: string): Promise<void> {
-    await this.prisma.chunkTag.upsert({
-      where: { chunkId_tagId: { chunkId, tagId } },
-      create: { chunkId, tagId },
+  async addTagToDocument(documentId: string, tagId: string): Promise<void> {
+    await this.prisma.documentTag.upsert({
+      where: { documentId_tagId: { documentId, tagId } },
+      create: { documentId, tagId },
       update: {},
     });
   }
 
-  async removeTagFromChunk(chunkId: string, tagName: string): Promise<void> {
+  async removeTagFromDocument(
+    documentId: string,
+    tagName: string,
+  ): Promise<void> {
     const tag = await this.prisma.tag.findUnique({
       where: { name: tagName },
     });
     if (!tag) return;
 
-    await this.prisma.chunkTag.deleteMany({
-      where: { chunkId, tagId: tag.id },
+    await this.prisma.documentTag.deleteMany({
+      where: { documentId, tagId: tag.id },
     });
   }
 
-  async findByChunkId(chunkId: string): Promise<TagEntity[]> {
-    const rows = await this.prisma.chunkTag.findMany({
-      where: { chunkId },
+  async findByDocumentId(documentId: string): Promise<TagEntity[]> {
+    const rows = await this.prisma.documentTag.findMany({
+      where: { documentId },
       include: { tag: true },
     });
     return rows.map((r) => ({ id: r.tag.id, name: r.tag.name }));

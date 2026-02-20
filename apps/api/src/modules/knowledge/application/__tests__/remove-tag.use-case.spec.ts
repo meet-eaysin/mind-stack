@@ -6,14 +6,14 @@ import type { TagEntity } from '../../domain/tag.entity.js';
 
 class FakeTagRepository implements TagRepository {
   private readonly tags: Map<string, TagEntity> = new Map();
-  private readonly chunkTags: Map<string, Set<string>> = new Map();
+  private readonly documentTags: Map<string, Set<string>> = new Map();
   private idCounter = 0;
 
-  seed(chunkId: string, tag: TagEntity): void {
+  seed(documentId: string, tag: TagEntity): void {
     this.tags.set(tag.id, tag);
-    const existing = this.chunkTags.get(chunkId) ?? new Set<string>();
+    const existing = this.documentTags.get(documentId) ?? new Set<string>();
     existing.add(tag.id);
-    this.chunkTags.set(chunkId, existing);
+    this.documentTags.set(documentId, existing);
   }
 
   findOrCreate(name: string): Promise<TagEntity> {
@@ -26,15 +26,15 @@ class FakeTagRepository implements TagRepository {
     return Promise.resolve(tag);
   }
 
-  addTagToChunk(chunkId: string, tagId: string): Promise<void> {
-    const existing = this.chunkTags.get(chunkId) ?? new Set<string>();
+  addTagToDocument(documentId: string, tagId: string): Promise<void> {
+    const existing = this.documentTags.get(documentId) ?? new Set<string>();
     existing.add(tagId);
-    this.chunkTags.set(chunkId, existing);
+    this.documentTags.set(documentId, existing);
     return Promise.resolve();
   }
 
-  removeTagFromChunk(chunkId: string, tagName: string): Promise<void> {
-    const existing = this.chunkTags.get(chunkId);
+  removeTagFromDocument(documentId: string, tagName: string): Promise<void> {
+    const existing = this.documentTags.get(documentId);
     if (!existing) return Promise.resolve();
     for (const [id, tag] of this.tags) {
       if (tag.name === tagName) {
@@ -45,8 +45,8 @@ class FakeTagRepository implements TagRepository {
     return Promise.resolve();
   }
 
-  findByChunkId(chunkId: string): Promise<TagEntity[]> {
-    const tagIds = this.chunkTags.get(chunkId);
+  findByDocumentId(documentId: string): Promise<TagEntity[]> {
+    const tagIds = this.documentTags.get(documentId);
     if (!tagIds) return Promise.resolve([]);
     const result: TagEntity[] = [];
     for (const tagId of tagIds) {
@@ -68,18 +68,18 @@ describe('RemoveTagUseCase', () => {
     useCase = new RemoveTagUseCase(tagRepository);
   });
 
-  it('should remove the tag from the chunk', async () => {
-    tagRepository.seed('chunk-1', { id: 'tag-1', name: 'important' });
+  it('should remove the tag from the document', async () => {
+    tagRepository.seed('doc-1', { id: 'tag-1', name: 'important' });
 
-    await useCase.execute({ chunkId: 'chunk-1', tagName: 'important' });
+    await useCase.execute({ documentId: 'doc-1', tagName: 'important' });
 
-    const tags = await tagRepository.findByChunkId('chunk-1');
+    const tags = await tagRepository.findByDocumentId('doc-1');
     expect(tags).toHaveLength(0);
   });
 
   it('should not throw when removing a tag that does not exist', async () => {
     await expect(
-      useCase.execute({ chunkId: 'chunk-1', tagName: 'nonexistent' }),
+      useCase.execute({ documentId: 'doc-1', tagName: 'nonexistent' }),
     ).resolves.toBeUndefined();
   });
 });

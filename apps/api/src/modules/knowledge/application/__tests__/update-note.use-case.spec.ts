@@ -11,10 +11,10 @@ class FakeNoteRepository implements NoteRepository {
     this.notes.set(note.id, { ...note });
   }
 
-  create(chunkId: string, content: string): Promise<NoteEntity> {
+  createForDocument(documentId: string, content: string): Promise<NoteEntity> {
     const note: NoteEntity = {
       id: `note-${String(this.notes.size + 1)}`,
-      chunkId,
+      documentId,
       content,
       createdAt: new Date(),
     };
@@ -31,9 +31,9 @@ class FakeNoteRepository implements NoteRepository {
     return Promise.resolve(note);
   }
 
-  findByChunkId(chunkId: string): Promise<NoteEntity | null> {
+  findByDocumentId(documentId: string): Promise<NoteEntity | null> {
     for (const note of this.notes.values()) {
-      if (note.chunkId === chunkId) return Promise.resolve(note);
+      if (note.documentId === documentId) return Promise.resolve(note);
     }
     return Promise.resolve(null);
   }
@@ -53,7 +53,7 @@ describe('UpdateNoteUseCase', () => {
   it('should update the note content and return the updated entity', async () => {
     noteRepository.seed({
       id: 'note-1',
-      chunkId: 'chunk-1',
+      documentId: 'doc-1',
       content: 'old content',
       createdAt: new Date('2025-01-01T00:00:00Z'),
     });

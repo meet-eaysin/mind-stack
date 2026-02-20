@@ -52,9 +52,6 @@ export type ChunkResponse = {
   content: string;
   startOffset: number;
   endOffset: number;
-  tags: string[];
-  note: string | null;
-  importanceScore: number | null;
   createdAt: string;
 };
 
@@ -66,21 +63,24 @@ export type DocumentDetailResponse = {
   status: IngestionStatus;
   rawContent: string;
   chunks: ChunkResponse[];
+  tags: string[];
+  note: string | null;
+  importanceScore: number | null;
   createdAt: string;
 };
 
 export type AddTagRequest = {
-  chunkId: string;
+  documentId: string;
   tagName: string;
 };
 
 export type RemoveTagRequest = {
-  chunkId: string;
+  documentId: string;
   tagName: string;
 };
 
 export type AddNoteRequest = {
-  chunkId: string;
+  documentId: string;
   content: string;
 };
 
@@ -140,7 +140,7 @@ export type StreamingAskResponseChunk =
 // ── Review DTOs ──
 
 export type ReviewItem = {
-  chunkId: string;
+  documentId: string;
   content: string;
   documentTitle: string;
   summary: string;
@@ -154,7 +154,7 @@ export type DailyReviewResponse = {
 };
 
 export type SubmitReviewFeedbackRequest = {
-  chunkId: string;
+  documentId: string;
   score: number;
 };
 

@@ -103,6 +103,9 @@ class FakeConceptRepository implements ConceptRepository {
   getCreatedRelations(): ConceptRelationEntity[] {
     return this.relations;
   }
+  findAssociatedChunks(_conceptId: string): Promise<{ id: string; content: string; documentTitle: string; }[]> {
+    return Promise.resolve([]);
+  }
 }
 
 // ── Tests ──

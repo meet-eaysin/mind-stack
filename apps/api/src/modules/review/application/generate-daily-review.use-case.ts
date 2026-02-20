@@ -1,31 +1,33 @@
 import type { ReviewRepository } from '../domain/review-repository.interface.js';
-import type { QueryRepository } from '../../query/domain/query-repository.interface.js';
+import type { DocumentRepository } from '../../ingestion/domain/document-repository.interface.js';
 import { selectChunksForReview } from '../domain/review-selection.service.js';
 import type { DailyReviewResponse, ReviewItem } from '@repo/shared-types';
 
 export class GenerateDailyReviewUseCase {
   constructor(
     private readonly reviewRepository: ReviewRepository,
-    private readonly queryRepository: QueryRepository,
+    private readonly documentRepository: DocumentRepository,
   ) {}
 
   async execute(limit: number = 5): Promise<DailyReviewResponse> {
     const allReviews = await this.reviewRepository.findAll();
     const selected = selectChunksForReview(allReviews, limit);
 
-    const chunkIds = selected.map((r) => r.chunkId);
-    const chunkDetails = await this.queryRepository.findChunksByIds(chunkIds);
+    // Fetch documents manually
+    const documents = await Promise.all(
+      selected.map((r) => this.documentRepository.findById(r.documentId)),
+    );
 
     const items: ReviewItem[] = selected.map((review) => {
-      const detail = chunkDetails.find((d) => d.chunkId === review.chunkId);
-      const content = detail?.content ?? '';
+      const doc = documents.find((d) => d?.id === review.documentId);
+      const content = doc?.rawContent ?? '';
       const summary =
         content.length > 200 ? content.substring(0, 200) + '...' : content;
 
       return {
-        chunkId: review.chunkId,
+        documentId: review.documentId,
         content,
-        documentTitle: detail?.documentTitle ?? '',
+        documentTitle: doc?.title ?? '',
         summary,
         reason: `Last reviewed ${Math.floor(
           (Date.now() - review.lastReviewedAt.getTime()) /

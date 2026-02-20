@@ -4,6 +4,7 @@ import type {
   QueryRepository,
   QueryChunkDetail,
 } from '../domain/query-repository.interface.js';
+import type { DocumentTag } from '@prisma/client';
 
 @Injectable()
 export class PrismaQueryRepository implements QueryRepository {
@@ -13,11 +14,14 @@ export class PrismaQueryRepository implements QueryRepository {
     const chunks = await this.prisma.chunk.findMany({
       where: { id: { in: chunkIds } },
       include: {
-        document: { select: { title: true } },
-        chunkTags: { include: { tag: true } },
-        importanceScore: true,
-        notes: { select: { id: true } },
-        reviews: { select: { id: true } },
+        document: {
+          include: {
+            DocumentTag: { include: { tag: true } },
+            ImportanceScore: true,
+            Note: true,
+            Review: { select: { id: true } },
+          },
+        },
       },
     });
 
@@ -25,21 +29,28 @@ export class PrismaQueryRepository implements QueryRepository {
       chunkId: c.id,
       content: c.content,
       documentTitle: c.document.title,
-      importanceScore: c.importanceScore?.score ?? null,
-      tags: c.chunkTags.map((ct) => ct.tag.name),
+      importanceScore: c.document.ImportanceScore?.score ?? null,
+      tags: c.document.DocumentTag.map(
+        (t: DocumentTag & { tag: { name: string } }) => t.tag.name,
+      ),
       createdAt: c.createdAt,
-      hasNote: c.notes.length > 0,
-      reviewCount: c.reviews.length,
+      hasNote: c.document.Note !== null,
+      reviewCount: c.document.Review.length,
     }));
   }
 
   async findChunksByTags(tags: string[]): Promise<string[]> {
-    const rows = await this.prisma.chunkTag.findMany({
-      where: { tag: { name: { in: tags } } },
-      select: { chunkId: true },
-      distinct: ['chunkId'],
+    const rows = await this.prisma.chunk.findMany({
+      where: {
+        document: {
+          DocumentTag: {
+            some: { tag: { name: { in: tags } } },
+          },
+        },
+      },
+      select: { id: true },
     });
-    return rows.map((r) => r.chunkId);
+    return rows.map((r) => r.id);
   }
 
   async findChunksByDateRange(from: Date, to: Date): Promise<string[]> {
