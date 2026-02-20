@@ -30,4 +30,11 @@ export type ConceptRepository = {
   }>;
   countChunksForConcept(conceptId: string): Promise<number>;
   linkConceptToChunk(conceptId: string, chunkId: string): Promise<void>;
+  findAssociatedChunks(conceptId: string): Promise<
+    Array<{
+      id: string;
+      content: string;
+      documentTitle: string;
+    }>
+  >;
 };

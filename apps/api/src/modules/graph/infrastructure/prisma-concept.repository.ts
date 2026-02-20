@@ -178,4 +178,37 @@ export class PrismaConceptRepository implements ConceptRepository {
       },
     });
   }
+
+  async findAssociatedChunks(conceptId: string): Promise<
+    Array<{
+      id: string;
+      content: string;
+      documentTitle: string;
+    }>
+  > {
+    const concept = await this.prisma.concept.findUnique({
+      where: { id: conceptId },
+    });
+    if (!concept) return [];
+
+    const chunkTags = await this.prisma.chunkTag.findMany({
+      where: {
+        tag: { name: concept.label },
+      },
+      include: {
+        chunk: {
+          include: {
+            document: true,
+          },
+        },
+      },
+      take: 5,
+    });
+
+    return chunkTags.map((ct) => ({
+      id: ct.chunk.id,
+      content: ct.chunk.content,
+      documentTitle: ct.chunk.document.title,
+    }));
+  }
 }

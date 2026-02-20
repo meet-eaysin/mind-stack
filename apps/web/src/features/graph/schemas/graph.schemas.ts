@@ -5,6 +5,15 @@ export const GraphNodeSchema = z.object({
   id: z.string(),
   label: z.string(),
   chunkCount: z.number(),
+  associatedChunks: z
+    .array(
+      z.object({
+        id: z.string(),
+        content: z.string(),
+        documentTitle: z.string(),
+      }),
+    )
+    .optional(),
 });
 
 export const GraphEdgeSchema = z.object({

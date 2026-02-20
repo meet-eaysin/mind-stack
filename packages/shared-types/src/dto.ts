@@ -163,6 +163,11 @@ export type ConceptNode = {
   id: string;
   label: string;
   chunkCount: number;
+  associatedChunks?: Array<{
+    id: string;
+    content: string;
+    documentTitle: string;
+  }>;
 };
 
 export type ConceptEdge = {

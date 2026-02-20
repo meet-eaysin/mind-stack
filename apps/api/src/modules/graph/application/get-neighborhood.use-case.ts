@@ -17,6 +17,9 @@ export class GetNeighborhoodUseCase {
         id: c.id,
         label: c.label,
         chunkCount: await this.conceptRepository.countChunksForConcept(c.id),
+        associatedChunks: await this.conceptRepository.findAssociatedChunks(
+          c.id,
+        ),
       })),
     );
 

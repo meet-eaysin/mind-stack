@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RefreshCw, Maximize, AlertCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { RefreshCw, AlertCircle, Search, Info, Activity } from "lucide-react";
 import {
   useGraph,
   useBuildGraph,
@@ -13,102 +13,177 @@ import {
   NeighborhoodPanel,
 } from "@/features/graph";
 import { getApiErrorMessage } from "@/lib/api-client";
+import { Badge } from "@/components/ui/badge";
 
 export default function GraphPage() {
   const { data, isLoading, error, refetch } = useGraph();
   const buildGraph = useBuildGraph();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredData = useMemo(() => {
+    if (!data) return null;
+    if (!searchQuery) return data;
+
+    const term = searchQuery.toLowerCase();
+    const filteredNodes = data.nodes.filter((n) =>
+      n.label.toLowerCase().includes(term),
+    );
+    const nodeIds = new Set(filteredNodes.map((n) => n.id));
+    const filteredEdges = data.edges.filter(
+      (e) => nodeIds.has(e.fromId) || nodeIds.has(e.toId),
+    );
+
+    return { nodes: filteredNodes, edges: filteredEdges };
+  }, [data, searchQuery]);
 
   return (
     <AppShell>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              Knowledge Graph
+            <h1 className="text-3xl font-bold tracking-tight bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Knowledge Map
             </h1>
-            <p className="text-muted-foreground">
-              Discover connections between concepts in your second brain.
+            <p className="text-muted-foreground text-sm">
+              Discover connections and trace knowledge across your documents.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 shrink-0">
+            <div className="relative w-64">
+              <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+              <Input
+                placeholder="Search concepts..."
+                className="pl-9 bg-muted/20"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => refetch()}
-              className="gap-1.5"
-            >
-              <Maximize className="size-3.5" />
-              Full Map
-            </Button>
-            <Button
-              size="sm"
               onClick={() => buildGraph.mutate({ forceRebuild: false })}
               disabled={buildGraph.isPending}
-              className="gap-1.5"
+              className="gap-2"
             >
               <RefreshCw
-                className={`size-3.5 ${buildGraph.isPending ? "animate-spin" : ""}`}
+                className={`size-4 ${buildGraph.isPending ? "animate-spin" : ""}`}
               />
-              Build Graph
+              Sync Graph
             </Button>
           </div>
         </div>
 
         {isLoading && (
-          <Skeleton className="h-96 w-full" data-testid="graph-loading" />
+          <div className="grid gap-4 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <Skeleton
+                className="h-[500px] w-full rounded-xl"
+                data-testid="graph-loading"
+              />
+            </div>
+            <div className="space-y-4">
+              <Skeleton className="h-64 w-full rounded-xl" />
+              <Skeleton className="h-32 w-full rounded-xl" />
+            </div>
+          </div>
         )}
 
         {error && (
           <div
-            className="flex h-96 items-center justify-center rounded-lg border bg-card"
+            className="flex h-96 items-center justify-center rounded-xl border bg-card/50 backdrop-blur-sm"
             data-testid="graph-error"
           >
             <div className="text-center">
-              <AlertCircle className="mx-auto mb-2 size-8 text-destructive" />
-              <p className="text-sm text-destructive">
+              <AlertCircle className="mx-auto mb-2 size-10 text-destructive/50" />
+              <p className="text-sm text-destructive font-medium">
                 {getApiErrorMessage(error)}
               </p>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => refetch()}
-                className="mt-2"
+                className="mt-4"
               >
-                Retry
+                Retry Connection
               </Button>
             </div>
           </div>
         )}
 
-        {data && (
-          <div className="grid gap-4 lg:grid-cols-3">
+        {data && filteredData && (
+          <div className="grid gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2">
-              <GraphVisualization
-                nodes={data.nodes}
-                edges={data.edges}
-                onNodeSelect={setSelectedNodeId}
-                selectedNodeId={selectedNodeId}
-              />
+              <div className="relative rounded-xl border bg-background/50 overflow-hidden">
+                <div className="absolute top-4 left-4 z-10">
+                  <Badge
+                    variant="secondary"
+                    className="bg-background/80 backdrop-blur-md border-primary/20 text-[10px] font-bold"
+                  >
+                    {filteredData.nodes.length} PERSISTED CONCEPTS
+                  </Badge>
+                </div>
+                <GraphVisualization
+                  nodes={filteredData.nodes}
+                  edges={filteredData.edges}
+                  onNodeSelect={setSelectedNodeId}
+                  selectedNodeId={selectedNodeId}
+                />
+              </div>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {selectedNodeId ? (
                 <NeighborhoodPanel conceptId={selectedNodeId} />
               ) : (
                 <div
-                  className="rounded-lg border bg-card p-4 text-sm text-muted-foreground"
+                  className="rounded-xl border bg-card/50 p-6 text-center space-y-3"
                   data-testid="graph-selection-hint"
                 >
-                  Select a concept node on the map to explore its connections
-                  and details.
+                  <div className="mx-auto size-12 rounded-full bg-primary/5 flex items-center justify-center text-primary/40">
+                    <Info className="size-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-semibold text-sm text-foreground">
+                      Exploration Mode
+                    </h4>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Select a node in the graph to analyze its specific
+                      connections and source documents.
+                    </p>
+                  </div>
                 </div>
               )}
-              <Separator />
-              <div className="rounded-lg border bg-card p-4">
-                <h3 className="mb-2 text-sm font-semibold">Graph Stats</h3>
-                <div className="space-y-1 text-sm text-muted-foreground">
-                  <p>Total Nodes: {data.nodes.length}</p>
-                  <p>Total Edges: {data.edges.length}</p>
+
+              <div className="rounded-xl border bg-card/40 p-5 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <Activity className="size-4 text-primary" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Network Insights
+                  </h3>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold">
+                      Total Nodes
+                    </p>
+                    <p className="text-2xl font-black">{data.nodes.length}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold">
+                      Total Links
+                    </p>
+                    <p className="text-2xl font-black">{data.edges.length}</p>
+                  </div>
+                  <div className="col-span-2 pt-2">
+                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary"
+                        style={{
+                          width: `${Math.min(100, (data.nodes.length / 50) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

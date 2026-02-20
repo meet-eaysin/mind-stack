@@ -10,7 +10,7 @@ import { BuildGraphUseCase } from '../../../graph/application/build-graph.use-ca
 import { JOB_TYPE, INGESTION_STATUS } from '@repo/shared-types';
 import { createLogger } from '@repo/logger';
 import { EMBEDDING_PROVIDER, VECTOR_STORE } from '../../../../common/tokens.js';
-import type { EmbeddingProvider } from '@repo/embeddings';
+import type { EmbeddingProvider, EmbeddingResult } from '@repo/embeddings';
 import type { VectorStore } from '@repo/vector-store';
 import type { IngestionJob } from '../../domain/ingestion-job.types.js';
 
@@ -100,7 +100,7 @@ export class IngestionProcessor extends WorkerHost {
       const embeddingResults = await this.embeddingProvider.embedBatch(texts);
 
       const vectorDocs = chunksWithMeta.map((cwm, i) => {
-        const result = embeddingResults[i];
+        const result: EmbeddingResult | undefined = embeddingResults[i];
         if (!result) {
           throw new Error(
             `Failed to generate embedding for chunk: ${cwm.chunk.id}`,
