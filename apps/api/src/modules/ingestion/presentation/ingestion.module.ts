@@ -12,9 +12,7 @@ import { IngestPdfUseCase } from '../application/ingest-pdf.use-case.js';
 import { IngestYoutubeUseCase } from '../application/ingest-youtube.use-case.js';
 import { RetryIngestionUseCase } from '../application/retry-ingestion.use-case.js';
 
-import { ChunkingProcessor } from '../infrastructure/processors/chunking.processor.js';
-import { EmbeddingProcessor } from '../infrastructure/processors/embedding.processor.js';
-import { ConceptExtractionProcessor } from '../infrastructure/processors/concept-extraction.processor.js';
+import { IngestionProcessor } from '../infrastructure/processors/ingestion.processor.js';
 
 import { KnowledgeModule } from '../../knowledge/presentation/knowledge.module.js';
 import { GraphModule } from '../../graph/presentation/graph.module.js';
@@ -31,9 +29,7 @@ import { QueryModule } from '../../query/presentation/query.module.js';
   providers: [
     PrismaDocumentRepository,
     IngestionJobProducer,
-    ChunkingProcessor,
-    EmbeddingProcessor,
-    ConceptExtractionProcessor,
+    IngestionProcessor,
     {
       provide: IngestUrlUseCase,
       useFactory: (

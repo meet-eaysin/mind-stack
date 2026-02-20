@@ -3,6 +3,7 @@ import { JobType } from '@repo/shared-types';
 
 export type IngestionJobData = {
   documentId: string;
+  rawContent?: string;
 };
 
 export type IngestionJob = Job<IngestionJobData, void, JobType>;
