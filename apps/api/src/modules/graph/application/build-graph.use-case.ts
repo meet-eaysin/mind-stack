@@ -107,9 +107,6 @@ export class BuildGraphUseCase {
       );
       return validated;
     } catch (error) {
-      console.error(
-        `GRAPH_EXTRACT: Failed to parse concepts: ${error instanceof Error ? error.message : String(error)}`,
-      );
       throw new Error(
         `Graph extraction failed: ${error instanceof Error ? error.message : String(error)}`,
       );

@@ -18,7 +18,19 @@ export function GraphVisualization({
 }) {
   const [nodePositions, setNodePositions] = useState<
     Array<GraphNode & { x: number; y: number; vx: number; vy: number }>
-  >([]);
+  >(() => {
+    return nodes.map((node, i) => {
+      const angle = (2 * Math.PI * i) / (nodes.length || 1);
+      const radius = 125; // Math.min(800, 500) * 0.25
+      return {
+        ...node,
+        x: 400 + radius * Math.cos(angle) + (Math.random() - 0.5) * 50,
+        y: 250 + radius * Math.sin(angle) + (Math.random() - 0.5) * 50,
+        vx: 0,
+        vy: 0,
+      };
+    });
+  });
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
