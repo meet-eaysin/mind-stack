@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { IngestionModal } from "@/features/ingestion/components/ingestion-modal";
+import { useRetryIngestion } from "@/features/ingestion/hooks";
+import { Badge } from "@/components/ui/badge";
 import {
   Globe,
   Type,
@@ -12,6 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
+  RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +36,7 @@ export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const pageSize = 10;
   const queryClient = useQueryClient();
+  const retryIngestion = useRetryIngestion();
 
   const { data, isLoading, error } = useDocuments(
     page,
@@ -96,21 +101,73 @@ export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
             {data.documents.map((doc) => {
               const Icon = sourceTypeIcons[doc.sourceType] || FileText;
               return (
-                <button
+                <div
                   key={doc.id}
-                  onClick={() => onSelect(doc.id)}
-                  className="flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-accent"
+                  className="flex w-full items-center justify-between gap-3 rounded-lg border p-3 transition-colors hover:bg-accent group"
                   data-testid={`document-item-${doc.id}`}
                 >
-                  <Icon className="size-4 shrink-0 text-muted-foreground" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{doc.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {doc.chunkCount} chunks ·{" "}
-                      {new Date(doc.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </button>
+                  <button
+                    onClick={() => onSelect(doc.id)}
+                    className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                  >
+                    <Icon className="size-4 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate font-medium">{doc.title}</p>
+                        {doc.status === "FAILED" && (
+                          <Badge
+                            variant="destructive"
+                            className="h-4 text-[10px] px-1 py-0 gap-1 rounded"
+                          >
+                            <AlertCircle className="size-3" /> FAILED
+                          </Badge>
+                        )}
+                        {doc.status !== "READY" && doc.status !== "FAILED" && (
+                          <Badge
+                            variant="secondary"
+                            className="h-4 text-[10px] px-1 py-0 gap-1 text-muted-foreground bg-muted rounded"
+                          >
+                            <RefreshCw className="size-3 animate-spin" />{" "}
+                            {doc.status}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {doc.chunkCount} chunks ·{" "}
+                        {new Date(doc.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </button>
+                  {doc.status === "FAILED" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        retryIngestion.mutate(doc.id, {
+                          onSuccess: () => {
+                            queryClient.invalidateQueries({
+                              queryKey: ["documents"],
+                            });
+                            queryClient.invalidateQueries({
+                              queryKey: ["knowledge"],
+                            });
+                          },
+                        });
+                      }}
+                      disabled={
+                        retryIngestion.isPending &&
+                        retryIngestion.variables === doc.id
+                      }
+                      className="shrink-0 h-8 text-xs gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <RefreshCw
+                        className={`size-3 ${retryIngestion.isPending && retryIngestion.variables === doc.id ? "animate-spin" : ""}`}
+                      />
+                      Retry
+                    </Button>
+                  )}
+                </div>
               );
             })}
           </div>

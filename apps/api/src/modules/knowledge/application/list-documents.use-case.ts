@@ -1,4 +1,4 @@
-import { type SourceType } from '@repo/shared-types';
+import { type SourceType, type IngestionStatus } from '@repo/shared-types';
 import type { DocumentRepository } from '../../ingestion/domain/document-repository.interface.js';
 import type { DocumentEntity } from '../../ingestion/domain/document.entity.js';
 import type { ChunkRepository } from '../domain/chunk-repository.interface.js';
@@ -8,6 +8,7 @@ type DocumentListItem = {
   title: string;
   sourceType: SourceType;
   sourceUrl: string | null;
+  status: IngestionStatus;
   chunkCount: number;
   createdAt: Date;
 };
@@ -37,6 +38,7 @@ export class ListDocumentsUseCase {
         title: doc.title,
         sourceType: doc.sourceType,
         sourceUrl: doc.sourceUrl,
+        status: doc.status,
         chunkCount: chunks.length,
         createdAt: doc.createdAt,
       });

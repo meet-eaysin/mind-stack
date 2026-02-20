@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useIngestUrl, useIngestText } from "../hooks";
+import { getApiErrorMessage } from "@/lib/api-client";
 
 interface IngestionModalProps {
   open: boolean;
@@ -124,7 +125,7 @@ export function IngestionModal({
 
                 {ingestUrl.error && (
                   <p className="text-sm font-medium text-destructive">
-                    {ingestUrl.error.message || "Failed to ingest URL"}
+                    {getApiErrorMessage(ingestUrl.error)}
                   </p>
                 )}
 
@@ -195,7 +196,7 @@ export function IngestionModal({
 
                 {ingestText.error && (
                   <p className="text-sm font-medium text-destructive">
-                    {ingestText.error.message || "Failed to ingest text"}
+                    {getApiErrorMessage(ingestText.error)}
                   </p>
                 )}
 

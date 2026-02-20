@@ -37,6 +37,12 @@ export function useIngestYoutube() {
   });
 }
 
+export function useRetryIngestion() {
+  return useMutation<IngestionResponse, ApiError, string>({
+    mutationFn: ingestionApi.retry,
+  });
+}
+
 export function useIngestionStatus(documentId: string | null) {
   const [status, setStatus] = useState<IngestionStatus | null>(null);
 

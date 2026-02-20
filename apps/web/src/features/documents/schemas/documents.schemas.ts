@@ -10,6 +10,7 @@ export const DocumentListItemSchema = z.object({
   title: z.string(),
   sourceType: SourceTypeSchema,
   sourceUrl: z.string().nullable(),
+  status: IngestionStatusSchema,
   chunkCount: z.number(),
   createdAt: z.string(),
 });

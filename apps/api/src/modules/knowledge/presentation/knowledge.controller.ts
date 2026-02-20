@@ -53,6 +53,7 @@ export class KnowledgeController {
         title: d.title,
         sourceType: d.sourceType,
         sourceUrl: d.sourceUrl,
+        status: d.status,
         chunkCount: d.chunkCount,
         createdAt: d.createdAt.toISOString(),
       })),

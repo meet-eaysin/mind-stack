@@ -35,6 +35,7 @@ export type DocumentListItem = {
   title: string;
   sourceType: SourceType;
   sourceUrl: string | null;
+  status: IngestionStatus;
   chunkCount: number;
   createdAt: string;
 };
