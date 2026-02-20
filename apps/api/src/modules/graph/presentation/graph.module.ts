@@ -33,6 +33,6 @@ import { LLM_PROVIDER } from '../../../common/tokens.js';
       inject: [PrismaConceptRepository],
     },
   ],
-  exports: [PrismaConceptRepository],
+  exports: [PrismaConceptRepository, BuildGraphUseCase],
 })
 export class GraphModule {}

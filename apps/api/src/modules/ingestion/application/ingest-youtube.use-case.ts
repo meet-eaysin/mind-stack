@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { DocumentRepository } from '../domain/document-repository.interface.js';
 import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port.js';
 import { createDocument } from '../domain/document.entity.js';
+import { SOURCE_TYPE } from '@repo/shared-types';
 
 export class IngestYoutubeUseCase {
   constructor(
@@ -24,7 +25,7 @@ export class IngestYoutubeUseCase {
     const document = createDocument({
       id: randomUUID(),
       title: input.title ?? `YouTube: ${videoId}`,
-      sourceType: 'YOUTUBE',
+      sourceType: SOURCE_TYPE.YOUTUBE,
       sourceUrl: input.url,
       rawContent: transcript,
     });

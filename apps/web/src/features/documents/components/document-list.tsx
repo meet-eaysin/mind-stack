@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { IngestionModal } from "@/features/ingestion/components/ingestion-modal";
 import {
   Globe,
   Type,
@@ -9,6 +11,7 @@ import {
   FileText,
   ChevronLeft,
   ChevronRight,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +29,9 @@ const sourceTypeIcons: Record<string, React.ElementType> = {
 export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const pageSize = 10;
+  const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useDocuments(
     page,
@@ -34,16 +39,38 @@ export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
     searchTerm || undefined,
   );
 
+  const handleIngestionSuccess = () => {
+    setPage(1);
+    queryClient.invalidateQueries({ queryKey: ["knowledge"] });
+  };
+
   return (
     <div className="flex flex-col gap-4">
-      <Input
-        placeholder="Search documents..."
-        value={searchTerm}
-        onChange={(e) => {
-          setSearchTerm(e.target.value);
-          setPage(1);
-        }}
-        data-testid="document-search-input"
+      <div className="flex items-center gap-2">
+        <Input
+          placeholder="Search documents..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setPage(1);
+          }}
+          data-testid="document-search-input"
+          className="flex-1"
+        />
+        <Button
+          onClick={() => setIsModalOpen(true)}
+          className="shrink-0 gap-1"
+          data-testid="add-document-btn"
+        >
+          <Plus className="size-4" />
+          Add Document
+        </Button>
+      </div>
+
+      <IngestionModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onSuccess={handleIngestionSuccess}
       />
 
       {isLoading && (

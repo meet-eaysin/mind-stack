@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { DocumentRepository } from '../domain/document-repository.interface.js';
 import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port.js';
 import { createDocument } from '../domain/document.entity.js';
+import { SOURCE_TYPE } from '@repo/shared-types';
 
 export class IngestTextUseCase {
   constructor(
@@ -16,7 +17,7 @@ export class IngestTextUseCase {
     const document = createDocument({
       id: randomUUID(),
       title: input.title,
-      sourceType: 'TEXT',
+      sourceType: SOURCE_TYPE.TEXT,
       sourceUrl: null,
       rawContent: input.content,
     });

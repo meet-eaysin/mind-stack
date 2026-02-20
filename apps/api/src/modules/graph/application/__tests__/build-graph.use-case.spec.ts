@@ -92,6 +92,10 @@ class FakeConceptRepository implements ConceptRepository {
     return Promise.resolve(0);
   }
 
+  linkConceptToChunk(_conceptId: string, _chunkId: string): Promise<void> {
+    return Promise.resolve();
+  }
+
   getCreatedConcepts(): ConceptEntity[] {
     return [...this.concepts.values()];
   }

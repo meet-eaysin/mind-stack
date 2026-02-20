@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useDocument } from "../hooks";
 import { getApiErrorMessage } from "@/lib/api-client";
 import { ChunkCard } from "./chunk-card";
+import { ExportActions } from "@/features/export/components/export-actions";
 
 export function DocumentDetail({
   id,
@@ -59,11 +60,14 @@ export function DocumentDetail({
         Back to list
       </Button>
 
-      <div>
-        <h2 className="text-xl font-semibold">{doc.title}</h2>
-        <p className="text-sm text-muted-foreground">
-          {doc.sourceType} · {doc.status} · {doc.chunks.length} chunks
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-semibold">{doc.title}</h2>
+          <p className="text-sm text-muted-foreground">
+            {doc.sourceType} · {doc.status} · {doc.chunks.length} chunks
+          </p>
+        </div>
+        <ExportActions chunkIds={doc.chunks.map((c) => c.id)} />
       </div>
 
       <Separator />

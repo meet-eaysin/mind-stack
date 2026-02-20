@@ -2,11 +2,24 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import type { DocumentRepository } from '../domain/document-repository.interface.js';
 import type { DocumentEntity } from '../domain/document.entity.js';
-import { type IngestionStatus, type SourceType } from '@repo/shared-types';
+import {
+  INGESTION_STATUS,
+  SOURCE_TYPE,
+  type IngestionStatus,
+  type SourceType,
+} from '@repo/shared-types';
 
 @Injectable()
 export class PrismaDocumentRepository implements DocumentRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  private isSourceType(value: string): value is SourceType {
+    return Object.values(SOURCE_TYPE).includes(value as SourceType);
+  }
+
+  private isIngestionStatus(value: string): value is IngestionStatus {
+    return Object.values(INGESTION_STATUS).includes(value as IngestionStatus);
+  }
 
   private mapToDomain(row: {
     id: string;
@@ -17,13 +30,20 @@ export class PrismaDocumentRepository implements DocumentRepository {
     status: string;
     createdAt: Date;
   }): DocumentEntity {
+    if (!this.isSourceType(row.sourceType)) {
+      throw new Error(`Invalid source type in database: ${row.sourceType}`);
+    }
+    if (!this.isIngestionStatus(row.status)) {
+      throw new Error(`Invalid ingestion status in database: ${row.status}`);
+    }
+
     return {
       id: row.id,
       title: row.title,
-      sourceType: row.sourceType as SourceType,
+      sourceType: row.sourceType,
       sourceUrl: row.sourceUrl,
       rawContent: row.rawContent,
-      status: row.status as IngestionStatus,
+      status: row.status,
       createdAt: row.createdAt,
     };
   }

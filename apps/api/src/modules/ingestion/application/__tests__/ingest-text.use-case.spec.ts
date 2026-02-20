@@ -2,7 +2,7 @@ import { IngestTextUseCase } from '../ingest-text.use-case.js';
 import type { DocumentRepository } from '../../domain/document-repository.interface.js';
 import type { IngestionJobProducerPort } from '../../domain/ingestion-job-producer.port.js';
 import type { DocumentEntity } from '../../domain/document.entity.js';
-import type { IngestionStatus } from '@repo/shared-types';
+import { type IngestionStatus, INGESTION_STATUS } from '@repo/shared-types';
 
 // ── Fakes ──
 
@@ -38,10 +38,12 @@ class FakeDocumentRepository implements DocumentRepository {
 class FakeIngestionJobProducer implements IngestionJobProducerPort {
   readonly enqueuedIds: string[] = [];
 
-  enqueueChunkingJob(documentId: string): Promise<void> {
+  async enqueueChunkingJob(documentId: string): Promise<void> {
     this.enqueuedIds.push(documentId);
-    return Promise.resolve();
   }
+
+  async enqueueEmbeddingJob(_documentId: string): Promise<void> {}
+  async enqueueConceptExtractionJob(_documentId: string): Promise<void> {}
 }
 
 // ── Tests ──
@@ -72,7 +74,7 @@ describe('IngestTextUseCase', () => {
     expect(saved?.sourceType).toBe('TEXT');
     expect(saved?.sourceUrl).toBeNull();
     expect(saved?.rawContent).toBe('Some important content');
-    expect(saved?.status).toBe('PENDING');
+    expect(saved?.status).toBe(INGESTION_STATUS.INGESTED);
 
     expect(jobProducer.enqueuedIds).toHaveLength(1);
     expect(jobProducer.enqueuedIds[0]).toBe(result.documentId);

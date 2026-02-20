@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { KnowledgeController } from './knowledge.controller.js';
 import { PrismaChunkRepository } from '../infrastructure/prisma-chunk.repository.js';
 import { PrismaTagRepository } from '../infrastructure/prisma-tag.repository.js';
@@ -14,7 +14,7 @@ import { UpdateImportanceUseCase } from '../application/update-importance.use-ca
 import { IngestionModule } from '../../ingestion/presentation/ingestion.module.js';
 
 @Module({
-  imports: [IngestionModule],
+  imports: [forwardRef(() => IngestionModule)],
   controllers: [KnowledgeController],
   providers: [
     PrismaChunkRepository,

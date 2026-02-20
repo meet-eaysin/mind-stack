@@ -5,4 +5,6 @@
  */
 export type IngestionJobProducerPort = {
   enqueueChunkingJob(documentId: string): Promise<void>;
+  enqueueEmbeddingJob(documentId: string): Promise<void>;
+  enqueueConceptExtractionJob(documentId: string): Promise<void>;
 };

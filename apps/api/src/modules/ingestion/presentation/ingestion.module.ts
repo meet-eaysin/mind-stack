@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { IngestionController } from './ingestion.controller.js';
 import { PrismaDocumentRepository } from '../infrastructure/prisma-document.repository.js';
@@ -12,12 +12,28 @@ import { IngestPdfUseCase } from '../application/ingest-pdf.use-case.js';
 import { IngestYoutubeUseCase } from '../application/ingest-youtube.use-case.js';
 import { RetryIngestionUseCase } from '../application/retry-ingestion.use-case.js';
 
+import { ChunkingProcessor } from '../infrastructure/processors/chunking.processor.js';
+import { EmbeddingProcessor } from '../infrastructure/processors/embedding.processor.js';
+import { ConceptExtractionProcessor } from '../infrastructure/processors/concept-extraction.processor.js';
+
+import { KnowledgeModule } from '../../knowledge/presentation/knowledge.module.js';
+import { GraphModule } from '../../graph/presentation/graph.module.js';
+import { QueryModule } from '../../query/presentation/query.module.js';
+
 @Module({
-  imports: [BullModule.registerQueue({ name: INGESTION_QUEUE })],
+  imports: [
+    BullModule.registerQueue({ name: INGESTION_QUEUE }),
+    forwardRef(() => KnowledgeModule),
+    GraphModule,
+    QueryModule,
+  ],
   controllers: [IngestionController],
   providers: [
     PrismaDocumentRepository,
     IngestionJobProducer,
+    ChunkingProcessor,
+    EmbeddingProcessor,
+    ConceptExtractionProcessor,
     {
       provide: IngestUrlUseCase,
       useFactory: (

@@ -29,4 +29,5 @@ export type ConceptRepository = {
     relations: ConceptRelationEntity[];
   }>;
   countChunksForConcept(conceptId: string): Promise<number>;
+  linkConceptToChunk(conceptId: string, chunkId: string): Promise<void>;
 };

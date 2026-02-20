@@ -1,0 +1,18 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^@modules/(.*)$": "<rootDir>/src/modules/$1",
+    "^(\\.\\.?\\/.*)\\.js$": "$1",
+    "^@repo/shared-types$": "<rootDir>/../../packages/shared-types/src/index.ts",
+    "^@repo/llm$": "<rootDir>/../../packages/llm/src/index.ts",
+    "^@repo/embeddings$": "<rootDir>/../../packages/embeddings/src/index.ts",
+    "^@repo/vector-store$": "<rootDir>/../../packages/vector-store/src/index.ts",
+    "^canvas$": "<rootDir>/test/e2e/canvas-mock.ts"
+  }
+}

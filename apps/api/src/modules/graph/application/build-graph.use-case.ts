@@ -43,6 +43,7 @@ export class BuildGraphUseCase {
 
     for (const concept of extracted) {
       const source = await this.conceptRepository.findOrCreate(concept.label);
+      await this.conceptRepository.linkConceptToChunk(source.id, input.chunkId);
 
       for (const relation of concept.relations) {
         const target = await this.conceptRepository.findOrCreate(

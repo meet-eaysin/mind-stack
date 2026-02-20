@@ -4,6 +4,7 @@ import { JSDOM } from 'jsdom';
 import type { DocumentRepository } from '../domain/document-repository.interface.js';
 import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port.js';
 import { createDocument } from '../domain/document.entity.js';
+import { SOURCE_TYPE } from '@repo/shared-types';
 
 export class IngestUrlUseCase {
   constructor(
@@ -39,7 +40,7 @@ export class IngestUrlUseCase {
     const document = createDocument({
       id: randomUUID(),
       title: input.title ?? article.title ?? new URL(input.url).hostname,
-      sourceType: 'URL',
+      sourceType: SOURCE_TYPE.URL,
       sourceUrl: input.url,
       rawContent: article.textContent || '',
     });

@@ -1,5 +1,5 @@
 import { Controller, Post, Body, Param } from '@nestjs/common';
-import type { IngestionResponse } from '@repo/shared-types';
+import { type IngestionResponse, INGESTION_STATUS } from '@repo/shared-types';
 import { IngestUrlUseCase } from '../application/ingest-url.use-case.js';
 import { IngestTextUseCase } from '../application/ingest-text.use-case.js';
 import { IngestPdfUseCase } from '../application/ingest-pdf.use-case.js';
@@ -27,7 +27,7 @@ export class IngestionController {
     const result = await this.ingestUrl.execute(dto);
     return {
       documentId: result.documentId,
-      status: 'INGESTED',
+      status: INGESTION_STATUS.INGESTED,
       message: 'Document ingestion started',
     };
   }
@@ -37,7 +37,7 @@ export class IngestionController {
     const result = await this.ingestText.execute(dto);
     return {
       documentId: result.documentId,
-      status: 'INGESTED',
+      status: INGESTION_STATUS.INGESTED,
       message: 'Text ingestion started',
     };
   }
@@ -47,7 +47,7 @@ export class IngestionController {
     const result = await this.ingestPdf.execute(dto);
     return {
       documentId: result.documentId,
-      status: 'INGESTED',
+      status: INGESTION_STATUS.INGESTED,
       message: 'PDF ingestion started',
     };
   }
@@ -59,7 +59,7 @@ export class IngestionController {
     const result = await this.ingestYoutube.execute(dto);
     return {
       documentId: result.documentId,
-      status: 'INGESTED',
+      status: INGESTION_STATUS.INGESTED,
       message: 'YouTube transcript ingestion started',
     };
   }
@@ -71,7 +71,7 @@ export class IngestionController {
     await this.retryIngestion.execute(documentId);
     return {
       documentId,
-      status: 'INGESTED',
+      status: INGESTION_STATUS.INGESTED,
       message: 'Ingestion retry started',
     };
   }

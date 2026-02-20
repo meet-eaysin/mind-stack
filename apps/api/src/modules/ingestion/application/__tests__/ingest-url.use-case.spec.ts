@@ -1,4 +1,8 @@
-import type { IngestionStatus } from '@repo/shared-types';
+import {
+  type IngestionStatus,
+  INGESTION_STATUS,
+  SOURCE_TYPE,
+} from '@repo/shared-types';
 import { IngestUrlUseCase } from '../ingest-url.use-case.js';
 import type { DocumentRepository } from '../../domain/document-repository.interface.js';
 import type { IngestionJobProducerPort } from '../../domain/ingestion-job-producer.port.js';
@@ -53,10 +57,12 @@ class FakeDocumentRepository implements DocumentRepository {
 class FakeIngestionJobProducer implements IngestionJobProducerPort {
   readonly enqueuedIds: string[] = [];
 
-  enqueueChunkingJob(documentId: string): Promise<void> {
+  async enqueueChunkingJob(documentId: string): Promise<void> {
     this.enqueuedIds.push(documentId);
-    return Promise.resolve();
   }
+
+  async enqueueEmbeddingJob(_documentId: string): Promise<void> {}
+  async enqueueConceptExtractionJob(_documentId: string): Promise<void> {}
 }
 
 // ── Tests ──
@@ -97,20 +103,20 @@ describe('IngestUrlUseCase', () => {
     expect(saved?.title).toBe('My Article');
     expect(saved?.sourceType).toBe('URL');
     expect(saved?.sourceUrl).toBe('https://example.com/article');
-    expect(saved?.status).toBe('PENDING');
+    expect(saved?.status).toBe(INGESTION_STATUS.INGESTED);
 
     expect(jobProducer.enqueuedIds).toHaveLength(1);
     expect(jobProducer.enqueuedIds[0]).toBe(result.documentId);
   });
 
   it('should return existing documentId if URL is already ingested', async () => {
-    const existingDoc = {
+    const existingDoc: DocumentEntity = {
       id: 'existing-id',
       title: 'Existing',
-      sourceType: 'URL' as const,
+      sourceType: SOURCE_TYPE.URL,
       sourceUrl: 'https://example.com/already-here',
       rawContent: 'content',
-      status: 'READY' as IngestionStatus,
+      status: INGESTION_STATUS.READY,
       createdAt: new Date(),
     };
     documentRepository.saved.push(existingDoc);

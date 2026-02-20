@@ -1,8 +1,9 @@
-import { IsString, IsOptional, IsUrl } from 'class-validator';
+import { IsString, IsOptional, IsUrl, IsNotEmpty } from 'class-validator';
 
 export class IngestUrlDto {
   @IsUrl()
-  url!: string;
+  @IsNotEmpty()
+  url: string = '';
 
   @IsOptional()
   @IsString()
@@ -11,23 +12,28 @@ export class IngestUrlDto {
 
 export class IngestTextDto {
   @IsString()
-  title!: string;
+  @IsNotEmpty()
+  title: string = '';
 
   @IsString()
-  content!: string;
+  @IsNotEmpty()
+  content: string = '';
 }
 
 export class IngestPdfDto {
   @IsString()
-  title!: string;
+  @IsNotEmpty()
+  title: string = '';
 
   @IsString()
-  fileBase64!: string;
+  @IsNotEmpty()
+  fileBase64: string = '';
 }
 
 export class IngestYoutubeDto {
   @IsUrl()
-  url!: string;
+  @IsNotEmpty()
+  url: string = '';
 
   @IsOptional()
   @IsString()

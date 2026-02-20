@@ -79,6 +79,10 @@ class FakeConceptRepository implements ConceptRepository {
   countChunksForConcept(conceptId: string): Promise<number> {
     return Promise.resolve(this.chunkCounts.get(conceptId) ?? 0);
   }
+
+  linkConceptToChunk(_conceptId: string, _chunkId: string): Promise<void> {
+    return Promise.resolve();
+  }
 }
 
 // ── Tests ──

@@ -146,4 +146,36 @@ export class PrismaConceptRepository implements ConceptRepository {
     });
     return count;
   }
+
+  async linkConceptToChunk(conceptId: string, chunkId: string): Promise<void> {
+    const concept = await this.prisma.concept.findUnique({
+      where: { id: conceptId },
+    });
+
+    if (!concept) {
+      throw new Error(`Concept with id ${conceptId} not found`);
+    }
+
+    // Upsert a Tag using the concept's label to satisfy the schema definition
+    const tag = await this.prisma.tag.upsert({
+      where: { name: concept.label },
+      update: {},
+      create: { id: randomUUID(), name: concept.label },
+    });
+
+    // Link the Chunk to the Tag if it doesn't exist
+    await this.prisma.chunkTag.upsert({
+      where: {
+        chunkId_tagId: {
+          chunkId,
+          tagId: tag.id,
+        },
+      },
+      update: {},
+      create: {
+        chunkId,
+        tagId: tag.id,
+      },
+    });
+  }
 }

@@ -38,10 +38,12 @@ class FakeDocumentRepository implements DocumentRepository {
 class FakeIngestionJobProducer implements IngestionJobProducerPort {
   readonly enqueuedIds: string[] = [];
 
-  enqueueChunkingJob(documentId: string): Promise<void> {
+  async enqueueChunkingJob(documentId: string): Promise<void> {
     this.enqueuedIds.push(documentId);
-    return Promise.resolve();
   }
+
+  async enqueueEmbeddingJob(_documentId: string): Promise<void> {}
+  async enqueueConceptExtractionJob(_documentId: string): Promise<void> {}
 }
 
 // ── Helpers ──

@@ -45,7 +45,6 @@ export function useIngestionStatus(documentId: string | null) {
     queryFn: () => ingestionApi.getStatus(documentId!),
     enabled: !!documentId && status !== "READY" && status !== "FAILED",
     refetchInterval: (query: any) => {
-      // Re-added any temporarily to focus on MSW, but I will try to fix properly in a moment or just skip if it's too much noise.
       const data = query.state.data as DocumentStatusResponse | undefined;
       if (data?.status === "READY" || data?.status === "FAILED") {
         return false;

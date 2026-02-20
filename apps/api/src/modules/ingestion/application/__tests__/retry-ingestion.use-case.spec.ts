@@ -1,4 +1,8 @@
-import type { IngestionStatus } from '@repo/shared-types';
+import {
+  type IngestionStatus,
+  INGESTION_STATUS,
+  SOURCE_TYPE,
+} from '@repo/shared-types';
 import { RetryIngestionUseCase } from '../retry-ingestion.use-case.js';
 import type { DocumentRepository } from '../../domain/document-repository.interface.js';
 import type { IngestionJobProducerPort } from '../../domain/ingestion-job-producer.port.js';
@@ -12,10 +16,10 @@ function createDocumentFixture(
   return {
     id: 'doc-1',
     title: 'Test Document',
-    sourceType: 'URL',
+    sourceType: SOURCE_TYPE.URL,
     sourceUrl: 'https://example.com',
     rawContent: 'content',
-    status: 'FAILED',
+    status: INGESTION_STATUS.FAILED,
     createdAt: new Date('2025-01-01T00:00:00Z'),
     ...overrides,
   };
@@ -66,10 +70,12 @@ class FakeDocumentRepository implements DocumentRepository {
 class FakeIngestionJobProducer implements IngestionJobProducerPort {
   readonly enqueuedIds: string[] = [];
 
-  enqueueChunkingJob(documentId: string): Promise<void> {
+  async enqueueChunkingJob(documentId: string): Promise<void> {
     this.enqueuedIds.push(documentId);
-    return Promise.resolve();
   }
+
+  async enqueueEmbeddingJob(_documentId: string): Promise<void> {}
+  async enqueueConceptExtractionJob(_documentId: string): Promise<void> {}
 }
 
 // ── Tests ──
@@ -85,14 +91,17 @@ describe('RetryIngestionUseCase', () => {
     useCase = new RetryIngestionUseCase(documentRepository, jobProducer);
   });
 
-  it('should reset a FAILED document to PENDING and enqueue a chunking job', async () => {
-    const doc = createDocumentFixture({ id: 'doc-fail', status: 'FAILED' });
+  it('should reset a FAILED document to INGESTED and enqueue a chunking job', async () => {
+    const doc = createDocumentFixture({
+      id: 'doc-fail',
+      status: INGESTION_STATUS.FAILED,
+    });
     documentRepository.seed(doc);
 
     await useCase.execute('doc-fail');
 
     const updated = documentRepository.getDocument('doc-fail');
-    expect(updated?.status).toBe('PENDING');
+    expect(updated?.status).toBe(INGESTION_STATUS.INGESTED);
     expect(jobProducer.enqueuedIds).toEqual(['doc-fail']);
   });
 
@@ -105,7 +114,7 @@ describe('RetryIngestionUseCase', () => {
   it('should throw when the document status is not FAILED', async () => {
     const doc = createDocumentFixture({
       id: 'doc-ok',
-      status: 'READY' as IngestionStatus,
+      status: INGESTION_STATUS.READY,
     });
     documentRepository.seed(doc);
 

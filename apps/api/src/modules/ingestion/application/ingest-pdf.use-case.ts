@@ -3,6 +3,7 @@ import { PDFParse } from 'pdf-parse';
 import type { DocumentRepository } from '../domain/document-repository.interface.js';
 import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port.js';
 import { createDocument } from '../domain/document.entity.js';
+import { SOURCE_TYPE } from '@repo/shared-types';
 
 export class IngestPdfUseCase {
   constructor(
@@ -22,7 +23,7 @@ export class IngestPdfUseCase {
     const document = createDocument({
       id: randomUUID(),
       title: input.title,
-      sourceType: 'PDF',
+      sourceType: SOURCE_TYPE.PDF,
       sourceUrl: null,
       rawContent,
     });

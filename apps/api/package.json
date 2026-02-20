@@ -92,7 +92,7 @@
     "testEnvironment": "node",
     "moduleNameMapper": {
       "^@modules/(.*)$": "<rootDir>/modules/$1",
-      "^(\\.\\.\\/.*)\\.js$": "$1",
+      "^(\\.\\.?\\/.*)\\.js$": "$1",
       "^@repo/shared-types$": "<rootDir>/../../../packages/shared-types/src/index.ts",
       "^@repo/llm$": "<rootDir>/../../../packages/llm/src/index.ts",
       "^@repo/embeddings$": "<rootDir>/../../../packages/embeddings/src/index.ts",
