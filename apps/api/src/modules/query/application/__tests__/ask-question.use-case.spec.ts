@@ -22,6 +22,7 @@ function createChunkReferenceFixture(
     documentTitle: 'TypeScript Guide',
     score: 0.95,
     tags: ['typescript'],
+    hasNote: false,
     ...overrides,
   };
 }

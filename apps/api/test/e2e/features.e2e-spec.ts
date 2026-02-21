@@ -14,7 +14,6 @@ import {
 } from '../../src/common/tokens.js';
 import { PrismaQueryRepository } from '../../src/modules/query/infrastructure/prisma-query.repository.js';
 import { PrismaReviewRepository } from '../../src/modules/review/infrastructure/prisma-review.repository.js';
-import { IngestionProcessor } from '../../src/modules/ingestion/infrastructure/processors/ingestion.processor.js';
 import type { DocumentEntity } from '../../src/modules/ingestion/domain/document.entity.js';
 import type { IngestionStatus, SourceType } from '@repo/shared-types';
 
@@ -185,8 +184,6 @@ describe('Feature Flows (e2e)', () => {
       .useValue(mockQueryRepo)
       .overrideProvider(PrismaReviewRepository)
       .useValue(mockReviewRepo)
-      .overrideProvider(IngestionProcessor)
-      .useValue({ process: jest.fn(), onModuleInit: jest.fn() })
       .compile();
 
     app = moduleFixture.createNestApplication();

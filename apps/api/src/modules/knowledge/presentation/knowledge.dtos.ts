@@ -51,3 +51,13 @@ export class PaginationQueryDto {
   @Max(100)
   pageSize?: number;
 }
+
+export class UpdateDocumentDto {
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  sourceUrl?: string;
+}

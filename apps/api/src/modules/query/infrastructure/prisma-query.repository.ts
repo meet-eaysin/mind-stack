@@ -18,25 +18,29 @@ export class PrismaQueryRepository implements QueryRepository {
           include: {
             DocumentTag: { include: { tag: true } },
             ImportanceScore: true,
-            Note: true,
+            notes: true,
             Review: { select: { id: true } },
           },
         },
       },
     });
 
-    return chunks.map((c) => ({
-      chunkId: c.id,
-      content: c.content,
-      documentTitle: c.document.title,
-      importanceScore: c.document.ImportanceScore?.score ?? null,
-      tags: c.document.DocumentTag.map(
-        (t: DocumentTag & { tag: { name: string } }) => t.tag.name,
-      ),
-      createdAt: c.createdAt,
-      hasNote: c.document.Note !== null,
-      reviewCount: c.document.Review.length,
-    }));
+    return chunks.map((c) => {
+      const doc = c.document;
+      return {
+        chunkId: c.id,
+        content: c.content,
+        documentTitle: doc.title,
+        importanceScore: doc.ImportanceScore?.score ?? null,
+        tags: doc.DocumentTag.map(
+          (t: DocumentTag & { tag: { name: string } }) => t.tag.name,
+        ),
+        createdAt: c.createdAt,
+        hasNote: doc.notes && doc.notes.length > 0,
+        reviewCount: doc.Review.length,
+        documentStatus: doc.status,
+      };
+    });
   }
 
   async findChunksByTags(tags: string[]): Promise<string[]> {

@@ -22,6 +22,12 @@ export type IngestYoutubeRequest = {
   title?: string | undefined;
 };
 
+export type IngestClipRequest = {
+  url: string;
+  title: string;
+  content: string;
+};
+
 export type IngestionResponse = {
   documentId: string;
   status: IngestionStatus;
@@ -121,6 +127,7 @@ export type ChunkReference = {
   documentTitle: string;
   score: number;
   tags: string[];
+  hasNote: boolean;
 };
 
 export type SearchResponse = {
@@ -189,7 +196,6 @@ export type ConceptNeighborhoodRequest = {
 };
 
 // ── Export DTOs ──
-
 export type ExportMarkdownRequest = {
   chunkIds: string[];
 };
@@ -204,6 +210,11 @@ export type ExportNotionRequest = {
 
 export type ExportNotionResponse = {
   payload: NotionBlock[];
+};
+
+export type NotionImportRequest = {
+  title: string;
+  content: string;
 };
 
 export type NotionBlock = {

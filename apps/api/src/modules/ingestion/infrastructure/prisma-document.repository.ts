@@ -29,6 +29,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
     rawContent: string;
     status: string;
     createdAt: Date;
+    deletedAt: Date | null;
   }): DocumentEntity {
     if (!this.isSourceType(row.sourceType)) {
       throw new Error(`Invalid source type in database: ${row.sourceType}`);
@@ -45,6 +46,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
       rawContent: row.rawContent,
       status: row.status,
       createdAt: row.createdAt,
+      deletedAt: row.deletedAt,
     };
   }
 
@@ -57,6 +59,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
         sourceUrl: document.sourceUrl,
         rawContent: document.rawContent,
         status: document.status,
+        deletedAt: document.deletedAt ?? null,
       },
     });
 
@@ -64,14 +67,17 @@ export class PrismaDocumentRepository implements DocumentRepository {
   }
 
   async findById(id: string): Promise<DocumentEntity | null> {
-    const row = await this.prisma.document.findUnique({ where: { id } });
-    if (!row) return null;
+    const row = await this.prisma.document.findUnique({
+      where: { id },
+    });
+    if (!row || row.deletedAt) return null;
 
     return this.mapToDomain(row);
   }
 
   async findAll(): Promise<DocumentEntity[]> {
     const rows = await this.prisma.document.findMany({
+      where: { deletedAt: null },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -80,7 +86,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
 
   async findBySourceUrl(url: string): Promise<DocumentEntity | null> {
     const row = await this.prisma.document.findFirst({
-      where: { sourceUrl: url },
+      where: { sourceUrl: url, deletedAt: null },
     });
     if (!row) return null;
 
@@ -110,8 +116,9 @@ export class PrismaDocumentRepository implements DocumentRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.prisma.document.delete({
+    await this.prisma.document.update({
       where: { id },
+      data: { deletedAt: new Date() },
     });
   }
 }

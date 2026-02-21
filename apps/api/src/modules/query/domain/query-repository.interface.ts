@@ -8,6 +8,7 @@ export type SearchResultEntity = {
   recencyDecay: number;
   finalScore: number;
   tags: string[];
+  hasNote: boolean;
 };
 
 export type QueryChunkDetail = {
@@ -19,6 +20,7 @@ export type QueryChunkDetail = {
   createdAt: Date;
   hasNote: boolean;
   reviewCount: number;
+  documentStatus: string;
 };
 
 export type QueryRepository = {

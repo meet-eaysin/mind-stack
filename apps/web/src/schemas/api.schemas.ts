@@ -37,6 +37,7 @@ export const ChunkReferenceSchema = z.object({
   documentTitle: z.string(),
   score: z.number(),
   tags: z.array(z.string()),
+  hasNote: z.boolean(),
 });
 
 export const SuccessResponseSchema = z.object({

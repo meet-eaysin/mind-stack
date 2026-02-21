@@ -154,4 +154,18 @@ export const apiClient = {
     });
     return handleResponse(response, schema);
   },
+  patch: async <T, B>(
+    path: string,
+    body: B,
+    schema: z.ZodSchema<T>,
+  ): Promise<T> => {
+    const response = await safeFetch(`${env.NEXT_PUBLIC_API_URL}${path}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    return handleResponse(response, schema);
+  },
 };

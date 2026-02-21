@@ -35,7 +35,21 @@ export class IngestYoutubeDto {
   @IsNotEmpty()
   url: string = '';
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   title?: string;
+}
+
+export class IngestClipDto {
+  @IsUrl()
+  @IsNotEmpty()
+  url: string = '';
+
+  @IsString()
+  @IsNotEmpty()
+  title: string = '';
+
+  @IsString()
+  @IsNotEmpty()
+  content: string = '';
 }

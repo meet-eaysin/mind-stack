@@ -12,6 +12,7 @@ import { AddNoteUseCase } from '../application/add-note.use-case.js';
 import { UpdateNoteUseCase } from '../application/update-note.use-case.js';
 import { UpdateImportanceUseCase } from '../application/update-importance.use-case.js';
 import { DeleteDocumentUseCase } from '../application/delete-document.use-case.js';
+import { UpdateDocumentUseCase } from '../application/update-document.use-case.js';
 import { IngestionModule } from '../../ingestion/presentation/ingestion.module.js';
 import { VECTOR_STORE } from '../../../common/tokens.js';
 import type { VectorStore } from '@repo/vector-store';
@@ -94,6 +95,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       provide: UpdateImportanceUseCase,
       useFactory: (docRepo: PrismaDocumentRepository) =>
         new UpdateImportanceUseCase(docRepo),
+      inject: [PrismaDocumentRepository],
+    },
+    {
+      provide: UpdateDocumentUseCase,
+      useFactory: (docRepo: PrismaDocumentRepository) =>
+        new UpdateDocumentUseCase(docRepo),
       inject: [PrismaDocumentRepository],
     },
   ],

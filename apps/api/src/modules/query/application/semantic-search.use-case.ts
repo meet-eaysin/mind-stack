@@ -2,6 +2,7 @@ import type { EmbeddingProvider } from '@repo/embeddings';
 import type { VectorStore } from '@repo/vector-store';
 import type { QueryRepository } from '../domain/query-repository.interface.js';
 import { rankResults } from '../domain/ranking.service.js';
+import { INGESTION_STATUS } from '@repo/shared-types';
 import type { ChunkReference } from '@repo/shared-types';
 
 export class SemanticSearchUseCase {
@@ -24,20 +25,27 @@ export class SemanticSearchUseCase {
     const chunkIds = vectorResults.map((r) => r.id);
     const chunkDetails = await this.queryRepository.findChunksByIds(chunkIds);
 
-    const merged = vectorResults.map((vr) => {
-      const detail = chunkDetails.find((d) => d.chunkId === vr.id);
-      return {
-        chunkId: vr.id,
-        content: detail?.content ?? vr.content,
-        documentTitle: detail?.documentTitle ?? '',
-        vectorScore: vr.score,
-        importanceScore: detail?.importanceScore ?? null,
-        tags: detail?.tags ?? [],
-        createdAt: detail?.createdAt ?? new Date(),
-        hasNote: detail?.hasNote ?? false,
-        reviewCount: detail?.reviewCount ?? 0,
-      };
-    });
+    // Filter out chunks belonging to documents that are not yet READY
+    const readyChunkDetails = chunkDetails.filter(
+      (d) => d.documentStatus === INGESTION_STATUS.READY,
+    );
+
+    const merged = vectorResults
+      .filter((vr) => readyChunkDetails.some((d) => d.chunkId === vr.id))
+      .map((vr) => {
+        const detail = readyChunkDetails.find((d) => d.chunkId === vr.id)!;
+        return {
+          chunkId: vr.id,
+          content: detail?.content ?? vr.content,
+          documentTitle: detail?.documentTitle ?? '',
+          vectorScore: vr.score,
+          importanceScore: detail?.importanceScore ?? null,
+          tags: detail?.tags ?? [],
+          createdAt: detail?.createdAt ?? new Date(),
+          hasNote: detail?.hasNote ?? false,
+          reviewCount: detail?.reviewCount ?? 0,
+        };
+      });
 
     const ranked = rankResults(merged);
 
@@ -62,6 +70,7 @@ export class SemanticSearchUseCase {
         documentTitle: r.documentTitle,
         score: r.finalScore,
         tags: r.tags,
+        hasNote: r.hasNote,
       });
 
       if (finalizedRes.length >= topK) break;

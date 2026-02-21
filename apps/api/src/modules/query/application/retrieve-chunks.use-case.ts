@@ -31,6 +31,7 @@ export class RetrieveChunksUseCase {
         documentTitle: detail?.documentTitle ?? '',
         score: vr.score,
         tags: detail?.tags ?? [],
+        hasNote: detail?.hasNote ?? false,
       };
     });
   }

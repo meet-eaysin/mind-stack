@@ -1,4 +1,5 @@
 import { ExportNotionUseCase } from '../export-notion.use-case.js';
+import { INGESTION_STATUS } from '@repo/shared-types';
 import type {
   QueryRepository,
   QueryChunkDetail,
@@ -50,6 +51,7 @@ describe('ExportNotionUseCase', () => {
         createdAt: new Date('2025-01-01T00:00:00Z'),
         hasNote: false,
         reviewCount: 0,
+        documentStatus: INGESTION_STATUS.READY,
       },
     ]);
 

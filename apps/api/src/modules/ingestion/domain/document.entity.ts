@@ -8,6 +8,7 @@ export type DocumentEntity = {
   rawContent: string;
   status: IngestionStatus;
   createdAt: Date;
+  deletedAt?: Date | null;
 };
 
 export function createDocument(params: {
@@ -25,5 +26,6 @@ export function createDocument(params: {
     rawContent: params.rawContent,
     status: 'INGESTED',
     createdAt: new Date(),
+    deletedAt: null,
   };
 }

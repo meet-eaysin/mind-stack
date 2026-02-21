@@ -9,6 +9,10 @@ import {
   Star,
   Trash2,
   Tag,
+  Edit2,
+  Save,
+  X,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +26,7 @@ import {
   useAddNote,
   useUpdateImportance,
   useDeleteDocument,
+  useUpdateDocument,
 } from "../hooks";
 import { getApiErrorMessage } from "@/lib/api-client";
 import { ExportActions } from "@/features/export/components/export-actions";
@@ -39,8 +44,12 @@ export function DocumentDetail({
   const addNote = useAddNote();
   const updateImportance = useUpdateImportance();
   const deleteDocument = useDeleteDocument();
+  const updateDocument = useUpdateDocument();
   const [newTag, setNewTag] = useState("");
   const [noteContent, setNoteContent] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editUrl, setEditUrl] = useState("");
 
   if (isLoading) {
     return (
@@ -68,8 +77,22 @@ export function DocumentDetail({
   }
 
   if (!data) return null;
-
   const doc = data.document;
+
+  const handleEditStart = () => {
+    setEditTitle(doc.title);
+    setEditUrl(doc.sourceUrl || "");
+    setIsEditing(true);
+  };
+
+  const handleEditSave = () => {
+    updateDocument.mutate(
+      { id: doc.id, title: editTitle, sourceUrl: editUrl || undefined },
+      {
+        onSuccess: () => setIsEditing(false),
+      },
+    );
+  };
 
   return (
     <div className="space-y-4" data-testid="document-detail">
@@ -85,13 +108,85 @@ export function DocumentDetail({
       </Button>
 
       <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-semibold">{doc.title}</h2>
-          <p className="text-sm text-muted-foreground">
-            {doc.sourceType} · {doc.status} · {doc.chunks.length} chunks
-          </p>
+        <div className="flex-1">
+          {isEditing ? (
+            <div className="space-y-2">
+              <Input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Document title"
+                className="text-lg font-semibold"
+                data-testid="edit-title-input"
+              />
+              <div className="flex items-center gap-2">
+                <ExternalLink className="size-4 text-muted-foreground" />
+                <Input
+                  value={editUrl}
+                  onChange={(e) => setEditUrl(e.target.value)}
+                  placeholder="Source URL (optional)"
+                  className="h-8 text-sm"
+                  data-testid="edit-url-input"
+                />
+              </div>
+            </div>
+          ) : (
+            <>
+              <h2 className="text-xl font-semibold">{doc.title}</h2>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>
+                  {doc.sourceType} · {doc.status} · {doc.chunks.length} chunks
+                </span>
+                {doc.sourceUrl && (
+                  <a
+                    href={doc.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-0.5 hover:text-primary transition-colors"
+                  >
+                    <ExternalLink className="size-3" />
+                  </a>
+                )}
+              </div>
+            </>
+          )}
         </div>
         <div className="flex items-center gap-2">
+          {isEditing ? (
+            <>
+              <Button
+                size="sm"
+                variant="default"
+                className="gap-1.5"
+                onClick={handleEditSave}
+                disabled={updateDocument.isPending}
+                data-testid="save-edit-btn"
+              >
+                <Save className="size-4" />
+                Save
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5"
+                onClick={() => setIsEditing(false)}
+                data-testid="cancel-edit-btn"
+              >
+                <X className="size-4" />
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={handleEditStart}
+              data-testid="edit-document-btn"
+            >
+              <Edit2 className="size-4" />
+              Edit
+            </Button>
+          )}
           <Button
             variant="destructive"
             size="sm"
@@ -105,7 +200,7 @@ export function DocumentDetail({
                 });
               }
             }}
-            disabled={deleteDocument.isPending}
+            disabled={deleteDocument.isPending || isEditing}
             data-testid="delete-document-btn"
           >
             <Trash2 className="size-4" />

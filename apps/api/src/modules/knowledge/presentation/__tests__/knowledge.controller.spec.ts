@@ -11,6 +11,7 @@ import { RemoveTagUseCase } from '../../application/remove-tag.use-case.js';
 import { AddNoteUseCase } from '../../application/add-note.use-case.js';
 import { UpdateNoteUseCase } from '../../application/update-note.use-case.js';
 import { UpdateImportanceUseCase } from '../../application/update-importance.use-case.js';
+import { UpdateDocumentUseCase } from '../../application/update-document.use-case.js';
 import { ConfigService } from '@nestjs/config';
 
 describe('KnowledgeController (e2e)', () => {
@@ -24,6 +25,7 @@ describe('KnowledgeController (e2e)', () => {
   const mockAddNote = { execute: jest.fn() };
   const mockUpdateNote = { execute: jest.fn() };
   const mockUpdateImportance = { execute: jest.fn() };
+  const mockUpdateDocument = { execute: jest.fn() };
   const mockConfigService = { get: jest.fn().mockReturnValue(null) };
 
   beforeEach(async () => {
@@ -38,6 +40,7 @@ describe('KnowledgeController (e2e)', () => {
         { provide: AddNoteUseCase, useValue: mockAddNote },
         { provide: UpdateNoteUseCase, useValue: mockUpdateNote },
         { provide: UpdateImportanceUseCase, useValue: mockUpdateImportance },
+        { provide: UpdateDocumentUseCase, useValue: mockUpdateDocument },
         { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
@@ -162,6 +165,18 @@ describe('KnowledgeController (e2e)', () => {
         .send({ documentId: 'd1', score: 10 });
 
       expect(response.status).toBe(400);
+    });
+  });
+
+  describe('PATCH /knowledge/documents/:id', () => {
+    it('should return 200 when updating a document', async () => {
+      mockUpdateDocument.execute.mockResolvedValue(undefined);
+      const response = await request(app.getHttpServer())
+        .patch('/knowledge/documents/doc-1')
+        .send({ title: 'New Title' });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
     });
   });
 });

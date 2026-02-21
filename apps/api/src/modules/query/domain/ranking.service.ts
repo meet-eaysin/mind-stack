@@ -59,6 +59,7 @@ export function rankResults(
         recencyDecay,
         finalScore,
         tags: r.tags,
+        hasNote: r.hasNote,
       };
     })
     .sort((a, b) => b.finalScore - a.finalScore);

@@ -109,3 +109,26 @@ export function useDeleteDocument() {
     },
   });
 }
+
+export function useUpdateDocument() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      title,
+      sourceUrl,
+    }: {
+      id: string;
+      title?: string;
+      sourceUrl?: string;
+    }) => documentsApi.update(id, { title, sourceUrl }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.KNOWLEDGE.DETAIL(variables.id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["knowledge", "list"],
+      });
+    },
+  });
+}

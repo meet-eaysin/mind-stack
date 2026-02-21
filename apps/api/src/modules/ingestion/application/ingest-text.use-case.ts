@@ -13,12 +13,13 @@ export class IngestTextUseCase {
   async execute(input: {
     title: string;
     content: string;
+    sourceUrl?: string;
   }): Promise<{ documentId: string }> {
     const document = createDocument({
       id: randomUUID(),
       title: input.title,
       sourceType: SOURCE_TYPE.TEXT,
-      sourceUrl: null,
+      sourceUrl: input.sourceUrl ?? null,
       rawContent: input.content,
     });
 

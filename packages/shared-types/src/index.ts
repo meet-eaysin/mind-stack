@@ -14,6 +14,7 @@ export type {
 export type {
   IngestUrlRequest,
   IngestTextRequest,
+  IngestClipRequest,
   IngestPdfRequest,
   IngestYoutubeRequest,
   IngestionResponse,
@@ -44,6 +45,7 @@ export type {
   ExportMarkdownResponse,
   ExportNotionRequest,
   ExportNotionResponse,
+  NotionImportRequest,
   NotionBlock,
   PaginationQuery,
 } from "./dto";

@@ -92,4 +92,17 @@ describe('IngestTextUseCase', () => {
     expect(jobProducer.enqueuedIds).toHaveLength(1);
     expect(jobProducer.enqueuedIds[0]).toBe(result.documentId);
   });
+
+  it('should store sourceUrl if provided', async () => {
+    const result = await useCase.execute({
+      title: 'Clip',
+      content: 'Clipped content',
+      sourceUrl: 'https://example.com/item',
+    });
+
+    const saved = documentRepository.saved.find(
+      (d) => d.id === result.documentId,
+    );
+    expect(saved?.sourceUrl).toBe('https://example.com/item');
+  });
 });

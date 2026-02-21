@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Delete,
   Body,
   Param,
@@ -20,6 +21,7 @@ import { RemoveTagUseCase } from '../application/remove-tag.use-case.js';
 import { AddNoteUseCase } from '../application/add-note.use-case.js';
 import { UpdateNoteUseCase } from '../application/update-note.use-case.js';
 import { UpdateImportanceUseCase } from '../application/update-importance.use-case.js';
+import { UpdateDocumentUseCase } from '../application/update-document.use-case.js';
 import {
   AddTagDto,
   RemoveTagDto,
@@ -27,6 +29,7 @@ import {
   UpdateNoteDto,
   UpdateImportanceDto,
   PaginationQueryDto,
+  UpdateDocumentDto,
 } from './knowledge.dtos.js';
 
 @Controller('knowledge')
@@ -40,6 +43,7 @@ export class KnowledgeController {
     private readonly addNote: AddNoteUseCase,
     private readonly updateNote: UpdateNoteUseCase,
     private readonly updateImportance: UpdateImportanceUseCase,
+    private readonly updateDocument: UpdateDocumentUseCase,
   ) {}
 
   @Get('documents')
@@ -84,6 +88,15 @@ export class KnowledgeController {
   @Delete('documents/:id')
   async remove(@Param('id') id: string): Promise<{ success: boolean }> {
     await this.deleteDocument.execute(id);
+    return { success: true };
+  }
+
+  @Patch('documents/:id')
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateDocumentDto,
+  ): Promise<{ success: boolean }> {
+    await this.updateDocument.execute(id, dto);
     return { success: true };
   }
 

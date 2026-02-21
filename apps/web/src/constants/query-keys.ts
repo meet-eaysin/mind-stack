@@ -14,4 +14,11 @@ export const QUERY_KEYS = {
   EXPORT: {
     PREVIEW: (ids: string[]) => ["export", "preview", ids] as const,
   },
+  SEARCH: {
+    HISTORY: ["search", "history"] as const,
+    FILTERS: ["search", "filters"] as const,
+  },
+  ADMIN: {
+    METRICS: ["admin", "metrics"] as const,
+  },
 } as const;

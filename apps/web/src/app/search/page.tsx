@@ -41,6 +41,9 @@ export default function SearchPage() {
       citations: ChunkReference[];
     }[]
   >([]);
+  const [tags, setTags] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   const search = useSearch();
   const filteredSearch = useFilteredSearch();
@@ -54,7 +57,15 @@ export default function SearchPage() {
     if (mode === "semantic") {
       search.mutate({ query });
     } else if (mode === "filtered") {
-      filteredSearch.mutate({ query });
+      filteredSearch.mutate({
+        query,
+        tags: tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
+        fromDate: fromDate || undefined,
+        toDate: toDate || undefined,
+      });
     } else if (mode === "ask") {
       askQuestion.mutate({ question: query });
     } else if (mode === "retrieve") {
@@ -148,6 +159,48 @@ export default function SearchPage() {
             </Button>
           ))}
         </div>
+
+        {/* Filter controls */}
+        {mode === "filtered" && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-lg border bg-muted/30">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Tags (comma separated)
+              </label>
+              <Input
+                placeholder="tag1, tag2..."
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+                className="h-9 bg-background"
+                data-testid="filter-tags-input"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                From Date
+              </label>
+              <Input
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                className="h-9 bg-background"
+                data-testid="filter-from-date"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                To Date
+              </label>
+              <Input
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                className="h-9 bg-background"
+                data-testid="filter-to-date"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Search form */}
         <form onSubmit={handleSubmit} className="flex gap-2">

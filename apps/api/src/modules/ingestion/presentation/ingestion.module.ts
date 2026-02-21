@@ -10,9 +10,9 @@ import { IngestUrlUseCase } from '../application/ingest-url.use-case.js';
 import { IngestTextUseCase } from '../application/ingest-text.use-case.js';
 import { IngestPdfUseCase } from '../application/ingest-pdf.use-case.js';
 import { IngestYoutubeUseCase } from '../application/ingest-youtube.use-case.js';
+import { IngestClipUseCase } from '../application/ingest-clip.use-case.js';
 import { RetryIngestionUseCase } from '../application/retry-ingestion.use-case.js';
-
-import { IngestionProcessor } from '../infrastructure/processors/ingestion.processor.js';
+import { ClipController } from './clip.controller.js';
 
 import { KnowledgeModule } from '../../knowledge/presentation/knowledge.module.js';
 import { GraphModule } from '../../graph/presentation/graph.module.js';
@@ -25,11 +25,10 @@ import { QueryModule } from '../../query/presentation/query.module.js';
     GraphModule,
     QueryModule,
   ],
-  controllers: [IngestionController],
+  controllers: [IngestionController, ClipController],
   providers: [
     PrismaDocumentRepository,
     IngestionJobProducer,
-    IngestionProcessor,
     {
       provide: IngestUrlUseCase,
       useFactory: (
@@ -69,6 +68,12 @@ import { QueryModule } from '../../query/presentation/query.module.js';
         producer: IngestionJobProducer,
       ) => new RetryIngestionUseCase(repo, producer),
       inject: [PrismaDocumentRepository, IngestionJobProducer],
+    },
+    {
+      provide: IngestClipUseCase,
+      useFactory: (ingestText: IngestTextUseCase) =>
+        new IngestClipUseCase(ingestText),
+      inject: [IngestTextUseCase],
     },
   ],
   exports: [PrismaDocumentRepository],

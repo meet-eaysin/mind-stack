@@ -23,6 +23,12 @@ export const documentsApi = {
       ENDPOINTS.KNOWLEDGE.DETAIL(id),
       schemas.DocumentDetailResponseSchema,
     ),
+  update: (id: string, updates: { title?: string; sourceUrl?: string }) =>
+    apiClient.patch(
+      ENDPOINTS.KNOWLEDGE.DETAIL(id),
+      updates,
+      SuccessResponseSchema,
+    ),
 
   delete: (id: string) =>
     apiClient.delete(ENDPOINTS.KNOWLEDGE.DETAIL(id), {}, SuccessResponseSchema),

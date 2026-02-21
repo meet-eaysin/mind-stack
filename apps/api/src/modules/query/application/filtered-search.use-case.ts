@@ -88,6 +88,7 @@ export class FilteredSearchUseCase {
           documentTitle: r.documentTitle,
           score: r.finalScore,
           tags: r.tags,
+          hasNote: r.hasNote,
         });
       }
     }

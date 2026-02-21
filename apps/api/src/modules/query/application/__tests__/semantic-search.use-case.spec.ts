@@ -1,4 +1,5 @@
 import { SemanticSearchUseCase } from '../semantic-search.use-case.js';
+import { INGESTION_STATUS } from '@repo/shared-types';
 import type { EmbeddingProvider, EmbeddingResult } from '@repo/embeddings';
 import type {
   VectorStore,
@@ -121,6 +122,7 @@ describe('SemanticSearchUseCase', () => {
         createdAt: new Date('2025-01-01T00:00:00Z'),
         hasNote: false,
         reviewCount: 0,
+        documentStatus: INGESTION_STATUS.READY,
       },
       {
         chunkId: 'chunk-2',
@@ -131,6 +133,7 @@ describe('SemanticSearchUseCase', () => {
         createdAt: new Date('2025-01-01T00:00:00Z'),
         hasNote: false,
         reviewCount: 0,
+        documentStatus: INGESTION_STATUS.READY,
       },
     ]);
 

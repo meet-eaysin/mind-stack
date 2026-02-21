@@ -8,17 +8,18 @@ generator client {
 }
 
 model Document {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   title      String
-  sourceType String   @map("source_type")
-  sourceUrl  String?  @map("source_url")
-  rawContent String   @map("raw_content")
-  status     String   @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
-  createdAt  DateTime @default(now()) @map("created_at")
+  sourceType String    @map("source_type")
+  sourceUrl  String?   @map("source_url")
+  rawContent String    @map("raw_content")
+  status     String    @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  createdAt  DateTime  @default(now()) @map("created_at")
+  deletedAt  DateTime? @map("deleted_at")
 
   chunks          Chunk[]
   DocumentTag     DocumentTag[]
-  Note            Note?
+  notes           Note[]
   ImportanceScore ImportanceScore?
   Review          Review[]
 
@@ -35,6 +36,7 @@ model Chunk {
   createdAt   DateTime @default(now()) @map("created_at")
 
   conceptChunks ConceptChunk[]
+  notes         Note[]
 
   @@index([documentId])
   @@map("chunks")
@@ -75,7 +77,9 @@ model ConceptChunk {
 model Note {
   id         String   @id @default(uuid())
   document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  documentId String   @unique @map("document_id")
+  documentId String   @map("document_id")
+  chunk      Chunk?   @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  chunkId    String?  @map("chunk_id")
   content    String
   createdAt  DateTime @default(now()) @map("created_at")
 

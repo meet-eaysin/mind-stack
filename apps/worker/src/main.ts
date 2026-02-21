@@ -89,7 +89,7 @@ async function main(): Promise<void> {
           logger.warn(`Unknown job type: ${job.name}`);
       }
     },
-    { connection, concurrency: 2 },
+    { connection, concurrency: 1 },
   );
 
   worker.on("completed", (job) => {

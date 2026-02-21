@@ -1,5 +1,6 @@
 "use client";
 
+import { StickyNote } from "lucide-react";
 import type { ChunkReference } from "@/types";
 
 export function ChunkResult({ chunk }: { chunk: ChunkReference }) {
@@ -9,8 +10,11 @@ export function ChunkResult({ chunk }: { chunk: ChunkReference }) {
       data-testid={`chunk-result-${chunk.chunkId}`}
     >
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs font-medium text-primary">
+        <span className="flex items-center gap-1.5 text-xs font-medium text-primary">
           {chunk.documentTitle}
+          {chunk.hasNote && (
+            <StickyNote className="size-3 text-muted-foreground" />
+          )}
         </span>
         <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
           {(chunk.score * 100).toFixed(0)}% match
