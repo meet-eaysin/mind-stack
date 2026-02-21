@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
 import { CalendarCheck } from "lucide-react";
 import { useDailyReview } from "@/features/review";
 import { getApiErrorMessage } from "@/lib/api-client";
@@ -11,6 +12,9 @@ import { ReviewCard } from "@/features/review";
 export default function ReviewPage() {
   const { data, isLoading, error } = useDailyReview();
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const total = data?.items.length ?? 0;
+  const progress = total > 0 ? ((currentIndex + 1) / total) * 100 : 0;
 
   return (
     <AppShell>
@@ -56,20 +60,21 @@ export default function ReviewPage() {
         )}
 
         {data && data.items.length > 0 && (
-          <>
-            <p className="text-center text-sm text-muted-foreground">
-              Review date: {data.date}
-            </p>
+          <div className="mx-auto max-w-2xl space-y-4">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>Review date: {data.date}</span>
+              <span>{Math.round(progress)}% complete</span>
+            </div>
+            <Progress value={progress} className="h-1" />
+
             <ReviewCard
-              item={data.items[currentIndex]}
-              index={currentIndex}
-              total={data.items.length}
+              item={data.items[currentIndex] || data.items[total - 1]}
+              index={Math.min(currentIndex, total - 1)}
+              total={total}
               onPrev={() => setCurrentIndex((i) => Math.max(0, i - 1))}
-              onNext={() =>
-                setCurrentIndex((i) => Math.min(data.items.length - 1, i + 1))
-              }
+              onNext={() => setCurrentIndex((i) => Math.min(total - 1, i + 1))}
             />
-          </>
+          </div>
         )}
       </div>
     </AppShell>

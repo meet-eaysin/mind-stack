@@ -4,7 +4,9 @@ import { useState } from "react";
 import { ThumbsUp, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useSubmitFeedback, useUpdateReviewScore } from "../hooks";
+import { Badge } from "@/components/ui/badge";
+import { useSubmitFeedback } from "../hooks";
+import { useUpdateImportance } from "@/features/documents";
 import type { ReviewItem } from "../types";
 
 export function ReviewCard({
@@ -21,7 +23,19 @@ export function ReviewCard({
   total: number;
 }) {
   const submitFeedback = useSubmitFeedback();
-  const updateScore = useUpdateReviewScore();
+  const updateImportance = useUpdateImportance();
+
+  const handleFeedback = (score: number) => {
+    submitFeedback.mutate(
+      { documentId: item.documentId, score },
+      {
+        onSuccess: () => {
+          onNext();
+        },
+      },
+    );
+  };
+
   const [showSummary, setShowSummary] = useState(false);
 
   return (
@@ -29,9 +43,26 @@ export function ReviewCard({
       className="mx-auto max-w-2xl space-y-4"
       data-testid={`review-card-${item.documentId}`}
     >
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>{item.documentTitle}</span>
-        <span>
+      <div className="flex items-start justify-between gap-4 text-sm text-muted-foreground">
+        <div className="flex flex-col gap-2">
+          <span className="text-base font-semibold text-foreground">
+            {item.documentTitle}
+          </span>
+          {item.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {item.tags.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant="secondary"
+                  className="px-2 py-0.5 text-[10px] uppercase tracking-wider"
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+        <span className="shrink-0 font-medium">
           {index + 1} / {total}
         </span>
       </div>
@@ -73,9 +104,7 @@ export function ReviewCard({
               key={score}
               variant="outline"
               size="sm"
-              onClick={() =>
-                submitFeedback.mutate({ documentId: item.documentId, score })
-              }
+              onClick={() => handleFeedback(score)}
               disabled={submitFeedback.isPending}
               className="gap-1"
               data-testid={`recall-btn-${score}`}
@@ -98,9 +127,9 @@ export function ReviewCard({
               variant="secondary"
               size="sm"
               onClick={() =>
-                updateScore.mutate({ documentId: item.documentId, score })
+                updateImportance.mutate({ documentId: item.documentId, score })
               }
-              disabled={updateScore.isPending}
+              disabled={updateImportance.isPending}
               className="gap-1"
               data-testid={`importance-btn-${score}`}
               aria-label={`Set importance ${score}`}

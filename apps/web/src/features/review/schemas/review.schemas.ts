@@ -7,6 +7,7 @@ export const ReviewItemSchema = z.object({
   summary: z.string(),
   reason: z.string(),
   lastReviewedAt: z.string().nullable(),
+  tags: z.array(z.string()),
 });
 
 export const DailyReviewResponseSchema = z.object({

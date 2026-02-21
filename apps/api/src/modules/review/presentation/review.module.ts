@@ -6,9 +6,11 @@ import { GenerateDailyReviewUseCase } from '../application/generate-daily-review
 import { SubmitReviewFeedbackUseCase } from '../application/submit-review-feedback.use-case.js';
 import { UpdateReviewScoreUseCase } from '../application/update-review-score.use-case.js';
 import { IngestionModule } from '../../ingestion/presentation/ingestion.module.js';
+import { KnowledgeModule } from '../../knowledge/presentation/knowledge.module.js';
+import { PrismaTagRepository } from '../../knowledge/infrastructure/prisma-tag.repository.js';
 
 @Module({
-  imports: [IngestionModule],
+  imports: [IngestionModule, KnowledgeModule],
   controllers: [ReviewController],
   providers: [
     PrismaReviewRepository,
@@ -17,8 +19,13 @@ import { IngestionModule } from '../../ingestion/presentation/ingestion.module.j
       useFactory: (
         reviewRepo: PrismaReviewRepository,
         docRepo: PrismaDocumentRepository,
-      ) => new GenerateDailyReviewUseCase(reviewRepo, docRepo),
-      inject: [PrismaReviewRepository, PrismaDocumentRepository],
+        tagRepo: PrismaTagRepository,
+      ) => new GenerateDailyReviewUseCase(reviewRepo, docRepo, tagRepo),
+      inject: [
+        PrismaReviewRepository,
+        PrismaDocumentRepository,
+        PrismaTagRepository,
+      ],
     },
     {
       provide: SubmitReviewFeedbackUseCase,

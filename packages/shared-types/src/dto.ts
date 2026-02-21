@@ -90,7 +90,7 @@ export type UpdateNoteRequest = {
 };
 
 export type UpdateImportanceRequest = {
-  chunkId: string;
+  documentId: string;
   score: number;
 };
 
@@ -146,6 +146,7 @@ export type ReviewItem = {
   summary: string;
   reason: string;
   lastReviewedAt: string | null;
+  tags: string[];
 };
 
 export type DailyReviewResponse = {

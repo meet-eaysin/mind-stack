@@ -25,18 +25,3 @@ export function useSubmitFeedback() {
     },
   });
 }
-
-export function useUpdateReviewScore() {
-  const queryClient = useQueryClient();
-  return useMutation<
-    { success: boolean },
-    ApiError,
-    { documentId: string; score: number }
-  >({
-    mutationFn: ({ documentId, score }) =>
-      reviewApi.updateScore(documentId, score),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.REVIEW.DAILY });
-    },
-  });
-}
