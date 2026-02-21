@@ -217,16 +217,26 @@ export function DocumentDetail({
             <div className="space-y-4">
               <Alert className="bg-primary/5 border-primary/10">
                 <Globe className="h-4 w-4" />
-                <AlertDescription className="text-xs">
-                  Viewing original website. Some sites may block embedding.{" "}
-                  <a
-                    href={doc.sourceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-medium underline underline-offset-4"
+                <AlertDescription className="text-xs flex items-center justify-between w-full flex-wrap gap-2">
+                  <span>
+                    Viewing original website. Some sites may block embedding.{" "}
+                    <a
+                      href={doc.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium underline underline-offset-4"
+                    >
+                      Open in new tab
+                    </a>
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-[10px] px-2"
+                    onClick={() => setViewType("reader")}
                   >
-                    Open in new tab
-                  </a>
+                    Switch to Reader
+                  </Button>
                 </AlertDescription>
               </Alert>
               <div className="w-full aspect-video bg-muted rounded-2xl border shadow-2xl overflow-hidden relative">
