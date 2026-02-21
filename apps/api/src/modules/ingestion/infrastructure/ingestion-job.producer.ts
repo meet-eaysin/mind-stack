@@ -14,6 +14,10 @@ export class IngestionJobProducer implements IngestionJobProducerPort {
     private readonly queue: Queue<IngestionJobData, void, JobType>,
   ) {}
 
+  async enqueueUrlExtractionJob(documentId: string): Promise<void> {
+    await this.addJob(JOB_TYPE.URL_EXTRACTION as JobType, { documentId });
+  }
+
   async enqueueChunkingJob(documentId: string): Promise<void> {
     await this.addJob(JOB_TYPE.CHUNKING, { documentId });
   }

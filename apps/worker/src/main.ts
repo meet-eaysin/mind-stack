@@ -10,6 +10,7 @@ import { handleChunkingJob } from "./jobs/chunking.job";
 import { handleEmbeddingJob } from "./jobs/embedding.job";
 import { handleConceptExtractionJob } from "./jobs/concept-extraction.job";
 import { handleDailyReviewJob } from "./jobs/daily-review.job";
+import { handleUrlExtractionJob } from "./jobs/url-extraction.job";
 
 const logger = createLogger("Worker");
 
@@ -63,6 +64,15 @@ async function main(): Promise<void> {
       });
 
       switch (job.name) {
+        case JOB_TYPE.URL_EXTRACTION:
+          await handleUrlExtractionJob(
+            job,
+            prisma,
+            llmProvider,
+            ingestionQueue,
+          );
+          break;
+
         case JOB_TYPE.CHUNKING:
           await handleChunkingJob(job, prisma, ingestionQueue);
           break;

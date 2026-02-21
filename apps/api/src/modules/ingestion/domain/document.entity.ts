@@ -17,6 +17,7 @@ export function createDocument(params: {
   sourceType: SourceType;
   sourceUrl: string | null;
   rawContent: string;
+  status?: IngestionStatus;
 }): DocumentEntity {
   return {
     id: params.id,
@@ -24,7 +25,7 @@ export function createDocument(params: {
     sourceType: params.sourceType,
     sourceUrl: params.sourceUrl,
     rawContent: params.rawContent,
-    status: 'INGESTED',
+    status: params.status ?? 'INGESTED',
     createdAt: new Date(),
     deletedAt: null,
   };

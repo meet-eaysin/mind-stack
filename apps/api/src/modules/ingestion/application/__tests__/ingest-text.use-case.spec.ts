@@ -51,6 +51,8 @@ class FakeDocumentRepository implements DocumentRepository {
 class FakeIngestionJobProducer implements IngestionJobProducerPort {
   readonly enqueuedIds: string[] = [];
 
+  async enqueueUrlExtractionJob(_documentId: string): Promise<void> {}
+
   async enqueueChunkingJob(documentId: string): Promise<void> {
     this.enqueuedIds.push(documentId);
   }
