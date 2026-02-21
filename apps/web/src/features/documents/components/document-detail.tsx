@@ -9,6 +9,8 @@ import {
   ExternalLink,
   MessageSquarePlus,
   ChevronRight,
+  Globe,
+  Layout,
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -29,6 +31,8 @@ import { getApiErrorMessage } from "@/lib/api-client";
 import { ExportActions } from "@/features/export/components/export-actions";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 
 type SelectionState = {
@@ -54,6 +58,8 @@ export function DocumentDetail({
 
   const [newTag, setNewTag] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [viewType, setViewType] = useState<"source" | "reader">("reader");
+  const [prevId, setPrevId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editUrl, setEditUrl] = useState("");
   const [selection, setSelection] = useState<SelectionState | null>(null);
@@ -97,6 +103,15 @@ export function DocumentDetail({
     document.addEventListener("mouseup", handleMouseUp);
     return () => document.removeEventListener("mouseup", handleMouseUp);
   }, [handleMouseUp]);
+
+  if (data?.document.id && data.document.id !== prevId) {
+    setPrevId(data.document.id);
+    if (data.document.sourceUrl && data.document.sourceType === "URL") {
+      setViewType("source");
+    } else {
+      setViewType("reader");
+    }
+  }
 
   if (isLoading) {
     return (
@@ -161,190 +176,239 @@ export function DocumentDetail({
               {doc.title}
             </h1>
           </div>
-          <div className="flex items-center gap-2">
-            <ExportActions chunkIds={doc.chunks.map((c) => c.id)} />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsEditing(!isEditing)}
-            >
-              {isEditing ? "Done" : "Settings"}
-            </Button>
+          <div className="flex items-center gap-4">
+            {doc.sourceType === "URL" && (
+              <Tabs
+                value={viewType}
+                onValueChange={(v) => setViewType(v as "source" | "reader")}
+                className="w-[200px]"
+              >
+                <TabsList className="grid w-full grid-cols-2 h-8">
+                  <TabsTrigger value="source" className="text-xs gap-1.5">
+                    <Globe className="size-3" />
+                    Source
+                  </TabsTrigger>
+                  <TabsTrigger value="reader" className="text-xs gap-1.5">
+                    <Layout className="size-3" />
+                    Reader
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            )}
+            <div className="flex items-center gap-2">
+              <ExportActions chunkIds={doc.chunks.map((c) => c.id)} />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditing(!isEditing)}
+              >
+                {isEditing ? "Done" : "Settings"}
+              </Button>
+            </div>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 py-12 flex flex-col lg:flex-row gap-12">
+      <main className="max-w-7xl mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8">
         {/* Main Content Area */}
-        <article
-          ref={articleRef}
-          className="flex-1 max-w-3xl mx-auto lg:mx-0 prose prose-slate dark:prose-invert prose-headings:font-serif prose-p:text-lg prose-p:leading-relaxed selection:bg-primary/20"
-        >
-          {/* Document Header in Article */}
-          <header className="mb-12 not-prose">
-            <div className="flex flex-wrap gap-2 mb-4">
-              {doc.tags.map((tag: string) => (
-                <span
-                  key={tag}
-                  className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs font-medium flex items-center gap-1"
-                >
-                  {tag}
-                  <button
-                    onClick={() =>
-                      removeTag.mutate({ documentId: doc.id, tagName: tag })
-                    }
-                  >
-                    <X className="size-3" />
-                  </button>
-                </span>
-              ))}
-              {isEditing && (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (newTag.trim()) {
-                      addTag.mutate({
-                        documentId: doc.id,
-                        tagName: newTag.trim(),
-                      });
-                      setNewTag("");
-                    }
-                  }}
-                >
-                  <Input
-                    placeholder="Add tag..."
-                    className="h-6 w-24 text-xs"
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                  />
-                </form>
-              )}
-            </div>
-
-            {isEditing ? (
-              <div className="space-y-4 mb-8">
-                <Input
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  className="text-3xl font-bold h-auto py-2"
-                />
-                <Input
-                  value={editUrl}
-                  onChange={(e) => setEditUrl(e.target.value)}
-                  placeholder="Source URL"
-                />
-                <Button
-                  onClick={() =>
-                    updateDocument.mutate({
-                      id: doc.id,
-                      title: editTitle,
-                      sourceUrl: editUrl,
-                    })
-                  }
-                >
-                  Save Changes
-                </Button>
-              </div>
-            ) : (
-              <h1 className="text-4xl sm:text-5xl font-bold font-serif leading-tight mb-4">
-                {doc.title}
-              </h1>
-            )}
-
-            <div className="flex items-center gap-4 text-muted-foreground text-sm italic">
-              <span>{doc.sourceType}</span>
-              <span>•</span>
-              <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
-              {doc.sourceUrl && (
-                <>
-                  <span>•</span>
+        <div className="flex-1 min-w-0">
+          {viewType === "source" && doc.sourceUrl ? (
+            <div className="space-y-4">
+              <Alert className="bg-primary/5 border-primary/10">
+                <Globe className="h-4 w-4" />
+                <AlertDescription className="text-xs">
+                  Viewing original website. Some sites may block embedding.{" "}
                   <a
                     href={doc.sourceUrl}
                     target="_blank"
-                    rel="noreferrer"
-                    className="hover:underline flex items-center gap-1"
+                    rel="noopener noreferrer"
+                    className="font-medium underline underline-offset-4"
                   >
-                    Source <ExternalLink className="size-3" />
+                    Open in new tab
                   </a>
-                </>
-              )}
+                </AlertDescription>
+              </Alert>
+              <div className="w-full aspect-video bg-muted rounded-2xl border shadow-2xl overflow-hidden relative">
+                <iframe
+                  src={doc.sourceUrl}
+                  className="w-full h-full border-0"
+                  title={doc.title}
+                  sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                />
+              </div>
             </div>
-          </header>
-
-          {/* Render Segments */}
-          <div className="space-y-0">
-            {doc.chunks.map((chunk) => {
-              const chunkNotes = doc.notes.filter(
-                (n) => n.chunkId === chunk.id,
-              );
-              return (
-                <div
-                  key={chunk.id}
-                  data-chunk-id={chunk.id}
-                  className="relative group mb-4 last:mb-0"
-                >
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      p: ({ node: _node, ...props }) => <p {...props} />,
-                      img: ({ node: _node, ...props }) => (
-                        <div className="my-8 flex justify-center flex-col items-center">
-                          <Image
-                            src={(props.src as string) || ""}
-                            alt={props.alt || ""}
-                            width={800}
-                            height={450}
-                            unoptimized
-                            className="rounded-xl shadow-lg border max-w-full h-auto"
-                          />
-                          {props.alt && (
-                            <span className="text-sm text-muted-foreground mt-2 italic">
-                              {props.alt}
-                            </span>
-                          )}
-                        </div>
-                      ),
-                      code: ({ node: _node, ...props }) => (
-                        <code
-                          className="px-1.5 py-0.5 rounded-md bg-muted font-mono text-sm border shadow-sm"
-                          {...props}
-                        />
-                      ),
-                      pre: ({ node: _node, ...props }) => (
-                        <pre
-                          className="p-4 rounded-xl bg-slate-900 border text-slate-100 overflow-x-auto my-6 shadow-inner font-mono text-sm"
-                          {...props}
-                        />
-                      ),
-                    }}
-                  >
-                    {chunk.content}
-                  </ReactMarkdown>
-
-                  {/* Sidebar Indicators for notes */}
-                  {chunkNotes.length > 0 && (
-                    <div className="absolute -left-12 top-2 hidden xl:flex flex-col gap-1">
-                      {chunkNotes.map((note) => (
-                        <button
-                          key={note.id}
-                          onClick={() => setActiveNoteId(note.id)}
-                          className={cn(
-                            "p-1.5 rounded-full border bg-background shadow-sm transition-all hover:scale-110",
-                            activeNoteId === note.id
-                              ? "border-primary text-primary"
-                              : "text-muted-foreground",
-                          )}
-                        >
-                          <StickyNote className="size-4" />
-                        </button>
-                      ))}
-                    </div>
+          ) : (
+            <article
+              ref={articleRef}
+              className="prose prose-slate dark:prose-invert prose-headings:font-serif prose-p:text-lg prose-p:leading-relaxed selection:bg-primary/20"
+            >
+              {/* Document Header in Article */}
+              <header className="mb-12 not-prose">
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {doc.tags.map((tag: string) => (
+                    <span
+                      key={tag}
+                      className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs font-medium flex items-center gap-1"
+                    >
+                      {tag}
+                      <button
+                        onClick={() =>
+                          removeTag.mutate({ documentId: doc.id, tagName: tag })
+                        }
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </span>
+                  ))}
+                  {isEditing && (
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (newTag.trim()) {
+                          addTag.mutate({
+                            documentId: doc.id,
+                            tagName: newTag.trim(),
+                          });
+                          setNewTag("");
+                        }
+                      }}
+                    >
+                      <Input
+                        placeholder="Add tag..."
+                        className="h-6 w-24 text-xs"
+                        value={newTag}
+                        onChange={(e) => setNewTag(e.target.value)}
+                      />
+                    </form>
                   )}
                 </div>
-              );
-            })}
-          </div>
-        </article>
+
+                {isEditing ? (
+                  <div className="space-y-4 mb-8">
+                    <Input
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      className="text-3xl font-bold h-auto py-2"
+                    />
+                    <Input
+                      value={editUrl}
+                      onChange={(e) => setEditUrl(e.target.value)}
+                      placeholder="Source URL"
+                    />
+                    <Button
+                      onClick={() =>
+                        updateDocument.mutate({
+                          id: doc.id,
+                          title: editTitle,
+                          sourceUrl: editUrl,
+                        })
+                      }
+                    >
+                      Save Changes
+                    </Button>
+                  </div>
+                ) : (
+                  <h1 className="text-4xl sm:text-5xl font-bold font-serif leading-tight mb-4">
+                    {doc.title}
+                  </h1>
+                )}
+
+                <div className="flex items-center gap-4 text-muted-foreground text-sm italic">
+                  <span>{doc.sourceType}</span>
+                  <span>•</span>
+                  <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
+                  {doc.sourceUrl && (
+                    <>
+                      <span>•</span>
+                      <a
+                        href={doc.sourceUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="hover:underline flex items-center gap-1"
+                      >
+                        Source <ExternalLink className="size-3" />
+                      </a>
+                    </>
+                  )}
+                </div>
+              </header>
+
+              {/* Render Segments */}
+              <div className="space-y-0">
+                {doc.chunks.map((chunk) => {
+                  const chunkNotes = doc.notes.filter(
+                    (n) => n.chunkId === chunk.id,
+                  );
+                  return (
+                    <div
+                      key={chunk.id}
+                      data-chunk-id={chunk.id}
+                      className="relative group mb-4 last:mb-0"
+                    >
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          p: ({ node: _node, ...props }) => <p {...props} />,
+                          img: ({ node: _node, ...props }) => (
+                            <div className="my-8 flex justify-center flex-col items-center">
+                              <Image
+                                src={(props.src as string) || ""}
+                                alt={props.alt || ""}
+                                width={800}
+                                height={450}
+                                unoptimized
+                                className="rounded-xl shadow-lg border max-w-full h-auto"
+                              />
+                              {props.alt && (
+                                <span className="text-sm text-muted-foreground mt-2 italic">
+                                  {props.alt}
+                                </span>
+                              )}
+                            </div>
+                          ),
+                          code: ({ node: _node, ...props }) => (
+                            <code
+                              className="px-1.5 py-0.5 rounded-md bg-muted font-mono text-sm border shadow-sm"
+                              {...props}
+                            />
+                          ),
+                          pre: ({ node: _node, ...props }) => (
+                            <pre
+                              className="p-4 rounded-xl bg-slate-900 border text-slate-100 overflow-x-auto my-6 shadow-inner font-mono text-sm"
+                              {...props}
+                            />
+                          ),
+                        }}
+                      >
+                        {chunk.content}
+                      </ReactMarkdown>
+
+                      {/* Sidebar Indicators for notes */}
+                      {chunkNotes.length > 0 && (
+                        <div className="absolute -left-12 top-2 hidden xl:flex flex-col gap-1">
+                          {chunkNotes.map((note) => (
+                            <button
+                              key={note.id}
+                              onClick={() => setActiveNoteId(note.id)}
+                              className={cn(
+                                "p-1.5 rounded-full border bg-background shadow-sm transition-all hover:scale-110",
+                                activeNoteId === note.id
+                                  ? "border-primary text-primary"
+                                  : "text-muted-foreground",
+                              )}
+                            >
+                              <StickyNote className="size-4" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </article>
+          )}
+        </div>
 
         {/* Floating Sidebar / Annotations */}
         <aside className="w-full lg:w-80 shrink-0 space-y-6">
