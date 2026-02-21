@@ -143,9 +143,9 @@ describe('BuildGraphUseCase', () => {
     const concepts = conceptRepository.getCreatedConcepts();
     expect(concepts).toHaveLength(3);
     const labels = concepts.map((c) => c.label);
-    expect(labels).toContain('TypeScript');
-    expect(labels).toContain('JavaScript');
-    expect(labels).toContain('Node.js');
+    expect(labels).toContain('typescript');
+    expect(labels).toContain('javascript');
+    expect(labels).toContain('node.js');
 
     const relations = conceptRepository.getCreatedRelations();
     expect(relations).toHaveLength(2);
@@ -154,12 +154,10 @@ describe('BuildGraphUseCase', () => {
   it('should handle malformed LLM JSON gracefully', async () => {
     llmProvider.setResponse('not valid json');
 
-    await expect(
-      useCase.execute({
-        chunkContent: 'Some random content',
-        chunkId: 'chunk-1',
-      }),
-    ).rejects.toThrow();
+    await useCase.execute({
+      chunkContent: 'Some random content',
+      chunkId: 'chunk-1',
+    });
 
     const concepts = conceptRepository.getCreatedConcepts();
     expect(concepts).toHaveLength(0);

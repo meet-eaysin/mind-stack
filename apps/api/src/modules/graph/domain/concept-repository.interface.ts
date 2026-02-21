@@ -34,6 +34,7 @@ export type ConceptRepository = {
     Array<{
       id: string;
       content: string;
+      documentId: string;
       documentTitle: string;
     }>
   >;

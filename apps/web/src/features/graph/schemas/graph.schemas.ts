@@ -10,6 +10,7 @@ export const GraphNodeSchema = z.object({
       z.object({
         id: z.string(),
         content: z.string(),
+        documentId: z.string(),
         documentTitle: z.string(),
       }),
     )

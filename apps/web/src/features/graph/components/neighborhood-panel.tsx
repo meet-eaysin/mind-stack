@@ -4,8 +4,17 @@ import { FileText, ExternalLink, Hash, Link2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
-export function NeighborhoodPanel({ conceptId }: { conceptId: string }) {
+import { useRouter } from "next/navigation";
+
+export function NeighborhoodPanel({
+  conceptId,
+  onNodeSelect,
+}: {
+  conceptId: string;
+  onNodeSelect?: (id: string | null) => void;
+}) {
   const { data, isLoading } = useNeighborhood(conceptId);
+  const router = useRouter();
 
   if (isLoading) {
     return (
@@ -53,13 +62,14 @@ export function NeighborhoodPanel({ conceptId }: { conceptId: string }) {
               {rootNode.associatedChunks.map((chunk) => (
                 <div
                   key={chunk.id}
-                  className="p-3 bg-background/50 border rounded-lg hover:border-primary/50 transition-colors group"
+                  className="p-3 bg-background/50 border rounded-lg hover:border-primary/50 transition-colors group cursor-pointer"
+                  onClick={() => router.push(`/documents/${chunk.documentId}`)}
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-[10px] font-medium text-muted-foreground truncate max-w-[150px]">
                       {chunk.documentTitle}
                     </span>
-                    <Link2 className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ExternalLink className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <p className="text-xs text-foreground/80 line-clamp-3 leading-relaxed">
                     {chunk.content}
@@ -83,11 +93,12 @@ export function NeighborhoodPanel({ conceptId }: { conceptId: string }) {
               <div
                 key={node.id}
                 className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group"
+                onClick={() => onNodeSelect?.(node.id)}
               >
                 <span className="text-sm group-hover:text-primary transition-colors">
                   {node.label}
                 </span>
-                <ExternalLink className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Link2 className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
             ))}
           </div>
@@ -95,20 +106,37 @@ export function NeighborhoodPanel({ conceptId }: { conceptId: string }) {
 
         {data.edges.length > 0 && (
           <div className="pt-2">
-            <h4 className="text-[10px] font-medium text-muted-foreground mb-2">
-              Semantic Relations
+            <h4 className="text-[10px] font-bold text-muted-foreground mb-3 uppercase tracking-wider">
+              Connection Types
             </h4>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-2">
               {Array.from(new Set(data.edges.map((e) => e.relationType))).map(
-                (type) => (
-                  <Badge
-                    key={type}
-                    variant="outline"
-                    className="text-[9px] uppercase tracking-tighter py-0 px-2 font-normal"
-                  >
-                    {type}
-                  </Badge>
-                ),
+                (type) => {
+                  let colorClass =
+                    "bg-primary/5 text-primary border-primary/20";
+                  if (type === "IS_PART_OF")
+                    colorClass =
+                      "bg-blue-500/10 text-blue-400 border-blue-500/20";
+                  if (type === "LEADS_TO")
+                    colorClass =
+                      "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+                  if (type === "DEPENDS_ON")
+                    colorClass =
+                      "bg-amber-500/10 text-amber-400 border-amber-500/20";
+                  if (type === "SIMILAR_TO")
+                    colorClass =
+                      "bg-purple-500/10 text-purple-400 border-purple-500/20";
+
+                  return (
+                    <Badge
+                      key={type}
+                      variant="outline"
+                      className={`text-[9px] uppercase tracking-tighter py-0.5 px-2 font-bold ${colorClass}`}
+                    >
+                      {type.replace(/_/g, " ")}
+                    </Badge>
+                  );
+                },
               )}
             </div>
           </div>

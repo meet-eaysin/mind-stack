@@ -27,15 +27,13 @@ export class PrismaConceptRepository implements ConceptRepository {
   }
 
   async findOrCreate(label: string): Promise<ConceptEntity> {
-    const existing = await this.prisma.concept.findUnique({
+    const concept = await this.prisma.concept.upsert({
       where: { label },
+      update: {},
+      create: { id: randomUUID(), label },
     });
-    if (existing) return { id: existing.id, label: existing.label };
 
-    const created = await this.prisma.concept.create({
-      data: { id: randomUUID(), label },
-    });
-    return { id: created.id, label: created.label };
+    return { id: concept.id, label: concept.label };
   }
 
   async createRelation(
@@ -175,6 +173,7 @@ export class PrismaConceptRepository implements ConceptRepository {
     Array<{
       id: string;
       content: string;
+      documentId: string;
       documentTitle: string;
     }>
   > {
@@ -200,6 +199,7 @@ export class PrismaConceptRepository implements ConceptRepository {
     return conceptChunks.map((cc) => ({
       id: cc.chunk.id,
       content: cc.chunk.content,
+      documentId: cc.chunk.document.id,
       documentTitle: cc.chunk.document.title,
     }));
   }

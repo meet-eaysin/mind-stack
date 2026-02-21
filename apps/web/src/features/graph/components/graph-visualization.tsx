@@ -5,6 +5,9 @@ import { Network, ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 import type { GraphNode, GraphEdge } from "../types";
 import { Button } from "@/components/ui/button";
 
+const DEFAULT_WIDTH = 800;
+const DEFAULT_HEIGHT = 500;
+
 export function GraphVisualization({
   nodes,
   edges,
@@ -21,11 +24,17 @@ export function GraphVisualization({
   >(() => {
     return nodes.map((node, i) => {
       const angle = (2 * Math.PI * i) / (nodes.length || 1);
-      const radius = 125; // Math.min(800, 500) * 0.25
+      const radius = 150;
       return {
         ...node,
-        x: 400 + radius * Math.cos(angle) + (Math.random() - 0.5) * 50,
-        y: 250 + radius * Math.sin(angle) + (Math.random() - 0.5) * 50,
+        x:
+          DEFAULT_WIDTH / 2 +
+          radius * Math.cos(angle) +
+          (Math.random() - 0.5) * 50,
+        y:
+          DEFAULT_HEIGHT / 2 +
+          radius * Math.sin(angle) +
+          (Math.random() - 0.5) * 50,
         vx: 0,
         vy: 0,
       };
@@ -37,22 +46,19 @@ export function GraphVisualization({
   const svgRef = useRef<SVGSVGElement>(null);
   const requestRef = useRef<number>(null);
 
-  const width = 800;
-  const height = 500;
+  const width = DEFAULT_WIDTH;
+  const height = DEFAULT_HEIGHT;
 
-  // React 19 pattern: Adjusting state based on props during render
-  // This avoids cascading renders from useEffect
+  // Sync node positions when nodes prop changes (Render-phase update)
   const [prevNodes, setPrevNodes] = useState(nodes);
-
   if (nodes !== prevNodes) {
     setPrevNodes(nodes);
     setNodePositions((current) => {
-      // Re-map or add new nodes, preserving physical state for existing ones
       return nodes.map((node, i) => {
         const existing = current.find((c) => c.id === node.id);
         if (existing) return { ...existing, ...node };
 
-        const angle = (2 * Math.PI * i) / nodes.length;
+        const angle = (2 * Math.PI * i) / (nodes.length || 1);
         const radius = Math.min(width, height) * 0.25;
         return {
           ...node,
@@ -125,8 +131,6 @@ export function GraphVisualization({
           node.vy *= friction;
           node.x += node.vx;
           node.y += node.vy;
-          node.x = Math.max(50, Math.min(width - 50, node.x));
-          node.y = Math.max(50, Math.min(height - 50, node.y));
         });
 
         return nextPositions;
@@ -143,7 +147,7 @@ export function GraphVisualization({
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return; // Only left click
     setIsDragging(true);
-    setDragStart({ x: e.clientX - transform.x, y: e.clientY - dragStart.y });
+    setDragStart({ x: e.clientX - transform.x, y: e.clientY - transform.y });
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -174,8 +178,40 @@ export function GraphVisualization({
     }));
   };
 
-  const resetTransform = () => {
-    setTransform({ x: 0, y: 0, scale: 1 });
+  // const resetTransform = () => {
+  //   setTransform({ x: 0, y: 0, scale: 1 });
+  // };
+
+  const zoomToFit = () => {
+    if (nodePositions.length === 0) return;
+
+    let minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
+    nodePositions.forEach((n) => {
+      minX = Math.min(minX, n.x);
+      minY = Math.min(minY, n.y);
+      maxX = Math.max(maxX, n.x);
+      maxY = Math.max(maxY, n.y);
+    });
+
+    const graphWidth = maxX - minX + 100;
+    const graphHeight = maxY - minY + 100;
+    const padding = 40;
+
+    const scaleX = (width - padding * 2) / graphWidth;
+    const scaleY = (height - padding * 2) / graphHeight;
+    const newScale = Math.min(Math.max(0.2, Math.min(scaleX, scaleY)), 2);
+
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+
+    setTransform({
+      x: width / 2 - centerX * newScale,
+      y: height / 2 - centerY * newScale,
+      scale: newScale,
+    });
   };
 
   if (nodes.length === 0) {
@@ -342,7 +378,8 @@ export function GraphVisualization({
             variant="ghost"
             size="icon"
             className="size-8"
-            onClick={resetTransform}
+            onClick={zoomToFit}
+            title="Zoom to Fit"
           >
             <Maximize2 className="size-4" />
           </Button>
