@@ -21,7 +21,7 @@
     "@repo/vector-store": "*",
     "bullmq": "^5.34.0",
     "ioredis": "^5.9.3",
-    "zod": "^3.23.8"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:^",

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { reviewApi } from "../api";
-import { QUERY_KEYS } from "@/constents/query-keys";
+import { QUERY_KEYS } from "@/constants/query-keys";
 import type { ApiError } from "@/lib/api-client";
 import type { DailyReviewResponse } from "../types";
 

@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/api-client";
-import { ENDPOINTS } from "@/constents/endpoints";
+import { ENDPOINTS } from "@/constants/endpoints";
 import { env } from "@/config/env";
 import * as schemas from "../schemas/search.schemas";
 import type {

@@ -2,6 +2,13 @@
 
 import { useRef, useState } from "react";
 import { useForm, useWatch, type Control } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  IngestUrlRequestSchema,
+  IngestTextRequestSchema,
+  IngestYoutubeRequestSchema,
+} from "../schemas/ingestion.schemas";
 import {
   Dialog,
   DialogContent,
@@ -30,31 +37,41 @@ import {
 import { getApiErrorMessage } from "@/lib/api-client";
 import { FileText, Link, Youtube, Type, Upload } from "lucide-react";
 
-interface IngestionModalProps {
+type IngestionModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
-}
+};
 
-interface UrlFormValues {
+type UrlFormValues = {
   url: string;
-}
+};
 
-interface TextFormValues {
+type TextFormValues = {
   title: string;
   content: string;
-}
+};
 
-interface PdfFormValues {
+type PdfFormValues = {
   title: string;
   file: FileList;
-}
+};
 
-interface YoutubeFormValues {
+const PdfFormSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  file: z.any().refine((val) => val && val.length > 0, "File is required"),
+});
+
+type YoutubeFormValues = {
   url: string;
-}
+};
 
-type IngestionTab = "url" | "text" | "pdf" | "youtube";
+const INGESTION_TABS = ["url", "text", "pdf", "youtube"] as const;
+type IngestionTab = (typeof INGESTION_TABS)[number];
+
+function isIngestionTab(v: string): v is IngestionTab {
+  return (INGESTION_TABS as readonly string[]).includes(v);
+}
 
 export function IngestionModal({
   open,
@@ -65,16 +82,21 @@ export function IngestionModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const urlForm = useForm<UrlFormValues>({
+    resolver: zodResolver(IngestUrlRequestSchema),
     defaultValues: { url: "" },
   });
 
   const textForm = useForm<TextFormValues>({
+    resolver: zodResolver(IngestTextRequestSchema),
     defaultValues: { title: "", content: "" },
   });
 
-  const pdfForm = useForm<PdfFormValues>();
+  const pdfForm = useForm<PdfFormValues>({
+    resolver: zodResolver(PdfFormSchema),
+  });
 
   const youtubeForm = useForm<YoutubeFormValues>({
+    resolver: zodResolver(IngestYoutubeRequestSchema),
     defaultValues: { url: "" },
   });
 
@@ -107,7 +129,8 @@ export function IngestionModal({
     const reader = new FileReader();
 
     reader.onload = () => {
-      const base64 = reader.result as string;
+      if (typeof reader.result !== "string") return;
+      const base64 = reader.result;
       const fileBase64 = base64.split(",")[1]; // Remove data:application/pdf;base64,
 
       ingestPdf.mutate(
@@ -154,7 +177,7 @@ export function IngestionModal({
 
         <Tabs
           value={activeTab}
-          onValueChange={(v) => setActiveTab(v as IngestionTab)}
+          onValueChange={(v) => isIngestionTab(v) && setActiveTab(v)}
           className="w-full"
         >
           <TabsList className="grid w-full grid-cols-4">
@@ -185,7 +208,6 @@ export function IngestionModal({
                 <FormField
                   control={urlForm.control}
                   name="url"
-                  rules={{ required: "URL is required" }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Website URL</FormLabel>
@@ -214,7 +236,6 @@ export function IngestionModal({
                 <FormField
                   control={textForm.control}
                   name="title"
-                  rules={{ required: "Title is required" }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Document Title</FormLabel>
@@ -232,7 +253,6 @@ export function IngestionModal({
                 <FormField
                   control={textForm.control}
                   name="content"
-                  rules={{ required: "Content is required" }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Raw Text Content</FormLabel>
@@ -262,7 +282,6 @@ export function IngestionModal({
                 <FormField
                   control={pdfForm.control}
                   name="title"
-                  rules={{ required: "Title is required" }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Document Title</FormLabel>
@@ -277,7 +296,6 @@ export function IngestionModal({
                 <FormField
                   control={pdfForm.control}
                   name="file"
-                  rules={{ required: "File is required" }}
                   render={({
                     field: { onChange, value: _value, ...field },
                   }) => (
@@ -322,14 +340,6 @@ export function IngestionModal({
                 <FormField
                   control={youtubeForm.control}
                   name="url"
-                  rules={{
-                    required: "YouTube URL is required",
-                    pattern: {
-                      value:
-                        /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/,
-                      message: "Must be a valid YouTube URL",
-                    },
-                  }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Video URL</FormLabel>

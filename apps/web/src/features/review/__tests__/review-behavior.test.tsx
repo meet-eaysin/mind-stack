@@ -11,11 +11,13 @@ describe("Review Behavior", () => {
 
     // Wait for content
     await waitFor(() => {
-      expect(screen.getByTestId("review-card-chunk-1")).toBeInTheDocument();
+      expect(screen.getByTestId("review-card-doc-1")).toBeInTheDocument();
     });
 
     expect(screen.getByText("Test Document")).toBeInTheDocument();
-    expect(screen.getByText("Review chunk content 1")).toBeInTheDocument();
+    expect(
+      screen.getByText("Review content for document 1"),
+    ).toBeInTheDocument();
 
     // Show summary
     const toggleSummary = screen.getByTestId("toggle-summary-btn");
@@ -37,9 +39,11 @@ describe("Review Behavior", () => {
     fireEvent.click(nextBtn);
 
     await waitFor(() => {
-      expect(screen.getByTestId("review-card-chunk-2")).toBeInTheDocument();
+      expect(screen.getByTestId("review-card-doc-2")).toBeInTheDocument();
     });
-    expect(screen.getByText("Review chunk content 2")).toBeInTheDocument();
+    expect(
+      screen.getByText("Review content for document 2"),
+    ).toBeInTheDocument();
   });
 
   it("should show empty state when no items to review", async () => {

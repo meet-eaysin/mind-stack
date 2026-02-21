@@ -1,6 +1,6 @@
 import type { ChunkEntity } from './chunk.entity.js';
 
-export interface ChunkRepository {
+export type ChunkRepository = {
   findByDocumentId(documentId: string): Promise<ChunkEntity[]>;
   findById(chunkId: string): Promise<ChunkEntity | null>;
   createMany(
@@ -8,4 +8,4 @@ export interface ChunkRepository {
     chunks: Array<{ content: string; startOffset: number; endOffset: number }>,
   ): Promise<ChunkEntity[]>;
   deleteByDocumentId(documentId: string): Promise<void>;
-}
+};

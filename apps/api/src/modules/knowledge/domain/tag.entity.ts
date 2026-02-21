@@ -1,4 +1,4 @@
-export interface TagEntity {
+export type TagEntity = {
   id: string;
   name: string;
-}
+};

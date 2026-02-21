@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/api-client";
-import { ENDPOINTS } from "@/constents/endpoints";
+import { ENDPOINTS } from "@/constants/endpoints";
 import * as schemas from "../schemas/documents.schemas";
 import { SuccessResponseSchema } from "@/schemas/api.schemas";
 
@@ -23,6 +23,9 @@ export const documentsApi = {
       ENDPOINTS.KNOWLEDGE.DETAIL(id),
       schemas.DocumentDetailResponseSchema,
     ),
+
+  delete: (id: string) =>
+    apiClient.delete(ENDPOINTS.KNOWLEDGE.DETAIL(id), {}, SuccessResponseSchema),
 
   addTag: (documentId: string, tagName: string) =>
     apiClient.post(

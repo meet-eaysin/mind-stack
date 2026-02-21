@@ -16,14 +16,16 @@ import {
   Plus,
   RefreshCw,
   AlertCircle,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useDocuments } from "../hooks";
+import { useDocuments, useDeleteDocument } from "../hooks";
 import { getApiErrorMessage } from "@/lib/api-client";
-import { QUERY_KEYS } from "@/constents/query-keys";
+import { QUERY_KEYS } from "@/constants/query-keys";
 import type { DocumentListResponse } from "../types";
+import { INGESTION_STATUS } from "@repo/shared-types";
 
 const sourceTypeIcons: Record<string, React.ElementType> = {
   URL: Globe,
@@ -38,7 +40,9 @@ export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const pageSize = 10;
   const queryClient = useQueryClient();
-  const retryIngestion = useRetryIngestion({
+  const retryIngestion = useRetryIngestion<{
+    previousDocs?: DocumentListResponse;
+  }>({
     onMutate: async (documentId: string) => {
       // Optimistic update
       await queryClient.cancelQueries({
@@ -53,7 +57,9 @@ export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
           {
             ...previousDocs,
             documents: previousDocs.documents.map((d) =>
-              d.id === documentId ? { ...d, status: "INGESTED" as const } : d,
+              d.id === documentId
+                ? { ...d, status: INGESTION_STATUS.INGESTED }
+                : d,
             ),
           },
         );
@@ -66,11 +72,10 @@ export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
       });
     },
     onError: (_err, _documentId, context) => {
-      const typedContext = context as { previousDocs?: DocumentListResponse };
-      if (typedContext?.previousDocs) {
+      if (context?.previousDocs) {
         queryClient.setQueryData(
           QUERY_KEYS.KNOWLEDGE.LIST(page, pageSize, searchTerm || undefined),
-          typedContext.previousDocs,
+          context.previousDocs,
         );
       }
     },
@@ -81,6 +86,7 @@ export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
     pageSize,
     searchTerm || undefined,
   );
+  const deleteDocument = useDeleteDocument();
 
   const handleIngestionSuccess = () => {
     setPage(1);
@@ -176,26 +182,50 @@ export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
                       </p>
                     </div>
                   </button>
-                  {doc.status === "FAILED" && (
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {doc.status === "FAILED" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          retryIngestion.mutate(doc.id);
+                        }}
+                        disabled={
+                          retryIngestion.isPending &&
+                          retryIngestion.variables === doc.id
+                        }
+                        className="shrink-0 h-8 text-xs gap-1.5"
+                      >
+                        <RefreshCw
+                          className={`size-3 ${retryIngestion.isPending && retryIngestion.variables === doc.id ? "animate-spin" : ""}`}
+                        />
+                        Retry
+                      </Button>
+                    )}
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        retryIngestion.mutate(doc.id);
+                        if (
+                          window.confirm(
+                            "Are you sure you want to delete this document?",
+                          )
+                        ) {
+                          deleteDocument.mutate(doc.id);
+                        }
                       }}
                       disabled={
-                        retryIngestion.isPending &&
-                        retryIngestion.variables === doc.id
+                        deleteDocument.isPending &&
+                        deleteDocument.variables === doc.id
                       }
-                      className="shrink-0 h-8 text-xs gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="shrink-0 h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      data-testid={`delete-doc-${doc.id}`}
                     >
-                      <RefreshCw
-                        className={`size-3 ${retryIngestion.isPending && retryIngestion.variables === doc.id ? "animate-spin" : ""}`}
-                      />
-                      Retry
+                      <Trash2 className="size-4" />
                     </Button>
-                  )}
+                  </div>
                 </div>
               );
             })}

@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ingestionApi } from "../api";
 import { useState, useEffect } from "react";
-import { QUERY_KEYS } from "@/constents/query-keys";
+import { QUERY_KEYS } from "@/constants/query-keys";
 import type {
   IngestionResponse,
   IngestUrlRequest,
@@ -37,12 +37,20 @@ export function useIngestYoutube() {
   });
 }
 
-export function useRetryIngestion(options?: {
-  onMutate?: (documentId: string) => Promise<unknown> | unknown;
-  onSuccess?: (data: IngestionResponse, variables: string) => void;
-  onError?: (err: ApiError, variables: string, context?: unknown) => void;
+export function useRetryIngestion<TContext = unknown>(options?: {
+  onMutate?: (documentId: string) => Promise<TContext> | TContext;
+  onSuccess?: (
+    data: IngestionResponse,
+    variables: string,
+    context: TContext,
+  ) => void;
+  onError?: (
+    err: ApiError,
+    variables: string,
+    context: TContext | undefined,
+  ) => void;
 }) {
-  return useMutation<IngestionResponse, ApiError, string>({
+  return useMutation<IngestionResponse, ApiError, string, TContext>({
     mutationFn: ingestionApi.retry,
     ...options,
   });
@@ -53,10 +61,10 @@ export function useIngestionStatus(documentId: string | null) {
 
   const { data } = useQuery<DocumentStatusResponse, ApiError>({
     queryKey: QUERY_KEYS.KNOWLEDGE.STATUS(documentId || ""),
-    queryFn: () => ingestionApi.getStatus(documentId!),
+    queryFn: () => ingestionApi.getStatus(documentId ?? ""),
     enabled: !!documentId && status !== "READY" && status !== "FAILED",
     refetchInterval: (query) => {
-      const data = query.state.data as DocumentStatusResponse | undefined;
+      const data = query.state.data;
       if (data?.status === "READY" || data?.status === "FAILED") {
         return false;
       }

@@ -5,9 +5,10 @@ import {
   ArrowLeft,
   BookOpen,
   Layers,
-  Tag,
   StickyNote,
   Star,
+  Trash2,
+  Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ import {
   useRemoveTag,
   useAddNote,
   useUpdateImportance,
+  useDeleteDocument,
 } from "../hooks";
 import { getApiErrorMessage } from "@/lib/api-client";
 import { ExportActions } from "@/features/export/components/export-actions";
@@ -36,6 +38,7 @@ export function DocumentDetail({
   const removeTag = useRemoveTag();
   const addNote = useAddNote();
   const updateImportance = useUpdateImportance();
+  const deleteDocument = useDeleteDocument();
   const [newTag, setNewTag] = useState("");
   const [noteContent, setNoteContent] = useState("");
 
@@ -88,7 +91,28 @@ export function DocumentDetail({
             {doc.sourceType} · {doc.status} · {doc.chunks.length} chunks
           </p>
         </div>
-        <ExportActions chunkIds={doc.chunks.map((c) => c.id)} />
+        <div className="flex items-center gap-2">
+          <Button
+            variant="destructive"
+            size="sm"
+            className="gap-1.5"
+            onClick={() => {
+              if (
+                window.confirm("Are you sure you want to delete this document?")
+              ) {
+                deleteDocument.mutate(doc.id, {
+                  onSuccess: onBack,
+                });
+              }
+            }}
+            disabled={deleteDocument.isPending}
+            data-testid="delete-document-btn"
+          >
+            <Trash2 className="size-4" />
+            Delete
+          </Button>
+          <ExportActions chunkIds={doc.chunks.map((c) => c.id)} />
+        </div>
       </div>
 
       {/* Document-level metadata */}

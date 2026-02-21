@@ -6,22 +6,21 @@ export type ApiError =
   | { type: "backend"; status: number; message: string }
   | { type: "validation"; issues: readonly string[] };
 
+const ApiErrorSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("network"), message: z.string() }),
+  z.object({
+    type: z.literal("backend"),
+    status: z.number(),
+    message: z.string(),
+  }),
+  z.object({
+    type: z.literal("validation"),
+    issues: z.array(z.string()).optional().default([]),
+  }),
+]);
+
 export function isApiError(error: unknown): error is ApiError {
-  if (typeof error !== "object" || error === null) return false;
-  const e = error as Record<string, unknown>;
-  const type = e["type"];
-
-  if (type === "network") {
-    return typeof e["message"] === "string";
-  }
-  if (type === "backend") {
-    return typeof e["status"] === "number" && typeof e["message"] === "string";
-  }
-  if (type === "validation") {
-    return Array.isArray(e["issues"]);
-  }
-
-  return false;
+  return ApiErrorSchema.safeParse(error).success;
 }
 
 export function getApiErrorMessage(error: unknown): string {
@@ -31,7 +30,7 @@ export function getApiErrorMessage(error: unknown): string {
     case "backend":
       return error.message;
     case "validation":
-      return error.issues.join(", ");
+      return (error.issues ?? []).join(", ");
   }
 }
 

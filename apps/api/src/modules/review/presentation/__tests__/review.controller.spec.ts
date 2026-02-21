@@ -5,7 +5,6 @@ import request from 'supertest';
 import { ReviewController } from '../review.controller.js';
 import { GenerateDailyReviewUseCase } from '../../application/generate-daily-review.use-case.js';
 import { SubmitReviewFeedbackUseCase } from '../../application/submit-review-feedback.use-case.js';
-import { UpdateReviewScoreUseCase } from '../../application/update-review-score.use-case.js';
 import { ConfigService } from '@nestjs/config';
 
 describe('ReviewController (e2e)', () => {
@@ -13,7 +12,6 @@ describe('ReviewController (e2e)', () => {
 
   const mockGenerateDailyReview = { execute: jest.fn() };
   const mockSubmitFeedback = { execute: jest.fn() };
-  const mockUpdateScore = { execute: jest.fn() };
   const mockConfigService = { get: jest.fn().mockReturnValue(null) };
 
   beforeEach(async () => {
@@ -25,7 +23,6 @@ describe('ReviewController (e2e)', () => {
           useValue: mockGenerateDailyReview,
         },
         { provide: SubmitReviewFeedbackUseCase, useValue: mockSubmitFeedback },
-        { provide: UpdateReviewScoreUseCase, useValue: mockUpdateScore },
         { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
@@ -76,17 +73,6 @@ describe('ReviewController (e2e)', () => {
         .send({ documentId: 'd1', score: 10 });
 
       expect(response.status).toBe(400);
-    });
-  });
-
-  describe('POST /review/score', () => {
-    it('should return 201 for valid score update', async () => {
-      mockUpdateScore.execute.mockResolvedValue(undefined);
-      const response = await request(app.getHttpServer())
-        .post('/review/score')
-        .send({ documentId: 'd1', score: 2 });
-
-      expect(response.status).toBe(201);
     });
   });
 

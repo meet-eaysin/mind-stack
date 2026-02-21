@@ -1,4 +1,5 @@
 import { screen, waitFor, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import { render } from "@/test/test-utils";
 import { DocumentList, DocumentDetail } from "../components";
@@ -18,7 +19,8 @@ describe("Documents Behavior", () => {
     expect(screen.getByText("Test URL Document")).toBeInTheDocument();
 
     const docItem = screen.getByTestId("document-item-doc-1");
-    fireEvent.click(docItem);
+    const docBtn = docItem.querySelector("button");
+    fireEvent.click(docBtn!);
     expect(onSelect).toHaveBeenCalledWith("doc-1");
   });
 
@@ -31,7 +33,15 @@ describe("Documents Behavior", () => {
     });
 
     expect(screen.getByText("Test PDF Document")).toBeInTheDocument();
-    expect(screen.getByTestId("chunk-list")).toBeInTheDocument();
+
+    const analysisTab = screen.getByRole("tab", { name: /analysis view/i });
+
+    // Radix UI requires userEvent to properly trigger tab changes
+    await userEvent.click(analysisTab);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("chunk-list")).toBeInTheDocument();
+    });
     expect(
       screen.getByText("This is a test chunk content."),
     ).toBeInTheDocument();
@@ -50,7 +60,9 @@ describe("Documents Behavior", () => {
     fireEvent.click(addNoteBtn);
 
     await waitFor(() => {
-      expect(screen.getByTestId("chunk-note")).toHaveTextContent("test note");
+      expect(screen.getByTestId("document-note")).toHaveTextContent(
+        "test note",
+      );
     });
 
     const importanceBtn = screen.getByTestId("importance-btn-5");

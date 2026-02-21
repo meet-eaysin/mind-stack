@@ -5,7 +5,7 @@ import {
   keepPreviousData,
 } from "@tanstack/react-query";
 import { documentsApi } from "../api";
-import { QUERY_KEYS } from "@/constents/query-keys";
+import { QUERY_KEYS } from "@/constants/query-keys";
 import type { DocumentListResponse, DocumentDetailResponse } from "../types";
 import type { ApiError } from "@/lib/api-client";
 
@@ -96,6 +96,16 @@ export function useUpdateNote() {
       documentsApi.updateNote(noteId, content),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["knowledge", "detail"] });
+    },
+  });
+}
+
+export function useDeleteDocument() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => documentsApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["knowledge"] });
     },
   });
 }

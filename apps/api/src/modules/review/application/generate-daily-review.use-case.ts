@@ -47,7 +47,7 @@ export class GenerateDailyReviewUseCase {
           content.length > 200 ? content.substring(0, 200) + '...' : content;
 
         let reason = '';
-        let lastReviewDate = '';
+        let lastReviewDate: string | null = null;
 
         if (target.type === 'REVIEWED') {
           const daysAgo = Math.floor(
@@ -58,7 +58,7 @@ export class GenerateDailyReviewUseCase {
           lastReviewDate = target.review.lastReviewedAt.toISOString();
         } else {
           reason = 'Not yet reviewed. Content is fresh and ready for audit.';
-          lastReviewDate = target.createdAt.toISOString();
+          lastReviewDate = null;
         }
 
         return {

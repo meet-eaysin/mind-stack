@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/api-client";
-import { ENDPOINTS } from "@/constents/endpoints";
+import { ENDPOINTS } from "@/constants/endpoints";
 import * as schemas from "../schemas/export.schemas";
 import type { ExportMarkdownResponse, ExportNotionResponse } from "../types";
 

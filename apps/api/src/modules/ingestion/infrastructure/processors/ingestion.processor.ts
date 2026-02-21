@@ -58,6 +58,14 @@ export class IngestionProcessor extends WorkerHost {
     rawContent?: string,
   ): Promise<void> {
     try {
+      // Delete existing vectors before re-chunking to prevent orphan embeddings
+      const existingChunks =
+        await this.chunkRepository.findByDocumentId(documentId);
+      const existingIds = existingChunks.map((c) => c.id);
+      if (existingIds.length > 0) {
+        await this.vectorStore.delete(existingIds);
+      }
+
       await this.documentRepository.updateStatus(
         documentId,
         INGESTION_STATUS.CHUNKING,
@@ -182,6 +190,11 @@ export class IngestionProcessor extends WorkerHost {
     this.logger.error(`Failed ${phase} for document ${documentId}: ${message}`);
     this.documentRepository
       .updateStatus(documentId, INGESTION_STATUS.FAILED)
-      .catch(() => {});
+      .catch((e) =>
+        this.logger.error('Failed to update status to FAILED', {
+          documentId,
+          error: e,
+        }),
+      );
   }
 }

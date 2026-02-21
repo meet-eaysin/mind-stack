@@ -16,6 +16,7 @@ export const handlers = [
           summary: "Summary 1",
           reason: "Reason 1",
           lastReviewedAt: null,
+          tags: [],
         },
         {
           documentId: "doc-2",
@@ -24,6 +25,7 @@ export const handlers = [
           summary: "Summary 2",
           reason: "Reason 2",
           lastReviewedAt: null,
+          tags: [],
         },
       ],
     });

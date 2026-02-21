@@ -22,7 +22,6 @@ import {
 import { searchApi } from "@/features/search/api";
 import { getApiErrorMessage } from "@/lib/api-client";
 import type { ChunkReference } from "@/types";
-import type { StreamingAskResponseChunk } from "@/features/search/types";
 import { StreamingAskResponseChunkSchema } from "@/features/search/schemas/search.schemas";
 
 type SearchMode = "semantic" | "filtered" | "ask" | "retrieve" | "stream";
@@ -71,10 +70,12 @@ export default function SearchPage() {
       const eventSource = searchApi.askStream(query);
       eventSource.onmessage = (event) => {
         try {
-          const parsed = JSON.parse(event.data as string) as unknown;
+          const raw =
+            typeof event.data === "string" ? event.data : String(event.data);
+          const parsed: unknown = JSON.parse(raw);
           const chunk = StreamingAskResponseChunkSchema.safeParse(parsed);
           if (chunk.success) {
-            const data = chunk.data as StreamingAskResponseChunk;
+            const data = chunk.data;
             if (data.type === "text") {
               finalAnswer += data.data;
               setStreamAnswer(finalAnswer);

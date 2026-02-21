@@ -20,7 +20,7 @@ interface RawLLMOutput {
 
 export const ExtractedConceptSchema = z
   .object({
-    label: z.union([z.string(), z.record(z.string())]).optional(),
+    label: z.union([z.string(), z.record(z.string(), z.string())]).optional(),
     relations: z
       .union([z.array(RawRelationSchema), z.array(z.string())])
       .optional(),

@@ -4,7 +4,6 @@ import { PrismaReviewRepository } from '../infrastructure/prisma-review.reposito
 import { PrismaDocumentRepository } from '../../ingestion/infrastructure/prisma-document.repository.js';
 import { GenerateDailyReviewUseCase } from '../application/generate-daily-review.use-case.js';
 import { SubmitReviewFeedbackUseCase } from '../application/submit-review-feedback.use-case.js';
-import { UpdateReviewScoreUseCase } from '../application/update-review-score.use-case.js';
 import { IngestionModule } from '../../ingestion/presentation/ingestion.module.js';
 import { KnowledgeModule } from '../../knowledge/presentation/knowledge.module.js';
 import { PrismaTagRepository } from '../../knowledge/infrastructure/prisma-tag.repository.js';
@@ -31,12 +30,6 @@ import { PrismaTagRepository } from '../../knowledge/infrastructure/prisma-tag.r
       provide: SubmitReviewFeedbackUseCase,
       useFactory: (repo: PrismaReviewRepository) =>
         new SubmitReviewFeedbackUseCase(repo),
-      inject: [PrismaReviewRepository],
-    },
-    {
-      provide: UpdateReviewScoreUseCase,
-      useFactory: (repo: PrismaReviewRepository) =>
-        new UpdateReviewScoreUseCase(repo),
       inject: [PrismaReviewRepository],
     },
   ],

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { graphApi } from "../api";
-import { QUERY_KEYS } from "@/constents/query-keys";
+import { QUERY_KEYS } from "@/constants/query-keys";
 import type { ApiError } from "@/lib/api-client";
 import type { GraphResponse, BuildGraphResponse } from "../types";
 
@@ -24,7 +24,7 @@ export function useGraph() {
 export function useNeighborhood(conceptId: string | null, depth = 1) {
   return useQuery<GraphResponse, ApiError>({
     queryKey: ["graph", "neighborhood", conceptId, depth],
-    queryFn: () => graphApi.getNeighborhood(conceptId!, depth),
+    queryFn: () => graphApi.getNeighborhood(conceptId ?? "", depth),
     enabled: conceptId !== null,
   });
 }
