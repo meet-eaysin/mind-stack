@@ -95,15 +95,19 @@ class FakeChunkRepository implements ChunkRepository {
     return Promise.resolve(this.chunksByDoc.get(documentId) ?? []);
   }
 
-  findById(_chunkId: string): Promise<ChunkEntity | null> {
+  async findById(_chunkId: string): Promise<ChunkEntity | null> {
     return Promise.resolve(null);
   }
 
-  createMany(
+  async createMany(
     _documentId: string,
     _chunks: Array<{ content: string; startOffset: number; endOffset: number }>,
   ): Promise<ChunkEntity[]> {
     return Promise.resolve([]);
+  }
+
+  async deleteByDocumentId(_documentId: string): Promise<void> {
+    return Promise.resolve();
   }
 }
 

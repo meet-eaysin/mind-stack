@@ -83,7 +83,9 @@ class FakeConceptRepository implements ConceptRepository {
   linkConceptToChunk(_conceptId: string, _chunkId: string): Promise<void> {
     return Promise.resolve();
   }
-  findAssociatedChunks(_conceptId: string): Promise<{ id: string; content: string; documentTitle: string; }[]> {
+  findAssociatedChunks(
+    _conceptId: string,
+  ): Promise<{ id: string; content: string; documentTitle: string }[]> {
     return Promise.resolve([]);
   }
 }

@@ -32,10 +32,20 @@ describe('selectChunksForReview', () => {
       reviewScore: 0,
     });
 
-    const result = selectChunksForReview([lessOld, veryOld], 10);
+    const result = selectChunksForReview(
+      [
+        { type: 'REVIEWED', review: lessOld },
+        { type: 'REVIEWED', review: veryOld },
+      ],
+      10,
+    );
 
-    expect(result[0]?.documentId).toBe('d1');
-    expect(result[1]?.documentId).toBe('d2');
+    if (result[0]?.type === 'REVIEWED') {
+      expect(result[0].review.documentId).toBe('d1');
+    }
+    if (result[1]?.type === 'REVIEWED') {
+      expect(result[1].review.documentId).toBe('d2');
+    }
   });
 
   it('should respect the limit parameter', () => {
@@ -60,7 +70,10 @@ describe('selectChunksForReview', () => {
       }),
     ];
 
-    const result = selectChunksForReview(reviews, 2);
+    const result = selectChunksForReview(
+      reviews.map((r) => ({ type: 'REVIEWED', review: r })),
+      2,
+    );
 
     expect(result).toHaveLength(2);
   });
@@ -73,7 +86,10 @@ describe('selectChunksForReview', () => {
       reviewScore: 0,
     });
 
-    const result = selectChunksForReview([notDue], 10);
+    const result = selectChunksForReview(
+      [{ type: 'REVIEWED', review: notDue }],
+      10,
+    );
 
     expect(result).toHaveLength(0);
   });
@@ -92,12 +108,20 @@ describe('selectChunksForReview', () => {
       reviewScore: 0,
     });
 
-    const result = selectChunksForReview([highScore, lowScore], 10);
+    const result = selectChunksForReview(
+      [
+        { type: 'REVIEWED', review: highScore },
+        { type: 'REVIEWED', review: lowScore },
+      ],
+      10,
+    );
 
     // With score=5, interval = 1 * 2^5 = 32 days. 5 days < 32, so not overdue.
     // With score=0, interval = 1 * 2^0 = 1 day. 5 days > 1, so overdue.
     expect(result).toHaveLength(1);
-    expect(result[0]?.documentId).toBe('d2');
+    if (result[0]?.type === 'REVIEWED') {
+      expect(result[0].review.documentId).toBe('d2');
+    }
   });
 
   it('should return empty array when given empty input', () => {

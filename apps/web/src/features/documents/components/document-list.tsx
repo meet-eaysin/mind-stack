@@ -22,6 +22,8 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDocuments } from "../hooks";
 import { getApiErrorMessage } from "@/lib/api-client";
+import { QUERY_KEYS } from "@/constents/query-keys";
+import type { DocumentListResponse } from "../types";
 
 const sourceTypeIcons: Record<string, React.ElementType> = {
   URL: Globe,
@@ -36,7 +38,43 @@ export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const pageSize = 10;
   const queryClient = useQueryClient();
-  const retryIngestion = useRetryIngestion();
+  const retryIngestion = useRetryIngestion({
+    onMutate: async (documentId: string) => {
+      // Optimistic update
+      await queryClient.cancelQueries({
+        queryKey: ["knowledge"],
+      });
+      const previousDocs = queryClient.getQueryData<DocumentListResponse>(
+        QUERY_KEYS.KNOWLEDGE.LIST(page, pageSize, searchTerm || undefined),
+      );
+      if (previousDocs) {
+        queryClient.setQueryData(
+          QUERY_KEYS.KNOWLEDGE.LIST(page, pageSize, searchTerm || undefined),
+          {
+            ...previousDocs,
+            documents: previousDocs.documents.map((d) =>
+              d.id === documentId ? { ...d, status: "INGESTED" as const } : d,
+            ),
+          },
+        );
+      }
+      return { previousDocs };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["knowledge"],
+      });
+    },
+    onError: (_err, _documentId, context) => {
+      const typedContext = context as { previousDocs?: DocumentListResponse };
+      if (typedContext?.previousDocs) {
+        queryClient.setQueryData(
+          QUERY_KEYS.KNOWLEDGE.LIST(page, pageSize, searchTerm || undefined),
+          typedContext.previousDocs,
+        );
+      }
+    },
+  });
 
   const { data, isLoading, error } = useDocuments(
     page,
@@ -144,16 +182,7 @@ export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        retryIngestion.mutate(doc.id, {
-                          onSuccess: () => {
-                            queryClient.invalidateQueries({
-                              queryKey: ["documents"],
-                            });
-                            queryClient.invalidateQueries({
-                              queryKey: ["knowledge"],
-                            });
-                          },
-                        });
+                        retryIngestion.mutate(doc.id);
                       }}
                       disabled={
                         retryIngestion.isPending &&

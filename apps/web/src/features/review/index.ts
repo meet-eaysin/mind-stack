@@ -1,7 +1,3 @@
 export { reviewApi } from "./api";
-export {
-  useDailyReview,
-  useSubmitFeedback,
-  useUpdateReviewScore,
-} from "./hooks";
+export { useDailyReview, useSubmitFeedback } from "./hooks";
 export * from "./components";

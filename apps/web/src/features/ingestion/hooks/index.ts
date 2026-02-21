@@ -37,9 +37,14 @@ export function useIngestYoutube() {
   });
 }
 
-export function useRetryIngestion() {
+export function useRetryIngestion(options?: {
+  onMutate?: (documentId: string) => Promise<unknown> | unknown;
+  onSuccess?: (data: IngestionResponse, variables: string) => void;
+  onError?: (err: ApiError, variables: string, context?: unknown) => void;
+}) {
   return useMutation<IngestionResponse, ApiError, string>({
     mutationFn: ingestionApi.retry,
+    ...options,
   });
 }
 

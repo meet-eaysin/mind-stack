@@ -5,6 +5,8 @@ import type {
 } from '../../domain/review-repository.interface.js';
 import type { DocumentRepository } from '../../../ingestion/domain/document-repository.interface.js';
 import type { DocumentEntity } from '../../../ingestion/domain/document.entity.js';
+import type { TagRepository } from '../../../knowledge/domain/tag-repository.interface.js';
+import type { TagEntity } from '../../../knowledge/domain/tag.entity.js';
 
 // ── Fixtures ──
 
@@ -73,6 +75,12 @@ class FakeDocumentRepository implements Partial<DocumentRepository> {
   }
 }
 
+class FakeTagRepository implements Partial<TagRepository> {
+  async findByDocumentId(): Promise<TagEntity[]> {
+    return [];
+  }
+}
+
 // ── Tests ──
 
 describe('GenerateDailyReviewUseCase', () => {
@@ -83,9 +91,11 @@ describe('GenerateDailyReviewUseCase', () => {
   beforeEach(() => {
     reviewRepository = new FakeReviewRepository();
     documentRepository = new FakeDocumentRepository();
+    const tagRepository = new FakeTagRepository();
     useCase = new GenerateDailyReviewUseCase(
       reviewRepository,
       documentRepository as unknown as DocumentRepository,
+      tagRepository as unknown as TagRepository,
     );
   });
 

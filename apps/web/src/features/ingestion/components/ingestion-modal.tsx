@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useRef, useState } from "react";
+import { useForm, useWatch, type Control } from "react-hook-form";
 import {
   Dialog,
   DialogContent,
@@ -21,8 +21,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useIngestUrl, useIngestText } from "../hooks";
+import {
+  useIngestUrl,
+  useIngestText,
+  useIngestPdf,
+  useIngestYoutube,
+} from "../hooks";
 import { getApiErrorMessage } from "@/lib/api-client";
+import { FileText, Link, Youtube, Type, Upload } from "lucide-react";
 
 interface IngestionModalProps {
   open: boolean;
@@ -39,12 +45,24 @@ interface TextFormValues {
   content: string;
 }
 
+interface PdfFormValues {
+  title: string;
+  file: FileList;
+}
+
+interface YoutubeFormValues {
+  url: string;
+}
+
+type IngestionTab = "url" | "text" | "pdf" | "youtube";
+
 export function IngestionModal({
   open,
   onOpenChange,
   onSuccess,
 }: IngestionModalProps) {
-  const [activeTab, setActiveTab] = useState<"url" | "text">("url");
+  const [activeTab, setActiveTab] = useState<IngestionTab>("url");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const urlForm = useForm<UrlFormValues>({
     defaultValues: { url: "" },
@@ -54,48 +72,108 @@ export function IngestionModal({
     defaultValues: { title: "", content: "" },
   });
 
+  const pdfForm = useForm<PdfFormValues>();
+
+  const youtubeForm = useForm<YoutubeFormValues>({
+    defaultValues: { url: "" },
+  });
+
   const ingestUrl = useIngestUrl();
   const ingestText = useIngestText();
+  const ingestPdf = useIngestPdf();
+  const ingestYoutube = useIngestYoutube();
+
+  const handleSuccess = () => {
+    urlForm.reset();
+    textForm.reset();
+    pdfForm.reset();
+    youtubeForm.reset();
+    onOpenChange(false);
+    onSuccess?.();
+  };
 
   const onUrlSubmit = (data: UrlFormValues) => {
-    ingestUrl.mutate(data, {
-      onSuccess: () => {
-        urlForm.reset();
-        onOpenChange(false);
-        onSuccess?.();
-      },
-    });
+    ingestUrl.mutate(data, { onSuccess: handleSuccess });
   };
 
   const onTextSubmit = (data: TextFormValues) => {
-    ingestText.mutate(data, {
-      onSuccess: () => {
-        textForm.reset();
-        onOpenChange(false);
-        onSuccess?.();
-      },
+    ingestText.mutate(data, { onSuccess: handleSuccess });
+  };
+
+  const onPdfSubmit = async (data: PdfFormValues) => {
+    if (!data.file || data.file.length === 0) return;
+
+    const file = data.file[0];
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      const fileBase64 = base64.split(",")[1]; // Remove data:application/pdf;base64,
+
+      ingestPdf.mutate(
+        { title: data.title, fileBase64 },
+        {
+          onSuccess: () => {
+            handleSuccess();
+            if (fileInputRef.current) fileInputRef.current.value = "";
+          },
+        },
+      );
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  const onYoutubeSubmit = (data: YoutubeFormValues) => {
+    ingestYoutube.mutate(data, {
+      onSuccess: handleSuccess,
     });
   };
 
+  const isPending =
+    ingestUrl.isPending ||
+    ingestText.isPending ||
+    ingestPdf.isPending ||
+    ingestYoutube.isPending;
+
+  const error =
+    ingestUrl.error ||
+    ingestText.error ||
+    ingestPdf.error ||
+    ingestYoutube.error;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]" data-testid="ingestion-modal">
+      <DialogContent className="sm:max-w-[550px]" data-testid="ingestion-modal">
         <DialogHeader>
           <DialogTitle>Add New Document</DialogTitle>
           <DialogDescription>
-            Provide a URL to scrape or paste raw text to ingest into the
-            knowledge base.
+            Expand your knowledge base with web articles, documents, or videos.
           </DialogDescription>
         </DialogHeader>
 
         <Tabs
           value={activeTab}
-          onValueChange={(v) => setActiveTab(v as "url" | "text")}
+          onValueChange={(v) => setActiveTab(v as IngestionTab)}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="url">URL</TabsTrigger>
-            <TabsTrigger value="text">Raw Text</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="url" title="URL">
+              <Link className="h-4 w-4 mr-2" />
+              URL
+            </TabsTrigger>
+            <TabsTrigger value="text" title="Text">
+              <Type className="h-4 w-4 mr-2" />
+              Text
+            </TabsTrigger>
+            <TabsTrigger value="pdf" title="PDF">
+              <FileText className="h-4 w-4 mr-2" />
+              PDF
+            </TabsTrigger>
+            <TabsTrigger value="youtube" title="YouTube">
+              <Youtube className="h-4 w-4 mr-2" />
+              YT
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="url" className="mt-4">
@@ -122,30 +200,7 @@ export function IngestionModal({
                     </FormItem>
                   )}
                 />
-
-                {ingestUrl.error && (
-                  <p className="text-sm font-medium text-destructive">
-                    {getApiErrorMessage(ingestUrl.error)}
-                  </p>
-                )}
-
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => onOpenChange(false)}
-                    disabled={ingestUrl.isPending}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={ingestUrl.isPending}
-                    data-testid="submit-url-btn"
-                  >
-                    {ingestUrl.isPending ? "Ingesting..." : "Ingest URL"}
-                  </Button>
-                </div>
+                {renderActionButtons(() => onOpenChange(false), isPending)}
               </form>
             </Form>
           </TabsContent>
@@ -193,35 +248,162 @@ export function IngestionModal({
                     </FormItem>
                   )}
                 />
-
-                {ingestText.error && (
-                  <p className="text-sm font-medium text-destructive">
-                    {getApiErrorMessage(ingestText.error)}
-                  </p>
-                )}
-
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => onOpenChange(false)}
-                    disabled={ingestText.isPending}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={ingestText.isPending}
-                    data-testid="submit-text-btn"
-                  >
-                    {ingestText.isPending ? "Ingesting..." : "Ingest Text"}
-                  </Button>
-                </div>
+                {renderActionButtons(() => onOpenChange(false), isPending)}
               </form>
             </Form>
           </TabsContent>
+
+          <TabsContent value="pdf" className="mt-4">
+            <Form {...pdfForm}>
+              <form
+                onSubmit={pdfForm.handleSubmit(onPdfSubmit)}
+                className="space-y-4"
+              >
+                <FormField
+                  control={pdfForm.control}
+                  name="title"
+                  rules={{ required: "Title is required" }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Document Title</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Research Paper" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={pdfForm.control}
+                  name="file"
+                  rules={{ required: "File is required" }}
+                  render={({
+                    field: { onChange, value: _value, ...field },
+                  }) => (
+                    <FormItem>
+                      <FormLabel>PDF File</FormLabel>
+                      <FormControl>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="file"
+                            accept=".pdf"
+                            className="hidden"
+                            {...field}
+                            ref={(e) => {
+                              field.ref(e);
+                              fileInputRef.current = e;
+                            }}
+                            onChange={(e) => {
+                              onChange(e.target.files);
+                            }}
+                          />
+                          <PdfFileNameDisplay
+                            control={pdfForm.control}
+                            onClick={() => fileInputRef.current?.click()}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {renderActionButtons(() => onOpenChange(false), isPending)}
+              </form>
+            </Form>
+          </TabsContent>
+
+          <TabsContent value="youtube" className="mt-4">
+            <Form {...youtubeForm}>
+              <form
+                onSubmit={youtubeForm.handleSubmit(onYoutubeSubmit)}
+                className="space-y-4"
+              >
+                <FormField
+                  control={youtubeForm.control}
+                  name="url"
+                  rules={{
+                    required: "YouTube URL is required",
+                    pattern: {
+                      value:
+                        /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/,
+                      message: "Must be a valid YouTube URL",
+                    },
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Video URL</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="https://youtube.com/watch?v=..."
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogDescription className="pb-2">
+                  We will automatically extract and process the transcript from
+                  this video.
+                </DialogDescription>
+                {renderActionButtons(() => onOpenChange(false), isPending)}
+              </form>
+            </Form>
+          </TabsContent>
+
+          {error && (
+            <p className="mt-2 text-sm font-medium text-destructive">
+              {getApiErrorMessage(error)}
+            </p>
+          )}
         </Tabs>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function renderActionButtons(onCancel: () => void, isPending: boolean) {
+  return (
+    <div className="flex justify-end gap-2">
+      <Button
+        type="button"
+        variant="outline"
+        onClick={onCancel}
+        disabled={isPending}
+      >
+        Cancel
+      </Button>
+      <Button type="submit" disabled={isPending}>
+        {isPending ? "Ingesting..." : "Ingest Document"}
+      </Button>
+    </div>
+  );
+}
+
+function PdfFileNameDisplay({
+  control,
+  onClick,
+}: {
+  control: Control<PdfFormValues>;
+  onClick: () => void;
+}) {
+  const file = useWatch({
+    control,
+    name: "file",
+  });
+
+  const fileName = file?.[0]?.name || "Choose PDF file";
+
+  return (
+    <Button
+      type="button"
+      variant="secondary"
+      className="w-full h-24 border-2 border-dashed flex flex-col items-center justify-center gap-2"
+      onClick={onClick}
+    >
+      <Upload className="h-6 w-6 text-muted-foreground" />
+      <span>{fileName}</span>
+    </Button>
   );
 }
