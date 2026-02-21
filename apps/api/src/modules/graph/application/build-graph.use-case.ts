@@ -2,8 +2,11 @@ import type { ConceptRepository } from '../domain/concept-repository.interface.j
 import type { LLMProvider } from '@repo/llm';
 import { ExtractedConceptsSchema } from './dto/extraction.dto.js';
 import { ExtractedConcept } from '../domain/graph.types.js';
+import { createLogger } from '@repo/logger';
 
 export class BuildGraphUseCase {
+  private readonly logger = createLogger('BuildGraphUseCase');
+
   constructor(
     private readonly conceptRepository: ConceptRepository,
     private readonly llmProvider: LLMProvider,
@@ -61,7 +64,7 @@ export class BuildGraphUseCase {
       });
 
       let rawBody = response.text.trim();
-      console.log(`GRAPH_EXTRACT: Raw LLM Response: "${rawBody}"`);
+      this.logger.info(`Raw LLM Response: "${rawBody}"`);
 
       // Handle common LLM debris
       if (rawBody.includes('```')) {
@@ -82,27 +85,13 @@ export class BuildGraphUseCase {
       const parsed: unknown = JSON.parse(rawBody);
       const validated = ExtractedConceptsSchema.parse(parsed);
 
-      console.log(
-        `GRAPH_EXTRACT: Successfully extracted ${validated.length} concepts`,
-      );
+      this.logger.info(`Successfully extracted ${validated.length} concepts`);
       return validated as ExtractedConcept[];
     } catch (error) {
-      console.error(
-        `GRAPH_EXTRACT: Failed to parse concepts: ${error instanceof Error ? error.message : String(error)}. FALLING BACK TO MOCK DATA FOR UI TESTING.`,
+      this.logger.error(
+        `GRAPH_EXTRACT: Failed to parse concepts: ${error instanceof Error ? error.message : String(error)}`,
       );
-      return [
-        {
-          label: 'Application Concept ' + Math.floor(Math.random() * 100),
-          relations: [
-            { target: 'Core Technology', type: 'DEPENDS_ON' },
-            { target: 'System Architecture', type: 'RELATES_TO' },
-          ],
-        },
-        {
-          label: 'Core Technology',
-          relations: [{ target: 'System Architecture', type: 'IS_PART_OF' }],
-        },
-      ] as ExtractedConcept[];
+      throw error;
     }
   }
 }

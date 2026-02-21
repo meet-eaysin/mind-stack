@@ -71,4 +71,10 @@ export class PrismaChunkRepository implements ChunkRepository {
 
     return created;
   }
+
+  async deleteByDocumentId(documentId: string): Promise<void> {
+    await this.prisma.chunk.deleteMany({
+      where: { documentId },
+    });
+  }
 }

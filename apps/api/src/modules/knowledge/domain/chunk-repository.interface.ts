@@ -7,4 +7,5 @@ export interface ChunkRepository {
     documentId: string,
     chunks: Array<{ content: string; startOffset: number; endOffset: number }>,
   ): Promise<ChunkEntity[]>;
+  deleteByDocumentId(documentId: string): Promise<void>;
 }

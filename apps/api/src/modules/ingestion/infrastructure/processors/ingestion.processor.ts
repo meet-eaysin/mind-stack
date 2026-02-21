@@ -69,6 +69,7 @@ export class IngestionProcessor extends WorkerHost {
       const content = rawContent || doc.rawContent;
       const chunks = this.splitIntoChunks(content);
 
+      await this.chunkRepository.deleteByDocumentId(documentId);
       await this.chunkRepository.createMany(documentId, chunks);
       await this.jobProducer.enqueueEmbeddingJob(documentId);
 
