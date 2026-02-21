@@ -22,6 +22,17 @@ export class AddNoteDto {
 
   @IsString()
   content!: string;
+
+  @IsOptional()
+  @IsString()
+  chunkId?: string;
+
+  @IsOptional()
+  @IsString()
+  selectedText?: string;
+
+  @IsOptional()
+  metadata?: Record<string, unknown>;
 }
 
 export class UpdateNoteDto {

@@ -7,10 +7,16 @@ export class AddNoteUseCase {
   async execute(input: {
     documentId: string;
     content: string;
+    chunkId?: string;
+    selectedText?: string;
+    metadata?: Record<string, unknown>;
   }): Promise<NoteEntity> {
     return this.noteRepository.createForDocument(
       input.documentId,
       input.content,
+      input.chunkId,
+      input.selectedText,
+      input.metadata,
     );
   }
 }

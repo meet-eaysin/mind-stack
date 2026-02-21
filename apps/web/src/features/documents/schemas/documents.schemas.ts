@@ -37,7 +37,16 @@ export const DocumentDetailResponseSchema = z.object({
     rawContent: z.string(),
     chunks: z.array(ChunkSchema),
     tags: z.array(z.string()),
-    note: z.string().nullable(),
+    notes: z.array(
+      z.object({
+        id: z.string(),
+        content: z.string(),
+        chunkId: z.string().nullable(),
+        selectedText: z.string().nullable(),
+        metadata: z.record(z.string(), z.any()).nullable(),
+        createdAt: z.string(),
+      }),
+    ),
     importanceScore: z.number().nullable(),
     createdAt: z.string(),
   }),
@@ -60,6 +69,9 @@ export const RemoveTagRequestSchema = z.object({
 export const AddNoteRequestSchema = z.object({
   documentId: z.string(),
   content: z.string(),
+  chunkId: z.string().optional(),
+  selectedText: z.string().optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export const UpdateNoteRequestSchema = z.object({

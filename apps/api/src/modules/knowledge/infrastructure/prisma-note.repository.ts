@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import type { NoteRepository } from '../domain/note-repository.interface.js';
@@ -11,14 +12,27 @@ export class PrismaNoteRepository implements NoteRepository {
   async createForDocument(
     documentId: string,
     content: string,
+    chunkId?: string,
+    selectedText?: string,
+    metadata?: Record<string, unknown>,
   ): Promise<NoteEntity> {
     const row = await this.prisma.note.create({
-      data: { id: randomUUID(), documentId, content },
+      data: {
+        id: randomUUID(),
+        documentId,
+        content,
+        chunkId: chunkId ?? null,
+        selectedText: selectedText ?? null,
+        metadata: (metadata as Prisma.InputJsonValue) ?? null,
+      },
     });
     return {
       id: row.id,
       documentId: row.documentId,
+      chunkId: row.chunkId,
+      selectedText: row.selectedText,
       content: row.content,
+      metadata: row.metadata as Record<string, unknown> | null,
       createdAt: row.createdAt,
     };
   }
@@ -31,22 +45,27 @@ export class PrismaNoteRepository implements NoteRepository {
     return {
       id: row.id,
       documentId: row.documentId,
+      chunkId: row.chunkId,
+      selectedText: row.selectedText,
       content: row.content,
+      metadata: row.metadata as Record<string, unknown> | null,
       createdAt: row.createdAt,
     };
   }
 
-  async findByDocumentId(documentId: string): Promise<NoteEntity | null> {
-    const row = await this.prisma.note.findFirst({
+  async findManyByDocumentId(documentId: string): Promise<NoteEntity[]> {
+    const rows = await this.prisma.note.findMany({
       where: { documentId },
       orderBy: { createdAt: 'desc' },
     });
-    if (!row) return null;
-    return {
+    return rows.map((row) => ({
       id: row.id,
       documentId: row.documentId,
+      chunkId: row.chunkId,
+      selectedText: row.selectedText as string | null,
       content: row.content,
+      metadata: row.metadata as Record<string, unknown> | null,
       createdAt: row.createdAt,
-    };
+    }));
   }
 }

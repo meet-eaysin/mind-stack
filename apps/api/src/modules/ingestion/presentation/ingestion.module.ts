@@ -1,5 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
+import { LLMProvider } from '@repo/llm';
 import { IngestionController } from './ingestion.controller.js';
 import { PrismaDocumentRepository } from '../infrastructure/prisma-document.repository.js';
 import {
@@ -17,6 +18,7 @@ import { ClipController } from './clip.controller.js';
 import { KnowledgeModule } from '../../knowledge/presentation/knowledge.module.js';
 import { GraphModule } from '../../graph/presentation/graph.module.js';
 import { QueryModule } from '../../query/presentation/query.module.js';
+import { LLM_PROVIDER } from '../../../common/tokens.js';
 
 @Module({
   imports: [
@@ -34,8 +36,9 @@ import { QueryModule } from '../../query/presentation/query.module.js';
       useFactory: (
         repo: PrismaDocumentRepository,
         producer: IngestionJobProducer,
-      ) => new IngestUrlUseCase(repo, producer),
-      inject: [PrismaDocumentRepository, IngestionJobProducer],
+        llm: LLMProvider,
+      ) => new IngestUrlUseCase(repo, producer, llm),
+      inject: [PrismaDocumentRepository, IngestionJobProducer, LLM_PROVIDER],
     },
     {
       provide: IngestTextUseCase,

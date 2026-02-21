@@ -63,10 +63,23 @@ export function useAddNote() {
     mutationFn: ({
       documentId,
       content,
+      chunkId,
+      selectedText,
+      metadata,
     }: {
       documentId: string;
       content: string;
-    }) => documentsApi.addNote(documentId, content),
+      chunkId?: string;
+      selectedText?: string;
+      metadata?: Record<string, unknown>;
+    }) =>
+      documentsApi.addNote(
+        documentId,
+        content,
+        chunkId,
+        selectedText,
+        metadata,
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["knowledge", "detail"] });
     },

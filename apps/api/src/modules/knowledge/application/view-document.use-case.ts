@@ -21,7 +21,8 @@ export class ViewDocumentUseCase {
     const chunksEntity =
       await this.chunkRepository.findByDocumentId(documentId);
     const tags = await this.tagRepository.findByDocumentId(documentId);
-    const note = await this.noteRepository.findByDocumentId(documentId);
+    const notesEntities =
+      await this.noteRepository.findManyByDocumentId(documentId);
     const importance = await this.documentRepository.getImportance(documentId);
 
     const chunks: ChunkResponse[] = chunksEntity.map((c) => ({
@@ -40,7 +41,14 @@ export class ViewDocumentUseCase {
       rawContent: doc.rawContent,
       chunks,
       tags: tags.map((t) => t.name),
-      note: note?.content ?? null,
+      notes: notesEntities.map((n) => ({
+        id: n.id,
+        content: n.content,
+        chunkId: n.chunkId ?? null,
+        selectedText: n.selectedText ?? null,
+        metadata: n.metadata ?? null,
+        createdAt: n.createdAt.toISOString(),
+      })),
       importanceScore: importance,
       status: doc.status,
       createdAt: doc.createdAt.toISOString(),

@@ -93,16 +93,64 @@ function splitIntoChunks(
   overlap: number,
 ): ChunkData[] {
   const chunks: ChunkData[] = [];
-  const sentences = text.split(/(?<=[.!?])\s+/);
+
+  // Split by double newlines first (paragraphs/Markdown blocks)
+  const blocks = text.split(/\n\s*\n/);
+
   let currentChunk = "";
   let startOffset = 0;
   let currentOffset = 0;
 
-  for (const sentence of sentences) {
-    if (
-      currentChunk.length + sentence.length > chunkSize &&
+  for (const block of blocks) {
+    const trimmedBlock = block.trim();
+    if (!trimmedBlock) {
+      currentOffset += block.length;
+      continue;
+    }
+
+    // Determine if this block alone is already close to or exceeding chunk size
+    if (trimmedBlock.length > chunkSize) {
+      // If we have a pending chunk, push it
+      if (currentChunk.trim().length > 0) {
+        chunks.push({
+          content: currentChunk.trim(),
+          startOffset,
+          endOffset: currentOffset,
+        });
+
+        const overlapText = currentChunk.slice(-overlap);
+        startOffset = currentOffset - overlapText.length;
+        currentChunk = overlapText;
+      } else {
+        startOffset = currentOffset;
+      }
+
+      // Large block: split into smaller pieces (sentences or fixed size)
+      // For Markdown, we prefer sentences to avoid breaking syntax mid-line
+      const sentences = trimmedBlock.split(/(?<=[.!?])\s+/);
+      for (const sentence of sentences) {
+        if (
+          currentChunk.length + sentence.length > chunkSize &&
+          currentChunk.length > 0
+        ) {
+          chunks.push({
+            content: currentChunk.trim(),
+            startOffset,
+            endOffset: currentOffset,
+          });
+          const overlapText = currentChunk.slice(-overlap);
+          startOffset = currentOffset - overlapText.length;
+          currentChunk = overlapText + sentence;
+        } else {
+          currentChunk += (currentChunk.length > 0 ? " " : "") + sentence;
+        }
+        currentOffset += sentence.length + 1;
+      }
+    } else if (
+      currentChunk.length + trimmedBlock.length > chunkSize &&
       currentChunk.length > 0
     ) {
+      // Current block fits but exceeds chunk total: push current and start new
       chunks.push({
         content: currentChunk.trim(),
         startOffset,
@@ -111,11 +159,13 @@ function splitIntoChunks(
 
       const overlapText = currentChunk.slice(-overlap);
       startOffset = currentOffset - overlapText.length;
-      currentChunk = overlapText + sentence;
+      currentChunk = overlapText + trimmedBlock;
+      currentOffset += block.length;
     } else {
-      currentChunk += (currentChunk.length > 0 ? " " : "") + sentence;
+      // Append block to current chunk
+      currentChunk += (currentChunk.length > 0 ? "\n\n" : "") + trimmedBlock;
+      currentOffset += block.length;
     }
-    currentOffset += sentence.length + 1;
   }
 
   if (currentChunk.trim().length > 0) {

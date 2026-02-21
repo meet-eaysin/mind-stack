@@ -15,10 +15,11 @@ model Document {
   rawContent String   @map("raw_content")
   status     String   @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
   createdAt  DateTime @default(now()) @map("created_at")
+  deletedAt  DateTime? @map("deleted_at")
 
   chunks          Chunk[]
   DocumentTag     DocumentTag[]
-  Note            Note?
+  notes           Note[]
   ImportanceScore ImportanceScore?
   Review          Review[]
 
@@ -73,11 +74,14 @@ model ConceptChunk {
 }
 
 model Note {
-  id         String   @id @default(uuid())
-  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  documentId String   @unique @map("document_id")
-  content    String
-  createdAt  DateTime @default(now()) @map("created_at")
+  id           String   @id @default(uuid())
+  document     Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId   String   @map("document_id")
+  chunkId      String?  @map("chunk_id")
+  selectedText String?  @map("selected_text")
+  content      String
+  metadata     Json?
+  createdAt    DateTime @default(now()) @map("created_at")
 
   @@map("notes")
 }

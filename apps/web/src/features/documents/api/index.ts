@@ -47,10 +47,16 @@ export const documentsApi = {
       SuccessResponseSchema,
     ),
 
-  addNote: (documentId: string, content: string) =>
+  addNote: (
+    documentId: string,
+    content: string,
+    chunkId?: string,
+    selectedText?: string,
+    metadata?: Record<string, unknown>,
+  ) =>
     apiClient.post(
       ENDPOINTS.KNOWLEDGE.NOTES,
-      { documentId, content },
+      { documentId, content, chunkId, selectedText, metadata },
       schemas.NoteCreatedResponseSchema,
     ),
 

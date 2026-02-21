@@ -61,6 +61,15 @@ export type ChunkResponse = {
   createdAt: string;
 };
 
+export type NoteResponse = {
+  id: string;
+  content: string;
+  chunkId: string | null;
+  selectedText: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+};
+
 export type DocumentDetailResponse = {
   id: string;
   title: string;
@@ -70,7 +79,7 @@ export type DocumentDetailResponse = {
   rawContent: string;
   chunks: ChunkResponse[];
   tags: string[];
-  note: string | null;
+  notes: NoteResponse[];
   importanceScore: number | null;
   createdAt: string;
 };
@@ -88,6 +97,9 @@ export type RemoveTagRequest = {
 export type AddNoteRequest = {
   documentId: string;
   content: string;
+  chunkId?: string | undefined;
+  selectedText?: string | undefined;
+  metadata?: Record<string, unknown> | undefined;
 };
 
 export type UpdateNoteRequest = {
