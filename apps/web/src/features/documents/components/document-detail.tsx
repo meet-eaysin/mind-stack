@@ -167,14 +167,15 @@ export function DocumentDetail({
               size="sm"
               onClick={onBack}
               className="gap-2"
+              data-testid="back-button"
             >
               <ArrowLeft className="size-4" />
               <span className="hidden sm:inline">Library</span>
             </Button>
             <Separator orientation="vertical" className="h-4" />
-            <h1 className="text-sm font-medium truncate max-w-[200px] sm:max-w-md">
+            <span className="text-sm font-medium truncate max-w-[200px] sm:max-w-md">
               {doc.title}
-            </h1>
+            </span>
           </div>
           <div className="flex items-center gap-4">
             {doc.sourceType === "URL" && (
@@ -248,6 +249,7 @@ export function DocumentDetail({
                   {doc.tags.map((tag: string) => (
                     <span
                       key={tag}
+                      data-testid={`tag-${tag}`}
                       className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs font-medium flex items-center gap-1"
                     >
                       {tag}
@@ -278,6 +280,7 @@ export function DocumentDetail({
                         className="h-6 w-24 text-xs"
                         value={newTag}
                         onChange={(e) => setNewTag(e.target.value)}
+                        data-testid="add-tag-input"
                       />
                     </form>
                   )}
@@ -334,7 +337,7 @@ export function DocumentDetail({
               </header>
 
               {/* Render Segments */}
-              <div className="space-y-0">
+              <div className="space-y-0" data-testid="chunk-list">
                 {doc.chunks.map((chunk) => {
                   const chunkNotes = doc.notes.filter(
                     (n) => n.chunkId === chunk.id,
@@ -440,6 +443,7 @@ export function DocumentDetail({
                     onChange={(e) => setNoteContent(e.target.value)}
                     className="min-h-[120px] bg-background text-sm focus:ring-primary/20"
                     autoFocus
+                    data-testid="add-note-input"
                   />
                   <div className="flex gap-2">
                     <Button
@@ -535,6 +539,7 @@ export function DocumentDetail({
                         onClick={() =>
                           updateImportance.mutate({ documentId: doc.id, score })
                         }
+                        data-testid={`importance-btn-${score}`}
                         className={cn(
                           "flex-1 py-1.5 rounded-md text-xs font-bold transition-all",
                           doc.importanceScore === score
@@ -565,7 +570,6 @@ export function DocumentDetail({
         </aside>
       </main>
 
-      {/* Floating Toolbar on selection (Mobile/Quick action) */}
       {selection && (
         <div
           className="fixed z-50 pointer-events-none"
@@ -575,12 +579,7 @@ export function DocumentDetail({
           }}
         >
           <div className="bg-foreground text-background px-3 py-1.5 rounded-lg shadow-xl flex items-center gap-2 animate-in zoom-in-95 duration-200 pointer-events-auto">
-            <button
-              onClick={() => {}} // Could be quick copy
-              className="hover:text-primary transition-colors p-1"
-            >
-              <MessageSquarePlus className="size-4" />
-            </button>
+            <MessageSquarePlus className="size-4" />
             <Separator
               orientation="vertical"
               className="h-4 bg-background/20"

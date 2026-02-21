@@ -140,26 +140,38 @@ class FakeTagRepository implements TagRepository {
 }
 
 class FakeNoteRepository implements NoteRepository {
-  private readonly notesByDoc: Map<string, NoteEntity> = new Map();
+  private readonly notesByDoc: Map<string, NoteEntity[]> = new Map();
 
   seed(documentId: string, note: NoteEntity): void {
-    this.notesByDoc.set(documentId, note);
+    const existing = this.notesByDoc.get(documentId) ?? [];
+    this.notesByDoc.set(documentId, [...existing, note]);
   }
 
-  createForDocument(documentId: string, content: string): Promise<NoteEntity> {
+  createForDocument(
+    documentId: string,
+    content: string,
+    chunkId?: string,
+    selectedText?: string,
+    metadata?: Record<string, unknown>,
+  ): Promise<NoteEntity> {
     const note: NoteEntity = {
       id: `note-new`,
       documentId,
       content,
+      chunkId: chunkId ?? null,
+      selectedText: selectedText ?? null,
+      metadata: metadata ?? null,
       createdAt: new Date(),
     };
-    this.notesByDoc.set(documentId, note);
+    const existing = this.notesByDoc.get(documentId) ?? [];
+    this.notesByDoc.set(documentId, [...existing, note]);
     return Promise.resolve(note);
   }
 
   update(noteId: string, content: string): Promise<NoteEntity> {
-    for (const note of this.notesByDoc.values()) {
-      if (note.id === noteId) {
+    for (const notes of this.notesByDoc.values()) {
+      const note = notes.find((n) => n.id === noteId);
+      if (note) {
         note.content = content;
         return Promise.resolve(note);
       }
@@ -167,8 +179,8 @@ class FakeNoteRepository implements NoteRepository {
     throw new Error(`Note not found: ${noteId}`);
   }
 
-  findByDocumentId(documentId: string): Promise<NoteEntity | null> {
-    return Promise.resolve(this.notesByDoc.get(documentId) ?? null);
+  findManyByDocumentId(documentId: string): Promise<NoteEntity[]> {
+    return Promise.resolve(this.notesByDoc.get(documentId) ?? []);
   }
 }
 
@@ -212,6 +224,9 @@ describe('ViewDocumentUseCase', () => {
       id: 'note-1',
       documentId: 'doc-1',
       content: 'a note',
+      chunkId: null,
+      selectedText: null,
+      metadata: null,
       createdAt: new Date(),
     });
 
@@ -223,7 +238,8 @@ describe('ViewDocumentUseCase', () => {
     expect(result.chunks).toHaveLength(1);
     expect(result.chunks[0]?.content).toBe('First chunk');
     expect(result.tags).toEqual(['test']);
-    expect(result.note).toBe('a note');
+    expect(result.notes).toHaveLength(1);
+    expect(result.notes[0]?.content).toBe('a note');
     expect(result.importanceScore).toBe(3);
   });
 

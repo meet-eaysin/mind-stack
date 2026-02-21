@@ -2,18 +2,25 @@ import { AddNoteUseCase } from '../add-note.use-case.js';
 import type { NoteRepository } from '../../domain/note-repository.interface.js';
 import type { NoteEntity } from '../../domain/note.entity.js';
 
-// ── Fakes ──
-
 class FakeNoteRepository implements NoteRepository {
   private readonly notes: NoteEntity[] = [];
   private idCounter = 0;
 
-  createForDocument(documentId: string, content: string): Promise<NoteEntity> {
+  createForDocument(
+    documentId: string,
+    content: string,
+    chunkId?: string,
+    selectedText?: string,
+    metadata?: Record<string, unknown>,
+  ): Promise<NoteEntity> {
     this.idCounter += 1;
     const note: NoteEntity = {
       id: `note-${String(this.idCounter)}`,
       documentId,
       content,
+      chunkId: chunkId ?? null,
+      selectedText: selectedText ?? null,
+      metadata: metadata ?? null,
       createdAt: new Date(),
     };
     this.notes.push(note);
@@ -29,9 +36,9 @@ class FakeNoteRepository implements NoteRepository {
     return Promise.resolve(note);
   }
 
-  findByDocumentId(documentId: string): Promise<NoteEntity | null> {
+  findManyByDocumentId(documentId: string): Promise<NoteEntity[]> {
     return Promise.resolve(
-      this.notes.find((n) => n.documentId === documentId) ?? null,
+      this.notes.filter((n) => n.documentId === documentId),
     );
   }
 }
@@ -65,8 +72,8 @@ describe('AddNoteUseCase', () => {
       content: 'Saved note',
     });
 
-    const found = await noteRepository.findByDocumentId('doc-xyz');
-    expect(found).not.toBeNull();
-    expect(found?.content).toBe('Saved note');
+    const found = await noteRepository.findManyByDocumentId('doc-xyz');
+    expect(found).toHaveLength(1);
+    expect(found[0]?.content).toBe('Saved note');
   });
 });

@@ -7,6 +7,7 @@ import { IngestUrlUseCase } from '../ingest-url.use-case.js';
 import type { DocumentRepository } from '../../domain/document-repository.interface.js';
 import type { IngestionJobProducerPort } from '../../domain/ingestion-job-producer.port.js';
 import type { DocumentEntity } from '../../domain/document.entity.js';
+import type { LLMProvider } from '@repo/llm';
 
 jest.mock('jsdom', () => ({
   JSDOM: jest.fn().mockImplementation(() => ({
@@ -84,11 +85,19 @@ describe('IngestUrlUseCase', () => {
   let useCase: IngestUrlUseCase;
   let documentRepository: FakeDocumentRepository;
   let jobProducer: FakeIngestionJobProducer;
+  let llmProvider: { generate: jest.Mock };
 
   beforeEach(() => {
     documentRepository = new FakeDocumentRepository();
     jobProducer = new FakeIngestionJobProducer();
-    useCase = new IngestUrlUseCase(documentRepository, jobProducer);
+    llmProvider = {
+      generate: jest.fn().mockResolvedValue({ text: 'Mocked Content' }),
+    };
+    useCase = new IngestUrlUseCase(
+      documentRepository,
+      jobProducer,
+      llmProvider as unknown as LLMProvider,
+    );
   });
 
   afterEach(() => {
@@ -154,12 +163,15 @@ describe('IngestUrlUseCase', () => {
   });
 
   it('should throw when the fetch fails', async () => {
-    const fakeResponse = new Response('Not Found', { status: 404 });
+    const fakeResponse = new Response('Not Found', {
+      status: 404,
+      statusText: 'Not Found',
+    });
     jest.spyOn(globalThis, 'fetch').mockResolvedValueOnce(fakeResponse);
 
     await expect(
       useCase.execute({ url: 'https://example.com/missing' }),
-    ).rejects.toThrow('Failed to fetch URL: 404');
+    ).rejects.toThrow('Failed to fetch URL (404): Not Found');
 
     expect(documentRepository.saved).toHaveLength(0);
     expect(jobProducer.enqueuedIds).toHaveLength(0);

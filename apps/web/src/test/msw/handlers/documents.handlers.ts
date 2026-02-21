@@ -7,13 +7,23 @@ import {
   UpdateImportanceRequestSchema,
 } from "@/features/documents/schemas/documents.schemas";
 
-const mockDocs: Record<
-  string,
-  { tags: string[]; note: string | null; importance: number }
-> = {
+type MockDocument = {
+  tags: string[];
+  notes: Array<{
+    id: string;
+    content: string;
+    chunkId: string | null;
+    selectedText: string | null;
+    metadata: Record<string, unknown> | null;
+    createdAt: string;
+  }>;
+  importance: number;
+};
+
+const mockDocs: Record<string, MockDocument> = {
   "doc-1": {
     tags: ["initial-tag"],
-    note: null,
+    notes: [],
     importance: 3,
   },
 };
@@ -48,7 +58,11 @@ export const handlers = [
   }),
   http.get("*/knowledge/documents/:id", ({ params }) => {
     const id = params.id as string;
-    const meta = mockDocs[id] || { tags: [], note: null, importance: 1 };
+    const meta: MockDocument = mockDocs[id] || {
+      tags: [],
+      notes: [],
+      importance: 1,
+    };
 
     return HttpResponse.json({
       document: {
@@ -68,7 +82,7 @@ export const handlers = [
           },
         ],
         tags: meta.tags,
-        note: meta.note,
+        notes: meta.notes,
         importanceScore: meta.importance,
         createdAt: new Date().toISOString(),
       },
@@ -78,7 +92,7 @@ export const handlers = [
     const body = await request.json();
     const { documentId, tagName } = AddTagRequestSchema.parse(body);
     if (!mockDocs[documentId]) {
-      mockDocs[documentId] = { tags: [], note: null, importance: 1 };
+      mockDocs[documentId] = { tags: [], notes: [], importance: 1 };
     }
     if (!mockDocs[documentId].tags.includes(tagName)) {
       mockDocs[documentId].tags.push(tagName);
@@ -97,19 +111,28 @@ export const handlers = [
   }),
   http.post("*/knowledge/notes", async ({ request }) => {
     const body = await request.json();
-    const { documentId, content } = AddNoteRequestSchema.parse(body);
+    const { documentId, content, chunkId, selectedText, metadata } =
+      AddNoteRequestSchema.parse(body);
     if (!mockDocs[documentId]) {
-      mockDocs[documentId] = { tags: [], note: null, importance: 1 };
+      mockDocs[documentId] = { tags: [], notes: [], importance: 1 };
     }
-    mockDocs[documentId].note = content;
+    const newNote = {
+      id: "note-1",
+      content,
+      chunkId: chunkId ?? null,
+      selectedText: selectedText ?? null,
+      metadata: (metadata as Record<string, unknown>) ?? null,
+      createdAt: new Date().toISOString(),
+    };
+    mockDocs[documentId].notes.push(newNote);
     return HttpResponse.json({ noteId: "note-1" });
   }),
   http.put("*/knowledge/notes/:id", async ({ request }) => {
     const body = await request.json();
     const { content } = UpdateNoteRequestSchema.parse(body);
-    // In a real mock we'd find by noteId, but for simplicity:
     if (mockDocs["doc-1"]) {
-      mockDocs["doc-1"].note = content;
+      const note = mockDocs["doc-1"].notes.find((n) => n.id === "note-1");
+      if (note) note.content = content;
     }
     return HttpResponse.json({ success: true });
   }),
@@ -117,7 +140,7 @@ export const handlers = [
     const body = await request.json();
     const { documentId, score } = UpdateImportanceRequestSchema.parse(body);
     if (!mockDocs[documentId]) {
-      mockDocs[documentId] = { tags: [], note: null, importance: 1 };
+      mockDocs[documentId] = { tags: [], notes: [], importance: 1 };
     }
     mockDocs[documentId].importance = score;
     return HttpResponse.json({ success: true });

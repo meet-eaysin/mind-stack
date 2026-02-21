@@ -17,6 +17,7 @@ export const handlers = [
           content: "This is a result chunk.",
           score: 0.95,
           tags: ["tag1"],
+          hasNote: false,
         },
       ],
     });
@@ -37,6 +38,7 @@ export const handlers = [
           content: "Citation content",
           score: 0.9,
           tags: [],
+          hasNote: false,
         },
       ],
     });
