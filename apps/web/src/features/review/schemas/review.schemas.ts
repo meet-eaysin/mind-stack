@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const ReviewItemSchema = z.object({
-  chunkId: z.string(),
+  documentId: z.string(),
   content: z.string(),
   documentTitle: z.string(),
   summary: z.string(),
@@ -15,11 +15,11 @@ export const DailyReviewResponseSchema = z.object({
 });
 
 export const SubmitFeedbackRequestSchema = z.object({
-  chunkId: z.string(),
+  documentId: z.string(),
   score: z.number().min(1).max(5),
 });
 
 export const UpdateReviewScoreRequestSchema = z.object({
-  chunkId: z.string(),
+  documentId: z.string(),
   score: z.number().min(1).max(5),
 });

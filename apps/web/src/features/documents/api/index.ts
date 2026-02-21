@@ -24,31 +24,31 @@ export const documentsApi = {
       schemas.DocumentDetailResponseSchema,
     ),
 
-  addTag: (chunkId: string, tagName: string) =>
+  addTag: (documentId: string, tagName: string) =>
     apiClient.post(
       ENDPOINTS.KNOWLEDGE.TAGS,
-      { chunkId, tagName },
+      { documentId, tagName },
       SuccessResponseSchema,
     ),
 
-  removeTag: (chunkId: string, tagName: string) =>
+  removeTag: (documentId: string, tagName: string) =>
     apiClient.delete(
       ENDPOINTS.KNOWLEDGE.TAGS,
-      { chunkId, tagName },
+      { documentId, tagName },
       SuccessResponseSchema,
     ),
 
-  addNote: (chunkId: string, content: string) =>
+  addNote: (documentId: string, content: string) =>
     apiClient.post(
       ENDPOINTS.KNOWLEDGE.NOTES,
-      { chunkId, content },
+      { documentId, content },
       schemas.NoteCreatedResponseSchema,
     ),
 
-  updateImportance: (chunkId: string, score: number) =>
+  updateImportance: (documentId: string, score: number) =>
     apiClient.post(
       ENDPOINTS.KNOWLEDGE.IMPORTANCE,
-      { chunkId, score },
+      { documentId, score },
       SuccessResponseSchema,
     ),
 

@@ -102,7 +102,7 @@ describe('KnowledgeController (e2e)', () => {
       mockAddTag.execute.mockResolvedValue(undefined);
       const response = await request(app.getHttpServer())
         .post('/knowledge/tags')
-        .send({ chunkId: 'c1', tagName: 'important' });
+        .send({ documentId: 'd1', tagName: 'important' });
 
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
@@ -114,7 +114,7 @@ describe('KnowledgeController (e2e)', () => {
       mockRemoveTag.execute.mockResolvedValue(undefined);
       const response = await request(app.getHttpServer())
         .delete('/knowledge/tags')
-        .send({ chunkId: 'c1', tagName: 'important' });
+        .send({ documentId: 'd1', tagName: 'important' });
 
       expect(response.status).toBe(200); // DELETE usually returns 200 or 204
     });
@@ -125,7 +125,7 @@ describe('KnowledgeController (e2e)', () => {
       mockAddNote.execute.mockResolvedValue({ id: 'n1' });
       const response = await request(app.getHttpServer())
         .post('/knowledge/notes')
-        .send({ chunkId: 'c1', content: 'Some note' });
+        .send({ documentId: 'd1', content: 'Some note' });
 
       expect(response.status).toBe(201);
       expect(response.body.noteId).toBe('n1');
@@ -148,7 +148,7 @@ describe('KnowledgeController (e2e)', () => {
       mockUpdateImportance.execute.mockResolvedValue(undefined);
       const response = await request(app.getHttpServer())
         .post('/knowledge/importance')
-        .send({ chunkId: 'c1', score: 5 });
+        .send({ documentId: 'd1', score: 5 });
 
       expect(response.status).toBe(201);
     });
@@ -156,7 +156,7 @@ describe('KnowledgeController (e2e)', () => {
     it('should return 400 for out of range score', async () => {
       const response = await request(app.getHttpServer())
         .post('/knowledge/importance')
-        .send({ chunkId: 'c1', score: 10 });
+        .send({ documentId: 'd1', score: 10 });
 
       expect(response.status).toBe(400);
     });

@@ -3,6 +3,7 @@ export type GenerationRequest = {
   systemPrompt?: string;
   temperature?: number;
   maxTokens?: number;
+  responseFormat?: "json";
 };
 
 export type GenerationResponse = {

@@ -64,7 +64,7 @@ describe('ReviewController (e2e)', () => {
       mockSubmitFeedback.execute.mockResolvedValue(undefined);
       const response = await request(app.getHttpServer())
         .post('/review/feedback')
-        .send({ chunkId: 'c1', score: 4 });
+        .send({ documentId: 'd1', score: 4 });
 
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
@@ -73,7 +73,7 @@ describe('ReviewController (e2e)', () => {
     it('should return 400 for invalid score', async () => {
       const response = await request(app.getHttpServer())
         .post('/review/feedback')
-        .send({ chunkId: 'c1', score: 10 });
+        .send({ documentId: 'd1', score: 10 });
 
       expect(response.status).toBe(400);
     });
@@ -84,7 +84,7 @@ describe('ReviewController (e2e)', () => {
       mockUpdateScore.execute.mockResolvedValue(undefined);
       const response = await request(app.getHttpServer())
         .post('/review/score')
-        .send({ chunkId: 'c1', score: 2 });
+        .send({ documentId: 'd1', score: 2 });
 
       expect(response.status).toBe(201);
     });

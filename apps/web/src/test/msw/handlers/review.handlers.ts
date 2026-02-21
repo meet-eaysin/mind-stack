@@ -10,19 +10,17 @@ export const handlers = [
       date: "2024-01-01",
       items: [
         {
-          chunkId: "chunk-1",
           documentId: "doc-1",
           documentTitle: "Test Document",
-          content: "Review chunk content 1",
+          content: "Review content for document 1",
           summary: "Summary 1",
           reason: "Reason 1",
           lastReviewedAt: null,
         },
         {
-          chunkId: "chunk-2",
-          documentId: "doc-1",
-          documentTitle: "Test Document",
-          content: "Review chunk content 2",
+          documentId: "doc-2",
+          documentTitle: "Test Document 2",
+          content: "Review content for document 2",
           summary: "Summary 2",
           reason: "Reason 2",
           lastReviewedAt: null,

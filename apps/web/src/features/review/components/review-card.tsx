@@ -27,7 +27,7 @@ export function ReviewCard({
   return (
     <div
       className="mx-auto max-w-2xl space-y-4"
-      data-testid={`review-card-${item.chunkId}`}
+      data-testid={`review-card-${item.documentId}`}
     >
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>{item.documentTitle}</span>
@@ -74,7 +74,7 @@ export function ReviewCard({
               variant="outline"
               size="sm"
               onClick={() =>
-                submitFeedback.mutate({ chunkId: item.chunkId, score })
+                submitFeedback.mutate({ documentId: item.documentId, score })
               }
               disabled={submitFeedback.isPending}
               className="gap-1"
@@ -98,7 +98,7 @@ export function ReviewCard({
               variant="secondary"
               size="sm"
               onClick={() =>
-                updateScore.mutate({ chunkId: item.chunkId, score })
+                updateScore.mutate({ documentId: item.documentId, score })
               }
               disabled={updateScore.isPending}
               className="gap-1"

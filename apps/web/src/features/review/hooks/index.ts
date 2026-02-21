@@ -16,10 +16,10 @@ export function useSubmitFeedback() {
   return useMutation<
     { success: boolean },
     ApiError,
-    { chunkId: string; score: number }
+    { documentId: string; score: number }
   >({
-    mutationFn: ({ chunkId, score }) =>
-      reviewApi.submitFeedback(chunkId, score),
+    mutationFn: ({ documentId, score }) =>
+      reviewApi.submitFeedback(documentId, score),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.REVIEW.DAILY });
     },
@@ -31,9 +31,10 @@ export function useUpdateReviewScore() {
   return useMutation<
     { success: boolean },
     ApiError,
-    { chunkId: string; score: number }
+    { documentId: string; score: number }
   >({
-    mutationFn: ({ chunkId, score }) => reviewApi.updateScore(chunkId, score),
+    mutationFn: ({ documentId, score }) =>
+      reviewApi.updateScore(documentId, score),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.REVIEW.DAILY });
     },

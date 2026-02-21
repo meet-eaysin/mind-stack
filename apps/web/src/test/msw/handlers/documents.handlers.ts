@@ -7,16 +7,15 @@ import {
   UpdateImportanceRequestSchema,
 } from "@/features/documents/schemas/documents.schemas";
 
-const mockChunks: Record<string, string[]> = {
-  "chunk-1": ["initial-tag"],
-};
-
-const mockNotes: Record<string, string | null> = {
-  "chunk-1": null,
-};
-
-const mockImportance: Record<string, number> = {
-  "chunk-1": 3,
+const mockDocs: Record<
+  string,
+  { tags: string[]; note: string | null; importance: number }
+> = {
+  "doc-1": {
+    tags: ["initial-tag"],
+    note: null,
+    importance: 3,
+  },
 };
 
 export const handlers = [
@@ -46,9 +45,12 @@ export const handlers = [
     });
   }),
   http.get("*/knowledge/documents/:id", ({ params }) => {
+    const id = params.id as string;
+    const meta = mockDocs[id] || { tags: [], note: null, importance: 1 };
+
     return HttpResponse.json({
       document: {
-        id: params.id as string,
+        id,
         title: "Test PDF Document",
         sourceType: "PDF",
         sourceUrl: null,
@@ -60,49 +62,62 @@ export const handlers = [
             content: "This is a test chunk content.",
             startOffset: 0,
             endOffset: 100,
-            importanceScore: mockImportance["chunk-1"],
-            tags: mockChunks["chunk-1"] || [],
-            note: mockNotes["chunk-1"] || null,
             createdAt: new Date().toISOString(),
           },
         ],
+        tags: meta.tags,
+        note: meta.note,
+        importanceScore: meta.importance,
         createdAt: new Date().toISOString(),
       },
     });
   }),
   http.post("*/knowledge/tags", async ({ request }) => {
     const body = await request.json();
-    const { chunkId, tagName } = AddTagRequestSchema.parse(body);
-    if (!mockChunks[chunkId]) mockChunks[chunkId] = [];
-    if (!mockChunks[chunkId].includes(tagName)) {
-      mockChunks[chunkId].push(tagName);
+    const { documentId, tagName } = AddTagRequestSchema.parse(body);
+    if (!mockDocs[documentId]) {
+      mockDocs[documentId] = { tags: [], note: null, importance: 1 };
+    }
+    if (!mockDocs[documentId].tags.includes(tagName)) {
+      mockDocs[documentId].tags.push(tagName);
     }
     return HttpResponse.json({ success: true });
   }),
   http.delete("*/knowledge/tags", async ({ request }) => {
     const body = await request.json();
-    const { chunkId, tagName } = RemoveTagRequestSchema.parse(body);
-    if (mockChunks[chunkId]) {
-      mockChunks[chunkId] = mockChunks[chunkId].filter((t) => t !== tagName);
+    const { documentId, tagName } = RemoveTagRequestSchema.parse(body);
+    if (mockDocs[documentId]) {
+      mockDocs[documentId].tags = mockDocs[documentId].tags.filter(
+        (t) => t !== tagName,
+      );
     }
     return HttpResponse.json({ success: true });
   }),
   http.post("*/knowledge/notes", async ({ request }) => {
     const body = await request.json();
-    const { chunkId, content } = AddNoteRequestSchema.parse(body);
-    mockNotes[chunkId] = content;
+    const { documentId, content } = AddNoteRequestSchema.parse(body);
+    if (!mockDocs[documentId]) {
+      mockDocs[documentId] = { tags: [], note: null, importance: 1 };
+    }
+    mockDocs[documentId].note = content;
     return HttpResponse.json({ noteId: "note-1" });
   }),
   http.put("*/knowledge/notes/:id", async ({ request }) => {
     const body = await request.json();
     const { content } = UpdateNoteRequestSchema.parse(body);
-    mockNotes["chunk-1"] = content;
+    // In a real mock we'd find by noteId, but for simplicity:
+    if (mockDocs["doc-1"]) {
+      mockDocs["doc-1"].note = content;
+    }
     return HttpResponse.json({ success: true });
   }),
   http.post("*/knowledge/importance", async ({ request }) => {
     const body = await request.json();
-    const { chunkId, score } = UpdateImportanceRequestSchema.parse(body);
-    mockImportance[chunkId] = score;
+    const { documentId, score } = UpdateImportanceRequestSchema.parse(body);
+    if (!mockDocs[documentId]) {
+      mockDocs[documentId] = { tags: [], note: null, importance: 1 };
+    }
+    mockDocs[documentId].importance = score;
     return HttpResponse.json({ success: true });
   }),
 ];

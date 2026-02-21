@@ -39,6 +39,7 @@ export class OllamaLLMProvider implements LLMProvider {
         model: this.options.model,
         prompt: request.prompt,
         system: request.systemPrompt,
+        format: request.responseFormat,
         stream: false,
         options: {
           temperature: request.temperature,

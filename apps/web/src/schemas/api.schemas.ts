@@ -28,9 +28,6 @@ export const ChunkSchema = z.object({
   content: z.string(),
   startOffset: z.number(),
   endOffset: z.number(),
-  tags: z.array(z.string()),
-  note: z.string().nullable(),
-  importanceScore: z.number().nullable(),
   createdAt: z.string(),
 });
 

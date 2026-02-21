@@ -28,8 +28,13 @@ export function useDocument(id: string) {
 export function useAddTag() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ chunkId, tagName }: { chunkId: string; tagName: string }) =>
-      documentsApi.addTag(chunkId, tagName),
+    mutationFn: ({
+      documentId,
+      tagName,
+    }: {
+      documentId: string;
+      tagName: string;
+    }) => documentsApi.addTag(documentId, tagName),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["knowledge", "detail"] });
     },
@@ -39,8 +44,13 @@ export function useAddTag() {
 export function useRemoveTag() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ chunkId, tagName }: { chunkId: string; tagName: string }) =>
-      documentsApi.removeTag(chunkId, tagName),
+    mutationFn: ({
+      documentId,
+      tagName,
+    }: {
+      documentId: string;
+      tagName: string;
+    }) => documentsApi.removeTag(documentId, tagName),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["knowledge", "detail"] });
     },
@@ -50,8 +60,13 @@ export function useRemoveTag() {
 export function useAddNote() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ chunkId, content }: { chunkId: string; content: string }) =>
-      documentsApi.addNote(chunkId, content),
+    mutationFn: ({
+      documentId,
+      content,
+    }: {
+      documentId: string;
+      content: string;
+    }) => documentsApi.addNote(documentId, content),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["knowledge", "detail"] });
     },
@@ -61,8 +76,13 @@ export function useAddNote() {
 export function useUpdateImportance() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ chunkId, score }: { chunkId: string; score: number }) =>
-      documentsApi.updateImportance(chunkId, score),
+    mutationFn: ({
+      documentId,
+      score,
+    }: {
+      documentId: string;
+      score: number;
+    }) => documentsApi.updateImportance(documentId, score),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["knowledge", "detail"] });
     },

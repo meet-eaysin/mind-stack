@@ -36,6 +36,9 @@ export const DocumentDetailResponseSchema = z.object({
     status: IngestionStatusSchema,
     rawContent: z.string(),
     chunks: z.array(ChunkSchema),
+    tags: z.array(z.string()),
+    note: z.string().nullable(),
+    importanceScore: z.number().nullable(),
     createdAt: z.string(),
   }),
 });
@@ -45,17 +48,17 @@ export const DocumentStatusResponseSchema = z.object({
 });
 
 export const AddTagRequestSchema = z.object({
-  chunkId: z.string(),
+  documentId: z.string(),
   tagName: z.string().min(1),
 });
 
 export const RemoveTagRequestSchema = z.object({
-  chunkId: z.string(),
+  documentId: z.string(),
   tagName: z.string().min(1),
 });
 
 export const AddNoteRequestSchema = z.object({
-  chunkId: z.string(),
+  documentId: z.string(),
   content: z.string(),
 });
 
@@ -64,7 +67,7 @@ export const UpdateNoteRequestSchema = z.object({
 });
 
 export const UpdateImportanceRequestSchema = z.object({
-  chunkId: z.string(),
+  documentId: z.string(),
   score: z.number().min(1).max(5),
 });
 

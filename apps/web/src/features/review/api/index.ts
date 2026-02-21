@@ -9,17 +9,20 @@ export const reviewApi = {
   getDaily: (): Promise<DailyReviewResponse> =>
     apiClient.get(ENDPOINTS.REVIEW.DAILY, schemas.DailyReviewResponseSchema),
 
-  submitFeedback: (chunkId: string, score: number): Promise<SuccessResponse> =>
+  submitFeedback: (
+    documentId: string,
+    score: number,
+  ): Promise<SuccessResponse> =>
     apiClient.post(
       ENDPOINTS.REVIEW.FEEDBACK,
-      { chunkId, score },
+      { documentId, score },
       SuccessResponseSchema,
     ),
 
-  updateScore: (chunkId: string, score: number): Promise<SuccessResponse> =>
+  updateScore: (documentId: string, score: number): Promise<SuccessResponse> =>
     apiClient.post(
       ENDPOINTS.REVIEW.SCORE,
-      { chunkId, score },
+      { documentId, score },
       SuccessResponseSchema,
     ),
 };
