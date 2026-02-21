@@ -9,4 +9,5 @@ export type DocumentRepository = {
   updateStatus(id: string, status: IngestionStatus): Promise<void>;
   updateImportance(id: string, score: number): Promise<void>;
   getImportance(id: string): Promise<number | null>;
+  delete(id: string): Promise<void>;
 };

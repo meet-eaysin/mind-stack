@@ -19,7 +19,7 @@ jest.mock('pdf-parse', () => {
 // ── Fakes ──
 
 class FakeDocumentRepository implements DocumentRepository {
-  readonly saved: DocumentEntity[] = [];
+  saved: DocumentEntity[] = [];
 
   save(document: DocumentEntity): Promise<DocumentEntity> {
     this.saved.push(document);
@@ -50,8 +50,12 @@ class FakeDocumentRepository implements DocumentRepository {
     return Promise.resolve();
   }
 
-  getImportance(_id: string): Promise<number | null> {
-    return Promise.resolve(null);
+  async getImportance(_id: string): Promise<number | null> {
+    return null;
+  }
+
+  async delete(id: string): Promise<void> {
+    this.saved = this.saved.filter((d) => d.id !== id);
   }
 }
 

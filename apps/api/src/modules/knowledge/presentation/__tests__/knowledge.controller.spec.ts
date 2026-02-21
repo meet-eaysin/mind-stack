@@ -5,6 +5,7 @@ import request from 'supertest';
 import { KnowledgeController } from '../knowledge.controller.js';
 import { ListDocumentsUseCase } from '../../application/list-documents.use-case.js';
 import { ViewDocumentUseCase } from '../../application/view-document.use-case.js';
+import { DeleteDocumentUseCase } from '../../application/delete-document.use-case.js';
 import { AddTagUseCase } from '../../application/add-tag.use-case.js';
 import { RemoveTagUseCase } from '../../application/remove-tag.use-case.js';
 import { AddNoteUseCase } from '../../application/add-note.use-case.js';
@@ -17,6 +18,7 @@ describe('KnowledgeController (e2e)', () => {
 
   const mockListDocuments = { execute: jest.fn() };
   const mockViewDocument = { execute: jest.fn() };
+  const mockDeleteDocument = { execute: jest.fn() };
   const mockAddTag = { execute: jest.fn() };
   const mockRemoveTag = { execute: jest.fn() };
   const mockAddNote = { execute: jest.fn() };
@@ -30,6 +32,7 @@ describe('KnowledgeController (e2e)', () => {
       providers: [
         { provide: ListDocumentsUseCase, useValue: mockListDocuments },
         { provide: ViewDocumentUseCase, useValue: mockViewDocument },
+        { provide: DeleteDocumentUseCase, useValue: mockDeleteDocument },
         { provide: AddTagUseCase, useValue: mockAddTag },
         { provide: RemoveTagUseCase, useValue: mockRemoveTag },
         { provide: AddNoteUseCase, useValue: mockAddNote },

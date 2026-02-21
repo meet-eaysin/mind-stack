@@ -70,6 +70,10 @@ class FakeDocumentRepository implements Partial<DocumentRepository> {
     this.documents = docs;
   }
 
+  findAll(): Promise<DocumentEntity[]> {
+    return Promise.resolve(this.documents);
+  }
+
   findById(id: string): Promise<DocumentEntity | null> {
     return Promise.resolve(this.documents.find((d) => d.id === id) ?? null);
   }

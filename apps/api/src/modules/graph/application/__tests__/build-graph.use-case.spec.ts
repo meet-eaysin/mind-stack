@@ -154,10 +154,12 @@ describe('BuildGraphUseCase', () => {
   it('should handle malformed LLM JSON gracefully', async () => {
     llmProvider.setResponse('not valid json');
 
-    await useCase.execute({
-      chunkContent: 'Some random content',
-      chunkId: 'chunk-1',
-    });
+    await expect(
+      useCase.execute({
+        chunkContent: 'Some random content',
+        chunkId: 'chunk-1',
+      }),
+    ).rejects.toThrow();
 
     const concepts = conceptRepository.getCreatedConcepts();
     expect(concepts).toHaveLength(0);

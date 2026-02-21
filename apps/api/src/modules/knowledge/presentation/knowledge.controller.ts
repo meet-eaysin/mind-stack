@@ -14,6 +14,7 @@ import type {
 } from '@repo/shared-types';
 import { ListDocumentsUseCase } from '../application/list-documents.use-case.js';
 import { ViewDocumentUseCase } from '../application/view-document.use-case.js';
+import { DeleteDocumentUseCase } from '../application/delete-document.use-case.js';
 import { AddTagUseCase } from '../application/add-tag.use-case.js';
 import { RemoveTagUseCase } from '../application/remove-tag.use-case.js';
 import { AddNoteUseCase } from '../application/add-note.use-case.js';
@@ -33,6 +34,7 @@ export class KnowledgeController {
   constructor(
     private readonly listDocuments: ListDocumentsUseCase,
     private readonly viewDocument: ViewDocumentUseCase,
+    private readonly deleteDocument: DeleteDocumentUseCase,
     private readonly addTag: AddTagUseCase,
     private readonly removeTag: RemoveTagUseCase,
     private readonly addNote: AddNoteUseCase,
@@ -77,6 +79,12 @@ export class KnowledgeController {
     return {
       status: document.status,
     };
+  }
+
+  @Delete('documents/:id')
+  async remove(@Param('id') id: string): Promise<{ success: boolean }> {
+    await this.deleteDocument.execute(id);
+    return { success: true };
   }
 
   @Post('tags')

@@ -11,15 +11,30 @@ import { RemoveTagUseCase } from '../application/remove-tag.use-case.js';
 import { AddNoteUseCase } from '../application/add-note.use-case.js';
 import { UpdateNoteUseCase } from '../application/update-note.use-case.js';
 import { UpdateImportanceUseCase } from '../application/update-importance.use-case.js';
+import { DeleteDocumentUseCase } from '../application/delete-document.use-case.js';
 import { IngestionModule } from '../../ingestion/presentation/ingestion.module.js';
+import { VECTOR_STORE } from '../../../common/tokens.js';
+import type { VectorStore } from '@repo/vector-store';
+import { ChromaVectorStore } from '@repo/vector-store';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
-  imports: [forwardRef(() => IngestionModule)],
+  imports: [forwardRef(() => IngestionModule), ConfigModule],
   controllers: [KnowledgeController],
   providers: [
     PrismaChunkRepository,
     PrismaTagRepository,
     PrismaNoteRepository,
+    {
+      provide: VECTOR_STORE,
+      useFactory: (config: ConfigService) => {
+        return new ChromaVectorStore(
+          config.getOrThrow('CHROMA_URL'),
+          'mind-stack',
+        );
+      },
+      inject: [ConfigService],
+    },
     {
       provide: ListDocumentsUseCase,
       useFactory: (
@@ -42,6 +57,15 @@ import { IngestionModule } from '../../ingestion/presentation/ingestion.module.j
         PrismaTagRepository,
         PrismaNoteRepository,
       ],
+    },
+    {
+      provide: DeleteDocumentUseCase,
+      useFactory: (
+        docRepo: PrismaDocumentRepository,
+        chunkRepo: PrismaChunkRepository,
+        vectorStore: VectorStore,
+      ) => new DeleteDocumentUseCase(docRepo, chunkRepo, vectorStore),
+      inject: [PrismaDocumentRepository, PrismaChunkRepository, VECTOR_STORE],
     },
     {
       provide: AddTagUseCase,

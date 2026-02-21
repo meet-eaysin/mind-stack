@@ -9,8 +9,12 @@ const logger = createLogger("EmbeddingJob");
 
 type ChunkWithDetails = Prisma.ChunkGetPayload<{
   include: {
-    document: { select: { title: true } };
-    chunkTags: { include: { tag: true } };
+    document: {
+      select: {
+        title: true;
+        DocumentTag: { include: { tag: true } };
+      };
+    };
   };
 }>;
 
@@ -52,8 +56,12 @@ export async function handleEmbeddingJob(
     const chunks = await prisma.chunk.findMany({
       where: { documentId },
       include: {
-        document: { select: { title: true } },
-        chunkTags: { include: { tag: true } },
+        document: {
+          select: {
+            title: true,
+            DocumentTag: { include: { tag: true } },
+          },
+        },
       },
     });
 
@@ -85,7 +93,9 @@ export async function handleEmbeddingJob(
             metadata: {
               documentId: chunk.documentId,
               documentTitle: chunk.document.title,
-              tags: chunk.chunkTags.map((ct) => ct.tag.name).join(","),
+              tags: chunk.document.DocumentTag.map((dt) => dt.tag.name).join(
+                ",",
+              ),
             },
           };
         },

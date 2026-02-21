@@ -7,7 +7,7 @@ import { type IngestionStatus, INGESTION_STATUS } from '@repo/shared-types';
 // ── Fakes ──
 
 class FakeDocumentRepository implements DocumentRepository {
-  readonly saved: DocumentEntity[] = [];
+  saved: DocumentEntity[] = [];
 
   save(document: DocumentEntity): Promise<DocumentEntity> {
     this.saved.push(document);
@@ -40,6 +40,11 @@ class FakeDocumentRepository implements DocumentRepository {
 
   getImportance(_id: string): Promise<number | null> {
     return Promise.resolve(null);
+  }
+
+  async delete(id: string): Promise<void> {
+    this.saved = this.saved.filter((d) => d.id !== id);
+    return Promise.resolve();
   }
 }
 

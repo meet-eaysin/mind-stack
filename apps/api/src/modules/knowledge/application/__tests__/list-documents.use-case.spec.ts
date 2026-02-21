@@ -25,7 +25,7 @@ function createDocumentFixture(
 // ── Fakes ──
 
 class FakeDocumentRepository implements DocumentRepository {
-  private readonly documents: DocumentEntity[] = [];
+  private documents: DocumentEntity[] = [];
 
   seed(docs: DocumentEntity[]): void {
     this.documents.push(...docs);
@@ -60,6 +60,10 @@ class FakeDocumentRepository implements DocumentRepository {
 
   getImportance(_id: string): Promise<number | null> {
     return Promise.resolve(null);
+  }
+
+  async delete(id: string): Promise<void> {
+    this.documents = this.documents.filter((d) => d.id !== id);
   }
 }
 

@@ -70,6 +70,10 @@ class FakeDocumentRepository implements DocumentRepository {
     return Promise.resolve(null);
   }
 
+  async delete(id: string): Promise<void> {
+    this.documents.delete(id);
+  }
+
   getDocument(id: string): DocumentEntity | undefined {
     return this.documents.get(id);
   }

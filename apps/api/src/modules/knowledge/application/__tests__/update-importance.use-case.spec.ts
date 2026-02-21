@@ -36,6 +36,10 @@ class FakeDocumentRepository implements DocumentRepository {
   getImportance(id: string): Promise<number | null> {
     return Promise.resolve(this.importance.get(id) ?? null);
   }
+
+  async delete(_id: string): Promise<void> {
+    return Promise.resolve();
+  }
 }
 
 // ── Tests ──

@@ -108,4 +108,10 @@ export class PrismaDocumentRepository implements DocumentRepository {
     });
     return row?.score ?? null;
   }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.document.delete({
+      where: { id },
+    });
+  }
 }

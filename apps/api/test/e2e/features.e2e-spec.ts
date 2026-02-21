@@ -20,7 +20,7 @@ import type { IngestionStatus, SourceType } from '@repo/shared-types';
 
 type MockNote = {
   id: string;
-  chunkId: string;
+  documentId: string;
   content: string;
 };
 
@@ -98,6 +98,19 @@ describe('Feature Flows (e2e)', () => {
     chunk: {
       findMany: jest.fn().mockImplementation(() => Promise.resolve([])),
     },
+    tag: {
+      findUnique: jest.fn().mockResolvedValue(null),
+      create: jest.fn().mockResolvedValue({ id: 'mock-tag-id', name: 'mock' }),
+      findMany: jest.fn().mockResolvedValue([]),
+    },
+    documentTag: {
+      upsert: jest.fn().mockResolvedValue({}),
+      deleteMany: jest.fn().mockResolvedValue({}),
+      findMany: jest.fn().mockResolvedValue([]),
+    },
+    importanceScore: {
+      findUnique: jest.fn().mockResolvedValue(null),
+    },
     note: {
       create: jest
         .fn()
@@ -106,6 +119,30 @@ describe('Feature Flows (e2e)', () => {
           notes.push(note);
           return Promise.resolve(note);
         }),
+      findFirst: jest
+        .fn()
+        .mockImplementation(
+          ({ where: { documentId } }: { where: { documentId: string } }) => {
+            return Promise.resolve(
+              notes.find((n) => n.documentId === documentId) || null,
+            );
+          },
+        ),
+      update: jest
+        .fn()
+        .mockImplementation(
+          ({
+            where: { id },
+            data,
+          }: {
+            where: { id: string };
+            data: Partial<MockNote>;
+          }) => {
+            const note = notes.find((n) => n.id === id);
+            if (note) Object.assign(note, data);
+            return Promise.resolve(note);
+          },
+        ),
     },
   };
 

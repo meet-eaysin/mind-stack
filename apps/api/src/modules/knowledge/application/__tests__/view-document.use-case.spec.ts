@@ -82,6 +82,10 @@ class FakeDocumentRepository implements DocumentRepository {
   getImportance(id: string): Promise<number | null> {
     return Promise.resolve(this.importance.get(id) ?? null);
   }
+
+  async delete(id: string): Promise<void> {
+    this.documents.delete(id);
+  }
 }
 
 class FakeChunkRepository implements ChunkRepository {
