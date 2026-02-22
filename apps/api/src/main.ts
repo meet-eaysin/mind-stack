@@ -26,7 +26,7 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api/v1');
 
   await app.listen(config.API_PORT, '0.0.0.0');
   logger.info(`API server running on http://0.0.0.0:${config.API_PORT}`);

@@ -17,6 +17,10 @@ export type VectorSearchOptions = {
   filter?: Record<string, string | number | boolean>;
 };
 
+export interface EmbeddingGenerator {
+  generate(texts: string[]): Promise<number[][]>;
+}
+
 export type VectorStore = {
   upsert(documents: VectorDocument[]): Promise<void>;
   search(
@@ -25,4 +29,6 @@ export type VectorStore = {
   ): Promise<VectorSearchResult[]>;
   delete(ids: string[]): Promise<void>;
   count(): Promise<number>;
+  getByIds(ids: string[]): Promise<string[]>;
+  getAllIds(): Promise<string[]>;
 };

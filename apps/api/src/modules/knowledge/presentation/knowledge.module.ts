@@ -14,28 +14,24 @@ import { UpdateImportanceUseCase } from '../application/update-importance.use-ca
 import { DeleteDocumentUseCase } from '../application/delete-document.use-case.js';
 import { UpdateDocumentUseCase } from '../application/update-document.use-case.js';
 import { IngestionModule } from '../../ingestion/presentation/ingestion.module.js';
+import { QueryModule } from '../../query/presentation/query.module.js';
 import { VECTOR_STORE } from '../../../common/tokens.js';
 import type { VectorStore } from '@repo/vector-store';
-import { ChromaVectorStore } from '@repo/vector-store';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
+import { VectorModule } from '../../../common/vector.module.js';
 
 @Module({
-  imports: [forwardRef(() => IngestionModule), ConfigModule],
+  imports: [
+    forwardRef(() => IngestionModule),
+    ConfigModule,
+    forwardRef(() => QueryModule),
+    VectorModule,
+  ],
   controllers: [KnowledgeController],
   providers: [
     PrismaChunkRepository,
     PrismaTagRepository,
     PrismaNoteRepository,
-    {
-      provide: VECTOR_STORE,
-      useFactory: (config: ConfigService) => {
-        return new ChromaVectorStore(
-          config.getOrThrow('CHROMA_URL'),
-          'mind-stack',
-        );
-      },
-      inject: [ConfigService],
-    },
     {
       provide: ListDocumentsUseCase,
       useFactory: (

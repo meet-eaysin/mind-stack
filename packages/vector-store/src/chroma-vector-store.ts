@@ -5,6 +5,7 @@ import {
   type VectorSearchOptions,
   type VectorSearchResult,
   type VectorStore,
+  type EmbeddingGenerator,
 } from "./vector-store.interface.js";
 
 const logger = createLogger("ChromaVectorStore");
@@ -12,11 +13,17 @@ const logger = createLogger("ChromaVectorStore");
 export class ChromaVectorStore implements VectorStore {
   private readonly client: ChromaClient;
   private readonly collectionName: string;
+  private readonly embeddingGenerator: EmbeddingGenerator | undefined;
   private collection: Collection | null = null;
 
-  constructor(url: string, collectionName: string) {
+  constructor(
+    url: string,
+    collectionName: string,
+    embeddingGenerator?: EmbeddingGenerator,
+  ) {
     this.client = new ChromaClient({ path: url });
     this.collectionName = collectionName;
+    this.embeddingGenerator = embeddingGenerator;
   }
 
   private async getCollection(): Promise<Collection> {
@@ -26,6 +33,15 @@ export class ChromaVectorStore implements VectorStore {
       this.collection = await this.client.getOrCreateCollection({
         name: this.collectionName,
         metadata: { "hnsw:space": "cosine" },
+        ...(this.embeddingGenerator
+          ? {
+              embeddingFunction: {
+                name: "mind_stack_ollama",
+                generate: (texts: string[]) =>
+                  this.embeddingGenerator!.generate(texts),
+              },
+            }
+          : {}),
       });
       return this.collection;
     } catch (error) {
@@ -83,7 +99,7 @@ export class ChromaVectorStore implements VectorStore {
           id,
           content: doc,
           metadata: metadata as Record<string, string | number | boolean>,
-          score: distance !== undefined ? 1 - distance : 0,
+          score: distance !== undefined && distance !== null ? 1 - distance : 0,
         });
       }
     }
@@ -99,5 +115,19 @@ export class ChromaVectorStore implements VectorStore {
   async count(): Promise<number> {
     const col = await this.getCollection();
     return col.count();
+  }
+
+  async getByIds(ids: string[]): Promise<string[]> {
+    const col = await this.getCollection();
+    const results = await col.get({
+      ids,
+    });
+    return results.ids;
+  }
+
+  async getAllIds(): Promise<string[]> {
+    const col = await this.getCollection();
+    const results = await col.get();
+    return results.ids;
   }
 }

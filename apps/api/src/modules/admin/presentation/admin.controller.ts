@@ -1,7 +1,9 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Post, Inject } from '@nestjs/common';
 import { GetQueueMetricsUseCase } from '../application/get-queue-metrics.use-case.js';
 import { CleanupConceptsUseCase } from '../application/cleanup-concepts.use-case.js';
 import { PrismaService } from '../../../prisma/prisma.service.js';
+import { VECTOR_STORE } from '../../../common/tokens.js';
+import type { VectorStore } from '@repo/vector-store';
 import {
   type QueueMetricsResponse,
   type CleanupResponse,
@@ -16,6 +18,7 @@ export class AdminController {
     private readonly getQueueMetrics: GetQueueMetricsUseCase,
     private readonly cleanupConcepts: CleanupConceptsUseCase,
     private readonly prisma: PrismaService,
+    @Inject(VECTOR_STORE) private readonly vectorStore: VectorStore,
   ) {}
 
   @Get('jobs')
@@ -30,25 +33,58 @@ export class AdminController {
 
   @Get('health/missing-embeddings')
   async getMissingEmbeddings(): Promise<MissingEmbeddingsResponse> {
-    // Check for chunks with empty embeddings
-    const chunksWithoutEmbeddings = await this.prisma.$queryRaw<
-      Array<{ id: string; documentId: string }>
-    >`
-      SELECT id, "document_id" as "documentId" FROM chunks WHERE embedding IS NULL
-    `;
+    // 1. Get all chunk IDs and their document IDs from Prisma
+    const allChunks = await this.prisma.chunk.findMany({
+      select: {
+        id: true,
+        documentId: true,
+      },
+    });
+
+    if (allChunks.length === 0) {
+      return { chunksWithoutEmbeddings: [] };
+    }
+
+    const allChunkIds = allChunks.map((c: { id: string }) => c.id);
+
+    // 2. Check which of these IDs exist in Chroma
+    const existingIdsInChroma = (await this.vectorStore.getByIds(
+      allChunkIds,
+    )) as string[];
+    const existingIdsSet = new Set(existingIdsInChroma);
+
+    // 3. Filter IDs that are in Prisma but NOT in Chroma
+    const chunksWithoutEmbeddings = allChunks
+      .filter(
+        (c: { id: string; documentId: string }) => !existingIdsSet.has(c.id),
+      )
+      .map((c: { id: string; documentId: string }) => ({
+        id: c.id,
+        documentId: c.documentId,
+      }));
 
     return { chunksWithoutEmbeddings };
   }
 
   @Get('health/orphans')
   async getOrphans(): Promise<OrphansResponse> {
-    // Chunks without documents (unlikely with FK constraints but good to check)
-    // In current schema, documentId is non-nullable, so checking for 'null'
-    // would requires casting to invalid type or raw query.
-    // If it's truly non-nullable, orphanChunks will be empty.
+    // 1. Chunks without documents (Impossible by DB schema but good for logic consistency)
     const orphanChunks: Array<{ id: string; documentId: string }> = [];
 
-    // Concepts without any relations
+    // 2. Embeddings in Chroma without Chunks in Postgres
+    const allChromaIds = (await this.vectorStore.getAllIds()) as string[];
+    const allChunks = await this.prisma.chunk.findMany({
+      select: { id: true },
+    });
+    const postgresChunkIds = new Set(
+      allChunks.map((c: { id: string }) => c.id),
+    );
+
+    const orphanEmbeddings = allChromaIds
+      .filter((id: string) => !postgresChunkIds.has(id))
+      .map((id: string) => ({ id }));
+
+    // 3. Concepts without any relations
     const orphanConcepts = await this.prisma.concept.findMany({
       where: {
         AND: [{ fromRelations: { none: {} } }, { toRelations: { none: {} } }],
@@ -62,6 +98,7 @@ export class AdminController {
     return {
       orphanChunks,
       orphanConcepts,
+      orphanEmbeddings,
     };
   }
 
@@ -79,11 +116,13 @@ export class AdminController {
     });
 
     return {
-      failedDocuments: failedDocuments.map((d) => ({
-        id: d.id,
-        title: d.title,
-        createdAt: d.createdAt.toISOString(),
-      })),
+      failedDocuments: failedDocuments.map(
+        (d: { id: string; title: string; createdAt: Date }) => ({
+          id: d.id,
+          title: d.title,
+          createdAt: d.createdAt.toISOString(),
+        }),
+      ),
     };
   }
 }

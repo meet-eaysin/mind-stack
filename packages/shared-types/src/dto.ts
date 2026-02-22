@@ -163,6 +163,7 @@ export type MissingEmbeddingsResponse = {
 export type OrphansResponse = {
   orphanChunks: Array<{ id: string; documentId: string }>;
   orphanConcepts: Array<{ id: string; label: string }>;
+  orphanEmbeddings: Array<{ id: string }>;
 };
 
 export type FailedDocumentsResponse = {

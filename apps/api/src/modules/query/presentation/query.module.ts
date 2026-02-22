@@ -8,7 +8,6 @@ import { RetrieveChunksUseCase } from '../application/retrieve-chunks.use-case';
 import { loadConfig } from '@repo/config';
 import { OllamaEmbeddingProvider } from '@repo/embeddings';
 import { OllamaLLMProvider } from '@repo/llm';
-import { ChromaVectorStore } from '@repo/vector-store';
 import type { EmbeddingProvider } from '@repo/embeddings';
 import type { LLMProvider } from '@repo/llm';
 import type { VectorStore } from '@repo/vector-store';
@@ -18,8 +17,10 @@ import {
   LLM_PROVIDER,
   VECTOR_STORE,
 } from '../../../common/tokens.js';
+import { VectorModule } from '../../../common/vector.module.js';
 
 @Module({
+  imports: [VectorModule],
   controllers: [QueryController],
   providers: [
     PrismaQueryRepository,
@@ -41,16 +42,6 @@ import {
           baseUrl: config.OLLAMA_BASE_URL,
           model: config.OLLAMA_MODEL,
         });
-      },
-    },
-    {
-      provide: VECTOR_STORE,
-      useFactory: () => {
-        const config = loadConfig();
-        return new ChromaVectorStore(
-          config.CHROMA_URL,
-          config.CHROMA_COLLECTION,
-        );
       },
     },
     {
@@ -87,11 +78,6 @@ import {
       inject: [EMBEDDING_PROVIDER, VECTOR_STORE, PrismaQueryRepository],
     },
   ],
-  exports: [
-    SemanticSearchUseCase,
-    EMBEDDING_PROVIDER,
-    LLM_PROVIDER,
-    VECTOR_STORE,
-  ],
+  exports: [SemanticSearchUseCase, EMBEDDING_PROVIDER, LLM_PROVIDER],
 })
 export class QueryModule {}
