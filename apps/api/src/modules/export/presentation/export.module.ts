@@ -4,6 +4,8 @@ import { PrismaQueryRepository } from '../../query/infrastructure/prisma-query.r
 import { ExportMarkdownUseCase } from '../application/export-markdown.use-case.js';
 import { ExportNotionUseCase } from '../application/export-notion.use-case.js';
 import { QueryModule } from '../../query/presentation/query.module.js';
+import { ExportFullUseCase } from '../application/export-full.use-case.js';
+import { PrismaService } from '../../../prisma/prisma.service.js';
 
 @Module({
   imports: [QueryModule],
@@ -21,6 +23,11 @@ import { QueryModule } from '../../query/presentation/query.module.js';
       useFactory: (queryRepo: PrismaQueryRepository) =>
         new ExportNotionUseCase(queryRepo),
       inject: [PrismaQueryRepository],
+    },
+    {
+      provide: ExportFullUseCase,
+      useFactory: (prisma: PrismaService) => new ExportFullUseCase(prisma),
+      inject: [PrismaService],
     },
   ],
 })

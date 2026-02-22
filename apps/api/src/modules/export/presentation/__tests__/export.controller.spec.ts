@@ -5,6 +5,7 @@ import request from 'supertest';
 import { ExportController } from '../export.controller.js';
 import { ExportMarkdownUseCase } from '../../application/export-markdown.use-case.js';
 import { ExportNotionUseCase } from '../../application/export-notion.use-case.js';
+import { ExportFullUseCase } from '../../application/export-full.use-case.js';
 import { ConfigService } from '@nestjs/config';
 
 describe('ExportController (e2e)', () => {
@@ -12,6 +13,7 @@ describe('ExportController (e2e)', () => {
 
   const mockExportMarkdown = { execute: jest.fn() };
   const mockExportNotion = { execute: jest.fn() };
+  const mockExportFull = { execute: jest.fn() };
   const mockConfigService = { get: jest.fn().mockReturnValue(null) };
 
   beforeEach(async () => {
@@ -20,6 +22,7 @@ describe('ExportController (e2e)', () => {
       providers: [
         { provide: ExportMarkdownUseCase, useValue: mockExportMarkdown },
         { provide: ExportNotionUseCase, useValue: mockExportNotion },
+        { provide: ExportFullUseCase, useValue: mockExportFull },
         { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
@@ -77,6 +80,22 @@ describe('ExportController (e2e)', () => {
 
       expect(response.status).toBe(201);
       expect(response.body.payload).toBeDefined();
+    });
+  });
+
+  describe('GET /export/full', () => {
+    it('should return 200 with complete system data', async () => {
+      const mockResult = {
+        version: '1.0.0',
+        exportedAt: new Date().toISOString(),
+        data: { documents: [] },
+      };
+      mockExportFull.execute.mockResolvedValue(mockResult);
+
+      const response = await request(app.getHttpServer()).get('/export/full');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockResult);
     });
   });
 

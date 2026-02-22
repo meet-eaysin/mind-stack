@@ -40,3 +40,9 @@ export const QueueMetricsResponseSchema = z.object({
   completed: z.number(),
   failed: z.number(),
 });
+
+export const ExportCompleteResponseSchema = z.object({
+  version: z.string(),
+  exportedAt: z.string(),
+  data: z.record(z.string(), z.array(z.record(z.string(), z.any()))),
+});

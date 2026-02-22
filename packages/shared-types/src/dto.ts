@@ -439,3 +439,23 @@ export type AddItemToGoalRequest = {
   collectionId?: string;
   documentId?: string;
 };
+
+// ── Export DTOs ──
+
+export type ExportCompleteResponse = {
+  version: string;
+  exportedAt: string;
+  data: {
+    documents: Array<Record<string, unknown>>;
+    tags: Array<Record<string, unknown>>;
+    concepts: Array<Record<string, unknown>>;
+    conceptRelations: Array<Record<string, unknown>>;
+    collections: Array<Record<string, unknown>>;
+    collectionItems: Array<Record<string, unknown>>;
+    learningGoals: Array<Record<string, unknown>>;
+    learningGoalItems: Array<Record<string, unknown>>;
+    reviews: Array<Record<string, unknown>>;
+    reviewLogs: Array<Record<string, unknown>>;
+    annotations: Array<Record<string, unknown>>;
+  };
+};

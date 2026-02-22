@@ -35,6 +35,7 @@ export const ENDPOINTS = {
   EXPORT: {
     MARKDOWN: "/export/markdown",
     NOTION: "/export/notion",
+    FULL: "/export/full",
   },
   COLLECTIONS: {
     ALL: "/collections",

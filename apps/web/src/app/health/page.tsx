@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 
 import { AppShell } from "@/components/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,8 +15,11 @@ import {
   Layers,
   Unlink,
   Loader2,
+  Download,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
+  healthApi,
   useMissingEmbeddings,
   useOrphans,
   useFailedDocuments,
@@ -111,6 +115,7 @@ export default function HealthPage() {
   const orphans = useOrphans();
   const failedDocs = useFailedDocuments();
   const queue = useQueueMetrics();
+  const [isExporting, setIsExporting] = React.useState(false);
 
   const isLoading =
     embeddings.isLoading ||
@@ -134,6 +139,30 @@ export default function HealthPage() {
     return "critical";
   };
 
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const data = await healthApi.getFullExport();
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `mind-stack-export-${
+        new Date().toISOString().split("T")[0]
+      }.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Export failed:", err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <AppShell>
       <div className="space-y-8">
@@ -150,6 +179,20 @@ export default function HealthPage() {
           </div>
           {!isLoading && !error && (
             <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExport}
+                disabled={isExporting}
+                className="gap-2"
+              >
+                {isExporting ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Download className="size-3.5" />
+                )}
+                Export Brain Data
+              </Button>
               {totalIssues === 0 ? (
                 <Badge className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 gap-1.5 px-3 py-1">
                   <CheckCircle2 className="size-3.5" />

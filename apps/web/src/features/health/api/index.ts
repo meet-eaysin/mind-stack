@@ -6,6 +6,7 @@ import type {
   OrphansResponse,
   FailedDocumentsResponse,
   QueueMetricsResponse,
+  ExportCompleteResponse,
 } from "../types";
 
 export const healthApi = {
@@ -29,4 +30,7 @@ export const healthApi = {
 
   getQueueMetrics: (): Promise<QueueMetricsResponse> =>
     apiClient.get(ENDPOINTS.ADMIN.JOBS, schemas.QueueMetricsResponseSchema),
-};
+
+  getFullExport: (): Promise<ExportCompleteResponse> =>
+    apiClient.get(ENDPOINTS.EXPORT.FULL, schemas.ExportCompleteResponseSchema),
+} as const;

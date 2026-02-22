@@ -56,6 +56,7 @@ export type {
   NotionImportRequest,
   NotionBlock,
   PaginationQuery,
+  ExportCompleteResponse,
 } from "./dto";
 
 export type {

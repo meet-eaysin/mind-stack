@@ -11,3 +11,6 @@ export type FailedDocumentsResponse = z.infer<
 export type QueueMetricsResponse = z.infer<
   typeof schemas.QueueMetricsResponseSchema
 >;
+export type ExportCompleteResponse = z.infer<
+  typeof schemas.ExportCompleteResponseSchema
+>;
