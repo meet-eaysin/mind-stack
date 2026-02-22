@@ -17,13 +17,28 @@ export class BuildGraphUseCase {
     chunkId: string;
   }): Promise<void> {
     const extracted = await this.extractConcepts(input.chunkContent);
+    if (!extracted.length) return;
 
+    const rootConcept = await this.conceptRepository.getRootConcept();
+    const createdConceptIds = new Set<string>();
+    const conceptHasRelations = new Set<string>();
+
+    // 1. Create or Find all extracted concepts and link to chunk
     for (const concept of extracted) {
       const normalizedLabel = this.normalizeLabel(concept.label);
       if (!normalizedLabel) continue;
 
       const source = await this.conceptRepository.findOrCreate(normalizedLabel);
+      createdConceptIds.add(source.id);
       await this.conceptRepository.linkConceptToChunk(source.id, input.chunkId);
+    }
+
+    // 2. Process relations and enforce graph constraints
+    for (const concept of extracted) {
+      const normalizedLabel = this.normalizeLabel(concept.label);
+      if (!normalizedLabel) continue;
+
+      const source = await this.conceptRepository.findOrCreate(normalizedLabel);
 
       for (const relation of concept.relations) {
         const normalizedTarget = this.normalizeLabel(relation.target);
@@ -31,10 +46,47 @@ export class BuildGraphUseCase {
 
         const target =
           await this.conceptRepository.findOrCreate(normalizedTarget);
+
+        // Prevent Hierarchy Cycles
+        let relationTypeToSave = relation.type;
+        if (
+          relationTypeToSave === 'IS_PART_OF' ||
+          relationTypeToSave === 'IS_PREREQUISITE_OF'
+        ) {
+          const hasCycle = await this.conceptRepository.detectCycle(
+            source.id,
+            target.id,
+            5,
+          );
+          if (hasCycle) {
+            this.logger.warn(
+              `Cycle detected for ${source.id} -> ${target.id}. Downgrading to RELATES_TO.`,
+            );
+            relationTypeToSave = 'RELATES_TO';
+          }
+        }
+
         await this.conceptRepository.createRelation(
           source.id,
           target.id,
-          relation.type,
+          relationTypeToSave,
+        );
+
+        conceptHasRelations.add(source.id);
+        conceptHasRelations.add(target.id);
+      }
+    }
+
+    // 3. Orphan Attachment: Ensure all chunks connect to the root graph
+    for (const conceptId of createdConceptIds) {
+      if (!conceptHasRelations.has(conceptId) && conceptId !== rootConcept.id) {
+        this.logger.debug(
+          `Attaching orphaned concept ${conceptId} to User Brain`,
+        );
+        await this.conceptRepository.createRelation(
+          conceptId,
+          rootConcept.id,
+          'IS_PART_OF',
         );
       }
     }

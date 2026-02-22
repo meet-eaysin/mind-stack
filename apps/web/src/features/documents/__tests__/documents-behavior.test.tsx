@@ -20,7 +20,8 @@ describe("Documents Behavior", () => {
 
     const docItem = screen.getByTestId("document-item-doc-1");
     const docBtn = docItem.querySelector("button");
-    fireEvent.click(docBtn!);
+    if (!docBtn) throw new Error("Document button not found");
+    fireEvent.click(docBtn);
     expect(onSelect).toHaveBeenCalledWith("doc-1");
   });
 
@@ -52,7 +53,9 @@ describe("Documents Behavior", () => {
 
     const addTagInput = screen.getByTestId("add-tag-input");
     fireEvent.change(addTagInput, { target: { value: "new-tag" } });
-    fireEvent.submit(addTagInput.closest("form")!);
+    const form = addTagInput.closest("form");
+    if (!form) throw new Error("Tag form not found");
+    fireEvent.submit(form);
 
     await waitFor(() => {
       expect(screen.getByTestId("tag-new-tag")).toBeInTheDocument();

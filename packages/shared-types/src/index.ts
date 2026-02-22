@@ -3,12 +3,18 @@ export {
   INGESTION_STATUS,
   RELATION_TYPE,
   JOB_TYPE,
+  LEARNING_STATUS,
+  DOCUMENT_TYPE,
+  ANNOTATION_TYPE,
 } from "./enums";
 export type {
   SourceType,
   IngestionStatus,
   RelationType,
   JobType,
+  LearningStatus,
+  DocumentType,
+  AnnotationType,
 } from "./enums";
 
 export type {
@@ -18,6 +24,7 @@ export type {
   IngestPdfRequest,
   IngestYoutubeRequest,
   IngestionResponse,
+  IngestionJobStatusResponse,
   DocumentListItem,
   DocumentListResponse,
   ChunkResponse,
@@ -48,4 +55,26 @@ export type {
   NotionImportRequest,
   NotionBlock,
   PaginationQuery,
+} from "./dto";
+
+export type {
+  CollectionListItem,
+  CollectionDetailResponse,
+  CreateCollectionRequest,
+  UpdateCollectionRequest,
+  AddDocumentToCollectionRequest,
+  CollectionItemResponse,
+  ReorderCollectionItemsRequest,
+  LearningGoalListItem,
+  LearningGoalDetailResponse,
+  CreateLearningGoalRequest,
+  UpdateLearningGoalRequest,
+  AddItemToGoalRequest,
+  LearningGoalItemResponse,
+  QueueMetricsResponse,
+  CleanupResponse,
+  MissingEmbeddingsResponse,
+  OrphansResponse,
+  FailedDocumentsResponse,
+  TopicMasteryData,
 } from "./dto";

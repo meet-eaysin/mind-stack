@@ -203,4 +203,65 @@ export class PrismaConceptRepository implements ConceptRepository {
       documentTitle: cc.chunk.document.title,
     }));
   }
+
+  async getRootConcept(): Promise<ConceptEntity> {
+    const label = 'user brain';
+    let concept = await this.prisma.concept.findUnique({
+      where: { label },
+    });
+    if (!concept) {
+      concept = await this.prisma.concept.create({
+        data: { id: randomUUID(), label },
+      });
+    }
+    return { id: concept.id, label: concept.label };
+  }
+
+  async detectCycle(
+    fromId: string,
+    toId: string,
+    maxDepth: number = 5,
+  ): Promise<boolean> {
+    // We are trying to add: fromId -> toId.
+    // A cycle occurs if there is already a path: toId -> ... -> fromId
+    // We do a bounded BFS from `toId` looking for `fromId`.
+
+    if (fromId === toId) return true; // Self-loop is a cycle
+
+    let currentLevelIds = [toId];
+    const visited = new Set<string>([toId]);
+
+    for (let depth = 0; depth < maxDepth; depth++) {
+      if (currentLevelIds.length === 0) break;
+
+      // Find all outgoing relations from current level
+      // Specifically focusing on hierarchical ones, but we check all for safety if we are enforcing strict DAG
+      const outgoing = await this.prisma.conceptRelation.findMany({
+        where: {
+          fromConceptId: { in: currentLevelIds },
+        },
+        select: { toConceptId: true },
+      });
+
+      const nextLevelIds: string[] = [];
+      for (const rel of outgoing) {
+        if (rel.toConceptId === fromId) {
+          return true; // Cycle detected
+        }
+        if (!visited.has(rel.toConceptId)) {
+          visited.add(rel.toConceptId);
+          nextLevelIds.push(rel.toConceptId);
+        }
+      }
+      currentLevelIds = nextLevelIds;
+    }
+
+    return false; // No cycle detected within maxDepth
+  }
+
+  async deleteRelation(relationId: string): Promise<void> {
+    await this.prisma.conceptRelation.delete({
+      where: { id: relationId },
+    });
+  }
 }

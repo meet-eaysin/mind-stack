@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import type { NoteRepository } from '../domain/note-repository.interface.js';
 import type { NoteEntity } from '../domain/note.entity.js';
+import type { AnnotationType } from '@repo/shared-types';
 
 @Injectable()
 export class PrismaNoteRepository implements NoteRepository {
@@ -12,33 +12,34 @@ export class PrismaNoteRepository implements NoteRepository {
   async createForDocument(
     documentId: string,
     content: string,
+    type?: AnnotationType,
     chunkId?: string,
-    selectedText?: string,
-    metadata?: Record<string, unknown>,
+    _selectedText?: string,
+    _metadata?: Record<string, unknown>,
   ): Promise<NoteEntity> {
-    const row = await this.prisma.note.create({
+    const row = await this.prisma.annotation.create({
       data: {
         id: randomUUID(),
         documentId,
         content,
         chunkId: chunkId ?? null,
-        selectedText: selectedText ?? null,
-        metadata: (metadata as Prisma.InputJsonValue) ?? null,
+        type: type ?? 'NOTE',
       },
     });
     return {
       id: row.id,
       documentId: row.documentId,
       chunkId: row.chunkId,
-      selectedText: row.selectedText,
+      selectedText: null,
       content: row.content,
-      metadata: row.metadata as Record<string, unknown> | null,
+      type: row.type as AnnotationType,
+      metadata: null,
       createdAt: row.createdAt,
     };
   }
 
   async update(noteId: string, content: string): Promise<NoteEntity> {
-    const row = await this.prisma.note.update({
+    const row = await this.prisma.annotation.update({
       where: { id: noteId },
       data: { content },
     });
@@ -46,25 +47,27 @@ export class PrismaNoteRepository implements NoteRepository {
       id: row.id,
       documentId: row.documentId,
       chunkId: row.chunkId,
-      selectedText: row.selectedText,
+      selectedText: null,
       content: row.content,
-      metadata: row.metadata as Record<string, unknown> | null,
+      type: row.type as AnnotationType,
+      metadata: null,
       createdAt: row.createdAt,
     };
   }
 
   async findManyByDocumentId(documentId: string): Promise<NoteEntity[]> {
-    const rows = await this.prisma.note.findMany({
-      where: { documentId },
+    const rows = await this.prisma.annotation.findMany({
+      where: { documentId, type: 'NOTE' },
       orderBy: { createdAt: 'desc' },
     });
     return rows.map((row) => ({
       id: row.id,
       documentId: row.documentId,
       chunkId: row.chunkId,
-      selectedText: row.selectedText as string | null,
+      selectedText: null,
       content: row.content,
-      metadata: row.metadata as Record<string, unknown> | null,
+      type: row.type as AnnotationType,
+      metadata: null,
       createdAt: row.createdAt,
     }));
   }

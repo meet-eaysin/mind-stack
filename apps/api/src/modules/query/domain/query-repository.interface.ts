@@ -2,6 +2,9 @@ export type SearchResultEntity = {
   chunkId: string;
   content: string;
   documentTitle: string;
+  author?: string;
+  publishedAt?: string;
+  sourceUrl?: string | null;
   vectorScore: number;
   importanceScore: number | null;
   tagMatchBoost: number;
@@ -15,6 +18,9 @@ export type QueryChunkDetail = {
   chunkId: string;
   content: string;
   documentTitle: string;
+  author: string | null;
+  publishedAt: Date | null;
+  sourceUrl: string | null;
   importanceScore: number | null;
   tags: string[];
   createdAt: Date;

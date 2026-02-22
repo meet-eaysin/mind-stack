@@ -85,8 +85,34 @@ class FakeConceptRepository implements ConceptRepository {
   }
   findAssociatedChunks(
     _conceptId: string,
-  ): Promise<{ id: string; content: string; documentTitle: string }[]> {
+  ): Promise<
+    { id: string; content: string; documentTitle: string; documentId: string }[]
+  > {
     return Promise.resolve([]);
+  }
+
+  getRootConcept(): Promise<ConceptEntity> {
+    const rootId = 'root-user-brain';
+    const rootLabel = 'user brain';
+    let root = this.concepts.find((c) => c.id === rootId);
+    if (!root) {
+      root = { id: rootId, label: rootLabel };
+      this.concepts.push(root);
+    }
+    return Promise.resolve(root);
+  }
+
+  detectCycle(
+    _fromId: string,
+    _toId: string,
+    _maxDepth?: number,
+  ): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
+  deleteRelation(relationId: string): Promise<void> {
+    this.relations = this.relations.filter((r) => r.id !== relationId);
+    return Promise.resolve();
   }
 }
 

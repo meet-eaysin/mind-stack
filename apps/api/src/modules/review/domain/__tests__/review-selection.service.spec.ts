@@ -10,6 +10,10 @@ function createReviewFixture(
     id: 'review-1',
     documentId: 'doc-1',
     lastReviewedAt: new Date('2020-01-01T00:00:00Z'),
+    nextReviewDate: new Date('2020-01-01T00:00:00Z'),
+    interval: 0,
+    easeFactor: 2.5,
+    repetitionCount: 0,
     reviewScore: 0,
     ...overrides,
   };
@@ -22,14 +26,12 @@ describe('selectChunksForReview', () => {
     const veryOld = createReviewFixture({
       id: 'r1',
       documentId: 'd1',
-      lastReviewedAt: new Date('2010-01-01T00:00:00Z'),
-      reviewScore: 0,
+      nextReviewDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 days ago
     });
     const lessOld = createReviewFixture({
       id: 'r2',
       documentId: 'd2',
-      lastReviewedAt: new Date('2024-01-01T00:00:00Z'),
-      reviewScore: 0,
+      nextReviewDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
     });
 
     const result = selectChunksForReview(
@@ -40,12 +42,15 @@ describe('selectChunksForReview', () => {
       10,
     );
 
-    if (result[0]?.type === 'REVIEWED') {
-      expect(result[0].review.documentId).toBe('d1');
-    }
-    if (result[1]?.type === 'REVIEWED') {
-      expect(result[1].review.documentId).toBe('d2');
-    }
+    expect(result).toHaveLength(2);
+    expect(result[0]).toMatchObject({
+      type: 'REVIEWED',
+      review: { documentId: 'd1' },
+    });
+    expect(result[1]).toMatchObject({
+      type: 'REVIEWED',
+      review: { documentId: 'd2' },
+    });
   });
 
   it('should respect the limit parameter', () => {
@@ -53,20 +58,17 @@ describe('selectChunksForReview', () => {
       createReviewFixture({
         id: 'r1',
         documentId: 'd1',
-        lastReviewedAt: new Date('2020-01-01'),
-        reviewScore: 0,
+        nextReviewDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
       }),
       createReviewFixture({
         id: 'r2',
         documentId: 'd2',
-        lastReviewedAt: new Date('2020-01-01'),
-        reviewScore: 0,
+        nextReviewDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
       }),
       createReviewFixture({
         id: 'r3',
         documentId: 'd3',
-        lastReviewedAt: new Date('2020-01-01'),
-        reviewScore: 0,
+        nextReviewDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
       }),
     ];
 
@@ -82,8 +84,7 @@ describe('selectChunksForReview', () => {
     const notDue = createReviewFixture({
       id: 'r1',
       documentId: 'd1',
-      lastReviewedAt: new Date(),
-      reviewScore: 0,
+      nextReviewDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // Tomorrow
     });
 
     const result = selectChunksForReview(
@@ -94,39 +95,32 @@ describe('selectChunksForReview', () => {
     expect(result).toHaveLength(0);
   });
 
-  it('should consider review score in the interval calculation', () => {
-    const highScore = createReviewFixture({
+  it('should prioritize unreviewed items with very high overdue score', () => {
+    const overdueReview = createReviewFixture({
       id: 'r1',
       documentId: 'd1',
-      lastReviewedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-      reviewScore: 5,
+      nextReviewDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days overdue
     });
-    const lowScore = createReviewFixture({
-      id: 'r2',
+    const unreviewed = {
+      type: 'UNREVIEWED' as const,
       documentId: 'd2',
-      lastReviewedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-      reviewScore: 0,
-    });
+      createdAt: new Date(),
+    };
 
     const result = selectChunksForReview(
-      [
-        { type: 'REVIEWED', review: highScore },
-        { type: 'REVIEWED', review: lowScore },
-      ],
+      [{ type: 'REVIEWED', review: overdueReview }, unreviewed],
       10,
     );
 
-    // With score=5, interval = 1 * 2^5 = 32 days. 5 days < 32, so not overdue.
-    // With score=0, interval = 1 * 2^0 = 1 day. 5 days > 1, so overdue.
-    expect(result).toHaveLength(1);
-    if (result[0]?.type === 'REVIEWED') {
-      expect(result[0].review.documentId).toBe('d2');
-    }
+    expect(result[0]).toEqual(unreviewed);
+    expect(result[1]).toMatchObject({
+      type: 'REVIEWED',
+      review: { documentId: 'd1' },
+    });
   });
 
   it('should return empty array when given empty input', () => {
     const result = selectChunksForReview([], 10);
-
     expect(result).toEqual([]);
   });
 });

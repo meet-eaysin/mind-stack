@@ -1,4 +1,11 @@
-import type { SourceType, IngestionStatus, RelationType } from "./enums";
+import type {
+  SourceType,
+  IngestionStatus,
+  RelationType,
+  LearningStatus,
+  AnnotationType,
+  DocumentType,
+} from "./enums";
 
 // ── Ingestion DTOs ──
 
@@ -30,8 +37,16 @@ export type IngestClipRequest = {
 
 export type IngestionResponse = {
   documentId: string;
+  jobId?: string | undefined;
   status: IngestionStatus;
   message: string;
+};
+
+export type IngestionJobStatusResponse = {
+  jobId: string;
+  state: "waiting" | "active" | "completed" | "failed" | "delayed" | "unknown";
+  progress: number;
+  reason?: string | undefined;
 };
 
 // ── Knowledge DTOs ──
@@ -42,7 +57,14 @@ export type DocumentListItem = {
   sourceType: SourceType;
   sourceUrl: string | null;
   status: IngestionStatus;
+  learningStatus: LearningStatus;
+  type: DocumentType;
+  author: string | null;
+  publisher: string | null;
+  publishedAt: string | null;
+  language: string;
   chunkCount: number;
+  addedByUserAt: string;
   createdAt: string;
 };
 
@@ -64,6 +86,7 @@ export type ChunkResponse = {
 export type NoteResponse = {
   id: string;
   content: string;
+  type: AnnotationType;
   chunkId: string | null;
   selectedText: string | null;
   metadata: Record<string, unknown> | null;
@@ -76,11 +99,18 @@ export type DocumentDetailResponse = {
   sourceType: SourceType;
   sourceUrl: string | null;
   status: IngestionStatus;
+  learningStatus: LearningStatus;
+  type: DocumentType;
+  author: string | null;
+  publisher: string | null;
+  publishedAt: string | null;
+  language: string;
   rawContent: string;
   chunks: ChunkResponse[];
   tags: string[];
   notes: NoteResponse[];
   importanceScore: number | null;
+  addedByUserAt: string;
   createdAt: string;
 };
 
@@ -97,6 +127,7 @@ export type RemoveTagRequest = {
 export type AddNoteRequest = {
   documentId: string;
   content: string;
+  type?: AnnotationType | undefined;
   chunkId?: string | undefined;
   selectedText?: string | undefined;
   metadata?: Record<string, unknown> | undefined;
@@ -110,6 +141,32 @@ export type UpdateNoteRequest = {
 export type UpdateImportanceRequest = {
   documentId: string;
   score: number;
+};
+
+// ── Admin DTOs ──
+
+export type QueueMetricsResponse = {
+  waiting: number;
+  active: number;
+  completed: number;
+  failed: number;
+};
+
+export type CleanupResponse = {
+  deletedCount: number;
+};
+
+export type MissingEmbeddingsResponse = {
+  chunksWithoutEmbeddings: Array<{ id: string; documentId: string }>;
+};
+
+export type OrphansResponse = {
+  orphanChunks: Array<{ id: string; documentId: string }>;
+  orphanConcepts: Array<{ id: string; label: string }>;
+};
+
+export type FailedDocumentsResponse = {
+  failedDocuments: Array<{ id: string; title: string; createdAt: string }>;
 };
 
 // ── Query DTOs ──
@@ -137,6 +194,9 @@ export type ChunkReference = {
   chunkId: string;
   content: string;
   documentTitle: string;
+  author?: string | undefined;
+  publishedAt?: string | undefined;
+  sourceUrl?: string | null;
   score: number;
   tags: string[];
   hasNote: boolean;
@@ -207,6 +267,29 @@ export type ConceptNeighborhoodRequest = {
   depth?: number | undefined;
 };
 
+// ── Analysis DTOs ──
+
+export type TopicMasteryData = {
+  coverage: {
+    totalConcepts: number;
+    reviewedConcepts: number;
+    percent: number;
+  };
+  levels: {
+    mastered: number;
+    consolidating: number;
+    learning: number;
+    unseen: number;
+  };
+  weakAreas: {
+    id: string;
+    label: string;
+    easeFactor: number;
+    interval: number;
+  }[];
+  learningStatusDistribution: Record<string, number>;
+};
+
 // ── Export DTOs ──
 export type ExportMarkdownRequest = {
   chunkIds: string[];
@@ -240,4 +323,102 @@ export type NotionBlock = {
 export type PaginationQuery = {
   page?: number | undefined;
   pageSize?: number | undefined;
+};
+
+// ── Collection DTOs ──
+
+export type CollectionListItem = {
+  id: string;
+  name: string;
+  description: string | null;
+  itemCount: number;
+  progress: number; // calculated from items ready/completed
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CollectionItemResponse = {
+  id: string;
+  documentId: string;
+  documentTitle: string;
+  learningStatus: string;
+  order: number;
+  prerequisiteId: string | null;
+};
+
+export type CollectionDetailResponse = {
+  id: string;
+  name: string;
+  description: string | null;
+  goal: string | null;
+  items: CollectionItemResponse[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CreateCollectionRequest = {
+  name: string;
+  description?: string;
+  goal?: string;
+};
+
+export type UpdateCollectionRequest = {
+  name?: string;
+  description?: string;
+  goal?: string;
+};
+
+export type AddDocumentToCollectionRequest = {
+  documentId: string;
+  order?: number;
+  prerequisiteId?: string;
+};
+
+export type ReorderCollectionItemsRequest = {
+  itemIds: string[]; // Order of IDs
+};
+
+// ── Learning Goal DTOs ──
+
+export type LearningGoalListItem = {
+  id: string;
+  name: string;
+  deadline: string | null;
+  progress: number;
+  itemCount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type LearningGoalItemResponse = {
+  id: string;
+  collectionId: string | null;
+  collectionName: string | null;
+  documentId: string | null;
+  documentTitle: string | null;
+};
+
+export type LearningGoalDetailResponse = {
+  id: string;
+  name: string;
+  deadline: string | null;
+  progress: number;
+  items: LearningGoalItemResponse[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CreateLearningGoalRequest = {
+  name: string;
+  deadline?: string;
+};
+
+export type UpdateLearningGoalRequest = {
+  name?: string;
+  deadline?: string;
+};
+
+export type AddItemToGoalRequest = {
+  collectionId?: string;
+  documentId?: string;
 };

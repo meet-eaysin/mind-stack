@@ -14,7 +14,7 @@ export class IngestTextUseCase {
     title: string;
     content: string;
     sourceUrl?: string;
-  }): Promise<{ documentId: string }> {
+  }): Promise<{ documentId: string; jobId?: string }> {
     const document = createDocument({
       id: randomUUID(),
       title: input.title,
@@ -24,8 +24,8 @@ export class IngestTextUseCase {
     });
 
     const saved = await this.documentRepository.save(document);
-    await this.jobProducer.enqueueChunkingJob(saved.id);
+    const jobId = await this.jobProducer.enqueueChunkingJob(saved.id);
 
-    return { documentId: saved.id };
+    return { documentId: saved.id, jobId };
   }
 }

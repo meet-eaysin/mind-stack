@@ -12,6 +12,7 @@ import { IngestPdfUseCase } from '../application/ingest-pdf.use-case.js';
 import { IngestYoutubeUseCase } from '../application/ingest-youtube.use-case.js';
 import { IngestClipUseCase } from '../application/ingest-clip.use-case.js';
 import { RetryIngestionUseCase } from '../application/retry-ingestion.use-case.js';
+import { GetIngestionJobStatusUseCase } from '../application/get-ingestion-job-status.use-case.js';
 import { ClipController } from './clip.controller.js';
 
 import { KnowledgeModule } from '../../knowledge/presentation/knowledge.module.js';
@@ -29,6 +30,12 @@ import { QueryModule } from '../../query/presentation/query.module.js';
   providers: [
     PrismaDocumentRepository,
     IngestionJobProducer,
+    {
+      provide: GetIngestionJobStatusUseCase,
+      useFactory: (producer: IngestionJobProducer) =>
+        new GetIngestionJobStatusUseCase(producer),
+      inject: [IngestionJobProducer],
+    },
     {
       provide: IngestUrlUseCase,
       useFactory: (

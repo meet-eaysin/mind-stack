@@ -7,7 +7,7 @@ import type { TagRepository } from '../../domain/tag-repository.interface.js';
 import type { TagEntity } from '../../domain/tag.entity.js';
 import type { NoteRepository } from '../../domain/note-repository.interface.js';
 import type { NoteEntity } from '../../domain/note.entity.js';
-import type { IngestionStatus } from '@repo/shared-types';
+import type { IngestionStatus, AnnotationType } from '@repo/shared-types';
 
 // ── Fixtures ──
 
@@ -16,12 +16,19 @@ function createDocumentFixture(
 ): DocumentEntity {
   return {
     id: 'doc-1',
-    title: 'Test Doc',
+    title: 'Title',
     sourceType: 'URL',
     sourceUrl: 'https://example.com',
-    rawContent: 'raw content here',
+    rawContent: 'Content',
     status: 'READY',
-    createdAt: new Date('2025-01-01T00:00:00Z'),
+    learningStatus: 'UPCOMING',
+    type: 'ARTICLE',
+    author: null,
+    publisher: null,
+    publishedAt: null,
+    language: 'en',
+    addedByUserAt: new Date(),
+    createdAt: new Date(),
     ...overrides,
   };
 }
@@ -150,6 +157,7 @@ class FakeNoteRepository implements NoteRepository {
   createForDocument(
     documentId: string,
     content: string,
+    type?: AnnotationType,
     chunkId?: string,
     selectedText?: string,
     metadata?: Record<string, unknown>,
@@ -158,6 +166,7 @@ class FakeNoteRepository implements NoteRepository {
       id: `note-new`,
       documentId,
       content,
+      type: type ?? 'NOTE',
       chunkId: chunkId ?? null,
       selectedText: selectedText ?? null,
       metadata: metadata ?? null,
@@ -224,6 +233,7 @@ describe('ViewDocumentUseCase', () => {
       id: 'note-1',
       documentId: 'doc-1',
       content: 'a note',
+      type: 'NOTE',
       chunkId: null,
       selectedText: null,
       metadata: null,

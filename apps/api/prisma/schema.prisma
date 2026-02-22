@@ -8,20 +8,33 @@ generator client {
 }
 
 model Document {
-  id         String   @id @default(uuid())
-  title      String
-  sourceType String   @map("source_type")
-  sourceUrl  String?  @map("source_url")
-  rawContent String   @map("raw_content")
-  status     String   @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
-  createdAt  DateTime @default(now()) @map("created_at")
-  deletedAt  DateTime? @map("deleted_at")
+  id             String    @id @default(uuid())
+  title          String
+  sourceType     String    @map("source_type")
+  sourceUrl      String?   @map("source_url")
+  rawContent     String    @map("raw_content")
+  status         String    @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  
+  // New fields from FPR
+  type           String    @default("OTHER") // ARTICLE, VIDEO, COURSE_LESSON, BOOK, NOTE, RFC, BLOG, TRANSCRIPT, OTHER
+  author         String?
+  publisher      String?
+  publishedAt    DateTime? @map("published_at")
+  language       String    @default("en")
+  learningStatus String    @default("UPCOMING") @map("learning_status") // TO_WATCH, TO_READ, UPCOMING, IN_PROGRESS, REVIEW, COMPLETED, PENDING_COMPLETION
+  addedByUserAt  DateTime  @default(now()) @map("added_by_user_at")
+  
+  createdAt      DateTime  @default(now()) @map("created_at")
+  deletedAt      DateTime? @map("deleted_at")
 
   chunks          Chunk[]
   DocumentTag     DocumentTag[]
-  notes           Note[]
+  annotations     Annotation[]
   ImportanceScore ImportanceScore?
   Review          Review[]
+  ReviewLog       ReviewLog[]
+  collectionItems CollectionItem[]
+  learningGoalItems LearningGoalItem[]
 
   @@map("documents")
 }
@@ -36,6 +49,8 @@ model Chunk {
   createdAt   DateTime @default(now()) @map("created_at")
 
   conceptChunks ConceptChunk[]
+  annotations   Annotation[]
+  reviewLogs    ReviewLog[]
 
   @@index([documentId])
   @@map("chunks")
@@ -73,17 +88,18 @@ model ConceptChunk {
   @@map("concept_chunks")
 }
 
-model Note {
-  id           String   @id @default(uuid())
-  document     Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  documentId   String   @map("document_id")
-  chunkId      String?  @map("chunk_id")
-  selectedText String?  @map("selected_text")
-  content      String
-  metadata     Json?
-  createdAt    DateTime @default(now()) @map("created_at")
+model Annotation {
+  id         String   @id @default(uuid())
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId String   @map("document_id")
+  chunk      Chunk?   @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  chunkId    String?  @map("chunk_id")
+  
+  type       String   @default("NOTE") // HIGHLIGHT, NOTE, QUESTION, INSIGHT
+  content    String
+  createdAt  DateTime @default(now()) @map("created_at")
 
-  @@map("notes")
+  @@map("annotations")
 }
 
 model ImportanceScore {
@@ -98,12 +114,33 @@ model ImportanceScore {
 model Review {
   id             String   @id @default(uuid())
   document       Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  documentId     String   @map("document_id")
+  documentId     String   @unique @map("document_id")
+  
+  // Spaced repetition fields
   lastReviewedAt DateTime @default(now()) @map("last_reviewed_at")
+  nextReviewDate DateTime @default(now()) @map("next_review_date")
+  interval       Float    @default(0) // Interval in days
+  easeFactor     Float    @default(2.5) @map("ease_factor")
+  repetitionCount Int     @default(0) @map("repetition_count")
   reviewScore    Int      @map("review_score") // 0-5
 
   @@index([documentId])
   @@map("reviews")
+}
+
+// Track historical review outcomes
+model ReviewLog {
+  id          String   @id @default(uuid())
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId  String   @map("document_id")
+  chunk       Chunk?   @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+  chunkId     String?  @map("chunk_id")
+  
+  feedback    String   // EASY, MEDIUM, HARD
+  timestamp   DateTime @default(now())
+
+  @@index([documentId])
+  @@map("review_logs")
 }
 
 model Concept {
@@ -128,4 +165,61 @@ model ConceptRelation {
 
   @@unique([fromConceptId, toConceptId, relationType])
   @@map("concept_relations")
+}
+
+model Collection {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  goal        String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  items CollectionItem[]
+  goals LearningGoalItem[]
+
+  @@map("collections")
+}
+
+model CollectionItem {
+  id             String     @id @default(uuid())
+  collection     Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collectionId   String     @map("collection_id")
+  document       Document   @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId     String     @map("document_id")
+  
+  order          Int        @default(0)
+  prerequisiteId String?    @map("prerequisite_id") // ID of another document that must be completed first
+
+  @@unique([collectionId, documentId])
+  @@index([collectionId])
+  @@map("collection_items")
+}
+
+model LearningGoal {
+  id          String   @id @default(uuid())
+  name        String
+  deadline    DateTime?
+  progress    Float    @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  items       LearningGoalItem[]
+
+  @@map("learning_goals")
+}
+
+model LearningGoalItem {
+  id             String       @id @default(uuid())
+  goal           LearningGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  goalId         String       @map("goal_id")
+  
+  // Can link to either a collection or directly to a single document (for flexibility, though primarily collections are used)
+  collection     Collection?  @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collectionId   String?      @map("collection_id")
+
+  document       Document?    @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId     String?      @map("document_id")
+  
+  @@map("learning_goal_items")
 }

@@ -52,8 +52,7 @@ export class OllamaLLMProvider implements LLMProvider {
       throw new Error(`Ollama generation failed: ${response.statusText}`);
     }
 
-    const rawData: unknown = await response.json();
-    const data = GenerateResponseSchema.parse(rawData);
+    const data = GenerateResponseSchema.parse(await response.json());
 
     return {
       text: data.response,
@@ -104,8 +103,7 @@ export class OllamaLLMProvider implements LLMProvider {
 
         for (const line of lines) {
           try {
-            const rawData: unknown = JSON.parse(line);
-            const data = StreamResponseSchema.parse(rawData);
+            const data = StreamResponseSchema.parse(JSON.parse(line));
             yield {
               text: data.response,
               done: data.done,

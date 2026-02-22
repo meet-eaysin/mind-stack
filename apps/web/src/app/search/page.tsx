@@ -83,8 +83,9 @@ export default function SearchPage() {
         try {
           const raw =
             typeof event.data === "string" ? event.data : String(event.data);
-          const parsed: unknown = JSON.parse(raw);
-          const chunk = StreamingAskResponseChunkSchema.safeParse(parsed);
+          const chunk = StreamingAskResponseChunkSchema.safeParse(
+            JSON.parse(raw),
+          );
           if (chunk.success) {
             const data = chunk.data;
             if (data.type === "text") {

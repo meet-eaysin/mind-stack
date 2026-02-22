@@ -1,10 +1,12 @@
-import { Controller, Post, Body, Param } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get } from '@nestjs/common';
 import { type IngestionResponse, INGESTION_STATUS } from '@repo/shared-types';
 import { IngestUrlUseCase } from '../application/ingest-url.use-case.js';
 import { IngestTextUseCase } from '../application/ingest-text.use-case.js';
 import { IngestPdfUseCase } from '../application/ingest-pdf.use-case.js';
 import { IngestYoutubeUseCase } from '../application/ingest-youtube.use-case.js';
 import { RetryIngestionUseCase } from '../application/retry-ingestion.use-case.js';
+import { GetIngestionJobStatusUseCase } from '../application/get-ingestion-job-status.use-case.js';
+import { PrismaDocumentRepository } from '../infrastructure/prisma-document.repository.js';
 import {
   IngestUrlDto,
   IngestTextDto,
@@ -20,6 +22,8 @@ export class IngestionController {
     private readonly ingestPdf: IngestPdfUseCase,
     private readonly ingestYoutube: IngestYoutubeUseCase,
     private readonly retryIngestion: RetryIngestionUseCase,
+    private readonly getJobStatus: GetIngestionJobStatusUseCase,
+    private readonly documentRepository: PrismaDocumentRepository,
   ) {}
 
   @Post('url')
@@ -27,6 +31,7 @@ export class IngestionController {
     const result = await this.ingestUrl.execute(dto);
     return {
       documentId: result.documentId,
+      jobId: result.jobId,
       status: INGESTION_STATUS.INGESTED,
       message: 'Document ingestion started',
     };
@@ -37,6 +42,7 @@ export class IngestionController {
     const result = await this.ingestText.execute(dto);
     return {
       documentId: result.documentId,
+      jobId: result.jobId,
       status: INGESTION_STATUS.INGESTED,
       message: 'Text ingestion started',
     };
@@ -47,6 +53,7 @@ export class IngestionController {
     const result = await this.ingestPdf.execute(dto);
     return {
       documentId: result.documentId,
+      jobId: result.jobId,
       status: INGESTION_STATUS.INGESTED,
       message: 'PDF ingestion started',
     };
@@ -59,6 +66,7 @@ export class IngestionController {
     const result = await this.ingestYoutube.execute(dto);
     return {
       documentId: result.documentId,
+      jobId: result.jobId,
       status: INGESTION_STATUS.INGESTED,
       message: 'YouTube transcript ingestion started',
     };
@@ -68,11 +76,30 @@ export class IngestionController {
   async retry(
     @Param('documentId') documentId: string,
   ): Promise<IngestionResponse> {
-    await this.retryIngestion.execute(documentId);
+    const result = await this.retryIngestion.execute(documentId);
     return {
       documentId,
+      jobId: result.jobId,
       status: INGESTION_STATUS.INGESTED,
       message: 'Ingestion retry started',
+    };
+  }
+
+  @Get('job/:jobId')
+  async getStatus(@Param('jobId') jobId: string) {
+    return this.getJobStatus.execute(jobId);
+  }
+
+  @Get('status/:documentId')
+  async getDocumentStatus(@Param('documentId') documentId: string) {
+    const doc = await this.documentRepository.findById(documentId);
+    if (!doc) {
+      throw new Error(`Document not found: ${documentId}`);
+    }
+    return {
+      documentId: doc.id,
+      status: doc.status,
+      learningStatus: doc.learningStatus,
     };
   }
 }

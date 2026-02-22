@@ -1,4 +1,12 @@
-import { IsString, IsInt, Min, Max, IsOptional } from 'class-validator';
+import { IsString, IsInt, Min, Max, IsOptional, IsEnum } from 'class-validator';
+import {
+  LEARNING_STATUS,
+  ANNOTATION_TYPE,
+  DOCUMENT_TYPE,
+  type LearningStatus,
+  type DocumentType,
+  type AnnotationType,
+} from '@repo/shared-types';
 
 export class AddTagDto {
   @IsString()
@@ -22,6 +30,10 @@ export class AddNoteDto {
 
   @IsString()
   content!: string;
+
+  @IsOptional()
+  @IsEnum(ANNOTATION_TYPE)
+  type?: AnnotationType;
 
   @IsOptional()
   @IsString()
@@ -71,4 +83,28 @@ export class UpdateDocumentDto {
   @IsOptional()
   @IsString()
   sourceUrl?: string;
+
+  @IsOptional()
+  @IsEnum(LEARNING_STATUS)
+  learningStatus?: LearningStatus;
+
+  @IsOptional()
+  @IsEnum(DOCUMENT_TYPE)
+  type?: DocumentType;
+
+  @IsOptional()
+  @IsString()
+  author?: string;
+
+  @IsOptional()
+  @IsString()
+  publisher?: string;
+
+  @IsOptional()
+  @IsString()
+  publishedAt?: string;
+
+  @IsOptional()
+  @IsString()
+  language?: string;
 }

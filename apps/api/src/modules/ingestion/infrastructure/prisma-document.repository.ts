@@ -4,9 +4,13 @@ import type { DocumentRepository } from '../domain/document-repository.interface
 import type { DocumentEntity } from '../domain/document.entity.js';
 import {
   INGESTION_STATUS,
+  LEARNING_STATUS,
   SOURCE_TYPE,
+  DOCUMENT_TYPE,
   type IngestionStatus,
+  type LearningStatus,
   type SourceType,
+  type DocumentType,
 } from '@repo/shared-types';
 
 @Injectable()
@@ -21,6 +25,14 @@ export class PrismaDocumentRepository implements DocumentRepository {
     return Object.values(INGESTION_STATUS).includes(value as IngestionStatus);
   }
 
+  private isLearningStatus(value: string): value is LearningStatus {
+    return Object.values(LEARNING_STATUS).includes(value as LearningStatus);
+  }
+
+  private isDocumentType(value: string): value is DocumentType {
+    return Object.values(DOCUMENT_TYPE).includes(value as DocumentType);
+  }
+
   private mapToDomain(row: {
     id: string;
     title: string;
@@ -28,25 +40,63 @@ export class PrismaDocumentRepository implements DocumentRepository {
     sourceUrl: string | null;
     rawContent: string;
     status: string;
+    learningStatus: string;
+    type: string;
+    author: string | null;
+    publisher: string | null;
+    publishedAt: Date | null;
+    language: string;
+    addedByUserAt: Date;
     createdAt: Date;
     deletedAt: Date | null;
   }): DocumentEntity {
-    if (!this.isSourceType(row.sourceType)) {
-      throw new Error(`Invalid source type in database: ${row.sourceType}`);
+    const {
+      sourceType,
+      status,
+      learningStatus,
+      type,
+      id,
+      title,
+      sourceUrl,
+      rawContent,
+      author,
+      publisher,
+      publishedAt,
+      language,
+      addedByUserAt,
+      createdAt,
+      deletedAt,
+    } = row;
+
+    if (!this.isSourceType(sourceType)) {
+      throw new Error(`Invalid source type in database: ${sourceType}`);
     }
-    if (!this.isIngestionStatus(row.status)) {
-      throw new Error(`Invalid ingestion status in database: ${row.status}`);
+    if (!this.isIngestionStatus(status)) {
+      throw new Error(`Invalid ingestion status in database: ${status}`);
+    }
+    if (!this.isLearningStatus(learningStatus)) {
+      throw new Error(`Invalid learning status in database: ${learningStatus}`);
+    }
+    if (!this.isDocumentType(type)) {
+      throw new Error(`Invalid document type in database: ${type}`);
     }
 
     return {
-      id: row.id,
-      title: row.title,
-      sourceType: row.sourceType,
-      sourceUrl: row.sourceUrl,
-      rawContent: row.rawContent,
-      status: row.status,
-      createdAt: row.createdAt,
-      deletedAt: row.deletedAt,
+      id,
+      title,
+      sourceType,
+      sourceUrl,
+      rawContent,
+      status,
+      learningStatus,
+      type,
+      author,
+      publisher,
+      publishedAt,
+      language,
+      addedByUserAt,
+      createdAt,
+      deletedAt,
     };
   }
 
@@ -59,6 +109,13 @@ export class PrismaDocumentRepository implements DocumentRepository {
         sourceUrl: document.sourceUrl,
         rawContent: document.rawContent,
         status: document.status,
+        learningStatus: document.learningStatus,
+        type: document.type,
+        author: document.author,
+        publisher: document.publisher,
+        publishedAt: document.publishedAt,
+        language: document.language,
+        addedByUserAt: document.addedByUserAt,
         deletedAt: document.deletedAt ?? null,
       },
     });

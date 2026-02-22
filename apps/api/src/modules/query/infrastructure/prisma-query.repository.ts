@@ -18,7 +18,7 @@ export class PrismaQueryRepository implements QueryRepository {
           include: {
             DocumentTag: { include: { tag: true } },
             ImportanceScore: true,
-            notes: true,
+            annotations: true,
             Review: { select: { id: true } },
           },
         },
@@ -31,14 +31,17 @@ export class PrismaQueryRepository implements QueryRepository {
         chunkId: c.id,
         content: c.content,
         documentTitle: doc.title,
+        author: doc.author,
+        publishedAt: doc.publishedAt,
+        sourceUrl: doc.sourceUrl,
         importanceScore: doc.ImportanceScore?.score ?? null,
         tags: doc.DocumentTag.map(
           (t: DocumentTag & { tag: { name: string } }) => t.tag.name,
         ),
         createdAt: c.createdAt,
-        hasNote: doc.notes && doc.notes.length > 0,
+        hasNote: doc.annotations && doc.annotations.length > 0,
         reviewCount: doc.Review.length,
-        documentStatus: doc.status,
+        documentStatus: doc.learningStatus || doc.status, // Fallback to existing status if older data
       };
     });
   }

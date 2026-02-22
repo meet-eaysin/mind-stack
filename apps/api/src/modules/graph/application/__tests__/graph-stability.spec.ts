@@ -76,6 +76,33 @@ class FakeConceptRepository implements ConceptRepository {
   async findAssociatedChunks() {
     return [];
   }
+
+  getRootConcept(): Promise<ConceptEntity> {
+    const rootId = 'root-user-brain';
+    const rootLabel = 'user brain';
+    let root = null;
+    for (const concept of this.concepts.values()) {
+      if (concept.id === rootId) root = concept;
+    }
+    if (!root) {
+      root = { id: rootId, label: rootLabel };
+      this.concepts.set(rootId, root);
+    }
+    return Promise.resolve(root);
+  }
+
+  detectCycle(
+    _fromId: string,
+    _toId: string,
+    _maxDepth?: number,
+  ): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
+  deleteRelation(relationId: string): Promise<void> {
+    this.relations = this.relations.filter((r) => r.id !== relationId);
+    return Promise.resolve();
+  }
 }
 
 describe('Graph Stability & Error Handling', () => {
@@ -101,8 +128,8 @@ describe('Graph Stability & Error Handling', () => {
       await useCase.execute({ chunkContent: '...', chunkId: '1' });
 
       const concepts = await repo.findAll();
-      expect(concepts).toHaveLength(1);
-      expect(concepts[0]?.label).toBe('machine learning');
+      expect(concepts).toHaveLength(2); // 1 + root concept
+      expect(concepts[1]?.label).toBe('machine learning');
     });
 
     it('should handle complex normalization with punctuation', async () => {
@@ -116,8 +143,8 @@ describe('Graph Stability & Error Handling', () => {
       await useCase.execute({ chunkContent: '...', chunkId: '1' });
 
       const concepts = await repo.findAll();
-      expect(concepts).toHaveLength(1);
-      expect(concepts[0]?.label).toBe('typescript');
+      expect(concepts).toHaveLength(2); // 1 + root concept
+      expect(concepts[1]?.label).toBe('typescript');
     });
   });
 
@@ -130,8 +157,8 @@ describe('Graph Stability & Error Handling', () => {
       await useCase.execute({ chunkContent: '...', chunkId: '1' });
 
       const concepts = await repo.findAll();
-      expect(concepts).toHaveLength(1);
-      expect(concepts[0]?.label).toBe('react');
+      expect(concepts).toHaveLength(2); // 1 + root concept
+      expect(concepts[1]?.label).toBe('react');
     });
 
     it('should repair trailing commas gracefully', async () => {
@@ -140,8 +167,8 @@ describe('Graph Stability & Error Handling', () => {
       await useCase.execute({ chunkContent: '...', chunkId: '1' });
 
       const concepts = await repo.findAll();
-      expect(concepts).toHaveLength(1);
-      expect(concepts[0]?.label).toBe('nestjs');
+      expect(concepts).toHaveLength(2); // 1 + root concept
+      expect(concepts[1]?.label).toBe('nestjs');
     });
   });
 
@@ -171,7 +198,7 @@ describe('Graph Stability & Error Handling', () => {
       await useCase.execute({ chunkContent: '...', chunkId: '1' });
 
       const concepts = await repo.findAll();
-      expect(concepts).toHaveLength(2);
+      expect(concepts).toHaveLength(3); // 2 + root concept
     });
   });
 });

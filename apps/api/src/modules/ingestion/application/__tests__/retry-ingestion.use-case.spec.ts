@@ -15,11 +15,18 @@ function createDocumentFixture(
 ): DocumentEntity {
   return {
     id: 'doc-1',
-    title: 'Test Document',
+    title: 'Title',
     sourceType: SOURCE_TYPE.URL,
     sourceUrl: 'https://example.com',
-    rawContent: 'content',
+    rawContent: 'Content',
     status: INGESTION_STATUS.FAILED,
+    learningStatus: 'UPCOMING',
+    type: 'ARTICLE',
+    author: null,
+    publisher: null,
+    publishedAt: null,
+    language: 'en',
+    addedByUserAt: new Date('2025-01-01T00:00:00Z'),
     createdAt: new Date('2025-01-01T00:00:00Z'),
     ...overrides,
   };
@@ -82,14 +89,21 @@ class FakeDocumentRepository implements DocumentRepository {
 class FakeIngestionJobProducer implements IngestionJobProducerPort {
   readonly enqueuedIds: string[] = [];
 
-  async enqueueUrlExtractionJob(_documentId: string): Promise<void> {}
-
-  async enqueueChunkingJob(documentId: string): Promise<void> {
-    this.enqueuedIds.push(documentId);
+  async enqueueUrlExtractionJob(_documentId: string): Promise<string> {
+    return 'mock-job-id';
   }
 
-  async enqueueEmbeddingJob(_documentId: string): Promise<void> {}
-  async enqueueConceptExtractionJob(_documentId: string): Promise<void> {}
+  async enqueueChunkingJob(documentId: string): Promise<string> {
+    this.enqueuedIds.push(documentId);
+    return 'mock-job-id';
+  }
+
+  async enqueueEmbeddingJob(_documentId: string): Promise<string> {
+    return 'mock-job-id';
+  }
+  async enqueueConceptExtractionJob(_documentId: string): Promise<string> {
+    return 'mock-job-id';
+  }
 }
 
 // ── Tests ──

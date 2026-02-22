@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import type {
   ReviewRepository,
@@ -14,12 +13,20 @@ export class PrismaReviewRepository implements ReviewRepository {
     id: string;
     documentId: string;
     lastReviewedAt: Date;
+    nextReviewDate: Date;
+    interval: number;
+    easeFactor: number;
+    repetitionCount: number;
     reviewScore: number;
   }): ReviewEntity {
     return {
       id: row.id,
       documentId: row.documentId,
       lastReviewedAt: row.lastReviewedAt,
+      nextReviewDate: row.nextReviewDate,
+      interval: row.interval,
+      easeFactor: row.easeFactor,
+      repetitionCount: row.repetitionCount,
       reviewScore: row.reviewScore,
     };
   }
@@ -33,27 +40,26 @@ export class PrismaReviewRepository implements ReviewRepository {
     return this.mapToDomain(row);
   }
 
-  async upsert(documentId: string, score: number): Promise<ReviewEntity> {
-    const existing = await this.prisma.review.findFirst({
-      where: { documentId },
-    });
-
-    if (existing) {
-      const row = await this.prisma.review.update({
-        where: { id: existing.id },
-        data: {
-          reviewScore: score,
-          lastReviewedAt: new Date(),
-        },
-      });
-      return this.mapToDomain(row);
-    }
-
-    const row = await this.prisma.review.create({
-      data: {
-        id: randomUUID(),
-        documentId,
-        reviewScore: score,
+  async save(review: ReviewEntity): Promise<ReviewEntity> {
+    const row = await this.prisma.review.upsert({
+      where: { id: review.id },
+      create: {
+        id: review.id,
+        documentId: review.documentId,
+        lastReviewedAt: review.lastReviewedAt,
+        nextReviewDate: review.nextReviewDate,
+        interval: review.interval,
+        easeFactor: review.easeFactor,
+        repetitionCount: review.repetitionCount,
+        reviewScore: review.reviewScore,
+      },
+      update: {
+        lastReviewedAt: review.lastReviewedAt,
+        nextReviewDate: review.nextReviewDate,
+        interval: review.interval,
+        easeFactor: review.easeFactor,
+        repetitionCount: review.repetitionCount,
+        reviewScore: review.reviewScore,
       },
     });
     return this.mapToDomain(row);
@@ -61,7 +67,12 @@ export class PrismaReviewRepository implements ReviewRepository {
 
   async findDueForReview(limit: number): Promise<ReviewEntity[]> {
     const rows = await this.prisma.review.findMany({
-      orderBy: { lastReviewedAt: 'asc' },
+      where: {
+        nextReviewDate: {
+          lte: new Date(),
+        },
+      },
+      orderBy: { nextReviewDate: 'asc' },
       take: limit,
     });
     return rows.map((r) => this.mapToDomain(r));
@@ -70,5 +81,19 @@ export class PrismaReviewRepository implements ReviewRepository {
   async findAll(): Promise<ReviewEntity[]> {
     const rows = await this.prisma.review.findMany();
     return rows.map((r) => this.mapToDomain(r));
+  }
+
+  async addLog(
+    documentId: string,
+    feedback: string,
+    chunkId?: string,
+  ): Promise<void> {
+    await this.prisma.reviewLog.create({
+      data: {
+        documentId,
+        feedback,
+        chunkId: chunkId || null,
+      },
+    });
   }
 }

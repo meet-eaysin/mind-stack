@@ -14,10 +14,21 @@ export class IngestUrlUseCase {
   async execute(input: {
     url: string;
     title?: string;
-  }): Promise<{ documentId: string }> {
+  }): Promise<{ documentId: string; jobId?: string }> {
     const existing = await this.documentRepository.findBySourceUrl(input.url);
     if (existing) {
-      return { documentId: existing.id };
+      if (
+        existing.status !== INGESTION_STATUS.FAILED &&
+        existing.status !== INGESTION_STATUS.READY
+      ) {
+        // Already in progress
+        return { documentId: existing.id };
+      }
+      // If it's FAILED or READY (and we are re-ingesting), we might want to allow it or return existing
+      // For now, let's just return existing if it's already finished successfully
+      if (existing.status === INGESTION_STATUS.READY) {
+        return { documentId: existing.id };
+      }
     }
 
     const document = createDocument({
@@ -30,8 +41,7 @@ export class IngestUrlUseCase {
     });
 
     const saved = await this.documentRepository.save(document);
-    await this.jobProducer.enqueueUrlExtractionJob(saved.id);
-
-    return { documentId: saved.id };
+    const jobId = await this.jobProducer.enqueueUrlExtractionJob(saved.id);
+    return { documentId: saved.id, jobId };
   }
 }

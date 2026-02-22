@@ -70,6 +70,11 @@ export const ExtractedConceptSchema = z
             RELATION_TYPE.DEPENDS_ON,
             RELATION_TYPE.SIMILAR_TO,
             RELATION_TYPE.LEADS_TO,
+            RELATION_TYPE.IS_PREREQUISITE_OF,
+            RELATION_TYPE.REFERENCES,
+            RELATION_TYPE.EXTENDS,
+            RELATION_TYPE.CONTRADICTS,
+            RELATION_TYPE.FOLLOW_UP_TO,
           ].includes(rel.type),
         ),
     };

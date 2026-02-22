@@ -12,6 +12,8 @@ import {
 import type {
   DocumentListResponse,
   DocumentDetailResponse,
+  LearningStatus,
+  DocumentType,
 } from '@repo/shared-types';
 import { ListDocumentsUseCase } from '../application/list-documents.use-case.js';
 import { ViewDocumentUseCase } from '../application/view-document.use-case.js';
@@ -60,6 +62,13 @@ export class KnowledgeController {
         sourceType: d.sourceType,
         sourceUrl: d.sourceUrl,
         status: d.status,
+        learningStatus: d.learningStatus,
+        type: d.type,
+        author: d.author,
+        publisher: d.publisher,
+        publishedAt: d.publishedAt ? d.publishedAt.toISOString() : null,
+        language: d.language,
+        addedByUserAt: d.addedByUserAt.toISOString(),
         chunkCount: d.chunkCount,
         createdAt: d.createdAt.toISOString(),
       })),
@@ -96,7 +105,27 @@ export class KnowledgeController {
     @Param('id') id: string,
     @Body() dto: UpdateDocumentDto,
   ): Promise<{ success: boolean }> {
-    await this.updateDocument.execute(id, dto);
+    const payload: {
+      title?: string;
+      sourceUrl?: string;
+      learningStatus?: LearningStatus;
+      type?: DocumentType;
+      author?: string;
+      publisher?: string;
+      publishedAt?: string;
+      language?: string;
+    } = {};
+    if (dto.title !== undefined) payload.title = dto.title;
+    if (dto.sourceUrl !== undefined) payload.sourceUrl = dto.sourceUrl;
+    if (dto.learningStatus !== undefined)
+      payload.learningStatus = dto.learningStatus;
+    if (dto.type !== undefined) payload.type = dto.type;
+    if (dto.author !== undefined) payload.author = dto.author;
+    if (dto.publisher !== undefined) payload.publisher = dto.publisher;
+    if (dto.publishedAt !== undefined) payload.publishedAt = dto.publishedAt;
+    if (dto.language !== undefined) payload.language = dto.language;
+
+    await this.updateDocument.execute(id, payload);
     return { success: true };
   }
 

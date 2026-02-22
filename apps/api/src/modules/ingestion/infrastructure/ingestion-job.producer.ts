@@ -14,24 +14,24 @@ export class IngestionJobProducer implements IngestionJobProducerPort {
     private readonly queue: Queue<IngestionJobData, void, JobType>,
   ) {}
 
-  async enqueueUrlExtractionJob(documentId: string): Promise<void> {
-    await this.addJob(JOB_TYPE.URL_EXTRACTION as JobType, { documentId });
+  async enqueueUrlExtractionJob(documentId: string): Promise<string> {
+    return this.addJob(JOB_TYPE.URL_EXTRACTION as JobType, { documentId });
   }
 
-  async enqueueChunkingJob(documentId: string): Promise<void> {
-    await this.addJob(JOB_TYPE.CHUNKING, { documentId });
+  async enqueueChunkingJob(documentId: string): Promise<string> {
+    return this.addJob(JOB_TYPE.CHUNKING, { documentId });
   }
 
-  async enqueueEmbeddingJob(documentId: string): Promise<void> {
-    await this.addJob(JOB_TYPE.EMBEDDING, { documentId });
+  async enqueueEmbeddingJob(documentId: string): Promise<string> {
+    return this.addJob(JOB_TYPE.EMBEDDING, { documentId });
   }
 
-  async enqueueConceptExtractionJob(documentId: string): Promise<void> {
-    await this.addJob(JOB_TYPE.CONCEPT_EXTRACTION, { documentId });
+  async enqueueConceptExtractionJob(documentId: string): Promise<string> {
+    return this.addJob(JOB_TYPE.CONCEPT_EXTRACTION, { documentId });
   }
 
-  private async addJob(type: JobType, data: IngestionJobData): Promise<void> {
-    await this.queue.add(type, data, {
+  private async addJob(type: JobType, data: IngestionJobData): Promise<string> {
+    const job = await this.queue.add(type, data, {
       attempts: 3,
       backoff: {
         type: 'exponential',
@@ -40,5 +40,19 @@ export class IngestionJobProducer implements IngestionJobProducerPort {
       removeOnComplete: true,
       removeOnFail: false,
     });
+    return job.id!;
+  }
+
+  async getJobStatus(jobId: string) {
+    const job = await this.queue.getJob(jobId);
+    if (!job) return null;
+
+    const state = await job.getState();
+    return {
+      jobId: job.id!,
+      state,
+      progress: job.progress,
+      reason: job.failedReason,
+    };
   }
 }

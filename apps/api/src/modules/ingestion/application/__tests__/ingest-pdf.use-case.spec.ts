@@ -62,13 +62,20 @@ class FakeDocumentRepository implements DocumentRepository {
 class FakeIngestionJobProducer implements IngestionJobProducerPort {
   readonly enqueuedIds: string[] = [];
 
-  async enqueueUrlExtractionJob(_documentId: string): Promise<void> {}
-  async enqueueChunkingJob(documentId: string): Promise<void> {
+  async enqueueUrlExtractionJob(_documentId: string): Promise<string> {
+    return 'mock-job-id';
+  }
+  async enqueueChunkingJob(documentId: string): Promise<string> {
     this.enqueuedIds.push(documentId);
+    return 'mock-job-id';
   }
 
-  async enqueueEmbeddingJob(_documentId: string): Promise<void> {}
-  async enqueueConceptExtractionJob(_documentId: string): Promise<void> {}
+  async enqueueEmbeddingJob(_documentId: string): Promise<string> {
+    return 'mock-job-id';
+  }
+  async enqueueConceptExtractionJob(_documentId: string): Promise<string> {
+    return 'mock-job-id';
+  }
 }
 
 // ── Tests ──

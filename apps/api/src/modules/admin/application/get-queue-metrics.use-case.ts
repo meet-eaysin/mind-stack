@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { type QueueMetricsResponse } from '@repo/shared-types';
 import { Queue } from 'bullmq';
 import { InjectQueue } from '@nestjs/bullmq';
 
@@ -8,12 +9,7 @@ export class GetQueueMetricsUseCase {
     @InjectQueue('ingestion') private readonly ingestionQueue: Queue,
   ) {}
 
-  async execute(): Promise<{
-    waiting: number;
-    active: number;
-    completed: number;
-    failed: number;
-  }> {
+  async execute(): Promise<QueueMetricsResponse> {
     const jobCounts = await this.ingestionQueue.getJobCounts(
       'wait',
       'active',

@@ -17,6 +17,10 @@ function createReviewFixture(
     id: 'review-1',
     documentId: 'doc-1',
     lastReviewedAt: new Date('2020-01-01T00:00:00Z'),
+    nextReviewDate: new Date('2020-01-01T00:00:00Z'),
+    interval: 0,
+    easeFactor: 2.5,
+    repetitionCount: 0,
     reviewScore: 0,
     ...overrides,
   };
@@ -37,30 +41,23 @@ class FakeReviewRepository implements ReviewRepository {
     );
   }
 
-  upsert(documentId: string, score: number): Promise<ReviewEntity> {
-    const existing = this.reviews.find((r) => r.documentId === documentId);
-    if (existing) {
-      existing.reviewScore = score;
-      existing.lastReviewedAt = new Date();
-      return Promise.resolve(existing);
-    }
-    const review: ReviewEntity = {
-      id: `review-${String(this.reviews.length + 1)}`,
-      documentId,
-      lastReviewedAt: new Date(),
-      reviewScore: score,
-    };
-    this.reviews.push(review);
+  save(review: ReviewEntity): Promise<ReviewEntity> {
+    const rest = this.reviews.filter((r) => r.id !== review.id);
+    this.reviews = [...rest, review];
     return Promise.resolve(review);
   }
 
   findDueForReview(_limit: number): Promise<ReviewEntity[]> {
-    return Promise.resolve([]);
+    return Promise.resolve(
+      this.reviews.filter((r) => r.nextReviewDate <= new Date()),
+    );
   }
 
   findAll(): Promise<ReviewEntity[]> {
     return Promise.resolve(this.reviews);
   }
+
+  async addLog(): Promise<void> {}
 }
 
 class FakeDocumentRepository implements Partial<DocumentRepository> {
@@ -109,14 +106,12 @@ describe('GenerateDailyReviewUseCase', () => {
       createReviewFixture({
         id: 'r1',
         documentId: 'doc-1',
-        lastReviewedAt: longAgo,
-        reviewScore: 0,
+        nextReviewDate: longAgo,
       }),
       createReviewFixture({
         id: 'r2',
         documentId: 'doc-2',
-        lastReviewedAt: longAgo,
-        reviewScore: 1,
+        nextReviewDate: longAgo,
       }),
     ]);
 
@@ -128,6 +123,7 @@ describe('GenerateDailyReviewUseCase', () => {
         sourceUrl: null,
         rawContent: 'Content about TypeScript',
         status: 'READY',
+        learningStatus: 'UPCOMING',
         createdAt: new Date('2025-01-01T00:00:00Z'),
       } as DocumentEntity,
       {
@@ -137,6 +133,7 @@ describe('GenerateDailyReviewUseCase', () => {
         sourceUrl: null,
         rawContent: 'Content about NestJS',
         status: 'READY',
+        learningStatus: 'UPCOMING',
         createdAt: new Date('2025-01-01T00:00:00Z'),
       } as DocumentEntity,
     ]);
@@ -157,8 +154,7 @@ describe('GenerateDailyReviewUseCase', () => {
     reviewRepository.seed([
       createReviewFixture({
         documentId: 'doc-1',
-        lastReviewedAt: new Date(),
-        reviewScore: 0,
+        nextReviewDate: new Date(Date.now() + 1000000),
       }),
     ]);
 

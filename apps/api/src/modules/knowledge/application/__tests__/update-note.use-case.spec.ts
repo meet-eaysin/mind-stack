@@ -1,4 +1,5 @@
 import { UpdateNoteUseCase } from '../update-note.use-case.js';
+import type { AnnotationType } from '@repo/shared-types';
 import type { NoteRepository } from '../../domain/note-repository.interface.js';
 import type { NoteEntity } from '../../domain/note.entity.js';
 
@@ -14,6 +15,7 @@ class FakeNoteRepository implements NoteRepository {
   createForDocument(
     documentId: string,
     content: string,
+    type?: AnnotationType,
     chunkId?: string,
     selectedText?: string,
     metadata?: Record<string, unknown>,
@@ -22,6 +24,7 @@ class FakeNoteRepository implements NoteRepository {
       id: `note-${String(this.notes.size + 1)}`,
       documentId,
       content,
+      type: type ?? 'NOTE',
       chunkId: chunkId ?? null,
       selectedText: selectedText ?? null,
       metadata: metadata ?? null,
@@ -65,6 +68,7 @@ describe('UpdateNoteUseCase', () => {
       id: 'note-1',
       documentId: 'doc-1',
       content: 'old content',
+      type: 'NOTE',
       chunkId: null,
       selectedText: null,
       metadata: null,

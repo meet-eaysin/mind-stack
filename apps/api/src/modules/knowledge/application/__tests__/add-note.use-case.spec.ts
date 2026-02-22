@@ -1,4 +1,5 @@
 import { AddNoteUseCase } from '../add-note.use-case.js';
+import type { AnnotationType } from '@repo/shared-types';
 import type { NoteRepository } from '../../domain/note-repository.interface.js';
 import type { NoteEntity } from '../../domain/note.entity.js';
 
@@ -9,6 +10,7 @@ class FakeNoteRepository implements NoteRepository {
   createForDocument(
     documentId: string,
     content: string,
+    type?: AnnotationType,
     chunkId?: string,
     selectedText?: string,
     metadata?: Record<string, unknown>,
@@ -18,6 +20,7 @@ class FakeNoteRepository implements NoteRepository {
       id: `note-${String(this.idCounter)}`,
       documentId,
       content,
+      type: type ?? 'NOTE',
       chunkId: chunkId ?? null,
       selectedText: selectedText ?? null,
       metadata: metadata ?? null,

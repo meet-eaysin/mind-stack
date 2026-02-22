@@ -1,8 +1,4 @@
-import {
-  type IngestionStatus,
-  INGESTION_STATUS,
-  SOURCE_TYPE,
-} from '@repo/shared-types';
+import { type IngestionStatus, INGESTION_STATUS } from '@repo/shared-types';
 import { IngestUrlUseCase } from '../ingest-url.use-case.js';
 import type { DocumentRepository } from '../../domain/document-repository.interface.js';
 import type { IngestionJobProducerPort } from '../../domain/ingestion-job-producer.port.js';
@@ -70,13 +66,20 @@ class FakeDocumentRepository implements DocumentRepository {
 class FakeIngestionJobProducer implements IngestionJobProducerPort {
   readonly enqueuedIds: string[] = [];
 
-  async enqueueUrlExtractionJob(documentId: string): Promise<void> {
+  async enqueueUrlExtractionJob(documentId: string): Promise<string> {
     this.enqueuedIds.push(documentId);
+    return 'mock-job-id';
   }
 
-  async enqueueChunkingJob(_documentId: string): Promise<void> {}
-  async enqueueEmbeddingJob(_documentId: string): Promise<void> {}
-  async enqueueConceptExtractionJob(_documentId: string): Promise<void> {}
+  async enqueueChunkingJob(_documentId: string): Promise<string> {
+    return 'mock-job-id';
+  }
+  async enqueueEmbeddingJob(_documentId: string): Promise<string> {
+    return 'mock-job-id';
+  }
+  async enqueueConceptExtractionJob(_documentId: string): Promise<string> {
+    return 'mock-job-id';
+  }
 }
 
 // ── Tests ──
@@ -117,16 +120,23 @@ describe('IngestUrlUseCase', () => {
   });
 
   it('should return existing documentId if URL is already ingested', async () => {
-    const existingDoc: DocumentEntity = {
-      id: 'existing-id',
-      title: 'Existing',
-      sourceType: SOURCE_TYPE.URL,
+    const doc: DocumentEntity = {
+      id: 'doc-1',
+      title: 'Title',
+      sourceType: 'URL',
       sourceUrl: 'https://example.com/already-here',
-      rawContent: 'content',
-      status: INGESTION_STATUS.READY,
+      rawContent: 'Content',
+      status: 'READY',
+      learningStatus: 'UPCOMING',
+      type: 'ARTICLE',
+      author: null,
+      publisher: null,
+      publishedAt: null,
+      language: 'en',
+      addedByUserAt: new Date(),
       createdAt: new Date(),
     };
-    documentRepository.saved.push(existingDoc);
+    documentRepository.saved.push(doc);
 
     const result = await useCase.execute({
       url: 'https://example.com/already-here',

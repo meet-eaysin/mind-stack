@@ -15,7 +15,6 @@ import {
 import { PrismaQueryRepository } from '../../src/modules/query/infrastructure/prisma-query.repository.js';
 import { PrismaReviewRepository } from '../../src/modules/review/infrastructure/prisma-review.repository.js';
 import type { DocumentEntity } from '../../src/modules/ingestion/domain/document.entity.js';
-import type { IngestionStatus, SourceType } from '@repo/shared-types';
 
 type MockNote = {
   id: string;
@@ -58,14 +57,21 @@ describe('Feature Flows (e2e)', () => {
     document: {
       create: jest
         .fn()
-        .mockImplementation((args: { data: Partial<DocumentEntity> }) => {
+        .mockImplementation((_args: { data: Partial<DocumentEntity> }) => {
           const doc: DocumentEntity = {
-            id: args.data.id || `doc-${Date.now()}`,
-            title: args.data.title || 'Untitled',
-            sourceType: args.data.sourceType || ('TEXT' as SourceType),
-            sourceUrl: args.data.sourceUrl || null,
-            rawContent: args.data.rawContent || '',
-            status: args.data.status || ('INGESTED' as IngestionStatus),
+            id: 'doc-1',
+            title: 'Test Doc',
+            sourceType: 'URL',
+            sourceUrl: 'https://example.com',
+            rawContent: 'Content',
+            status: 'READY',
+            learningStatus: 'UPCOMING',
+            type: 'ARTICLE',
+            author: null,
+            publisher: null,
+            publishedAt: null,
+            language: 'en',
+            addedByUserAt: new Date(),
             createdAt: new Date(),
           };
           documents.push(doc);

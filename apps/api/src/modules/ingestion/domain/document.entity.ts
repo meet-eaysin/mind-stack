@@ -1,4 +1,9 @@
-import type { SourceType, IngestionStatus } from '@repo/shared-types';
+import type {
+  SourceType,
+  IngestionStatus,
+  LearningStatus,
+  DocumentType,
+} from '@repo/shared-types';
 
 export type DocumentEntity = {
   id: string;
@@ -7,6 +12,13 @@ export type DocumentEntity = {
   sourceUrl: string | null;
   rawContent: string;
   status: IngestionStatus;
+  learningStatus: LearningStatus;
+  type: DocumentType;
+  author: string | null;
+  publisher: string | null;
+  publishedAt: Date | null;
+  language: string;
+  addedByUserAt: Date;
   createdAt: Date;
   deletedAt?: Date | null;
 };
@@ -18,6 +30,13 @@ export function createDocument(params: {
   sourceUrl: string | null;
   rawContent: string;
   status?: IngestionStatus;
+  learningStatus?: LearningStatus;
+  type?: DocumentType;
+  author?: string | null;
+  publisher?: string | null;
+  publishedAt?: Date | null;
+  language?: string;
+  addedByUserAt?: Date;
 }): DocumentEntity {
   return {
     id: params.id,
@@ -26,6 +45,13 @@ export function createDocument(params: {
     sourceUrl: params.sourceUrl,
     rawContent: params.rawContent,
     status: params.status ?? 'INGESTED',
+    learningStatus: params.learningStatus ?? 'UPCOMING',
+    type: params.type ?? 'OTHER',
+    author: params.author ?? null,
+    publisher: params.publisher ?? null,
+    publishedAt: params.publishedAt ?? null,
+    language: params.language ?? 'en',
+    addedByUserAt: params.addedByUserAt ?? new Date(),
     createdAt: new Date(),
     deletedAt: null,
   };

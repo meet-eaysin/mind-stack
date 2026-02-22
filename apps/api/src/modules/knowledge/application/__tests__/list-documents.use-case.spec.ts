@@ -17,6 +17,13 @@ function createDocumentFixture(
     sourceUrl: 'https://example.com',
     rawContent: 'raw',
     status: 'READY',
+    learningStatus: 'UPCOMING',
+    type: 'ARTICLE',
+    author: null,
+    publisher: null,
+    publishedAt: null,
+    language: 'en',
+    addedByUserAt: new Date('2025-01-01T00:00:00Z'),
     createdAt: new Date('2025-01-01T00:00:00Z'),
     ...overrides,
   };

@@ -19,11 +19,13 @@ const ApiErrorSchema = z.discriminatedUnion("type", [
   }),
 ]);
 
-export function isApiError(error: unknown): error is ApiError {
+export function isApiError(
+  error: object | null | undefined,
+): error is ApiError {
   return ApiErrorSchema.safeParse(error).success;
 }
 
-export function getApiErrorMessage(error: unknown): string {
+export function getApiErrorMessage(error: object | null | undefined): string {
   if (!isApiError(error)) return "An unknown error occurred";
   switch (error.type) {
     case "network":
@@ -62,36 +64,35 @@ async function handleResponse<T>(
     throw backendError;
   }
 
-  let data: unknown;
   try {
-    data = await response.json();
-  } catch {
+    const data = await response.json();
+    const result = schema.safeParse(data);
+
+    if (!result.success) {
+      const issues = result.error.issues.map((i) => i.message);
+      const validationError: ApiError = {
+        type: "validation",
+        issues,
+      };
+      throw validationError;
+    }
+
+    return result.data;
+  } catch (err) {
+    if (err && typeof err === "object" && isApiError(err)) throw err;
     const networkError: ApiError = {
       type: "network",
       message: "Failed to parse JSON response",
     };
     throw networkError;
   }
-
-  const result = schema.safeParse(data);
-
-  if (!result.success) {
-    const issues = result.error.issues.map((i) => i.message);
-    const validationError: ApiError = {
-      type: "validation",
-      issues,
-    };
-    throw validationError;
-  }
-
-  return result.data;
 }
 
 async function safeFetch(url: string, init?: RequestInit): Promise<Response> {
   try {
     const response = await fetch(url, init);
     return response;
-  } catch (err: unknown) {
+  } catch (err) {
     const message =
       err instanceof Error ? err.message : "Network request failed";
     const networkError: ApiError = { type: "network", message };

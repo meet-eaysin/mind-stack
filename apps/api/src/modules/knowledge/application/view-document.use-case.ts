@@ -44,6 +44,7 @@ export class ViewDocumentUseCase {
       notes: notesEntities.map((n) => ({
         id: n.id,
         content: n.content,
+        type: n.type,
         chunkId: n.chunkId ?? null,
         selectedText: n.selectedText ?? null,
         metadata: n.metadata ?? null,
@@ -51,6 +52,13 @@ export class ViewDocumentUseCase {
       })),
       importanceScore: importance,
       status: doc.status,
+      learningStatus: doc.learningStatus,
+      type: doc.type,
+      author: doc.author,
+      publisher: doc.publisher,
+      publishedAt: doc.publishedAt ? doc.publishedAt.toISOString() : null,
+      language: doc.language,
+      addedByUserAt: doc.addedByUserAt.toISOString(),
       createdAt: doc.createdAt.toISOString(),
     };
   }

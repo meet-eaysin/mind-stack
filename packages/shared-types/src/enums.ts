@@ -26,6 +26,11 @@ export const RELATION_TYPE = {
   DEPENDS_ON: "DEPENDS_ON",
   SIMILAR_TO: "SIMILAR_TO",
   LEADS_TO: "LEADS_TO",
+  IS_PREREQUISITE_OF: "IS_PREREQUISITE_OF",
+  REFERENCES: "REFERENCES",
+  EXTENDS: "EXTENDS",
+  CONTRADICTS: "CONTRADICTS",
+  FOLLOW_UP_TO: "FOLLOW_UP_TO",
 } as const;
 
 export type RelationType = (typeof RELATION_TYPE)[keyof typeof RELATION_TYPE];
@@ -39,3 +44,40 @@ export const JOB_TYPE = {
 } as const;
 
 export type JobType = (typeof JOB_TYPE)[keyof typeof JOB_TYPE];
+
+export const LEARNING_STATUS = {
+  TO_WATCH: "TO_WATCH",
+  TO_READ: "TO_READ",
+  UPCOMING: "UPCOMING",
+  IN_PROGRESS: "IN_PROGRESS",
+  REVIEW: "REVIEW",
+  COMPLETED: "COMPLETED",
+  PENDING_COMPLETION: "PENDING_COMPLETION",
+} as const;
+
+export type LearningStatus =
+  (typeof LEARNING_STATUS)[keyof typeof LEARNING_STATUS];
+
+export const DOCUMENT_TYPE = {
+  ARTICLE: "ARTICLE",
+  VIDEO: "VIDEO",
+  COURSE_LESSON: "COURSE_LESSON",
+  BOOK: "BOOK",
+  NOTE: "NOTE",
+  RFC: "RFC",
+  BLOG: "BLOG",
+  TRANSCRIPT: "TRANSCRIPT",
+  OTHER: "OTHER",
+} as const;
+
+export type DocumentType = (typeof DOCUMENT_TYPE)[keyof typeof DOCUMENT_TYPE];
+
+export const ANNOTATION_TYPE = {
+  HIGHLIGHT: "HIGHLIGHT",
+  NOTE: "NOTE",
+  QUESTION: "QUESTION",
+  INSIGHT: "INSIGHT",
+} as const;
+
+export type AnnotationType =
+  (typeof ANNOTATION_TYPE)[keyof typeof ANNOTATION_TYPE];

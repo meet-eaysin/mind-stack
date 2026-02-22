@@ -105,8 +105,37 @@ class FakeConceptRepository implements ConceptRepository {
   }
   findAssociatedChunks(
     _conceptId: string,
-  ): Promise<{ id: string; content: string; documentTitle: string }[]> {
+  ): Promise<
+    { id: string; content: string; documentTitle: string; documentId: string }[]
+  > {
     return Promise.resolve([]);
+  }
+
+  getRootConcept(): Promise<ConceptEntity> {
+    const rootId = 'root-user-brain';
+    const rootLabel = 'user brain';
+    let root = null;
+    for (const concept of this.concepts.values()) {
+      if (concept.id === rootId) root = concept;
+    }
+    if (!root) {
+      root = { id: rootId, label: rootLabel };
+      this.concepts.set(rootId, root);
+    }
+    return Promise.resolve(root);
+  }
+
+  detectCycle(
+    _fromId: string,
+    _toId: string,
+    _maxDepth?: number,
+  ): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
+  deleteRelation(relationId: string): Promise<void> {
+    this.relations = this.relations.filter((r) => r.id !== relationId);
+    return Promise.resolve();
   }
 }
 
@@ -141,7 +170,7 @@ describe('BuildGraphUseCase', () => {
     });
 
     const concepts = conceptRepository.getCreatedConcepts();
-    expect(concepts).toHaveLength(3);
+    expect(concepts).toHaveLength(4); // 3 original + 1 root concept ('user brain')
     const labels = concepts.map((c) => c.label);
     expect(labels).toContain('typescript');
     expect(labels).toContain('javascript');

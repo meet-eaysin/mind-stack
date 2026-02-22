@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { DocumentRepository } from '../domain/document-repository.interface.js';
 import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port.js';
 import { createDocument } from '../domain/document.entity.js';
-import { SOURCE_TYPE } from '@repo/shared-types';
+import { SOURCE_TYPE, INGESTION_STATUS } from '@repo/shared-types';
 
 export class IngestYoutubeUseCase {
   constructor(
@@ -13,10 +13,18 @@ export class IngestYoutubeUseCase {
   async execute(input: {
     url: string;
     title?: string;
-  }): Promise<{ documentId: string }> {
+  }): Promise<{ documentId: string; jobId?: string }> {
     const existing = await this.documentRepository.findBySourceUrl(input.url);
     if (existing) {
-      return { documentId: existing.id };
+      if (
+        existing.status !== INGESTION_STATUS.FAILED &&
+        existing.status !== INGESTION_STATUS.READY
+      ) {
+        return { documentId: existing.id };
+      }
+      if (existing.status === INGESTION_STATUS.READY) {
+        return { documentId: existing.id };
+      }
     }
 
     const videoId = this.extractVideoId(input.url);
@@ -31,9 +39,8 @@ export class IngestYoutubeUseCase {
     });
 
     const saved = await this.documentRepository.save(document);
-    await this.jobProducer.enqueueChunkingJob(saved.id);
-
-    return { documentId: saved.id };
+    const jobId = await this.jobProducer.enqueueChunkingJob(saved.id);
+    return { documentId: saved.id, jobId };
   }
 
   private extractVideoId(url: string): string {

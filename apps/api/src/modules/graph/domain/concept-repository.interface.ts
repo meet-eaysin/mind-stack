@@ -38,4 +38,11 @@ export type ConceptRepository = {
       documentTitle: string;
     }>
   >;
+  getRootConcept(): Promise<ConceptEntity>;
+  detectCycle(
+    fromId: string,
+    toId: string,
+    maxDepth?: number,
+  ): Promise<boolean>;
+  deleteRelation(relationId: string): Promise<void>;
 };

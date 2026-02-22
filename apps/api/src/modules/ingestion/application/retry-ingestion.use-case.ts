@@ -8,7 +8,7 @@ export class RetryIngestionUseCase {
     private readonly jobProducer: IngestionJobProducerPort,
   ) {}
 
-  async execute(documentId: string): Promise<void> {
+  async execute(documentId: string): Promise<{ jobId: string }> {
     const document = await this.documentRepository.findById(documentId);
     if (!document) {
       throw new Error(`Document not found: ${documentId}`);
@@ -22,6 +22,7 @@ export class RetryIngestionUseCase {
       documentId,
       INGESTION_STATUS.INGESTED,
     );
-    await this.jobProducer.enqueueChunkingJob(documentId);
+    const jobId = await this.jobProducer.enqueueChunkingJob(documentId);
+    return { jobId };
   }
 }
