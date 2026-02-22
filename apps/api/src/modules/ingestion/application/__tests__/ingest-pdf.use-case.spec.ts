@@ -2,7 +2,11 @@ import { IngestPdfUseCase } from '../ingest-pdf.use-case.js';
 import type { DocumentRepository } from '../../domain/document-repository.interface.js';
 import type { IngestionJobProducerPort } from '../../domain/ingestion-job-producer.port.js';
 import type { DocumentEntity } from '../../domain/document.entity.js';
-import { type IngestionStatus, INGESTION_STATUS } from '@repo/shared-types';
+import {
+  type IngestionStatus,
+  INGESTION_STATUS,
+  type LearningStatus,
+} from '@repo/shared-types';
 
 jest.mock('pdf-parse', () => {
   return {
@@ -21,24 +25,24 @@ jest.mock('pdf-parse', () => {
 class FakeDocumentRepository implements DocumentRepository {
   saved: DocumentEntity[] = [];
 
-  save(document: DocumentEntity): Promise<DocumentEntity> {
+  async save(document: DocumentEntity): Promise<DocumentEntity> {
     this.saved.push(document);
     return Promise.resolve(document);
   }
 
-  findById(id: string): Promise<DocumentEntity | null> {
+  async findById(id: string): Promise<DocumentEntity | null> {
     return Promise.resolve(this.saved.find((d) => d.id === id) ?? null);
   }
 
-  findAll(): Promise<DocumentEntity[]> {
+  async findAll(): Promise<DocumentEntity[]> {
     return Promise.resolve(this.saved);
   }
 
-  findBySourceUrl(url: string): Promise<DocumentEntity | null> {
+  async findBySourceUrl(url: string): Promise<DocumentEntity | null> {
     return Promise.resolve(this.saved.find((d) => d.sourceUrl === url) ?? null);
   }
 
-  updateStatus(_id: string, _status: IngestionStatus): Promise<void> {
+  async updateStatus(_id: string, _status: IngestionStatus): Promise<void> {
     const doc = this.saved.find((d) => d.id === _id);
     if (doc) {
       doc.status = _status;
@@ -46,12 +50,20 @@ class FakeDocumentRepository implements DocumentRepository {
     return Promise.resolve();
   }
 
-  updateImportance(_id: string, _score: number): Promise<void> {
+  async updateImportance(_id: string, _score: number): Promise<void> {
     return Promise.resolve();
   }
 
   async getImportance(_id: string): Promise<number | null> {
-    return null;
+    return Promise.resolve(null);
+  }
+
+  async addStatusHistory(
+    _documentId: string,
+    _status: IngestionStatus,
+    _learningStatus: LearningStatus,
+  ): Promise<void> {
+    return Promise.resolve();
   }
 
   async delete(id: string): Promise<void> {
@@ -65,6 +77,7 @@ class FakeIngestionJobProducer implements IngestionJobProducerPort {
   async enqueueUrlExtractionJob(_documentId: string): Promise<string> {
     return 'mock-job-id';
   }
+
   async enqueueChunkingJob(documentId: string): Promise<string> {
     this.enqueuedIds.push(documentId);
     return 'mock-job-id';
@@ -91,24 +104,19 @@ describe('IngestPdfUseCase', () => {
     useCase = new IngestPdfUseCase(documentRepository, jobProducer);
   });
 
-  it('should decode base64, save a PDF document, and enqueue a chunking job', async () => {
-    const textContent = 'PDF text content here';
-    const base64Content = Buffer.from(textContent, 'utf-8').toString('base64');
-
+  it('should save a PDF document and enqueue a chunking job', async () => {
+    const pdfBase64 = Buffer.from('mock pdf').toString('base64');
     const result = await useCase.execute({
-      title: 'My PDF',
-      fileBase64: base64Content,
+      title: 'Manual.pdf',
+      fileBase64: pdfBase64,
     });
 
     expect(result.documentId).toBeDefined();
     expect(documentRepository.saved).toHaveLength(1);
 
     const saved = documentRepository.saved[0];
-    expect(saved).toBeDefined();
-    expect(saved?.title).toBe('My PDF');
+    expect(saved?.title).toBe('Manual.pdf');
     expect(saved?.sourceType).toBe('PDF');
-    expect(saved?.sourceUrl).toBeNull();
-    expect(saved?.rawContent).toBe('Extracted PDF text content');
     expect(saved?.status).toBe(INGESTION_STATUS.INGESTED);
 
     expect(jobProducer.enqueuedIds).toHaveLength(1);

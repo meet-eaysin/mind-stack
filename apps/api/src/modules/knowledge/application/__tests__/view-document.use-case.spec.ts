@@ -7,7 +7,11 @@ import type { TagRepository } from '../../domain/tag-repository.interface.js';
 import type { TagEntity } from '../../domain/tag.entity.js';
 import type { NoteRepository } from '../../domain/note-repository.interface.js';
 import type { NoteEntity } from '../../domain/note.entity.js';
-import type { IngestionStatus, AnnotationType } from '@repo/shared-types';
+import {
+  type IngestionStatus,
+  type AnnotationType,
+  type LearningStatus,
+} from '@repo/shared-types';
 
 // ── Fixtures ──
 
@@ -29,6 +33,7 @@ function createDocumentFixture(
     language: 'en',
     addedByUserAt: new Date(),
     createdAt: new Date(),
+    deletedAt: null,
     ...overrides,
   };
 }
@@ -55,43 +60,58 @@ class FakeDocumentRepository implements DocumentRepository {
     this.documents.set(doc.id, doc);
   }
 
-  save(document: DocumentEntity): Promise<DocumentEntity> {
+  async save(document: DocumentEntity): Promise<DocumentEntity> {
     this.documents.set(document.id, document);
     return Promise.resolve(document);
   }
 
-  findById(id: string): Promise<DocumentEntity | null> {
-    return Promise.resolve(this.documents.get(id) ?? null);
+  async findById(id: string): Promise<DocumentEntity | null> {
+    const doc = this.documents.get(id);
+    return Promise.resolve(doc && !doc.deletedAt ? doc : null);
   }
 
-  findAll(): Promise<DocumentEntity[]> {
-    return Promise.resolve(Array.from(this.documents.values()));
-  }
-
-  findBySourceUrl(url: string): Promise<DocumentEntity | null> {
+  async findAll(): Promise<DocumentEntity[]> {
     return Promise.resolve(
-      Array.from(this.documents.values()).find((d) => d.sourceUrl === url) ??
-        null,
+      Array.from(this.documents.values()).filter((d) => !d.deletedAt),
     );
   }
 
-  updateStatus(id: string, status: IngestionStatus): Promise<void> {
+  async findBySourceUrl(url: string): Promise<DocumentEntity | null> {
+    return Promise.resolve(
+      Array.from(this.documents.values()).find(
+        (d) => d.sourceUrl === url && !d.deletedAt,
+      ) ?? null,
+    );
+  }
+
+  async updateStatus(id: string, status: IngestionStatus): Promise<void> {
     const doc = this.documents.get(id);
     if (doc) doc.status = status;
     return Promise.resolve();
   }
 
-  updateImportance(id: string, score: number): Promise<void> {
+  async updateImportance(id: string, score: number): Promise<void> {
     this.importance.set(id, score);
     return Promise.resolve();
   }
 
-  getImportance(id: string): Promise<number | null> {
+  async getImportance(id: string): Promise<number | null> {
     return Promise.resolve(this.importance.get(id) ?? null);
   }
 
   async delete(id: string): Promise<void> {
-    this.documents.delete(id);
+    const doc = this.documents.get(id);
+    if (doc) {
+      doc.deletedAt = new Date();
+    }
+  }
+
+  async addStatusHistory(
+    _documentId: string,
+    _status: IngestionStatus,
+    _learningStatus: LearningStatus,
+  ): Promise<void> {
+    return Promise.resolve();
   }
 }
 
@@ -102,7 +122,7 @@ class FakeChunkRepository implements ChunkRepository {
     this.chunksByDoc.set(documentId, chunks);
   }
 
-  findByDocumentId(documentId: string): Promise<ChunkEntity[]> {
+  async findByDocumentId(documentId: string): Promise<ChunkEntity[]> {
     return Promise.resolve(this.chunksByDoc.get(documentId) ?? []);
   }
 
@@ -129,19 +149,22 @@ class FakeTagRepository implements TagRepository {
     this.tagsByDoc.set(documentId, tags);
   }
 
-  findOrCreate(name: string): Promise<TagEntity> {
+  async findOrCreate(name: string): Promise<TagEntity> {
     return Promise.resolve({ id: `tag-${name}`, name });
   }
 
-  addTagToDocument(_documentId: string, _tagId: string): Promise<void> {
+  async addTagToDocument(_documentId: string, _tagId: string): Promise<void> {
     return Promise.resolve();
   }
 
-  removeTagFromDocument(_documentId: string, _tagName: string): Promise<void> {
+  async removeTagFromDocument(
+    _documentId: string,
+    _tagName: string,
+  ): Promise<void> {
     return Promise.resolve();
   }
 
-  findByDocumentId(documentId: string): Promise<TagEntity[]> {
+  async findByDocumentId(documentId: string): Promise<TagEntity[]> {
     return Promise.resolve(this.tagsByDoc.get(documentId) ?? []);
   }
 }
@@ -154,7 +177,7 @@ class FakeNoteRepository implements NoteRepository {
     this.notesByDoc.set(documentId, [...existing, note]);
   }
 
-  createForDocument(
+  async createForDocument(
     documentId: string,
     content: string,
     type?: AnnotationType,
@@ -177,7 +200,7 @@ class FakeNoteRepository implements NoteRepository {
     return Promise.resolve(note);
   }
 
-  update(noteId: string, content: string): Promise<NoteEntity> {
+  async update(noteId: string, content: string): Promise<NoteEntity> {
     for (const notes of this.notesByDoc.values()) {
       const note = notes.find((n) => n.id === noteId);
       if (note) {
@@ -188,7 +211,7 @@ class FakeNoteRepository implements NoteRepository {
     throw new Error(`Note not found: ${noteId}`);
   }
 
-  findManyByDocumentId(documentId: string): Promise<NoteEntity[]> {
+  async findManyByDocumentId(documentId: string): Promise<NoteEntity[]> {
     return Promise.resolve(this.notesByDoc.get(documentId) ?? []);
   }
 }
@@ -242,12 +265,13 @@ describe('ViewDocumentUseCase', () => {
 
     const result = await useCase.execute('doc-1');
 
-    expect(result.id).toBe('doc-1');
-    expect(result.title).toBe('Title');
-    expect(result.rawContent).toBe('Content');
+    expect(result.document.id).toBe('doc-1');
+    expect(result.document.title).toBe('Title');
+    expect(result.document.rawContent).toBe('Content');
     expect(result.chunks).toHaveLength(1);
     expect(result.chunks[0]?.content).toBe('First chunk');
-    expect(result.tags).toEqual(['test']);
+    expect(result.tags).toHaveLength(1);
+    expect(result.tags[0]?.name).toEqual('test');
     expect(result.notes).toHaveLength(1);
     expect(result.notes[0]?.content).toBe('a note');
     expect(result.importanceScore).toBe(3);

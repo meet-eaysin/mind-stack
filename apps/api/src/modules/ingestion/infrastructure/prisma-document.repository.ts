@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import type { DocumentRepository } from '../domain/document-repository.interface.js';
 import type { DocumentEntity } from '../domain/document.entity.js';
@@ -18,19 +19,23 @@ export class PrismaDocumentRepository implements DocumentRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   private isSourceType(value: string): value is SourceType {
-    return Object.values(SOURCE_TYPE).includes(value as SourceType);
+    const values: string[] = Object.values(SOURCE_TYPE);
+    return values.includes(value);
   }
 
   private isIngestionStatus(value: string): value is IngestionStatus {
-    return Object.values(INGESTION_STATUS).includes(value as IngestionStatus);
+    const values: string[] = Object.values(INGESTION_STATUS);
+    return values.includes(value);
   }
 
   private isLearningStatus(value: string): value is LearningStatus {
-    return Object.values(LEARNING_STATUS).includes(value as LearningStatus);
+    const values: string[] = Object.values(LEARNING_STATUS);
+    return values.includes(value);
   }
 
   private isDocumentType(value: string): value is DocumentType {
-    return Object.values(DOCUMENT_TYPE).includes(value as DocumentType);
+    const values: string[] = Object.values(DOCUMENT_TYPE);
+    return values.includes(value);
   }
 
   private mapToDomain(row: {
@@ -50,59 +55,44 @@ export class PrismaDocumentRepository implements DocumentRepository {
     createdAt: Date;
     deletedAt: Date | null;
   }): DocumentEntity {
-    const {
-      sourceType,
-      status,
-      learningStatus,
-      type,
-      id,
-      title,
-      sourceUrl,
-      rawContent,
-      author,
-      publisher,
-      publishedAt,
-      language,
-      addedByUserAt,
-      createdAt,
-      deletedAt,
-    } = row;
-
-    if (!this.isSourceType(sourceType)) {
-      throw new Error(`Invalid source type in database: ${sourceType}`);
+    if (!this.isSourceType(row.sourceType)) {
+      throw new Error(`Invalid source type in database: ${row.sourceType}`);
     }
-    if (!this.isIngestionStatus(status)) {
-      throw new Error(`Invalid ingestion status in database: ${status}`);
+    if (!this.isIngestionStatus(row.status)) {
+      throw new Error(`Invalid ingestion status in database: ${row.status}`);
     }
-    if (!this.isLearningStatus(learningStatus)) {
-      throw new Error(`Invalid learning status in database: ${learningStatus}`);
+    if (!this.isLearningStatus(row.learningStatus)) {
+      throw new Error(
+        `Invalid learning status in database: ${row.learningStatus}`,
+      );
     }
-    if (!this.isDocumentType(type)) {
-      throw new Error(`Invalid document type in database: ${type}`);
+    if (!this.isDocumentType(row.type)) {
+      throw new Error(`Invalid document type in database: ${row.type}`);
     }
 
     return {
-      id,
-      title,
-      sourceType,
-      sourceUrl,
-      rawContent,
-      status,
-      learningStatus,
-      type,
-      author,
-      publisher,
-      publishedAt,
-      language,
-      addedByUserAt,
-      createdAt,
-      deletedAt,
+      id: row.id,
+      title: row.title,
+      sourceType: row.sourceType,
+      sourceUrl: row.sourceUrl,
+      rawContent: row.rawContent,
+      status: row.status,
+      learningStatus: row.learningStatus,
+      type: row.type,
+      author: row.author,
+      publisher: row.publisher,
+      publishedAt: row.publishedAt,
+      language: row.language,
+      addedByUserAt: row.addedByUserAt,
+      createdAt: row.createdAt,
+      deletedAt: row.deletedAt,
     };
   }
 
   async save(document: DocumentEntity): Promise<DocumentEntity> {
-    const row = await this.prisma.document.create({
-      data: {
+    const row = await this.prisma.document.upsert({
+      where: { id: document.id },
+      create: {
         id: document.id,
         title: document.title,
         sourceType: document.sourceType,
@@ -116,6 +106,18 @@ export class PrismaDocumentRepository implements DocumentRepository {
         publishedAt: document.publishedAt,
         language: document.language,
         addedByUserAt: document.addedByUserAt,
+        deletedAt: document.deletedAt ?? null,
+      },
+      update: {
+        title: document.title,
+        sourceUrl: document.sourceUrl,
+        status: document.status,
+        learningStatus: document.learningStatus,
+        type: document.type,
+        author: document.author,
+        publisher: document.publisher,
+        publishedAt: document.publishedAt,
+        language: document.language,
         deletedAt: document.deletedAt ?? null,
       },
     });
@@ -176,6 +178,21 @@ export class PrismaDocumentRepository implements DocumentRepository {
     await this.prisma.document.update({
       where: { id },
       data: { deletedAt: new Date() },
+    });
+  }
+
+  async addStatusHistory(
+    documentId: string,
+    status: IngestionStatus,
+    learningStatus: LearningStatus,
+  ): Promise<void> {
+    await this.prisma.learningStatusHistory.create({
+      data: {
+        id: randomUUID(),
+        documentId,
+        status,
+        learningStatus,
+      },
     });
   }
 }

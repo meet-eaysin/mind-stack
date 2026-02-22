@@ -3,16 +3,14 @@ import type { AnnotationType } from '@repo/shared-types';
 import type { NoteRepository } from '../../domain/note-repository.interface.js';
 import type { NoteEntity } from '../../domain/note.entity.js';
 
-// ── Fakes ──
-
 class FakeNoteRepository implements NoteRepository {
-  private readonly notes: Map<string, NoteEntity> = new Map();
+  private readonly notes: NoteEntity[] = [];
 
   seed(note: NoteEntity): void {
-    this.notes.set(note.id, { ...note });
+    this.notes.push(note);
   }
 
-  createForDocument(
+  async createForDocument(
     documentId: string,
     content: string,
     type?: AnnotationType,
@@ -21,7 +19,7 @@ class FakeNoteRepository implements NoteRepository {
     metadata?: Record<string, unknown>,
   ): Promise<NoteEntity> {
     const note: NoteEntity = {
-      id: `note-${String(this.notes.size + 1)}`,
+      id: `new-note`,
       documentId,
       content,
       type: type ?? 'NOTE',
@@ -30,12 +28,12 @@ class FakeNoteRepository implements NoteRepository {
       metadata: metadata ?? null,
       createdAt: new Date(),
     };
-    this.notes.set(note.id, note);
+    this.notes.push(note);
     return Promise.resolve(note);
   }
 
-  update(noteId: string, content: string): Promise<NoteEntity> {
-    const note = this.notes.get(noteId);
+  async update(noteId: string, content: string): Promise<NoteEntity> {
+    const note = this.notes.find((n) => n.id === noteId);
     if (!note) {
       throw new Error(`Note not found: ${noteId}`);
     }
@@ -43,11 +41,9 @@ class FakeNoteRepository implements NoteRepository {
     return Promise.resolve(note);
   }
 
-  findManyByDocumentId(documentId: string): Promise<NoteEntity[]> {
+  async findManyByDocumentId(documentId: string): Promise<NoteEntity[]> {
     return Promise.resolve(
-      Array.from(this.notes.values()).filter(
-        (n) => n.documentId === documentId,
-      ),
+      this.notes.filter((n) => n.documentId === documentId),
     );
   }
 }
@@ -63,30 +59,30 @@ describe('UpdateNoteUseCase', () => {
     useCase = new UpdateNoteUseCase(noteRepository);
   });
 
-  it('should update the note content and return the updated entity', async () => {
+  it('should update the note content and return the NoteEntity', async () => {
     noteRepository.seed({
       id: 'note-1',
       documentId: 'doc-1',
-      content: 'old content',
+      content: 'Old content',
       type: 'NOTE',
       chunkId: null,
       selectedText: null,
       metadata: null,
-      createdAt: new Date('2025-01-01T00:00:00Z'),
+      createdAt: new Date(),
     });
 
     const result = await useCase.execute({
       noteId: 'note-1',
-      content: 'new content',
+      content: 'New content',
     });
 
     expect(result.id).toBe('note-1');
-    expect(result.content).toBe('new content');
+    expect(result.content).toBe('New content');
   });
 
   it('should throw when the note does not exist', async () => {
     await expect(
-      useCase.execute({ noteId: 'nonexistent', content: 'anything' }),
-    ).rejects.toThrow('Note not found: nonexistent');
+      useCase.execute({ noteId: 'missing', content: 'fail' }),
+    ).rejects.toThrow('Note not found: missing');
   });
 });

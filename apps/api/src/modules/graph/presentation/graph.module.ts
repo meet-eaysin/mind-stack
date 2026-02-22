@@ -4,6 +4,8 @@ import { PrismaConceptRepository } from '../infrastructure/prisma-concept.reposi
 import { BuildGraphUseCase } from '../application/build-graph.use-case.js';
 import { QueryGraphUseCase } from '../application/query-graph.use-case.js';
 import { GetNeighborhoodUseCase } from '../application/get-neighborhood.use-case.js';
+import { CreateRelationUseCase } from '../application/create-relation.use-case.js';
+import { DeleteRelationUseCase } from '../application/delete-relation.use-case.js';
 import { QueryModule } from '../../query/presentation/query.module.js';
 import type { LLMProvider } from '@repo/llm';
 
@@ -30,6 +32,18 @@ import { LLM_PROVIDER } from '../../../common/tokens.js';
       provide: GetNeighborhoodUseCase,
       useFactory: (conceptRepo: PrismaConceptRepository) =>
         new GetNeighborhoodUseCase(conceptRepo),
+      inject: [PrismaConceptRepository],
+    },
+    {
+      provide: CreateRelationUseCase,
+      useFactory: (conceptRepo: PrismaConceptRepository) =>
+        new CreateRelationUseCase(conceptRepo),
+      inject: [PrismaConceptRepository],
+    },
+    {
+      provide: DeleteRelationUseCase,
+      useFactory: (conceptRepo: PrismaConceptRepository) =>
+        new DeleteRelationUseCase(conceptRepo),
       inject: [PrismaConceptRepository],
     },
   ],

@@ -105,6 +105,7 @@ describe('selectChunksForReview', () => {
       type: 'UNREVIEWED' as const,
       documentId: 'd2',
       createdAt: new Date(),
+    deletedAt: null,
     };
 
     const result = selectChunksForReview(

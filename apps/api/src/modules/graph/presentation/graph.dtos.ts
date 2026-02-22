@@ -18,3 +18,14 @@ export class BuildGraphDto {
   @IsString()
   chunkId!: string;
 }
+
+export class CreateRelationDto {
+  @IsString()
+  fromId!: string;
+
+  @IsString()
+  toId!: string;
+
+  @IsString()
+  type!: string;
+}

@@ -80,6 +80,7 @@ describe('KnowledgeController (e2e)', () => {
             language: 'en',
             addedByUserAt: new Date(),
             createdAt: new Date(),
+    deletedAt: null,
             chunkCount: 5,
           },
         ],

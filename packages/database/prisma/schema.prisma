@@ -35,8 +35,20 @@ model Document {
   ReviewLog       ReviewLog[]
   collectionItems CollectionItem[]
   learningGoalItems LearningGoalItem[]
+  statusHistory     LearningStatusHistory[]
 
   @@map("documents")
+}
+
+model LearningStatusHistory {
+  id             String   @id @default(uuid())
+  document       Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId     String   @map("document_id")
+  status         String
+  learningStatus String   @map("learning_status")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("learning_status_history")
 }
 
 model Chunk {
@@ -97,6 +109,8 @@ model Annotation {
   
   type       String   @default("NOTE") // HIGHLIGHT, NOTE, QUESTION, INSIGHT
   content    String
+  selectedText String?  @map("selected_text")
+  metadata   Json?
   createdAt  DateTime @default(now()) @map("created_at")
 
   @@map("annotations")

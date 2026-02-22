@@ -24,6 +24,9 @@ export class UpdateDocumentUseCase {
       throw new NotFoundException(`Document with ID ${id} not found`);
     }
 
+    const oldLearningStatus = document.learningStatus;
+    const oldStatus = document.status;
+
     if (params.title !== undefined) {
       document.title = params.title;
     }
@@ -52,5 +55,16 @@ export class UpdateDocumentUseCase {
     }
 
     await this.documentRepository.save(document);
+
+    if (
+      document.learningStatus !== oldLearningStatus ||
+      document.status !== oldStatus
+    ) {
+      await this.documentRepository.addStatusHistory(
+        document.id,
+        document.status,
+        document.learningStatus,
+      );
+    }
   }
 }

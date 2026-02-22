@@ -7,7 +7,7 @@ class FakeNoteRepository implements NoteRepository {
   private readonly notes: NoteEntity[] = [];
   private idCounter = 0;
 
-  createForDocument(
+  async createForDocument(
     documentId: string,
     content: string,
     type?: AnnotationType,
@@ -30,7 +30,7 @@ class FakeNoteRepository implements NoteRepository {
     return Promise.resolve(note);
   }
 
-  update(noteId: string, content: string): Promise<NoteEntity> {
+  async update(noteId: string, content: string): Promise<NoteEntity> {
     const note = this.notes.find((n) => n.id === noteId);
     if (!note) {
       throw new Error(`Note not found: ${noteId}`);
@@ -39,7 +39,7 @@ class FakeNoteRepository implements NoteRepository {
     return Promise.resolve(note);
   }
 
-  findManyByDocumentId(documentId: string): Promise<NoteEntity[]> {
+  async findManyByDocumentId(documentId: string): Promise<NoteEntity[]> {
     return Promise.resolve(
       this.notes.filter((n) => n.documentId === documentId),
     );

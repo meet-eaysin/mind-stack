@@ -2,6 +2,7 @@ import {
   type IngestionStatus,
   INGESTION_STATUS,
   SOURCE_TYPE,
+  type LearningStatus,
 } from '@repo/shared-types';
 import { RetryIngestionUseCase } from '../retry-ingestion.use-case.js';
 import type { DocumentRepository } from '../../domain/document-repository.interface.js';
@@ -28,6 +29,7 @@ function createDocumentFixture(
     language: 'en',
     addedByUserAt: new Date('2025-01-01T00:00:00Z'),
     createdAt: new Date('2025-01-01T00:00:00Z'),
+    deletedAt: null,
     ...overrides,
   };
 }
@@ -41,27 +43,27 @@ class FakeDocumentRepository implements DocumentRepository {
     this.documents.set(doc.id, { ...doc });
   }
 
-  save(document: DocumentEntity): Promise<DocumentEntity> {
+  async save(document: DocumentEntity): Promise<DocumentEntity> {
     this.documents.set(document.id, document);
     return Promise.resolve(document);
   }
 
-  findById(id: string): Promise<DocumentEntity | null> {
+  async findById(id: string): Promise<DocumentEntity | null> {
     return Promise.resolve(this.documents.get(id) ?? null);
   }
 
-  findAll(): Promise<DocumentEntity[]> {
+  async findAll(): Promise<DocumentEntity[]> {
     return Promise.resolve(Array.from(this.documents.values()));
   }
 
-  findBySourceUrl(url: string): Promise<DocumentEntity | null> {
+  async findBySourceUrl(url: string): Promise<DocumentEntity | null> {
     return Promise.resolve(
       Array.from(this.documents.values()).find((d) => d.sourceUrl === url) ??
         null,
     );
   }
 
-  updateStatus(id: string, status: IngestionStatus): Promise<void> {
+  async updateStatus(id: string, status: IngestionStatus): Promise<void> {
     const doc = this.documents.get(id);
     if (doc) {
       doc.status = status;
@@ -69,12 +71,20 @@ class FakeDocumentRepository implements DocumentRepository {
     return Promise.resolve();
   }
 
-  updateImportance(_id: string, _score: number): Promise<void> {
+  async updateImportance(_id: string, _score: number): Promise<void> {
     return Promise.resolve();
   }
 
-  getImportance(_id: string): Promise<number | null> {
+  async getImportance(_id: string): Promise<number | null> {
     return Promise.resolve(null);
+  }
+
+  async addStatusHistory(
+    _documentId: string,
+    _status: IngestionStatus,
+    _learningStatus: LearningStatus,
+  ): Promise<void> {
+    return Promise.resolve();
   }
 
   async delete(id: string): Promise<void> {

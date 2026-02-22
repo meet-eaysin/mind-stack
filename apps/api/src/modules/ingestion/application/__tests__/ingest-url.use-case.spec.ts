@@ -1,4 +1,8 @@
-import { type IngestionStatus, INGESTION_STATUS } from '@repo/shared-types';
+import {
+  type IngestionStatus,
+  INGESTION_STATUS,
+  type LearningStatus,
+} from '@repo/shared-types';
 import { IngestUrlUseCase } from '../ingest-url.use-case.js';
 import type { DocumentRepository } from '../../domain/document-repository.interface.js';
 import type { IngestionJobProducerPort } from '../../domain/ingestion-job-producer.port.js';
@@ -24,24 +28,24 @@ jest.mock('@mozilla/readability', () => ({
 class FakeDocumentRepository implements DocumentRepository {
   saved: DocumentEntity[] = [];
 
-  save(document: DocumentEntity): Promise<DocumentEntity> {
+  async save(document: DocumentEntity): Promise<DocumentEntity> {
     this.saved.push(document);
     return Promise.resolve(document);
   }
 
-  findById(_id: string): Promise<DocumentEntity | null> {
+  async findById(_id: string): Promise<DocumentEntity | null> {
     return Promise.resolve(this.saved.find((d) => d.id === _id) ?? null);
   }
 
-  findAll(): Promise<DocumentEntity[]> {
+  async findAll(): Promise<DocumentEntity[]> {
     return Promise.resolve(this.saved);
   }
 
-  findBySourceUrl(url: string): Promise<DocumentEntity | null> {
+  async findBySourceUrl(url: string): Promise<DocumentEntity | null> {
     return Promise.resolve(this.saved.find((d) => d.sourceUrl === url) ?? null);
   }
 
-  updateStatus(_id: string, _status: IngestionStatus): Promise<void> {
+  async updateStatus(_id: string, _status: IngestionStatus): Promise<void> {
     const doc = this.saved.find((d) => d.id === _id);
     if (doc) {
       doc.status = _status;
@@ -49,12 +53,20 @@ class FakeDocumentRepository implements DocumentRepository {
     return Promise.resolve();
   }
 
-  updateImportance(_id: string, _score: number): Promise<void> {
+  async updateImportance(_id: string, _score: number): Promise<void> {
     return Promise.resolve();
   }
 
-  getImportance(_id: string): Promise<number | null> {
+  async getImportance(_id: string): Promise<number | null> {
     return Promise.resolve(null);
+  }
+
+  async addStatusHistory(
+    _documentId: string,
+    _status: IngestionStatus,
+    _learningStatus: LearningStatus,
+  ): Promise<void> {
+    return Promise.resolve();
   }
 
   async delete(id: string): Promise<void> {
@@ -135,6 +147,7 @@ describe('IngestUrlUseCase', () => {
       language: 'en',
       addedByUserAt: new Date(),
       createdAt: new Date(),
+      deletedAt: null,
     };
     documentRepository.saved.push(doc);
 

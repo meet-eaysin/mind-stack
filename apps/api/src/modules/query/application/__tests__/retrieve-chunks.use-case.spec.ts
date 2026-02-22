@@ -45,22 +45,30 @@ class FakeVectorStore implements VectorStore {
     this.results = results;
   }
 
-  upsert(_documents: VectorDocument[]): Promise<void> {
+  async getByIds(_ids: string[]): Promise<string[]> {
+    return [];
+  }
+
+  async getAllIds(): Promise<string[]> {
+    return [];
+  }
+
+  async upsert(_documents: VectorDocument[]): Promise<void> {
     return Promise.resolve();
   }
 
-  search(
+  async search(
     _embedding: number[],
     _options?: VectorSearchOptions,
   ): Promise<VectorSearchResult[]> {
     return Promise.resolve(this.results);
   }
 
-  delete(_ids: string[]): Promise<void> {
+  async delete(_ids: string[]): Promise<void> {
     return Promise.resolve();
   }
 
-  count(): Promise<number> {
+  async count(): Promise<number> {
     return Promise.resolve(this.results.length);
   }
 }

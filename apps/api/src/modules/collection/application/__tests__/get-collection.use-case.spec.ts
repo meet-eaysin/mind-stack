@@ -12,6 +12,7 @@ describe('GetCollectionUseCase', () => {
     description: 'Desc 1',
     goal: 'Goal 1',
     createdAt: new Date(),
+    deletedAt: null,
     updatedAt: new Date(),
     items: [
       {

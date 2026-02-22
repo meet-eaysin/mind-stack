@@ -1,40 +1,48 @@
 import { UpdateImportanceUseCase } from '../update-importance.use-case.js';
 import type { DocumentRepository } from '../../../ingestion/domain/document-repository.interface.js';
 import type { DocumentEntity } from '../../../ingestion/domain/document.entity.js';
-import type { IngestionStatus } from '@repo/shared-types';
+import { type IngestionStatus, type LearningStatus } from '@repo/shared-types';
 
 // ── Fakes ──
 
 class FakeDocumentRepository implements DocumentRepository {
   private readonly importance: Map<string, number> = new Map();
 
-  save(_document: DocumentEntity): Promise<DocumentEntity> {
+  async save(_document: DocumentEntity): Promise<DocumentEntity> {
     return Promise.resolve(_document);
   }
 
-  findById(_id: string): Promise<DocumentEntity | null> {
+  async findById(_id: string): Promise<DocumentEntity | null> {
     return Promise.resolve(null);
   }
 
-  findAll(): Promise<DocumentEntity[]> {
+  async findAll(): Promise<DocumentEntity[]> {
     return Promise.resolve([]);
   }
 
-  findBySourceUrl(_url: string): Promise<DocumentEntity | null> {
+  async findBySourceUrl(_url: string): Promise<DocumentEntity | null> {
     return Promise.resolve(null);
   }
 
-  updateStatus(_id: string, _status: IngestionStatus): Promise<void> {
+  async updateStatus(_id: string, _status: IngestionStatus): Promise<void> {
     return Promise.resolve();
   }
 
-  updateImportance(id: string, score: number): Promise<void> {
+  async updateImportance(id: string, score: number): Promise<void> {
     this.importance.set(id, score);
     return Promise.resolve();
   }
 
-  getImportance(id: string): Promise<number | null> {
+  async getImportance(id: string): Promise<number | null> {
     return Promise.resolve(this.importance.get(id) ?? null);
+  }
+
+  async addStatusHistory(
+    _documentId: string,
+    _status: IngestionStatus,
+    _learningStatus: LearningStatus,
+  ): Promise<void> {
+    return Promise.resolve();
   }
 
   async delete(_id: string): Promise<void> {

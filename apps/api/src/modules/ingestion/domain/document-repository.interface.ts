@@ -1,5 +1,5 @@
 import type { DocumentEntity } from './document.entity.js';
-import type { IngestionStatus } from '@repo/shared-types';
+import type { IngestionStatus, LearningStatus } from '@repo/shared-types';
 
 export type DocumentRepository = {
   save(document: DocumentEntity): Promise<DocumentEntity>;
@@ -10,4 +10,9 @@ export type DocumentRepository = {
   updateImportance(id: string, score: number): Promise<void>;
   getImportance(id: string): Promise<number | null>;
   delete(id: string): Promise<void>;
+  addStatusHistory(
+    documentId: string,
+    status: IngestionStatus,
+    learningStatus: LearningStatus,
+  ): Promise<void>;
 };

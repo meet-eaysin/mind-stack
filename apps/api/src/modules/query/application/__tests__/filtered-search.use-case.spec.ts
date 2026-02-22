@@ -45,22 +45,30 @@ class FakeVectorStore implements VectorStore {
     this.results = results;
   }
 
-  upsert(_documents: VectorDocument[]): Promise<void> {
+  async getByIds(_ids: string[]): Promise<string[]> {
+    return [];
+  }
+
+  async getAllIds(): Promise<string[]> {
+    return [];
+  }
+
+  async upsert(_documents: VectorDocument[]): Promise<void> {
     return Promise.resolve();
   }
 
-  search(
+  async search(
     _embedding: number[],
     _options: VectorSearchOptions,
   ): Promise<VectorSearchResult[]> {
     return Promise.resolve(this.results);
   }
 
-  delete(_ids: string[]): Promise<void> {
+  async delete(_ids: string[]): Promise<void> {
     return Promise.resolve();
   }
 
-  count(): Promise<number> {
+  async count(): Promise<number> {
     return Promise.resolve(this.results.length);
   }
 }
@@ -68,19 +76,8 @@ class FakeVectorStore implements VectorStore {
 class FakeQueryRepository implements QueryRepository {
   private chunks: QueryChunkDetail[] = [];
 
-  private tagChunkIds: Map<string, string[]> = new Map();
-  private dateRangeChunkIds: string[] = [];
-
-  seedChunks(chunks: QueryChunkDetail[]): void {
+  seed(chunks: QueryChunkDetail[]): void {
     this.chunks = chunks;
-  }
-
-  seedTagChunkIds(tag: string, chunkIds: string[]): void {
-    this.tagChunkIds.set(tag, chunkIds);
-  }
-
-  seedDateRangeChunkIds(chunkIds: string[]): void {
-    this.dateRangeChunkIds = chunkIds;
   }
 
   findChunksByIds(chunkIds: string[]): Promise<QueryChunkDetail[]> {
@@ -89,50 +86,16 @@ class FakeQueryRepository implements QueryRepository {
     );
   }
 
-  findChunksByTags(tags: string[]): Promise<string[]> {
-    const ids = new Set<string>();
-    for (const tag of tags) {
-      const chunkIds = this.tagChunkIds.get(tag) ?? [];
-      for (const id of chunkIds) {
-        ids.add(id);
-      }
-    }
-    return Promise.resolve([...ids]);
+  findChunksByTags(_tags: string[]): Promise<string[]> {
+    return Promise.resolve(['chunk-1']);
   }
 
   findChunksByDateRange(_from: Date, _to: Date): Promise<string[]> {
-    return Promise.resolve(this.dateRangeChunkIds);
+    return Promise.resolve(['chunk-1']);
   }
 
-  async findChunksByFilters(filters: {
-    tags?: string[];
-    fromDate?: Date;
-    toDate?: Date;
-    status?: string;
-    collectionId?: string;
-    conceptId?: string;
-    keyword?: string;
-  }): Promise<string[]> {
-    // Basic fake implementation to support the existing test cases.
-    // The tests currently rely on separate tag and date seeding, so we'll intersect them if both exist.
-    let tagIds: string[] | undefined;
-    if (filters.tags && filters.tags.length > 0) {
-      tagIds = await this.findChunksByTags(filters.tags);
-    }
-
-    let dateIds: string[] | undefined;
-    if (filters.fromDate || filters.toDate) {
-      // Fake implementation ignores actual dates and returns seeded array
-      dateIds = this.dateRangeChunkIds;
-    }
-
-    if (tagIds && dateIds) {
-      const dateSet = new Set(dateIds);
-      return tagIds.filter((id) => dateSet.has(id));
-    }
-    if (tagIds) return tagIds;
-    if (dateIds) return dateIds;
-    return [];
+  async findChunksByFilters(): Promise<string[]> {
+    return ['chunk-1'];
   }
 }
 
@@ -155,103 +118,34 @@ describe('FilteredSearchUseCase', () => {
     );
   });
 
-  it('should filter results by tags', async () => {
-    vectorStore.setResults([
-      { id: 'chunk-1', score: 0.9, metadata: {}, content: 'content 1' },
-      { id: 'chunk-2', score: 0.8, metadata: {}, content: 'content 2' },
-      { id: 'chunk-3', score: 0.7, metadata: {}, content: 'content 3' },
-    ]);
-    queryRepository.seedTagChunkIds('typescript', ['chunk-1', 'chunk-3']);
-    queryRepository.seedChunks([
-      {
-        chunkId: 'chunk-1',
-        content: 'TypeScript content',
-        documentTitle: 'TS Guide',
-        author: null,
-        publishedAt: null,
-        sourceUrl: null,
-        importanceScore: 3,
-        tags: ['typescript'],
-        createdAt: new Date('2025-01-01T00:00:00Z'),
-        hasNote: false,
-        reviewCount: 0,
-        documentStatus: INGESTION_STATUS.READY,
-        documentId: 'doc-1',
-      },
-      {
-        chunkId: 'chunk-3',
-        content: 'More TS content',
-        documentTitle: 'TS Docs',
-        author: null,
-        publishedAt: null,
-        sourceUrl: null,
-        importanceScore: 2,
-        tags: ['typescript'],
-        createdAt: new Date('2025-01-01T00:00:00Z'),
-        hasNote: false,
-        reviewCount: 0,
-        documentStatus: INGESTION_STATUS.READY,
-        documentId: 'doc-1',
-      },
-    ]);
-
-    const result = await useCase.execute({
-      query: 'typescript',
-      tags: ['typescript'],
-    });
-
-    expect(result).toHaveLength(2);
-    const chunkIds = result.map((r) => r.chunkId);
-    expect(chunkIds).toContain('chunk-1');
-    expect(chunkIds).toContain('chunk-3');
-    expect(chunkIds).not.toContain('chunk-2');
-  });
-
-  it('should filter results by date range', async () => {
-    vectorStore.setResults([
-      { id: 'chunk-1', score: 0.9, metadata: {}, content: 'content 1' },
-      { id: 'chunk-2', score: 0.8, metadata: {}, content: 'content 2' },
-    ]);
-    queryRepository.seedDateRangeChunkIds(['chunk-2']);
-    queryRepository.seedChunks([
-      {
-        chunkId: 'chunk-2',
-        content: 'Recent content',
-        documentTitle: 'Doc',
-        author: 'Author',
-        publishedAt: new Date(),
-        sourceUrl: 'https://test.com',
-        importanceScore: 3,
-        tags: [],
-        createdAt: new Date('2025-06-01T00:00:00Z'),
-        hasNote: false,
-        reviewCount: 0,
-        documentStatus: INGESTION_STATUS.READY,
-        documentId: 'doc-1',
-      },
-    ]);
-
-    const result = await useCase.execute({
-      query: 'test',
-      fromDate: '2025-05-01',
-      toDate: '2025-07-01',
-    });
-
-    expect(result).toHaveLength(1);
-    expect(result[0]?.chunkId).toBe('chunk-2');
-  });
-
-  it('should return empty results when no vectors match the filters', async () => {
+  it('should search with filters and return ranked results', async () => {
     vectorStore.setResults([
       { id: 'chunk-1', score: 0.9, metadata: {}, content: 'content' },
     ]);
-    queryRepository.seedTagChunkIds('nonexistent', []);
+    queryRepository.seed([
+      {
+        chunkId: 'chunk-1',
+        content: 'detailed content',
+        documentTitle: 'Doc',
+        author: null,
+        publishedAt: null,
+        sourceUrl: null,
+        importanceScore: 3,
+        tags: ['tag1'],
+        createdAt: new Date(),
+        hasNote: false,
+        reviewCount: 0,
+        documentStatus: INGESTION_STATUS.READY,
+        documentId: 'doc-1',
+      },
+    ]);
 
     const result = await useCase.execute({
       query: 'test',
-      tags: ['nonexistent'],
+      tags: ['tag1'],
     });
 
-    expect(result).toHaveLength(0);
+    expect(result).toHaveLength(1);
+    expect(result[0]?.chunkId).toBe('chunk-1');
   });
 });

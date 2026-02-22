@@ -12,6 +12,7 @@ describe('GetLearningGoalUseCase', () => {
     deadline: new Date(),
     progress: 50,
     createdAt: new Date(),
+    deletedAt: null,
     updatedAt: new Date(),
     items: [
       {

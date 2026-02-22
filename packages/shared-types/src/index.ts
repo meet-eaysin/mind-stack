@@ -29,6 +29,7 @@ export type {
   DocumentListResponse,
   ChunkResponse,
   DocumentDetailResponse,
+  NoteResponse,
   AddTagRequest,
   RemoveTagRequest,
   AddNoteRequest,

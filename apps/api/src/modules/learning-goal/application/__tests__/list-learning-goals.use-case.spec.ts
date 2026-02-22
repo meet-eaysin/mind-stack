@@ -13,6 +13,7 @@ describe('ListLearningGoalsUseCase', () => {
       progress: 50,
       itemCount: 2,
       createdAt: new Date(),
+    deletedAt: null,
       updatedAt: new Date(),
     },
   ];

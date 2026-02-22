@@ -2,22 +2,22 @@ import {
   Controller,
   Get,
   Post,
-  Put,
-  Patch,
   Delete,
   Body,
   Param,
   Query,
 } from '@nestjs/common';
 import type {
-  DocumentListResponse,
   DocumentDetailResponse,
-  LearningStatus,
-  DocumentType,
+  DocumentListResponse,
+  NoteResponse,
+  ChunkReference,
+  AnnotationType,
 } from '@repo/shared-types';
 import { ListDocumentsUseCase } from '../application/list-documents.use-case.js';
 import { ViewDocumentUseCase } from '../application/view-document.use-case.js';
 import { DeleteDocumentUseCase } from '../application/delete-document.use-case.js';
+import { GetRelatedSuggestionsUseCase } from '../application/get-related-suggestions.use-case.js';
 import { AddTagUseCase } from '../application/add-tag.use-case.js';
 import { RemoveTagUseCase } from '../application/remove-tag.use-case.js';
 import { AddNoteUseCase } from '../application/add-note.use-case.js';
@@ -33,6 +33,7 @@ import {
   PaginationQueryDto,
   UpdateDocumentDto,
 } from './knowledge.dtos.js';
+import type { NoteEntity } from '../domain/note.entity.js';
 
 @Controller('knowledge')
 export class KnowledgeController {
@@ -40,6 +41,7 @@ export class KnowledgeController {
     private readonly listDocuments: ListDocumentsUseCase,
     private readonly viewDocument: ViewDocumentUseCase,
     private readonly deleteDocument: DeleteDocumentUseCase,
+    private readonly getRelatedSuggestions: GetRelatedSuggestionsUseCase,
     private readonly addTag: AddTagUseCase,
     private readonly removeTag: RemoveTagUseCase,
     private readonly addNote: AddNoteUseCase,
@@ -47,6 +49,18 @@ export class KnowledgeController {
     private readonly updateImportance: UpdateImportanceUseCase,
     private readonly updateDocument: UpdateDocumentUseCase,
   ) {}
+
+  private mapNoteToResponse(note: NoteEntity): NoteResponse {
+    return {
+      id: note.id,
+      content: note.content,
+      type: note.type as AnnotationType,
+      chunkId: note.chunkId ?? null,
+      selectedText: note.selectedText ?? null,
+      metadata: note.metadata,
+      createdAt: note.createdAt.toISOString(),
+    };
+  }
 
   @Get('documents')
   async list(
@@ -78,89 +92,128 @@ export class KnowledgeController {
     };
   }
 
-  @Get('documents/:id')
-  async detail(
-    @Param('id') id: string,
-  ): Promise<{ document: DocumentDetailResponse }> {
-    const document = await this.viewDocument.execute(id);
-    return { document };
-  }
-
-  @Get('documents/:id/status')
-  async getStatus(@Param('id') id: string): Promise<{ status: string }> {
-    const document = await this.viewDocument.execute(id);
-    return {
-      status: document.status,
-    };
-  }
-
-  @Delete('documents/:id')
-  async remove(@Param('id') id: string): Promise<{ success: boolean }> {
-    await this.deleteDocument.execute(id);
-    return { success: true };
-  }
-
-  @Patch('documents/:id')
+  @Post('documents/:id')
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateDocumentDto,
   ): Promise<{ success: boolean }> {
-    const payload: {
-      title?: string;
-      sourceUrl?: string;
-      learningStatus?: LearningStatus;
-      type?: DocumentType;
-      author?: string;
-      publisher?: string;
-      publishedAt?: string;
-      language?: string;
-    } = {};
-    if (dto.title !== undefined) payload.title = dto.title;
-    if (dto.sourceUrl !== undefined) payload.sourceUrl = dto.sourceUrl;
-    if (dto.learningStatus !== undefined)
-      payload.learningStatus = dto.learningStatus;
-    if (dto.type !== undefined) payload.type = dto.type;
-    if (dto.author !== undefined) payload.author = dto.author;
-    if (dto.publisher !== undefined) payload.publisher = dto.publisher;
-    if (dto.publishedAt !== undefined) payload.publishedAt = dto.publishedAt;
-    if (dto.language !== undefined) payload.language = dto.language;
-
-    await this.updateDocument.execute(id, payload);
+    await this.updateDocument.execute(id, dto);
     return { success: true };
   }
 
-  @Post('tags')
-  async createTag(@Body() dto: AddTagDto): Promise<{ success: boolean }> {
-    await this.addTag.execute(dto);
+  @Get('documents/:id/details')
+  async details(@Param('id') id: string): Promise<DocumentDetailResponse> {
+    const result = await this.viewDocument.execute(id);
+    const { document, chunks, tags, notes, importanceScore } = result;
+
+    return {
+      id: document.id,
+      title: document.title,
+      sourceType: document.sourceType,
+      sourceUrl: document.sourceUrl,
+      rawContent: document.rawContent,
+      chunks: chunks.map((c) => ({
+        id: c.id,
+        content: c.content,
+        startOffset: c.startOffset,
+        endOffset: c.endOffset,
+        createdAt: c.createdAt.toISOString(),
+      })),
+      tags: tags.map((t) => t.name),
+      notes: notes.map((n) => this.mapNoteToResponse(n)),
+      importanceScore,
+      status: document.status,
+      learningStatus: document.learningStatus,
+      type: document.type,
+      author: document.author,
+      publisher: document.publisher,
+      publishedAt: document.publishedAt
+        ? document.publishedAt.toISOString()
+        : null,
+      language: document.language,
+      addedByUserAt: document.addedByUserAt.toISOString(),
+      createdAt: document.createdAt.toISOString(),
+    };
+  }
+
+  @Get('documents/:id/related')
+  async getRelated(@Param('id') id: string): Promise<ChunkReference[]> {
+    return this.getRelatedSuggestions.execute(id);
+  }
+
+  @Get('documents/:id/status')
+  async getStatus(@Param('id') id: string): Promise<{ status: string }> {
+    const result = await this.viewDocument.execute(id);
+    return { status: result.document.status };
+  }
+
+  @Delete('documents/:id')
+  async delete(@Param('id') id: string): Promise<{ success: boolean }> {
+    await this.deleteDocument.execute(id);
     return { success: true };
   }
 
-  @Delete('tags')
-  async deleteTag(@Body() dto: RemoveTagDto): Promise<{ success: boolean }> {
-    await this.removeTag.execute(dto);
+  @Get('documents/:id/notes')
+  async getNotes(@Param('id') id: string): Promise<NoteResponse[]> {
+    const result = await this.viewDocument.execute(id);
+    return result.notes.map((n) => this.mapNoteToResponse(n));
+  }
+
+  @Post('tags/add')
+  async addTagToDocument(
+    @Body() dto: AddTagDto,
+  ): Promise<{ success: boolean }> {
+    await this.addTag.execute({
+      documentId: dto.documentId,
+      tagName: dto.tagName,
+    });
     return { success: true };
   }
 
-  @Post('notes')
-  async createNote(@Body() dto: AddNoteDto): Promise<{ noteId: string }> {
-    const note = await this.addNote.execute(dto);
-    return { noteId: note.id };
+  @Post('tags/remove')
+  async removeTagFromDocument(
+    @Body() dto: RemoveTagDto,
+  ): Promise<{ success: boolean }> {
+    await this.removeTag.execute({
+      documentId: dto.documentId,
+      tagName: dto.tagName,
+    });
+    return { success: true };
   }
 
-  @Put('notes/:id')
-  async editNote(
+  @Post('notes/add')
+  async createNote(@Body() dto: AddNoteDto): Promise<NoteResponse> {
+    const note = await this.addNote.execute({
+      documentId: dto.documentId,
+      content: dto.content,
+      type: dto.type as AnnotationType | undefined,
+      chunkId: dto.chunkId,
+      selectedText: dto.selectedText,
+      metadata: dto.metadata,
+    });
+    return this.mapNoteToResponse(note);
+  }
+
+  @Post('notes/update/:id')
+  async updateExistingNote(
     @Param('id') id: string,
     @Body() dto: UpdateNoteDto,
-  ): Promise<{ success: boolean }> {
-    await this.updateNote.execute({ noteId: id, content: dto.content });
-    return { success: true };
+  ): Promise<NoteResponse> {
+    const note = await this.updateNote.execute({
+      noteId: id,
+      content: dto.content,
+    });
+    return this.mapNoteToResponse(note);
   }
 
   @Post('importance')
-  async setImportance(
+  async updateDocumentImportance(
     @Body() dto: UpdateImportanceDto,
   ): Promise<{ success: boolean }> {
-    await this.updateImportance.execute(dto);
+    await this.updateImportance.execute({
+      documentId: dto.documentId,
+      score: dto.score,
+    });
     return { success: true };
   }
 }

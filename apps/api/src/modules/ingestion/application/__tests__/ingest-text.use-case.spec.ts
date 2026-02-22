@@ -2,31 +2,35 @@ import { IngestTextUseCase } from '../ingest-text.use-case.js';
 import type { DocumentRepository } from '../../domain/document-repository.interface.js';
 import type { IngestionJobProducerPort } from '../../domain/ingestion-job-producer.port.js';
 import type { DocumentEntity } from '../../domain/document.entity.js';
-import { type IngestionStatus, INGESTION_STATUS } from '@repo/shared-types';
+import {
+  type IngestionStatus,
+  INGESTION_STATUS,
+  type LearningStatus,
+} from '@repo/shared-types';
 
 // ── Fakes ──
 
 class FakeDocumentRepository implements DocumentRepository {
   saved: DocumentEntity[] = [];
 
-  save(document: DocumentEntity): Promise<DocumentEntity> {
+  async save(document: DocumentEntity): Promise<DocumentEntity> {
     this.saved.push(document);
     return Promise.resolve(document);
   }
 
-  findById(id: string): Promise<DocumentEntity | null> {
+  async findById(id: string): Promise<DocumentEntity | null> {
     return Promise.resolve(this.saved.find((d) => d.id === id) ?? null);
   }
 
-  findAll(): Promise<DocumentEntity[]> {
+  async findAll(): Promise<DocumentEntity[]> {
     return Promise.resolve(this.saved);
   }
 
-  findBySourceUrl(url: string): Promise<DocumentEntity | null> {
+  async findBySourceUrl(url: string): Promise<DocumentEntity | null> {
     return Promise.resolve(this.saved.find((d) => d.sourceUrl === url) ?? null);
   }
 
-  updateStatus(_id: string, _status: IngestionStatus): Promise<void> {
+  async updateStatus(_id: string, _status: IngestionStatus): Promise<void> {
     const doc = this.saved.find((d) => d.id === _id);
     if (doc) {
       doc.status = _status;
@@ -34,12 +38,20 @@ class FakeDocumentRepository implements DocumentRepository {
     return Promise.resolve();
   }
 
-  updateImportance(_id: string, _score: number): Promise<void> {
+  async updateImportance(_id: string, _score: number): Promise<void> {
     return Promise.resolve();
   }
 
-  getImportance(_id: string): Promise<number | null> {
+  async getImportance(_id: string): Promise<number | null> {
     return Promise.resolve(null);
+  }
+
+  async addStatusHistory(
+    _documentId: string,
+    _status: IngestionStatus,
+    _learningStatus: LearningStatus,
+  ): Promise<void> {
+    return Promise.resolve();
   }
 
   async delete(id: string): Promise<void> {

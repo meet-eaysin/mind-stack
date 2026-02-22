@@ -19,7 +19,10 @@ export class DeleteDocumentUseCase {
       await this.vectorStore.delete(chunkIds);
     }
 
-    // 3. Delete document from database (cascades down to chunks, notes, tags)
+    // 3. Delete chunks from database
+    await this.chunkRepository.deleteByDocumentId(documentId);
+
+    // 4. Delete document from database (soft delete)
     await this.documentRepository.delete(documentId);
   }
 }

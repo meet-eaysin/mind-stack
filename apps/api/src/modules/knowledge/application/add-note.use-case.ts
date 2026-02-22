@@ -8,18 +8,18 @@ export class AddNoteUseCase {
   async execute(input: {
     documentId: string;
     content: string;
-    type?: string;
-    chunkId?: string;
-    selectedText?: string;
-    metadata?: Record<string, unknown>;
+    type?: AnnotationType | undefined;
+    chunkId?: string | null | undefined;
+    selectedText?: string | null | undefined;
+    metadata?: Record<string, unknown> | null | undefined;
   }): Promise<NoteEntity> {
     return this.noteRepository.createForDocument(
       input.documentId,
       input.content,
-      input.type as AnnotationType | undefined,
-      input.chunkId,
-      input.selectedText,
-      input.metadata,
+      input.type ?? undefined,
+      input.chunkId ?? undefined,
+      input.selectedText ?? undefined,
+      input.metadata ?? undefined,
     );
   }
 }
