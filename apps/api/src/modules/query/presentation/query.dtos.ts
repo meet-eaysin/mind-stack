@@ -36,6 +36,22 @@ export class FilteredSearchDto {
   toDate?: string;
 
   @IsOptional()
+  @IsString()
+  status?: string;
+
+  @IsOptional()
+  @IsString()
+  collectionId?: string;
+
+  @IsOptional()
+  @IsString()
+  conceptId?: string;
+
+  @IsOptional()
+  @IsString()
+  keyword?: string;
+
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(50)

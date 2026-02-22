@@ -10,3 +10,6 @@ export type ChunkReference = z.infer<typeof schemas.ChunkReferenceSchema>;
 export type NotionBlock = z.infer<typeof schemas.NotionBlockSchema>;
 
 export type SuccessResponse = z.infer<typeof schemas.SuccessResponseSchema>;
+export type DocumentSearchResult = z.infer<
+  typeof schemas.DocumentSearchResultSchema
+>;

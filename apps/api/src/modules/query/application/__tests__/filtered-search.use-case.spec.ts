@@ -103,6 +103,37 @@ class FakeQueryRepository implements QueryRepository {
   findChunksByDateRange(_from: Date, _to: Date): Promise<string[]> {
     return Promise.resolve(this.dateRangeChunkIds);
   }
+
+  async findChunksByFilters(filters: {
+    tags?: string[];
+    fromDate?: Date;
+    toDate?: Date;
+    status?: string;
+    collectionId?: string;
+    conceptId?: string;
+    keyword?: string;
+  }): Promise<string[]> {
+    // Basic fake implementation to support the existing test cases.
+    // The tests currently rely on separate tag and date seeding, so we'll intersect them if both exist.
+    let tagIds: string[] | undefined;
+    if (filters.tags && filters.tags.length > 0) {
+      tagIds = await this.findChunksByTags(filters.tags);
+    }
+
+    let dateIds: string[] | undefined;
+    if (filters.fromDate || filters.toDate) {
+      // Fake implementation ignores actual dates and returns seeded array
+      dateIds = this.dateRangeChunkIds;
+    }
+
+    if (tagIds && dateIds) {
+      const dateSet = new Set(dateIds);
+      return tagIds.filter((id) => dateSet.has(id));
+    }
+    if (tagIds) return tagIds;
+    if (dateIds) return dateIds;
+    return [];
+  }
 }
 
 // ── Tests ──
@@ -145,6 +176,7 @@ describe('FilteredSearchUseCase', () => {
         hasNote: false,
         reviewCount: 0,
         documentStatus: INGESTION_STATUS.READY,
+        documentId: 'doc-1',
       },
       {
         chunkId: 'chunk-3',
@@ -159,6 +191,7 @@ describe('FilteredSearchUseCase', () => {
         hasNote: false,
         reviewCount: 0,
         documentStatus: INGESTION_STATUS.READY,
+        documentId: 'doc-1',
       },
     ]);
 
@@ -194,6 +227,7 @@ describe('FilteredSearchUseCase', () => {
         hasNote: false,
         reviewCount: 0,
         documentStatus: INGESTION_STATUS.READY,
+        documentId: 'doc-1',
       },
     ]);
 

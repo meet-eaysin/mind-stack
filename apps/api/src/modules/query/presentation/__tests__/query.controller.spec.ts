@@ -57,7 +57,7 @@ describe('QueryController (e2e)', () => {
         .send({ query: 'hello', topK: 5 });
 
       expect(response.status).toBe(201); // NestJS default for POST is 201
-      expect(response.body.chunks).toHaveLength(1);
+      expect(response.body.documents).toHaveLength(1);
     });
 
     it('should return 400 when topK is too large', async () => {

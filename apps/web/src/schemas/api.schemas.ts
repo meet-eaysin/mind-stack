@@ -84,3 +84,21 @@ export const NotionBlockSchema = z.object({
   content: z.string(),
   metadata: z.record(z.string(), z.string()),
 });
+
+export const DocumentSearchResultSchema = z.object({
+  documentId: z.string(),
+  title: z.string(),
+  author: z.string().optional(),
+  publishedAt: z.string().optional(),
+  sourceUrl: z.string().nullable().optional(),
+  score: z.number(),
+  tags: z.array(z.string()),
+  hasNote: z.boolean(),
+  matchingChunks: z.array(
+    z.object({
+      chunkId: z.string(),
+      content: z.string(),
+      score: z.number(),
+    }),
+  ),
+});

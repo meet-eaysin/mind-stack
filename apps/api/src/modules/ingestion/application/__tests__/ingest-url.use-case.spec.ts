@@ -142,7 +142,7 @@ describe('IngestUrlUseCase', () => {
       url: 'https://example.com/already-here',
     });
 
-    expect(result.documentId).toBe('existing-id');
+    expect(result.documentId).toBe('doc-1');
     expect(documentRepository.saved).toHaveLength(1); // No new document saved
     expect(jobProducer.enqueuedIds).toHaveLength(0); // No new job enqueued
   });

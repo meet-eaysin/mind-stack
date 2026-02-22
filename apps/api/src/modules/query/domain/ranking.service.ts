@@ -10,6 +10,7 @@ const RECENCY_HALF_LIFE_DAYS = 30;
 export function rankResults(
   results: Array<{
     chunkId: string;
+    documentId: string;
     content: string;
     documentTitle: string;
     vectorScore: number;
@@ -60,6 +61,7 @@ export function rankResults(
         finalScore,
         tags: r.tags,
         hasNote: r.hasNote,
+        documentId: r.documentId,
       };
     })
     .sort((a, b) => b.finalScore - a.finalScore);

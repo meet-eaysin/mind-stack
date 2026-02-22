@@ -9,8 +9,10 @@ import { IngestTextUseCase } from '../../application/ingest-text.use-case.js';
 import { IngestPdfUseCase } from '../../application/ingest-pdf.use-case.js';
 import { IngestYoutubeUseCase } from '../../application/ingest-youtube.use-case.js';
 import { RetryIngestionUseCase } from '../../application/retry-ingestion.use-case.js';
+import { GetIngestionJobStatusUseCase } from '../../application/get-ingestion-job-status.use-case.js';
 import { ConfigService } from '@nestjs/config';
 import { INGESTION_STATUS } from '@repo/shared-types';
+import { PrismaDocumentRepository } from '../../infrastructure/prisma-document.repository.js';
 
 jest.mock('jsdom', () => ({
   JSDOM: jest.fn().mockImplementation(() => ({
@@ -35,7 +37,9 @@ describe('IngestionController (e2e)', () => {
   const mockIngestPdf = { execute: jest.fn() };
   const mockIngestYoutube = { execute: jest.fn() };
   const mockRetryIngestion = { execute: jest.fn() };
+  const mockGetJobStatus = { execute: jest.fn() };
   const mockConfigService = { get: jest.fn().mockReturnValue(null) }; // No API key by default
+  const mockDocumentRepository = { findById: jest.fn() };
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -46,7 +50,9 @@ describe('IngestionController (e2e)', () => {
         { provide: IngestPdfUseCase, useValue: mockIngestPdf },
         { provide: IngestYoutubeUseCase, useValue: mockIngestYoutube },
         { provide: RetryIngestionUseCase, useValue: mockRetryIngestion },
+        { provide: GetIngestionJobStatusUseCase, useValue: mockGetJobStatus },
         { provide: ConfigService, useValue: mockConfigService },
+        { provide: PrismaDocumentRepository, useValue: mockDocumentRepository },
       ],
     }).compile();
 
@@ -145,7 +151,7 @@ describe('IngestionController (e2e)', () => {
 
   describe('POST /ingest/retry/:documentId', () => {
     it('should return 201 when retrying a valid documentId', async () => {
-      mockRetryIngestion.execute.mockResolvedValue(undefined);
+      mockRetryIngestion.execute.mockResolvedValue({ jobId: 'job-123' });
       const response: SupertestResponse = await request(app.getHttpServer())
         .post('/ingest/retry/doc-123')
         .send();

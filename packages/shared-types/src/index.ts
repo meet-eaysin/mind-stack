@@ -38,6 +38,7 @@ export type {
   FilteredSearchRequest,
   AskQuestionRequest,
   ChunkReference,
+  DocumentSearchResult,
   SearchResponse,
   AskQuestionResponse,
   StreamingAskResponseChunk,

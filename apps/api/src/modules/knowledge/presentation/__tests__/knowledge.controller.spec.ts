@@ -66,7 +66,22 @@ describe('KnowledgeController (e2e)', () => {
     it('should return 200 with paginated documents', async () => {
       mockListDocuments.execute.mockResolvedValue({
         documents: [
-          { id: '1', title: 'Doc 1', createdAt: new Date(), chunkCount: 5 },
+          {
+            id: '1',
+            title: 'Doc 1',
+            sourceType: 'URL',
+            sourceUrl: 'https://example.com',
+            status: 'READY',
+            learningStatus: 'UPCOMING',
+            type: 'ARTICLE',
+            author: 'Author',
+            publisher: 'Publisher',
+            publishedAt: new Date(),
+            language: 'en',
+            addedByUserAt: new Date(),
+            createdAt: new Date(),
+            chunkCount: 5,
+          },
         ],
         total: 1,
       });
@@ -93,6 +108,20 @@ describe('KnowledgeController (e2e)', () => {
       mockViewDocument.execute.mockResolvedValue({
         id: 'doc-1',
         title: 'Test',
+        sourceType: 'URL',
+        sourceUrl: 'https://example.com',
+        status: 'READY',
+        learningStatus: 'UPCOMING',
+        type: 'ARTICLE',
+        author: 'Author',
+        publisher: 'Publisher',
+        publishedAt: new Date().toISOString(),
+        language: 'en',
+        rawContent: 'Content',
+        chunks: [],
+        tags: [],
+        importance: 3,
+        createdAt: new Date().toISOString(),
       });
       const response = await request(app.getHttpServer()).get(
         '/knowledge/documents/doc-1',

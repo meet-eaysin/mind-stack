@@ -192,6 +192,7 @@ export type AskQuestionRequest = {
 
 export type ChunkReference = {
   chunkId: string;
+  documentId: string;
   content: string;
   documentTitle: string;
   author?: string | undefined;
@@ -202,8 +203,24 @@ export type ChunkReference = {
   hasNote: boolean;
 };
 
+export type DocumentSearchResult = {
+  documentId: string;
+  title: string;
+  author?: string | undefined;
+  publishedAt?: string | undefined;
+  sourceUrl?: string | null;
+  score: number;
+  tags: string[];
+  hasNote: boolean;
+  matchingChunks: {
+    chunkId: string;
+    content: string;
+    score: number;
+  }[];
+};
+
 export type SearchResponse = {
-  chunks: ChunkReference[];
+  documents: DocumentSearchResult[];
 };
 
 export type AskQuestionResponse = {

@@ -9,6 +9,8 @@ import {
   CalendarCheck,
   Network,
   Folder,
+  Activity,
+  TrendingUp,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -20,6 +22,8 @@ const navItems = [
   { href: "/collections", label: "Collections", icon: Folder },
   { href: "/review", label: "Review", icon: CalendarCheck },
   { href: "/graph", label: "Graph", icon: Network },
+  { href: "/health", label: "Health", icon: Activity },
+  { href: "/productivity", label: "Productivity", icon: TrendingUp },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {

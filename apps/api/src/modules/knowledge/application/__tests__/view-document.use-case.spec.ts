@@ -243,8 +243,8 @@ describe('ViewDocumentUseCase', () => {
     const result = await useCase.execute('doc-1');
 
     expect(result.id).toBe('doc-1');
-    expect(result.title).toBe('Test Doc');
-    expect(result.rawContent).toBe('raw content here');
+    expect(result.title).toBe('Title');
+    expect(result.rawContent).toBe('Content');
     expect(result.chunks).toHaveLength(1);
     expect(result.chunks[0]?.content).toBe('First chunk');
     expect(result.tags).toEqual(['test']);

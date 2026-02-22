@@ -9,15 +9,20 @@ export const handlers = [
   http.post("*/query/search", async ({ request }) => {
     SemanticSearchRequestSchema.parse(await request.json());
     return HttpResponse.json({
-      chunks: [
+      documents: [
         {
-          chunkId: "c1",
           documentId: "d1",
-          documentTitle: "Test Documents",
-          content: "This is a result chunk.",
+          title: "Test Documents",
           score: 0.95,
           tags: ["tag1"],
           hasNote: false,
+          matchingChunks: [
+            {
+              chunkId: "c1",
+              content: "This is a result chunk.",
+              score: 0.95,
+            },
+          ],
         },
       ],
     });

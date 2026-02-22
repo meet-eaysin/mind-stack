@@ -4,7 +4,7 @@ import type {
   QueryRepository,
   QueryChunkDetail,
 } from '../domain/query-repository.interface.js';
-import type { DocumentTag } from '@prisma/client';
+import type { DocumentTag, Prisma } from '@prisma/client';
 
 @Injectable()
 export class PrismaQueryRepository implements QueryRepository {
@@ -42,6 +42,7 @@ export class PrismaQueryRepository implements QueryRepository {
         hasNote: doc.annotations && doc.annotations.length > 0,
         reviewCount: doc.Review.length,
         documentStatus: doc.learningStatus || doc.status, // Fallback to existing status if older data
+        documentId: doc.id,
       };
     });
   }
@@ -65,6 +66,73 @@ export class PrismaQueryRepository implements QueryRepository {
       where: {
         createdAt: { gte: from, lte: to },
       },
+      select: { id: true },
+    });
+    return rows.map((r) => r.id);
+  }
+
+  async findChunksByFilters(filters: {
+    tags?: string[];
+    fromDate?: Date;
+    toDate?: Date;
+    status?: string;
+    collectionId?: string;
+    conceptId?: string;
+    keyword?: string;
+  }): Promise<string[]> {
+    const where: Prisma.ChunkWhereInput = {};
+
+    if (filters.fromDate || filters.toDate) {
+      where.createdAt = {};
+      if (filters.fromDate) where.createdAt.gte = filters.fromDate;
+      if (filters.toDate) where.createdAt.lte = filters.toDate;
+    }
+
+    if (
+      filters.tags?.length ||
+      filters.status ||
+      filters.collectionId ||
+      filters.conceptId ||
+      filters.keyword
+    ) {
+      where.document = {};
+
+      if (filters.tags?.length) {
+        where.document.DocumentTag = {
+          some: { tag: { name: { in: filters.tags } } },
+        };
+      }
+
+      if (filters.status) {
+        where.document.learningStatus = filters.status;
+      }
+
+      if (filters.collectionId) {
+        where.document.collectionItems = {
+          some: { collectionId: filters.collectionId },
+        };
+      }
+    }
+
+    if (filters.conceptId) {
+      where.conceptChunks = {
+        some: { conceptId: filters.conceptId },
+      };
+    }
+
+    if (filters.keyword) {
+      where.OR = [
+        { content: { contains: filters.keyword, mode: 'insensitive' } },
+        {
+          document: {
+            title: { contains: filters.keyword, mode: 'insensitive' },
+          },
+        },
+      ];
+    }
+
+    const rows = await this.prisma.chunk.findMany({
+      where,
       select: { id: true },
     });
     return rows.map((r) => r.id);

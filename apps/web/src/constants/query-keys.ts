@@ -25,4 +25,17 @@ export const QUERY_KEYS = {
     LIST: ["collections", "list"] as const,
     DETAIL: (id: string) => ["collections", "detail", id] as const,
   },
+  HEALTH: {
+    MISSING_EMBEDDINGS: ["health", "missing-embeddings"] as const,
+    ORPHANS: ["health", "orphans"] as const,
+    FAILED_DOCUMENTS: ["health", "failed-documents"] as const,
+    QUEUE_METRICS: ["health", "queue-metrics"] as const,
+  },
+  ANALYSIS: {
+    MASTERY: ["analysis", "mastery"] as const,
+  },
+  LEARNING_GOALS: {
+    LIST: ["learning-goals", "list"] as const,
+    DETAIL: (id: string) => ["learning-goals", "detail", id] as const,
+  },
 } as const;

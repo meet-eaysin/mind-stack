@@ -18,3 +18,6 @@ export type AskQuestionResponse = z.infer<
 export type StreamingAskResponseChunk = z.infer<
   typeof schemas.StreamingAskResponseChunkSchema
 >;
+
+import { DocumentSearchResultSchema } from "@/schemas/api.schemas";
+export type DocumentSearchResult = z.infer<typeof DocumentSearchResultSchema>;

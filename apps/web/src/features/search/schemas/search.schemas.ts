@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { ChunkReferenceSchema } from "@/schemas/api.schemas";
+import {
+  ChunkReferenceSchema,
+  DocumentSearchResultSchema,
+} from "@/schemas/api.schemas";
 
 export const SemanticSearchRequestSchema = z.object({
   query: z.string(),
@@ -11,6 +14,10 @@ export const FilteredSearchRequestSchema = z.object({
   tags: z.array(z.string()).optional(),
   fromDate: z.string().optional(),
   toDate: z.string().optional(),
+  status: z.string().optional(),
+  collectionId: z.string().optional(),
+  conceptId: z.string().optional(),
+  keyword: z.string().optional(),
   topK: z.number().optional(),
 });
 
@@ -21,7 +28,7 @@ export const AskQuestionRequestSchema = z.object({
 });
 
 export const SearchResponseSchema = z.object({
-  chunks: z.array(ChunkReferenceSchema),
+  documents: z.array(DocumentSearchResultSchema),
 });
 
 export const RetrieveResponseSchema = z.object({

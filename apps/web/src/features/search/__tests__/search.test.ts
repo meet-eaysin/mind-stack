@@ -4,7 +4,7 @@ import { searchApi } from "../api";
 describe("Search Feature API", () => {
   it("should perform semantic search", async () => {
     const result = await searchApi.search("query");
-    expect(result.chunks).toHaveLength(1);
+    expect(result.documents).toHaveLength(1);
   });
 
   it("should ask question", async () => {

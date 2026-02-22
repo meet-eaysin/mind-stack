@@ -44,4 +44,22 @@ export const ENDPOINTS = {
     REMOVE_ITEM: (id: string, docId: string) =>
       `/collections/${id}/items/${docId}`,
   },
+  ADMIN: {
+    JOBS: "/admin/jobs",
+    CLEANUP: "/admin/cleanup",
+    HEALTH: {
+      MISSING_EMBEDDINGS: "/admin/health/missing-embeddings",
+      ORPHANS: "/admin/health/orphans",
+      FAILED_DOCUMENTS: "/admin/health/failed-documents",
+    },
+  },
+  ANALYSIS: {
+    MASTERY: "/analysis/mastery",
+  },
+  LEARNING_GOALS: {
+    ALL: "/learning-goals",
+    DETAIL: (id: string) => `/learning-goals/${id}`,
+    ITEMS: (id: string) => `/learning-goals/${id}/items`,
+    REMOVE_ITEM: (itemId: string) => `/learning-goals/items/${itemId}`,
+  },
 } as const;

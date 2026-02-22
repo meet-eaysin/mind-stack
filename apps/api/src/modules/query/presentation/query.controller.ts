@@ -8,7 +8,11 @@ import {
 } from '@nestjs/common';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import type { SearchResponse, AskQuestionResponse } from '@repo/shared-types';
+import type {
+  SearchResponse,
+  AskQuestionResponse,
+  ChunkReference,
+} from '@repo/shared-types';
 import { SemanticSearchUseCase } from '../application/semantic-search.use-case.js';
 import { FilteredSearchUseCase } from '../application/filtered-search.use-case.js';
 import { AskQuestionUseCase } from '../application/ask-question.use-case.js';
@@ -18,6 +22,7 @@ import {
   FilteredSearchDto,
   AskQuestionDto,
 } from './query.dtos.js';
+import { groupChunksToDocuments } from '../application/group-chunks.util.js';
 
 @Controller('query')
 export class QueryController {
@@ -31,7 +36,8 @@ export class QueryController {
   @Post('search')
   async search(@Body() dto: SemanticSearchDto): Promise<SearchResponse> {
     const chunks = await this.semanticSearch.execute(dto);
-    return { chunks };
+    const documents = groupChunksToDocuments(chunks);
+    return { documents };
   }
 
   @Post('search/filtered')
@@ -39,7 +45,8 @@ export class QueryController {
     @Body() dto: FilteredSearchDto,
   ): Promise<SearchResponse> {
     const chunks = await this.filteredSearch.execute(dto);
-    return { chunks };
+    const documents = groupChunksToDocuments(chunks);
+    return { documents };
   }
 
   @Post('ask')
@@ -55,7 +62,9 @@ export class QueryController {
   }
 
   @Post('retrieve')
-  async retrieve(@Body() dto: SemanticSearchDto): Promise<SearchResponse> {
+  async retrieve(
+    @Body() dto: SemanticSearchDto,
+  ): Promise<{ chunks: ChunkReference[] }> {
     const chunks = await this.retrieveChunks.execute(dto);
     return { chunks };
   }

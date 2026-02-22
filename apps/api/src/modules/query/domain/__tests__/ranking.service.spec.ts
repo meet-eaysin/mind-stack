@@ -5,6 +5,7 @@ import { rankResults } from '../ranking.service.js';
 function createRankInput(
   overrides: Partial<{
     chunkId: string;
+    documentId: string;
     content: string;
     documentTitle: string;
     vectorScore: number;
@@ -17,6 +18,7 @@ function createRankInput(
   }> = {},
 ): {
   chunkId: string;
+  documentId: string;
   content: string;
   documentTitle: string;
   vectorScore: number;
@@ -29,6 +31,7 @@ function createRankInput(
 } {
   return {
     chunkId: 'chunk-1',
+    documentId: 'doc_1',
     content: 'content',
     documentTitle: 'Doc',
     vectorScore: 0.9,

@@ -21,12 +21,12 @@ import {
 } from "@/features/search/hooks";
 import { searchApi } from "@/features/search/api";
 import { getApiErrorMessage } from "@/lib/api-client";
-import type { ChunkReference } from "@/types";
+import { DocumentResult } from "@/features/search/components/document-result";
+import { ChunkResult } from "@/features/search/components/chunk-result";
+import type { ChunkReference, DocumentSearchResult } from "@/types";
 import { StreamingAskResponseChunkSchema } from "@/features/search/schemas/search.schemas";
 
 type SearchMode = "semantic" | "filtered" | "ask" | "retrieve" | "stream";
-
-import { ChunkResult } from "@/features/search";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
@@ -44,6 +44,10 @@ export default function SearchPage() {
   const [tags, setTags] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [status, setStatus] = useState("");
+  const [collectionId, setCollectionId] = useState("");
+  const [conceptId, setConceptId] = useState("");
+  const [keyword, setKeyword] = useState("");
 
   const search = useSearch();
   const filteredSearch = useFilteredSearch();
@@ -65,6 +69,10 @@ export default function SearchPage() {
           .filter(Boolean),
         fromDate: fromDate || undefined,
         toDate: toDate || undefined,
+        status: status || undefined,
+        collectionId: collectionId || undefined,
+        conceptId: conceptId || undefined,
+        keyword: keyword || undefined,
       });
     } else if (mode === "ask") {
       askQuestion.mutate({ question: query });
@@ -200,6 +208,50 @@ export default function SearchPage() {
                 data-testid="filter-to-date"
               />
             </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Status
+              </label>
+              <Input
+                placeholder="e.g. REVIEW"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="h-9 bg-background"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Collection ID
+              </label>
+              <Input
+                placeholder="Linked to collection..."
+                value={collectionId}
+                onChange={(e) => setCollectionId(e.target.value)}
+                className="h-9 bg-background"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Concept ID
+              </label>
+              <Input
+                placeholder="Linked to concept..."
+                value={conceptId}
+                onChange={(e) => setConceptId(e.target.value)}
+                className="h-9 bg-background"
+              />
+            </div>
+            <div className="space-y-1.5 md:col-span-3">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Keyword Filter (Full Text Match)
+              </label>
+              <Input
+                placeholder="Must contain keyword..."
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                className="h-9 bg-background"
+              />
+            </div>
           </div>
         )}
 
@@ -240,11 +292,14 @@ export default function SearchPage() {
         {(search.data || filteredSearch.data || retrieve.data) && (
           <div className="space-y-3" data-testid="search-results">
             {(
-              search.data?.chunks ||
-              filteredSearch.data?.chunks ||
-              retrieve.data?.chunks ||
+              search.data?.documents ||
+              filteredSearch.data?.documents ||
               []
-            ).map((chunk: ChunkReference) => (
+            ).map((document: DocumentSearchResult) => (
+              <DocumentResult key={document.documentId} document={document} />
+            ))}
+
+            {(retrieve.data?.chunks || []).map((chunk: ChunkReference) => (
               <ChunkResult key={chunk.chunkId} chunk={chunk} />
             ))}
           </div>

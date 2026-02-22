@@ -36,6 +36,7 @@ export class SemanticSearchUseCase {
         const detail = readyChunkDetails.find((d) => d.chunkId === vr.id)!;
         return {
           chunkId: vr.id,
+          documentId: detail?.documentId ?? '',
           content: detail?.content ?? vr.content,
           documentTitle: detail?.documentTitle ?? '',
           author: detail?.author ?? null,
@@ -69,6 +70,7 @@ export class SemanticSearchUseCase {
       uniqueContent.add(normalizedContent);
       finalizedRes.push({
         chunkId: r.chunkId,
+        documentId: r.documentId,
         content: r.content,
         documentTitle: r.documentTitle,
         author: r.author ?? undefined,

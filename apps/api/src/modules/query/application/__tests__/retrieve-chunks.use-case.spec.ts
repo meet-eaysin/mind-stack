@@ -85,6 +85,10 @@ class FakeQueryRepository implements QueryRepository {
   findChunksByDateRange(_from: Date, _to: Date): Promise<string[]> {
     return Promise.resolve([]);
   }
+
+  async findChunksByFilters(): Promise<string[]> {
+    return [];
+  }
 }
 
 // ── Tests ──
@@ -124,6 +128,7 @@ describe('RetrieveChunksUseCase', () => {
         hasNote: false,
         reviewCount: 0,
         documentStatus: INGESTION_STATUS.READY,
+        documentId: 'doc-1',
       },
     ]);
 
