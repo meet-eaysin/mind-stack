@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Brain, Search, FileText, CalendarCheck, Network } from "lucide-react";
+import {
+  Brain,
+  Search,
+  FileText,
+  CalendarCheck,
+  Network,
+  Folder,
+} from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -10,6 +17,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { href: "/search", label: "Search", icon: Search },
   { href: "/documents", label: "Documents", icon: FileText },
+  { href: "/collections", label: "Collections", icon: Folder },
   { href: "/review", label: "Review", icon: CalendarCheck },
   { href: "/graph", label: "Graph", icon: Network },
 ];

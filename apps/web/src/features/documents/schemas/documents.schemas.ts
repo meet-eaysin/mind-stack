@@ -3,6 +3,9 @@ import {
   SourceTypeSchema,
   IngestionStatusSchema,
   ChunkSchema,
+  LearningStatusSchema,
+  DocumentTypeSchema,
+  AnnotationTypeSchema,
 } from "@/schemas/api.schemas";
 
 export const DocumentListItemSchema = z.object({
@@ -11,6 +14,8 @@ export const DocumentListItemSchema = z.object({
   sourceType: SourceTypeSchema,
   sourceUrl: z.string().nullable(),
   status: IngestionStatusSchema,
+  learningStatus: LearningStatusSchema,
+  type: DocumentTypeSchema,
   chunkCount: z.number(),
   createdAt: z.string(),
 });
@@ -33,7 +38,6 @@ export const DocumentDetailResponseSchema = z.object({
     title: z.string(),
     sourceType: SourceTypeSchema,
     sourceUrl: z.string().nullable(),
-    status: IngestionStatusSchema,
     rawContent: z.string(),
     chunks: z.array(ChunkSchema),
     tags: z.array(z.string()),
@@ -41,6 +45,7 @@ export const DocumentDetailResponseSchema = z.object({
       z.object({
         id: z.string(),
         content: z.string(),
+        type: AnnotationTypeSchema,
         chunkId: z.string().nullable(),
         selectedText: z.string().nullable(),
         metadata: z.record(z.string(), z.any()).nullable(),
@@ -48,6 +53,14 @@ export const DocumentDetailResponseSchema = z.object({
       }),
     ),
     importanceScore: z.number().nullable(),
+    status: IngestionStatusSchema,
+    learningStatus: LearningStatusSchema,
+    type: DocumentTypeSchema,
+    author: z.string().nullable(),
+    publisher: z.string().nullable(),
+    publishedAt: z.string().nullable(),
+    language: z.string(),
+    addedByUserAt: z.string(),
     createdAt: z.string(),
   }),
 });
@@ -69,6 +82,7 @@ export const RemoveTagRequestSchema = z.object({
 export const AddNoteRequestSchema = z.object({
   documentId: z.string(),
   content: z.string(),
+  type: AnnotationTypeSchema.optional(),
   chunkId: z.string().optional(),
   selectedText: z.string().optional(),
   metadata: z.record(z.string(), z.any()).optional(),

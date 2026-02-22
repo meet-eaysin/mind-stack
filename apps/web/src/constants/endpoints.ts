@@ -36,4 +36,12 @@ export const ENDPOINTS = {
     MARKDOWN: "/export/markdown",
     NOTION: "/export/notion",
   },
+  COLLECTIONS: {
+    ALL: "/collections",
+    DETAIL: (id: string) => `/collections/${id}`,
+    ITEMS: (id: string) => `/collections/${id}/items`,
+    REORDER: (id: string) => `/collections/${id}/reorder`,
+    REMOVE_ITEM: (id: string, docId: string) =>
+      `/collections/${id}/items/${docId}`,
+  },
 } as const;

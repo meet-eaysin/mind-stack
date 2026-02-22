@@ -128,13 +128,18 @@ export function useUpdateDocument() {
   return useMutation({
     mutationFn: ({
       id,
-      title,
-      sourceUrl,
+      ...updates
     }: {
       id: string;
       title?: string;
       sourceUrl?: string;
-    }) => documentsApi.update(id, { title, sourceUrl }),
+      learningStatus?: string;
+      type?: string;
+      author?: string;
+      publisher?: string;
+      publishedAt?: string;
+      language?: string;
+    }) => documentsApi.update(id, updates),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.KNOWLEDGE.DETAIL(variables.id),

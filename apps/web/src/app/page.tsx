@@ -8,6 +8,7 @@ import {
   CalendarCheck,
   Network,
   Sparkles,
+  Folder,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -38,6 +39,13 @@ const features = [
     icon: Network,
     title: "Knowledge Graph",
     description: "Visualize connections between concepts in your second brain.",
+  },
+  {
+    href: "/collections",
+    icon: Folder,
+    title: "Collections",
+    description:
+      "Organize documents into structured learning paths and courses.",
   },
 ];
 

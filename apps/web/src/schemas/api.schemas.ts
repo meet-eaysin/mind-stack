@@ -4,6 +4,7 @@ import { z } from "zod";
 
 export const IngestionStatusSchema = z.enum([
   "INGESTED",
+  "INITIALIZING",
   "CHUNKING",
   "EMBEDDING",
   "GRAPH_BUILDING",
@@ -19,6 +20,40 @@ export const RelationTypeSchema = z.enum([
   "DEPENDS_ON",
   "SIMILAR_TO",
   "LEADS_TO",
+  "IS_PREREQUISITE_OF",
+  "REFERENCES",
+  "EXTENDS",
+  "CONTRADICTS",
+  "FOLLOW_UP_TO",
+]);
+
+export const LearningStatusSchema = z.enum([
+  "TO_WATCH",
+  "TO_READ",
+  "UPCOMING",
+  "IN_PROGRESS",
+  "REVIEW",
+  "COMPLETED",
+  "PENDING_COMPLETION",
+]);
+
+export const DocumentTypeSchema = z.enum([
+  "ARTICLE",
+  "VIDEO",
+  "COURSE_LESSON",
+  "BOOK",
+  "NOTE",
+  "RFC",
+  "BLOG",
+  "TRANSCRIPT",
+  "OTHER",
+]);
+
+export const AnnotationTypeSchema = z.enum([
+  "HIGHLIGHT",
+  "NOTE",
+  "QUESTION",
+  "INSIGHT",
 ]);
 
 // ── Shared Models ──

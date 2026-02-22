@@ -4,75 +4,165 @@ import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
-import { CalendarCheck } from "lucide-react";
+import { CalendarCheck, Brain, Sparkles, Trophy } from "lucide-react";
 import { useDailyReview } from "@/features/review";
 import { getApiErrorMessage } from "@/lib/api-client";
 import { ReviewCard } from "@/features/review";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function ReviewPage() {
   const { data, isLoading, error } = useDailyReview();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [reviewedIds, setReviewedIds] = useState<Set<string>>(new Set());
 
   const total = data?.items.length ?? 0;
-  const progress = total > 0 ? ((currentIndex + 1) / total) * 100 : 0;
+  const progress = total > 0 ? (reviewedIds.size / total) * 100 : 0;
+  const isComplete = reviewedIds.size >= total && total > 0;
+
+  const handleNext = () => {
+    if (data?.items[currentIndex]) {
+      setReviewedIds((prev) =>
+        new Set(prev).add(data.items[currentIndex].documentId),
+      );
+    }
+    setCurrentIndex((i) => Math.min(total - 1, i + 1));
+  };
+
+  const handlePrev = () => {
+    setCurrentIndex((i) => Math.max(0, i - 1));
+  };
 
   return (
     <AppShell>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Daily Review</h1>
-          <p className="text-muted-foreground">
-            Practice spaced repetition to strengthen your memory.
-          </p>
+      <div className="min-h-[calc(100vh-8rem)]">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-1">
+              <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+                <Brain className="size-7 text-primary" />
+                Daily Review
+              </h1>
+              <p className="text-muted-foreground">
+                Strengthen your knowledge through spaced repetition.
+              </p>
+            </div>
+            {data && total > 0 && (
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-medium">
+                  {reviewedIds.size} of {total} reviewed
+                </p>
+                <p className="text-xs text-muted-foreground">{data.date}</p>
+              </div>
+            )}
+          </div>
+
+          {data && total > 0 && (
+            <div className="mt-4 space-y-1.5">
+              <Progress
+                value={progress}
+                className={cn(
+                  "h-2 transition-all",
+                  isComplete && "bg-emerald-100 dark:bg-emerald-900/30",
+                )}
+              />
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>{Math.round(progress)}% complete</span>
+                {total - reviewedIds.size > 0 && (
+                  <span>{total - reviewedIds.size} remaining</span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
+        {/* Loading */}
         {isLoading && (
           <div
-            className="mx-auto max-w-2xl space-y-4"
+            className="mx-auto max-w-2xl space-y-6 pt-8"
             data-testid="review-loading"
           >
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-40 w-full" />
-            <Skeleton className="h-10 w-full" />
+            <div className="space-y-3">
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+            <Skeleton className="h-64 w-full rounded-2xl" />
+            <div className="grid grid-cols-4 gap-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-24 rounded-xl" />
+              ))}
+            </div>
           </div>
         )}
 
+        {/* Error */}
         {error && (
           <div
-            className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive"
+            className="mx-auto max-w-2xl rounded-2xl border border-destructive/50 bg-destructive/10 p-6 text-sm text-destructive"
             data-testid="review-error"
           >
             {getApiErrorMessage(error)}
           </div>
         )}
 
+        {/* Empty */}
         {data && data.items.length === 0 && (
           <div
-            className="flex flex-col items-center gap-3 py-12 text-center"
+            className="flex flex-col items-center gap-4 py-20 text-center"
             data-testid="review-empty"
           >
-            <CalendarCheck className="size-12 text-muted-foreground" />
-            <p className="text-lg font-medium">All caught up!</p>
-            <p className="text-sm text-muted-foreground">
-              No items to review today. Come back tomorrow.
-            </p>
+            <div className="p-4 rounded-full bg-emerald-500/10">
+              <CalendarCheck className="size-12 text-emerald-500" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-xl font-semibold">All caught up!</p>
+              <p className="text-sm text-muted-foreground max-w-sm">
+                No items scheduled for review today. Your next review session
+                will be ready tomorrow.
+              </p>
+            </div>
           </div>
         )}
 
-        {data && data.items.length > 0 && (
-          <div className="mx-auto max-w-2xl space-y-4">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Review date: {data.date}</span>
-              <span>{Math.round(progress)}% complete</span>
+        {/* Completed All Reviews */}
+        {isComplete && (
+          <div className="flex flex-col items-center gap-4 py-20 text-center animate-in fade-in zoom-in-95 duration-500">
+            <div className="p-4 rounded-full bg-amber-500/10">
+              <Trophy className="size-12 text-amber-500" />
             </div>
-            <Progress value={progress} className="h-1" />
+            <div className="space-y-1">
+              <p className="text-xl font-semibold flex items-center gap-2">
+                <Sparkles className="size-5 text-amber-500" />
+                Session Complete!
+              </p>
+              <p className="text-sm text-muted-foreground max-w-sm">
+                You&apos;ve reviewed all {total} items for today. Great work
+                strengthening your knowledge!
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setCurrentIndex(0);
+                setReviewedIds(new Set());
+              }}
+              className="mt-2"
+            >
+              Review Again
+            </Button>
+          </div>
+        )}
 
+        {/* Active Review Card */}
+        {data && total > 0 && !isComplete && (
+          <div className="mx-auto max-w-2xl">
             <ReviewCard
               item={data.items[currentIndex] || data.items[total - 1]}
               index={Math.min(currentIndex, total - 1)}
               total={total}
-              onPrev={() => setCurrentIndex((i) => Math.max(0, i - 1))}
-              onNext={() => setCurrentIndex((i) => Math.min(total - 1, i + 1))}
+              onPrev={handlePrev}
+              onNext={handleNext}
             />
           </div>
         )}

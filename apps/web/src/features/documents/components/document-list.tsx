@@ -17,6 +17,11 @@ import {
   RefreshCw,
   AlertCircle,
   Trash2,
+  Book,
+  Video,
+  FileCode,
+  StickyNote,
+  GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,12 +31,35 @@ import { getApiErrorMessage } from "@/lib/api-client";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import type { DocumentListResponse } from "../types";
 import { INGESTION_STATUS } from "@repo/shared-types";
+import { cn } from "@/lib/utils";
 
 const sourceTypeIcons: Record<string, React.ElementType> = {
   URL: Globe,
   TEXT: Type,
   PDF: File,
   YOUTUBE: Youtube,
+};
+
+const documentTypeIcons: Record<string, React.ElementType> = {
+  ARTICLE: FileText,
+  VIDEO: Video,
+  COURSE_LESSON: GraduationCap,
+  BOOK: Book,
+  NOTE: StickyNote,
+  RFC: FileCode,
+  BLOG: Globe,
+  TRANSCRIPT: Type,
+  OTHER: File,
+};
+
+const learningStatusColors: Record<string, string> = {
+  TO_WATCH: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+  TO_READ: "bg-cyan-500/10 text-cyan-500 border-cyan-500/20",
+  UPCOMING: "bg-muted text-muted-foreground border-muted-foreground/10",
+  IN_PROGRESS: "bg-orange-500/10 text-orange-500 border-orange-500/20",
+  REVIEW: "bg-purple-500/10 text-purple-500 border-purple-500/20",
+  COMPLETED: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+  PENDING_COMPLETION: "bg-amber-500/10 text-amber-500 border-amber-500/20",
 };
 
 export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
@@ -143,7 +171,8 @@ export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
         <>
           <div className="space-y-2" data-testid="document-list">
             {data.documents.map((doc) => {
-              const Icon = sourceTypeIcons[doc.sourceType] || FileText;
+              const TypeIcon = documentTypeIcons[doc.type] || File;
+              const SourceIcon = sourceTypeIcons[doc.sourceType] || File;
               return (
                 <div
                   key={doc.id}
@@ -154,31 +183,55 @@ export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
                     onClick={() => onSelect(doc.id)}
                     className="flex min-w-0 flex-1 items-center gap-3 text-left"
                   >
-                    <Icon className="size-4 shrink-0 text-muted-foreground" />
+                    <div className="relative">
+                      <div className="p-2 rounded-lg bg-primary/5 text-primary">
+                        <TypeIcon className="size-5 shrink-0" />
+                      </div>
+                      <div className="absolute -bottom-1 -right-1 p-0.5 rounded-full bg-background border shadow-sm">
+                        <SourceIcon className="size-2 text-muted-foreground" />
+                      </div>
+                    </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <p className="truncate font-medium">{doc.title}</p>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "h-4 text-[9px] uppercase font-bold tracking-tight px-1.5 py-0 rounded",
+                            learningStatusColors[doc.learningStatus] ||
+                              learningStatusColors.UPCOMING,
+                          )}
+                        >
+                          {doc.learningStatus.replace("_", " ")}
+                        </Badge>
                         {doc.status === "FAILED" && (
                           <Badge
                             variant="destructive"
-                            className="h-4 text-[10px] px-1 py-0 gap-1 rounded"
+                            className="h-4 text-[9px] px-1 py-0 gap-1 rounded"
                           >
-                            <AlertCircle className="size-3" /> FAILED
+                            <AlertCircle className="size-2.5" /> FAILED
                           </Badge>
                         )}
                         {doc.status !== "READY" && doc.status !== "FAILED" && (
                           <Badge
                             variant="secondary"
-                            className="h-4 text-[10px] px-1 py-0 gap-1 text-muted-foreground bg-muted rounded"
+                            className="h-4 text-[9px] px-1 py-0 gap-1 text-muted-foreground bg-muted rounded"
                           >
-                            <RefreshCw className="size-3 animate-spin" />{" "}
+                            <RefreshCw className="size-2.5 animate-spin" />{" "}
                             {doc.status}
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {doc.chunkCount} chunks ·{" "}
-                        {new Date(doc.createdAt).toLocaleDateString()}
+                      <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
+                        <span className="capitalize">
+                          {doc.type.toLowerCase().replace("_", " ")}
+                        </span>
+                        <span>·</span>
+                        <span>{doc.chunkCount} chunks</span>
+                        <span>·</span>
+                        <span>
+                          {new Date(doc.createdAt).toLocaleDateString()}
+                        </span>
                       </p>
                     </div>
                   </button>

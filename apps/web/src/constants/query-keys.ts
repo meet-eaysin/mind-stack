@@ -21,4 +21,8 @@ export const QUERY_KEYS = {
   ADMIN: {
     METRICS: ["admin", "metrics"] as const,
   },
+  COLLECTIONS: {
+    LIST: ["collections", "list"] as const,
+    DETAIL: (id: string) => ["collections", "detail", id] as const,
+  },
 } as const;

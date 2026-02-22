@@ -23,7 +23,19 @@ export const documentsApi = {
       ENDPOINTS.KNOWLEDGE.DETAIL(id),
       schemas.DocumentDetailResponseSchema,
     ),
-  update: (id: string, updates: { title?: string; sourceUrl?: string }) =>
+  update: (
+    id: string,
+    updates: {
+      title?: string;
+      sourceUrl?: string;
+      learningStatus?: string;
+      type?: string;
+      author?: string;
+      publisher?: string;
+      publishedAt?: string;
+      language?: string;
+    },
+  ) =>
     apiClient.patch(
       ENDPOINTS.KNOWLEDGE.DETAIL(id),
       updates,

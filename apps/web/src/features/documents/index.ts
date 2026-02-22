@@ -6,5 +6,7 @@ export {
   useRemoveTag,
   useAddNote,
   useUpdateImportance,
+  useUpdateDocument,
+  useDeleteDocument,
 } from "./hooks";
 export * from "./components";

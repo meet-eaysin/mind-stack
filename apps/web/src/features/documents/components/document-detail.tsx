@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Globe,
   Layout,
+  Folder,
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -29,11 +30,14 @@ import {
 } from "../hooks";
 import { getApiErrorMessage } from "@/lib/api-client";
 import { ExportActions } from "@/features/export/components/export-actions";
+import { AddToCollectionDialog } from "@/features/collections/components/add-to-collection-dialog";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
+import { LEARNING_STATUS, DOCUMENT_TYPE } from "@repo/shared-types";
+import { Label } from "@/components/ui/label";
 
 type SelectionState = {
   text: string;
@@ -60,11 +64,67 @@ export function DocumentDetail({
   const [isEditing, setIsEditing] = useState(false);
   const [viewType, setViewType] = useState<"source" | "reader">("reader");
   const [prevId, setPrevId] = useState<string | null>(null);
-  const [editTitle, setEditTitle] = useState("");
-  const [editUrl, setEditUrl] = useState("");
+
+  type EditForm = {
+    title: string;
+    url: string;
+    learningStatus: string;
+    type: string;
+    author: string;
+    publisher: string;
+    publishedAt: string;
+    language: string;
+  };
+
+  const makeEditForm = (): EditForm => ({
+    title: data?.document.title ?? "",
+    url: data?.document.sourceUrl ?? "",
+    learningStatus: data?.document.learningStatus ?? "",
+    type: data?.document.type ?? "",
+    author: data?.document.author ?? "",
+    publisher: data?.document.publisher ?? "",
+    publishedAt: data?.document.publishedAt
+      ? data.document.publishedAt.split("T")[0]
+      : "",
+    language: data?.document.language ?? "",
+  });
+
+  const [editForm, setEditForm] = useState<EditForm>(makeEditForm);
+  const [editFormDocId, setEditFormDocId] = useState<string | null>(null);
+
+  // Adjust state during render (React Compiler safe): reset form when document changes
+  if (data?.document && data.document.id !== editFormDocId) {
+    setEditFormDocId(data.document.id);
+    setEditForm(makeEditForm());
+  }
+
+  const editTitle = editForm.title;
+  const editUrl = editForm.url;
+  const editLearningStatus = editForm.learningStatus;
+  const editType = editForm.type;
+  const editAuthor = editForm.author;
+  const editPublisher = editForm.publisher;
+  const editPublishedAt = editForm.publishedAt;
+  const editLanguage = editForm.language;
+
+  const setEditTitle = (v: string) => setEditForm((f) => ({ ...f, title: v }));
+  const setEditUrl = (v: string) => setEditForm((f) => ({ ...f, url: v }));
+  const setEditLearningStatus = (v: string) =>
+    setEditForm((f) => ({ ...f, learningStatus: v }));
+  const setEditType = (v: string) => setEditForm((f) => ({ ...f, type: v }));
+  const setEditAuthor = (v: string) =>
+    setEditForm((f) => ({ ...f, author: v }));
+  const setEditPublisher = (v: string) =>
+    setEditForm((f) => ({ ...f, publisher: v }));
+  const setEditPublishedAt = (v: string) =>
+    setEditForm((f) => ({ ...f, publishedAt: v }));
+  const setEditLanguage = (v: string) =>
+    setEditForm((f) => ({ ...f, language: v }));
+
   const [selection, setSelection] = useState<SelectionState | null>(null);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [noteContent, setNoteContent] = useState("");
+  const [isAddingToCollection, setIsAddingToCollection] = useState(false);
 
   const articleRef = useRef<HTMLDivElement>(null);
 
@@ -201,6 +261,15 @@ export function DocumentDetail({
               <Button
                 variant="outline"
                 size="sm"
+                onClick={() => setIsAddingToCollection(true)}
+                className="gap-2"
+              >
+                <Folder className="size-4" />
+                Add to Collection
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setIsEditing(!isEditing)}
               >
                 {isEditing ? "Done" : "Settings"}
@@ -209,6 +278,12 @@ export function DocumentDetail({
           </div>
         </div>
       </nav>
+
+      <AddToCollectionDialog
+        documentId={doc.id}
+        open={isAddingToCollection}
+        onOpenChange={setIsAddingToCollection}
+      />
 
       <main className="max-w-7xl mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8">
         {/* Main Content Area */}
@@ -297,28 +372,183 @@ export function DocumentDetail({
                 </div>
 
                 {isEditing ? (
-                  <div className="space-y-4 mb-8">
-                    <Input
-                      value={editTitle}
-                      onChange={(e) => setEditTitle(e.target.value)}
-                      className="text-3xl font-bold h-auto py-2"
-                    />
-                    <Input
-                      value={editUrl}
-                      onChange={(e) => setEditUrl(e.target.value)}
-                      placeholder="Source URL"
-                    />
-                    <Button
-                      onClick={() =>
-                        updateDocument.mutate({
-                          id: doc.id,
-                          title: editTitle,
-                          sourceUrl: editUrl,
-                        })
-                      }
-                    >
-                      Save Changes
-                    </Button>
+                  <div className="space-y-6 mb-8 p-6 rounded-xl border bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="title"
+                        className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                      >
+                        Title
+                      </Label>
+                      <Input
+                        id="title"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        className="text-2xl font-bold h-auto py-2 bg-background/50"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="learningStatus"
+                          className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                        >
+                          Learning Status
+                        </Label>
+                        <select
+                          id="learningStatus"
+                          value={editLearningStatus}
+                          onChange={(e) =>
+                            setEditLearningStatus(e.target.value)
+                          }
+                          className="flex h-10 w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {Object.values(LEARNING_STATUS).map((status) => (
+                            <option key={status} value={status}>
+                              {status.replace("_", " ")}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="type"
+                          className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                        >
+                          Document Type
+                        </Label>
+                        <select
+                          id="type"
+                          value={editType}
+                          onChange={(e) => setEditType(e.target.value)}
+                          className="flex h-10 w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {Object.values(DOCUMENT_TYPE).map((type) => (
+                            <option key={type} value={type}>
+                              {type.replace("_", " ")}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="sourceUrl"
+                        className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                      >
+                        Source URL
+                      </Label>
+                      <Input
+                        id="sourceUrl"
+                        value={editUrl}
+                        onChange={(e) => setEditUrl(e.target.value)}
+                        placeholder="https://..."
+                        className="bg-background/50"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="author"
+                          className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                        >
+                          Author
+                        </Label>
+                        <Input
+                          id="author"
+                          value={editAuthor}
+                          onChange={(e) => setEditAuthor(e.target.value)}
+                          placeholder="Author name"
+                          className="bg-background/50"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="publisher"
+                          className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                        >
+                          Publisher
+                        </Label>
+                        <Input
+                          id="publisher"
+                          value={editPublisher}
+                          onChange={(e) => setEditPublisher(e.target.value)}
+                          placeholder="Publisher name"
+                          className="bg-background/50"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="publishedAt"
+                          className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                        >
+                          Published Date
+                        </Label>
+                        <Input
+                          id="publishedAt"
+                          type="date"
+                          value={editPublishedAt}
+                          onChange={(e) => setEditPublishedAt(e.target.value)}
+                          className="bg-background/50"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="language"
+                          className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                        >
+                          Language
+                        </Label>
+                        <Input
+                          id="language"
+                          value={editLanguage}
+                          onChange={(e) => setEditLanguage(e.target.value)}
+                          placeholder="e.g. en, es, fr"
+                          className="bg-background/50"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        onClick={() =>
+                          updateDocument.mutate(
+                            {
+                              id: doc.id,
+                              title: editTitle,
+                              sourceUrl: editUrl,
+                              learningStatus: editLearningStatus,
+                              type: editType,
+                              author: editAuthor,
+                              publisher: editPublisher,
+                              publishedAt: editPublishedAt
+                                ? new Date(editPublishedAt).toISOString()
+                                : undefined,
+                              language: editLanguage,
+                            },
+                            {
+                              onSuccess: () => setIsEditing(false),
+                            },
+                          )
+                        }
+                        className="flex-1 shadow-lg shadow-primary/20"
+                      >
+                        Save Changes
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => setIsEditing(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <h1 className="text-4xl sm:text-5xl font-bold font-serif leading-tight mb-4">
