@@ -1,19 +1,27 @@
-import { Controller, Post, Body, Param, Get, Headers } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Get,
+  Headers,
+  NotFoundException,
+} from '@nestjs/common';
 import { type IngestionResponse, INGESTION_STATUS } from '@repo/shared-types';
-import { IngestUrlUseCase } from '../application/ingest-url.use-case.js';
-import { IngestTextUseCase } from '../application/ingest-text.use-case.js';
-import { IngestPdfUseCase } from '../application/ingest-pdf.use-case.js';
-import { IngestYoutubeUseCase } from '../application/ingest-youtube.use-case.js';
-import { RetryIngestionUseCase } from '../application/retry-ingestion.use-case.js';
-import { GetIngestionJobStatusUseCase } from '../application/get-ingestion-job-status.use-case.js';
-import { PrismaDocumentRepository } from '../infrastructure/prisma-document.repository.js';
+import { IngestUrlUseCase } from '../application/ingest-url.use-case';
+import { IngestTextUseCase } from '../application/ingest-text.use-case';
+import { IngestPdfUseCase } from '../application/ingest-pdf.use-case';
+import { IngestYoutubeUseCase } from '../application/ingest-youtube.use-case';
+import { RetryIngestionUseCase } from '../application/retry-ingestion.use-case';
+import { GetIngestionJobStatusUseCase } from '../application/get-ingestion-job-status.use-case';
+import { PrismaDocumentRepository } from '../infrastructure/prisma-document.repository';
 import {
   IngestUrlDto,
   IngestTextDto,
   IngestPdfDto,
   IngestYoutubeDto,
-} from './ingestion.dtos.js';
-import { getUserIdFromHeader } from '../../../common/request-user.js';
+} from './ingestion.dtos';
+import { getUserIdFromHeader } from '../../../common/request-user';
 
 @Controller('ingest')
 export class IngestionController {
@@ -117,7 +125,7 @@ export class IngestionController {
   async getDocumentStatus(@Param('documentId') documentId: string) {
     const doc = await this.documentRepository.findById(documentId);
     if (!doc) {
-      throw new Error(`Document not found: ${documentId}`);
+      throw new NotFoundException(`Document not found: ${documentId}`);
     }
     return {
       documentId: doc.id,

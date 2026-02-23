@@ -130,7 +130,9 @@ export function CollectionDetail({
   );
   const availableDocuments: DocumentListItem[] = (
     documentsQuery.data?.documents ?? []
-  ).filter((document: DocumentListItem) => !existingDocumentIds.has(document.id));
+  ).filter(
+    (document: DocumentListItem) => !existingDocumentIds.has(document.id),
+  );
 
   return (
     <div className="max-w-4xl mx-auto pb-20">
@@ -224,7 +226,7 @@ export function CollectionDetail({
                           className={cn(
                             "h-4 text-[9px] uppercase font-bold tracking-tight px-1.5 py-0 rounded",
                             learningStatusColors[item.learningStatus] ||
-                            learningStatusColors.UPCOMING,
+                              learningStatusColors.UPCOMING,
                           )}
                         >
                           {item.learningStatus.replace("_", " ")}

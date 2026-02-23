@@ -42,6 +42,8 @@ import {
   LEARNING_STATUS,
   DOCUMENT_TYPE,
   ANNOTATION_TYPE,
+  SOURCE_TYPE,
+  INGESTION_STATUS,
   type AnnotationType,
 } from "@repo/shared-types";
 import { Label } from "@/components/ui/label";
@@ -51,6 +53,39 @@ type SelectionState = {
   chunkId: string;
   rect: DOMRect;
 };
+
+type DocumentViewType = "source" | "reader";
+type MarkdownImageRendererProps = {
+  src?: string | Blob;
+  alt?: string | null;
+};
+
+function isDocumentViewType(value: string): value is DocumentViewType {
+  return value === "source" || value === "reader";
+}
+
+function renderMarkdownImage({
+  src,
+  alt,
+}: MarkdownImageRendererProps): React.JSX.Element {
+  const imageSrc = typeof src === "string" ? src : "";
+
+  return (
+    <div className="my-8 flex justify-center flex-col items-center">
+      <Image
+        src={imageSrc}
+        alt={alt ?? ""}
+        width={800}
+        height={450}
+        unoptimized
+        className="rounded-xl shadow-lg border max-w-full h-auto"
+      />
+      {typeof alt === "string" && alt.length > 0 && (
+        <span className="text-sm text-muted-foreground mt-2 italic">{alt}</span>
+      )}
+    </div>
+  );
+}
 
 export function DocumentDetail({
   id,
@@ -70,7 +105,7 @@ export function DocumentDetail({
 
   const [newTag, setNewTag] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const [viewType, setViewType] = useState<"source" | "reader">("reader");
+  const [viewType, setViewType] = useState<DocumentViewType>("reader");
   const [prevId, setPrevId] = useState<string | null>(null);
 
   type EditForm = {
@@ -178,7 +213,10 @@ export function DocumentDetail({
 
   if (data?.document.id && data.document.id !== prevId) {
     setPrevId(data.document.id);
-    if (data.document.sourceUrl && data.document.sourceType === "URL") {
+    if (
+      data.document.sourceUrl &&
+      data.document.sourceType === SOURCE_TYPE.URL
+    ) {
       setViewType("source");
     } else {
       setViewType("reader");
@@ -263,10 +301,14 @@ export function DocumentDetail({
             </span>
           </div>
           <div className="flex items-center gap-4">
-            {doc.sourceType === "URL" && (
+            {doc.sourceType === SOURCE_TYPE.URL && (
               <Tabs
                 value={viewType}
-                onValueChange={(v) => setViewType(v as "source" | "reader")}
+                onValueChange={(value) => {
+                  if (isDocumentViewType(value)) {
+                    setViewType(value);
+                  }
+                }}
                 className="w-50"
               >
                 <TabsList className="grid w-full grid-cols-2 h-8">
@@ -310,7 +352,7 @@ export function DocumentDetail({
         onOpenChange={setIsAddingToCollection}
       />
 
-      {doc.status === "FAILED" && (
+      {doc.status === INGESTION_STATUS.FAILED && (
         <div className="max-w-7xl mx-auto px-4 pt-6">
           <div className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
             <p className="font-semibold">Processing failed</p>
@@ -629,23 +671,8 @@ export function DocumentDetail({
                         remarkPlugins={[remarkGfm]}
                         components={{
                           p: ({ node: _node, ...props }) => <p {...props} />,
-                          img: ({ node: _node, ...props }) => (
-                            <div className="my-8 flex justify-center flex-col items-center">
-                              <Image
-                                src={(props.src as string) || ""}
-                                alt={props.alt || ""}
-                                width={800}
-                                height={450}
-                                unoptimized
-                                className="rounded-xl shadow-lg border max-w-full h-auto"
-                              />
-                              {props.alt && (
-                                <span className="text-sm text-muted-foreground mt-2 italic">
-                                  {props.alt}
-                                </span>
-                              )}
-                            </div>
-                          ),
+                          img: ({ node: _node, src, alt }) =>
+                            renderMarkdownImage({ src, alt }),
                           code: ({ node: _node, ...props }) => (
                             <code
                               className="px-1.5 py-0.5 rounded-md bg-muted font-mono text-sm border shadow-sm"

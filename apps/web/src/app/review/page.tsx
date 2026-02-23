@@ -161,8 +161,8 @@ export default function ReviewPage() {
               item={data.items[currentIndex] || data.items[total - 1]}
               index={Math.min(currentIndex, total - 1)}
               total={total}
-              onPrev={handlePrev}
-              onNext={handleNext}
+              onPrevAction={handlePrev}
+              onNextAction={handleNext}
             />
           </div>
         )}

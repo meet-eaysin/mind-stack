@@ -12,6 +12,7 @@ import type {
 } from "../types";
 import type { IngestionStatus } from "@/types";
 import type { ApiError } from "@/lib/api-client";
+import { INGESTION_STATUS } from "@repo/shared-types";
 
 export function useIngestUrl() {
   return useMutation<IngestionResponse, ApiError, IngestUrlRequest>({
@@ -62,10 +63,16 @@ export function useIngestionStatus(documentId: string | null) {
   const { data } = useQuery<DocumentStatusResponse, ApiError>({
     queryKey: QUERY_KEYS.KNOWLEDGE.STATUS(documentId || ""),
     queryFn: () => ingestionApi.getStatus(documentId ?? ""),
-    enabled: !!documentId && status !== "READY" && status !== "FAILED",
+    enabled:
+      !!documentId &&
+      status !== INGESTION_STATUS.READY &&
+      status !== INGESTION_STATUS.FAILED,
     refetchInterval: (query) => {
       const data = query.state.data;
-      if (data?.status === "READY" || data?.status === "FAILED") {
+      if (
+        data?.status === INGESTION_STATUS.READY ||
+        data?.status === INGESTION_STATUS.FAILED
+      ) {
         return false;
       }
       return 2000;

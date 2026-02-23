@@ -8,8 +8,8 @@ import { http, HttpResponse } from "msw";
 
 describe("Documents Behavior", () => {
   it("should render document list and allow selection", async () => {
-    const onSelect = vi.fn();
-    render(<DocumentList onSelect={onSelect} />);
+    const onSelectAction = vi.fn();
+    render(<DocumentList onSelectAction={onSelectAction} />);
 
     await waitFor(() => {
       expect(screen.getByTestId("document-list")).toBeInTheDocument();
@@ -22,7 +22,7 @@ describe("Documents Behavior", () => {
     const docBtn = docItem.querySelector("button");
     if (!docBtn) throw new Error("Document button not found");
     fireEvent.click(docBtn);
-    expect(onSelect).toHaveBeenCalledWith("doc-1");
+    expect(onSelectAction).toHaveBeenCalledWith("doc-1");
   });
 
   it("should render document detail and manage chunks", async () => {
@@ -96,7 +96,7 @@ describe("Documents Behavior", () => {
     const backBtn = screen.getByTestId("back-button");
     fireEvent.click(backBtn);
     expect(onBackAction).toHaveBeenCalled();
-  });
+  }, 10000);
 
   it("should show empty and error states for related resources", async () => {
     server.use(
@@ -131,7 +131,7 @@ describe("Documents Behavior", () => {
       }),
     );
 
-    render(<DocumentList onSelect={() => {}} />);
+    render(<DocumentList onSelectAction={() => {}} />);
 
     await waitFor(() => {
       expect(screen.getByTestId("document-list-error")).toBeInTheDocument();

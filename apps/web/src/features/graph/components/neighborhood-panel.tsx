@@ -12,17 +12,18 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { getApiErrorMessage } from "@/lib/api-client";
 import type { CreateRelationRequest } from "../types";
+import { RELATION_TYPE } from "@repo/shared-types";
 
 import { useRouter } from "next/navigation";
 
 const RELATION_TYPES: CreateRelationRequest["type"][] = [
-  "IS_PART_OF",
-  "IS_PREREQUISITE_OF",
-  "REFERENCES",
-  "EXTENDS",
-  "CONTRADICTS",
-  "SIMILAR_TO",
-  "FOLLOW_UP_TO",
+  RELATION_TYPE.IS_PART_OF,
+  RELATION_TYPE.IS_PREREQUISITE_OF,
+  RELATION_TYPE.REFERENCES,
+  RELATION_TYPE.EXTENDS,
+  RELATION_TYPE.CONTRADICTS,
+  RELATION_TYPE.SIMILAR_TO,
+  RELATION_TYPE.FOLLOW_UP_TO,
 ];
 
 export function NeighborhoodPanel({
@@ -37,8 +38,9 @@ export function NeighborhoodPanel({
   const deleteRelation = useDeleteRelation();
   const router = useRouter();
   const [targetConceptId, setTargetConceptId] = useState("");
-  const [relationType, setRelationType] =
-    useState<CreateRelationRequest["type"]>("IS_PART_OF");
+  const [relationType, setRelationType] = useState<
+    CreateRelationRequest["type"]
+  >(RELATION_TYPE.IS_PART_OF);
   const [relationIdToDelete, setRelationIdToDelete] = useState("");
 
   if (isLoading) {
@@ -58,7 +60,7 @@ export function NeighborhoodPanel({
 
   return (
     <div
-      className="rounded-xl border bg-card/50 backdrop-blur-md shadow-lg overflow-hidden flex flex-col max-h-[600px]"
+      className="rounded-xl border bg-card/50 backdrop-blur-md shadow-lg overflow-hidden flex flex-col max-h-150"
       data-testid="neighborhood-panel"
     >
       <div className="p-4 bg-muted/30 border-b flex items-center justify-between">
@@ -93,7 +95,7 @@ export function NeighborhoodPanel({
                   }
                 >
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[10px] font-medium text-muted-foreground truncate max-w-[150px]">
+                    <span className="text-[10px] font-medium text-muted-foreground truncate max-w-37.5">
                       {chunk.documentTitle}
                     </span>
                     <ExternalLink className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -141,10 +143,10 @@ export function NeighborhoodPanel({
                 (type) => {
                   let colorClass =
                     "bg-primary/5 text-primary border-primary/20";
-                  if (type === "IS_PART_OF")
+                  if (type === RELATION_TYPE.IS_PART_OF)
                     colorClass =
                       "bg-blue-500/10 text-blue-400 border-blue-500/20";
-                  if (type === "SIMILAR_TO")
+                  if (type === RELATION_TYPE.SIMILAR_TO)
                     colorClass =
                       "bg-purple-500/10 text-purple-400 border-purple-500/20";
 

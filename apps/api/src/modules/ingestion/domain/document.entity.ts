@@ -4,6 +4,11 @@ import type {
   LearningStatus,
   DocumentType,
 } from '@repo/shared-types';
+import {
+  INGESTION_STATUS,
+  LEARNING_STATUS,
+  DOCUMENT_TYPE,
+} from '@repo/shared-types';
 
 export type DocumentEntity = {
   id: string;
@@ -49,9 +54,9 @@ export function createDocument(params: {
     sourceType: params.sourceType,
     sourceUrl: params.sourceUrl,
     rawContent: params.rawContent,
-    status: params.status ?? 'INGESTED',
-    learningStatus: params.learningStatus ?? 'UPCOMING',
-    type: params.type ?? 'OTHER',
+    status: params.status ?? INGESTION_STATUS.INGESTED,
+    learningStatus: params.learningStatus ?? LEARNING_STATUS.UPCOMING,
+    type: params.type ?? DOCUMENT_TYPE.OTHER,
     author: params.author ?? null,
     publisher: params.publisher ?? null,
     publishedAt: params.publishedAt ?? null,

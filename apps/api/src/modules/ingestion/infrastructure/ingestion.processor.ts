@@ -2,20 +2,22 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject } from '@nestjs/common';
 import { JOB_TYPE, INGESTION_STATUS } from '@repo/shared-types';
 import type { VectorStore, VectorDocument } from '@repo/vector-store';
-import { VECTOR_STORE } from '../../../common/tokens.js';
-import type { IngestionJob } from '../domain/ingestion-job.types.js';
-import { PrismaDocumentRepository } from './prisma-document.repository.js';
-import { PrismaChunkRepository } from '../../knowledge/infrastructure/prisma-chunk.repository.js';
-import { BuildGraphUseCase } from '../../graph/application/build-graph.use-case.js';
+import { VECTOR_STORE } from '../../../common/tokens';
+import type { IngestionJob } from '../domain/ingestion-job.types';
+import { PrismaDocumentRepository } from './prisma-document.repository';
+import { PrismaChunkRepository } from '../../knowledge/infrastructure/prisma-chunk.repository';
+import { BuildGraphUseCase } from '../../graph/application/build-graph.use-case';
 import {
   IngestionJobProducer,
   INGESTION_QUEUE,
-} from './ingestion-job.producer.js';
-import { LlmProviderFactory } from '../../settings/application/llm-provider.factory.js';
-import { CheckEmbeddingModelUseCase } from '../../settings/application/check-embedding-model.use-case.js';
+} from './ingestion-job.producer';
+import { LlmProviderFactory } from '../../settings/application/llm-provider.factory';
+import { CheckEmbeddingModelUseCase } from '../../settings/application/check-embedding-model.use-case';
+import { createLogger } from '@repo/logger';
 
 const CHUNK_SIZE = 1200;
 const CHUNK_OVERLAP = 200;
+const logger = createLogger('IngestionProcessor');
 
 @Processor(INGESTION_QUEUE)
 export class IngestionProcessor extends WorkerHost {
@@ -35,6 +37,11 @@ export class IngestionProcessor extends WorkerHost {
   async process(job: IngestionJob): Promise<void> {
     const jobType = this.toJobType(job.name);
     const { documentId } = job.data;
+
+    logger.info('Processing ingestion job', {
+      jobType,
+      documentId,
+    });
 
     try {
       await this.documentRepository.updateProcessingError(documentId, null);
@@ -66,6 +73,11 @@ export class IngestionProcessor extends WorkerHost {
       const message = this.formatErrorMessage(raw);
       await this.documentRepository.updateProcessingError(documentId, message);
       await this.transition(documentId, INGESTION_STATUS.FAILED);
+      logger.error('Ingestion job failed', {
+        jobType,
+        documentId,
+        error: message,
+      });
       throw error;
     }
   }

@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { getApiErrorMessage } from "@/lib/api-client";
 import { ArrowLeft, GraduationCap, Lock } from "lucide-react";
+import { LEARNING_STATUS } from "@repo/shared-types";
 
 function CourseDetail({
   courseId,
@@ -46,7 +47,7 @@ function CourseDetail({
   if (!data) return null;
 
   const completed = data.items.filter(
-    (item) => item.learningStatus === "COMPLETED",
+    (item) => item.learningStatus === LEARNING_STATUS.COMPLETED,
   ).length;
   const percent =
     data.items.length === 0 ? 0 : (completed / data.items.length) * 100;

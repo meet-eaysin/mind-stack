@@ -2,7 +2,8 @@ import { randomUUID } from 'node:crypto';
 import type {
   ReviewRepository,
   ReviewEntity,
-} from '../domain/review-repository.interface.js';
+} from '../domain/review-repository.interface';
+import { BadRequestException } from '@nestjs/common';
 
 export class SubmitReviewFeedbackUseCase {
   constructor(private readonly reviewRepository: ReviewRepository) {}
@@ -13,7 +14,7 @@ export class SubmitReviewFeedbackUseCase {
     chunkId?: string;
   }): Promise<void> {
     if (input.score < 0 || input.score > 5) {
-      throw new Error('Review score must be between 0 and 5');
+      throw new BadRequestException('Review score must be between 0 and 5');
     }
 
     const existingReview = await this.reviewRepository.findByDocumentId(

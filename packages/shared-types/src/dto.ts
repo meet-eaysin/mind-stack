@@ -50,6 +50,16 @@ export type IngestionJobStatusResponse = {
   reason?: string | undefined;
 };
 
+export type ApiErrorResponse = {
+  statusCode: number;
+  error: string;
+  message: string;
+  details?: string[] | undefined;
+  path: string;
+  timestamp: string;
+  correlationId: string;
+};
+
 // ── Knowledge DTOs ──
 
 export type DocumentListItem = {

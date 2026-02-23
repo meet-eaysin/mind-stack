@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Network, ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 import type { GraphNode, GraphEdge } from "../types";
 import { Button } from "@/components/ui/button";
+import { RELATION_TYPE } from "@repo/shared-types";
 
 const DEFAULT_WIDTH = 800;
 const DEFAULT_HEIGHT = 500;
@@ -11,12 +12,12 @@ const DEFAULT_HEIGHT = 500;
 export function GraphVisualization({
   nodes,
   edges,
-  onNodeSelect,
+  onNodeSelectAction,
   selectedNodeId,
 }: {
   nodes: GraphNode[];
   edges: GraphEdge[];
-  onNodeSelect: (id: string | null) => void;
+  onNodeSelectAction: (id: string | null) => void;
   selectedNodeId: string | null;
 }) {
   const [nodePositions, setNodePositions] = useState<
@@ -297,7 +298,9 @@ export function GraphVisualization({
                   className="stroke-muted-foreground/30 transition-all duration-300"
                   strokeWidth={1.5}
                   strokeDasharray={
-                    edge.relationType === "SIMILAR_TO" ? "4 2" : "none"
+                    edge.relationType === RELATION_TYPE.SIMILAR_TO
+                      ? "4 2"
+                      : "none"
                   }
                 />
               );
@@ -316,7 +319,7 @@ export function GraphVisualization({
                   key={node.id}
                   onClick={(e) => {
                     e.stopPropagation();
-                    onNodeSelect(isSelected ? null : node.id);
+                    onNodeSelectAction(isSelected ? null : node.id);
                   }}
                   className="cursor-pointer group/node"
                   data-testid={`graph-node-${node.id}`}

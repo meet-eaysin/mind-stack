@@ -26,11 +26,11 @@ import { getApiErrorMessage } from "@/lib/api-client";
 import { Progress } from "@/components/ui/progress";
 import { CreateCollectionModal } from "./create-collection-modal";
 
-export function CollectionList({
-  onSelect,
-}: {
-  onSelect: (id: string) => void;
-}) {
+type CollectionListProps = {
+  onSelectAction: (id: string) => void;
+};
+
+export function CollectionList({ onSelectAction }: CollectionListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { data, isLoading, error } = useCollections();
@@ -92,7 +92,7 @@ export function CollectionList({
               <div className="flex items-start justify-between gap-2">
                 <div
                   className="flex items-center gap-3 cursor-pointer"
-                  onClick={() => onSelect(collection.id)}
+                  onClick={() => onSelectAction(collection.id)}
                 >
                   <div className="p-2.5 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                     <Folder className="size-6" />
@@ -157,7 +157,7 @@ export function CollectionList({
                 variant="ghost"
                 size="sm"
                 className="mt-2 w-full justify-between font-normal text-muted-foreground group-hover:text-primary group-hover:bg-primary/5 h-8"
-                onClick={() => onSelect(collection.id)}
+                onClick={() => onSelectAction(collection.id)}
               >
                 View Collection
                 <ExternalLink className="size-3.5" />

@@ -3,7 +3,8 @@ import { OllamaEmbeddingProvider } from '@repo/embeddings';
 import type { LLMProvider } from '@repo/llm';
 import { OllamaLLMProvider } from '@repo/llm';
 import { MODEL_PROVIDER } from '@repo/shared-types';
-import { ResolveLlmConfigUseCase } from './resolve-llm-config.use-case.js';
+import { ResolveLlmConfigUseCase } from './resolve-llm-config.use-case';
+import { BadRequestException } from '@nestjs/common';
 
 export type LlmProviderFactoryPort = {
   getEmbeddingProvider(userId: string): Promise<EmbeddingProvider>;
@@ -16,7 +17,7 @@ export class LlmProviderFactory {
   async getEmbeddingProvider(userId: string): Promise<EmbeddingProvider> {
     const config = await this.resolveConfig.execute(userId);
     if (config.embeddingProvider !== MODEL_PROVIDER.OLLAMA) {
-      throw new Error('Unsupported embedding provider');
+      throw new BadRequestException('Unsupported embedding provider');
     }
     return new OllamaEmbeddingProvider({
       baseUrl: config.baseUrl,
@@ -27,7 +28,7 @@ export class LlmProviderFactory {
   async getGenerationProvider(userId: string): Promise<LLMProvider> {
     const config = await this.resolveConfig.execute(userId);
     if (config.generationProvider !== MODEL_PROVIDER.OLLAMA) {
-      throw new Error('Unsupported generation provider');
+      throw new BadRequestException('Unsupported generation provider');
     }
     return new OllamaLLMProvider({
       baseUrl: config.baseUrl,

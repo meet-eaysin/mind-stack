@@ -15,6 +15,7 @@ import {
   Folder,
   Sparkles,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -24,8 +25,19 @@ import { AddToCollectionDialog } from "@/features/collections/components/add-to-
 import { cn } from "@/lib/utils";
 import type { ReviewItem } from "../types";
 import ReactMarkdown from "react-markdown";
+import { LEARNING_STATUS } from "@repo/shared-types";
 
-const FEEDBACK_OPTIONS = [
+type FeedbackOption = {
+  label: string;
+  score: number;
+  description: string;
+  icon: LucideIcon;
+  color: string;
+  activeColor: string;
+  interval: string;
+};
+
+const FEEDBACK_OPTIONS: ReadonlyArray<FeedbackOption> = [
   {
     label: "Again",
     score: 1,
@@ -66,18 +78,18 @@ const FEEDBACK_OPTIONS = [
     activeColor: "bg-emerald-500 text-white border-emerald-500",
     interval: "~7 days",
   },
-] as const;
+];
 
 export function ReviewCard({
   item,
-  onNext,
-  onPrev,
+  onNextAction,
+  onPrevAction,
   index,
   total,
 }: {
   item: ReviewItem;
-  onNext: () => void;
-  onPrev: () => void;
+  onNextAction: () => void;
+  onPrevAction: () => void;
   index: number;
   total: number;
 }) {
@@ -97,7 +109,7 @@ export function ReviewCard({
           setTimeout(() => {
             setIsRevealed(false);
             setSelectedScore(null);
-            onNext();
+            onNextAction();
           }, 400);
         },
       },
@@ -107,7 +119,7 @@ export function ReviewCard({
   const handleMarkComplete = () => {
     updateDocument.mutate({
       id: item.documentId,
-      learningStatus: "COMPLETED",
+      learningStatus: LEARNING_STATUS.COMPLETED,
     });
   };
 
@@ -278,7 +290,7 @@ export function ReviewCard({
             onClick={() => {
               setIsRevealed(false);
               setSelectedScore(null);
-              onPrev();
+              onPrevAction();
             }}
             disabled={index === 0}
             className="h-8 text-xs"
@@ -292,7 +304,7 @@ export function ReviewCard({
             onClick={() => {
               setIsRevealed(false);
               setSelectedScore(null);
-              onNext();
+              onNextAction();
             }}
             disabled={index >= total - 1}
             className="h-8 text-xs"

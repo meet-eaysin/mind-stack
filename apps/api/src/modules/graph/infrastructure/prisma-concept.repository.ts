@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { PrismaService } from '../../../prisma/prisma.service.js';
+import { PrismaService } from '../../../prisma/prisma.service';
 import type {
   ConceptRepository,
   ConceptEntity,
   ConceptRelationEntity,
-} from '../domain/concept-repository.interface.js';
+} from '../domain/concept-repository.interface';
 import type { RelationType } from '@repo/shared-types';
 import { RELATION_TYPE } from '@repo/shared-types';
 

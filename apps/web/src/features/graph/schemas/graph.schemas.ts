@@ -48,5 +48,5 @@ export const CreateRelationRequestSchema = z.object({
 });
 
 export const CreateRelationResponseSchema = z.object({
-  slug: z.string(),
+  success: z.boolean(),
 });

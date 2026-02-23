@@ -22,7 +22,7 @@ export default function CollectionsPage() {
                 courses.
               </p>
             </div>
-            <CollectionList onSelect={setSelectedCollectionId} />
+            <CollectionList onSelectAction={setSelectedCollectionId} />
           </div>
         ) : (
           <CollectionDetail

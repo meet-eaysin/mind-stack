@@ -23,7 +23,7 @@ describe("Graph Feature API", () => {
       toId: "doc-2",
       type: "IS_PART_OF",
     });
-    expect(result.slug).toBe("ok");
+    expect(result.success).toBe(true);
   });
 
   it("should delete relation correctly", async () => {

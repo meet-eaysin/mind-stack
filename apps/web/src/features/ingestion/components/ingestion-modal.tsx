@@ -76,11 +76,10 @@ type YoutubeFormValues = {
   url: string;
 };
 
-const INGESTION_TABS = ["url", "text", "pdf", "youtube"] as const;
-type IngestionTab = (typeof INGESTION_TABS)[number];
+type IngestionTab = "url" | "text" | "pdf" | "youtube";
 
 function isIngestionTab(v: string): v is IngestionTab {
-  return (INGESTION_TABS as readonly string[]).includes(v);
+  return v === "url" || v === "text" || v === "pdf" || v === "youtube";
 }
 
 export function IngestionModal({
@@ -248,7 +247,10 @@ export function IngestionModal({
                     </FormItem>
                   )}
                 />
-                {renderActionButtons(() => onOpenChangeAction(false), isPending)}
+                {renderActionButtons(
+                  () => onOpenChangeAction(false),
+                  isPending,
+                )}
               </form>
             </Form>
           </TabsContent>
@@ -294,7 +296,10 @@ export function IngestionModal({
                     </FormItem>
                   )}
                 />
-                {renderActionButtons(() => onOpenChangeAction(false), isPending)}
+                {renderActionButtons(
+                  () => onOpenChangeAction(false),
+                  isPending,
+                )}
               </form>
             </Form>
           </TabsContent>
@@ -353,7 +358,10 @@ export function IngestionModal({
                     </FormItem>
                   )}
                 />
-                {renderActionButtons(() => onOpenChangeAction(false), isPending)}
+                {renderActionButtons(
+                  () => onOpenChangeAction(false),
+                  isPending,
+                )}
               </form>
             </Form>
           </TabsContent>
@@ -384,7 +392,10 @@ export function IngestionModal({
                   We will automatically extract and process the transcript from
                   this video.
                 </DialogDescription>
-                {renderActionButtons(() => onOpenChangeAction(false), isPending)}
+                {renderActionButtons(
+                  () => onOpenChangeAction(false),
+                  isPending,
+                )}
               </form>
             </Form>
           </TabsContent>

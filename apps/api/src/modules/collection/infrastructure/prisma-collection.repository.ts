@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../prisma/prisma.service.js';
+import { PrismaService } from '../../../prisma/prisma.service';
 import type {
   CollectionRepository,
   CollectionWithItems,
-} from '../domain/collection-repository.interface.js';
+} from '../domain/collection-repository.interface';
 import type {
   CollectionEntity,
   CollectionItemEntity,
-} from '../domain/collection.entity.js';
+} from '../domain/collection.entity';
 import { Prisma } from '@prisma/client'; // Added for explicit Prisma types
+import { LEARNING_STATUS } from '@repo/shared-types';
 
 @Injectable()
 export class PrismaCollectionRepository implements CollectionRepository {
@@ -143,7 +144,7 @@ export class PrismaCollectionRepository implements CollectionRepository {
       const itemCount = items.length;
       const completedCount = items.filter(
         (i: CollectionItemWithLearningStatus) =>
-          i.document.learningStatus === 'COMPLETED',
+          i.document.learningStatus === LEARNING_STATUS.COMPLETED,
       ).length;
       const progress = itemCount > 0 ? (completedCount / itemCount) * 100 : 0;
 

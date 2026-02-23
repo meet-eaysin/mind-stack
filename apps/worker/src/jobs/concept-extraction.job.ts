@@ -2,7 +2,7 @@ import type { PrismaClient } from "@repo/database";
 import type { LLMProvider } from "@repo/llm";
 import { createLogger } from "@repo/logger";
 import { randomUUID } from "node:crypto";
-import { RELATION_TYPE } from "@repo/shared-types";
+import { INGESTION_STATUS, RELATION_TYPE } from "@repo/shared-types";
 import { Job } from "bullmq";
 
 const logger = createLogger("ConceptExtractionJob");
@@ -27,7 +27,10 @@ export async function handleConceptExtractionJob(
     throw new Error(`Document not found: ${documentId}`);
   }
 
-  if (document.status !== "GRAPH_BUILDING" && document.status !== "EMBEDDING") {
+  if (
+    document.status !== INGESTION_STATUS.GRAPH_BUILDING &&
+    document.status !== INGESTION_STATUS.EMBEDDING
+  ) {
     logger.warn("Skipping graph sync, document in wrong state", {
       documentId,
       status: document.status,
@@ -37,7 +40,7 @@ export async function handleConceptExtractionJob(
 
   await prisma.document.update({
     where: { id: documentId },
-    data: { status: "GRAPH_BUILDING" },
+    data: { status: INGESTION_STATUS.GRAPH_BUILDING },
   });
 
   try {
@@ -64,7 +67,7 @@ export async function handleConceptExtractionJob(
 
     await prisma.document.update({
       where: { id: documentId },
-      data: { status: "READY", processingError: null },
+      data: { status: INGESTION_STATUS.READY, processingError: null },
     });
   } catch (error) {
     logger.error("Failed to sync document graph", {
@@ -73,7 +76,7 @@ export async function handleConceptExtractionJob(
     const message = error instanceof Error ? error.message : String(error);
     await prisma.document.update({
       where: { id: documentId },
-      data: { status: "FAILED", processingError: message },
+      data: { status: INGESTION_STATUS.FAILED, processingError: message },
     });
     throw error;
   }

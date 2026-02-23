@@ -1,62 +1,29 @@
 import { z } from "zod";
+import {
+  INGESTION_STATUS,
+  SOURCE_TYPE,
+  RELATION_TYPE,
+  LEARNING_STATUS,
+  DOCUMENT_TYPE,
+  ANNOTATION_TYPE,
+  MODEL_PROVIDER,
+} from "@repo/shared-types";
 
 // ── Shared Enums ──
 
-export const IngestionStatusSchema = z.enum([
-  "INGESTED",
-  "INITIALIZING",
-  "CHUNKING",
-  "EMBEDDING",
-  "GRAPH_BUILDING",
-  "READY",
-  "FAILED",
-]);
+export const IngestionStatusSchema = z.enum(INGESTION_STATUS);
 
-export const SourceTypeSchema = z.enum(["URL", "TEXT", "PDF", "YOUTUBE"]);
+export const SourceTypeSchema = z.enum(SOURCE_TYPE);
 
-export const RelationTypeSchema = z.enum([
-  "RELATES_TO",
-  "IS_PART_OF",
-  "DEPENDS_ON",
-  "SIMILAR_TO",
-  "LEADS_TO",
-  "IS_PREREQUISITE_OF",
-  "REFERENCES",
-  "EXTENDS",
-  "CONTRADICTS",
-  "FOLLOW_UP_TO",
-]);
+export const RelationTypeSchema = z.enum(RELATION_TYPE);
 
-export const LearningStatusSchema = z.enum([
-  "TO_WATCH",
-  "TO_READ",
-  "UPCOMING",
-  "IN_PROGRESS",
-  "REVIEW",
-  "COMPLETED",
-  "PENDING_COMPLETION",
-]);
+export const LearningStatusSchema = z.enum(LEARNING_STATUS);
 
-export const DocumentTypeSchema = z.enum([
-  "ARTICLE",
-  "VIDEO",
-  "COURSE_LESSON",
-  "BOOK",
-  "NOTE",
-  "RFC",
-  "BLOG",
-  "TRANSCRIPT",
-  "OTHER",
-]);
+export const DocumentTypeSchema = z.enum(DOCUMENT_TYPE);
 
-export const AnnotationTypeSchema = z.enum([
-  "HIGHLIGHT",
-  "NOTE",
-  "QUESTION",
-  "INSIGHT",
-]);
+export const AnnotationTypeSchema = z.enum(ANNOTATION_TYPE);
 
-export const ModelProviderSchema = z.enum(["OLLAMA"]);
+export const ModelProviderSchema = z.enum(MODEL_PROVIDER);
 
 // ── Shared Models ──
 

@@ -38,10 +38,10 @@ export default function SearchPage() {
   const hasAdvancedFilters = useMemo(() => {
     return Boolean(
       tags.trim() ||
-        fromDate.trim() ||
-        toDate.trim() ||
-        status.trim() ||
-        keyword.trim(),
+      fromDate.trim() ||
+      toDate.trim() ||
+      status.trim() ||
+      keyword.trim(),
     );
   }, [fromDate, keyword, status, tags, toDate]);
 
@@ -78,7 +78,8 @@ export default function SearchPage() {
     search.mutate({ query: trimmedQuery });
   };
 
-  const semanticResults = search.data?.documents ?? filteredSearch.data?.documents;
+  const semanticResults =
+    search.data?.documents ?? filteredSearch.data?.documents;
   const hasSemanticResults = (semanticResults?.length ?? 0) > 0;
   const hasAskResult = Boolean(askQuestion.data);
 
@@ -217,7 +218,11 @@ export default function SearchPage() {
             className="flex-1"
             data-testid="search-input"
           />
-          <Button type="submit" disabled={isLoading} data-testid="search-submit">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            data-testid="search-submit"
+          >
             {isLoading ? "..." : mode === "ask" ? "Ask" : "Search"}
           </Button>
         </form>

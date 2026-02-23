@@ -1,135 +1,267 @@
-# Turborepo starter
+# Mind Stack Monorepo
 
-This Turborepo starter is maintained by the Turborepo core team.
+Mind Stack is a Turborepo monorepo for personal knowledge ingestion, retrieval, graph exploration, and spaced review.
 
-## Using this example
+## Overview
 
-Run the following command:
+- `apps/api`: NestJS backend (HTTP API + ingestion processor + clean-architecture modules)
+- `apps/web`: Next.js application for the product UI
+- `apps/worker`: BullMQ worker for asynchronous ingestion/review jobs
+- `apps/docs`: Next.js docs playground app
+- `packages/*`: shared runtime libraries and build-time tooling
 
-```sh
-npx create-turbo@latest
+## Architecture
+
+### Apps and responsibilities
+
+- `api`: composition root for backend modules; orchestrates use-cases, validation, guards, filters, interceptors, and infrastructure adapters.
+- `web`: presentation layer for end users; feature-scoped API clients/hooks/components built on React Query.
+- `worker`: asynchronous execution boundary for queue jobs (chunking, embedding, concept extraction, daily review, URL extraction).
+- `docs`: isolated docs/demo app using shared UI package.
+
+### Shared packages
+
+- `@repo/shared-types`: cross-app domain enums and DTO contracts.
+- `@repo/config`: centralized env schema/loader.
+- `@repo/logger`: centralized structured logger.
+- `@repo/database`: Prisma client package.
+- `@repo/llm`, `@repo/embeddings`, `@repo/vector-store`: external service adapters.
+- `@repo/eslint-config`, `@repo/typescript-config`: shared build/lint policy.
+- `@repo/ui`: shared UI primitives.
+
+## Clean Architecture In This Repo
+
+Backend modules follow `domain` / `application` / `infrastructure` / `presentation` separation:
+
+- `domain`: entities, value rules, repository interfaces.
+- `application`: use-cases and orchestration logic.
+- `infrastructure`: Prisma repositories, queue adapters, external integrations.
+- `presentation`: Nest controllers/modules/DTOs.
+
+Dependency direction stays inward:
+
+- `presentation -> application -> domain`
+- `infrastructure -> domain` (implements domain ports)
+
+Frontend keeps data logic in feature API/hook layers and keeps components presentation-focused.
+
+## Monorepo Structure
+
+```text
+apps/
+  api/
+  web/
+  worker/
+  docs/
+packages/
+  config/
+  database/
+  embeddings/
+  eslint-config/
+  llm/
+  logger/
+  shared-types/
+  typescript-config/
+  ui/
+  vector-store/
 ```
 
-## What's inside?
+## Prerequisites
 
-This Turborepo includes the following packages/apps:
+- Node.js `>= 18`
+- Yarn `4.x`
+- Docker + Docker Compose
 
-### Apps and Packages
+## Environment Configuration
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+Root `.env` is consumed by backend/worker config via `@repo/config`.
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+Required server variables:
 
-### Utilities
+- `NODE_ENV`
+- `DATABASE_URL`
+- `API_PORT`
+- `OLLAMA_BASE_URL`
+- `OLLAMA_MODEL`
+- `OLLAMA_EMBED_MODEL`
+- `CHROMA_URL`
+- `CHROMA_COLLECTION`
+- `REDIS_URL`
+- `LOG_LEVEL`
+- `WEB_URL`
+- `API_URL`
+- `API_KEY` (optional; enables API key guard when set)
 
-This Turborepo has some additional tools already setup for you:
+Web variable:
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+- `NEXT_PUBLIC_API_URL` (for `apps/web`, defaults to `http://localhost:4000/api/v1`)
 
-### Build
+## Local Development Setup
 
-To build all apps and packages, run the following command:
+1. Install dependencies:
 
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+```bash
+yarn install
 ```
 
-### Develop
+2. Start infrastructure:
 
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+```bash
+docker compose up -d
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+3. Optional: pull Ollama models defined in `.env`:
 
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+```bash
+docker compose --profile init-models up ollama-init
 ```
 
-### Remote Caching
+4. Sync Prisma schema:
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+```bash
+yarn workspace @repo/database db:push
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+## Run Services
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+Run everything (all workspace `dev` scripts through Turbo):
 
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+```bash
+yarn dev
 ```
 
-## Useful Links
+Run backend only:
 
-Learn more about the power of Turborepo:
+```bash
+yarn workspace api dev
+```
 
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+Run web only:
+
+```bash
+yarn workspace web dev
+```
+
+Run worker/jobs only:
+
+```bash
+yarn workspace worker dev
+```
+
+Run docs app only:
+
+```bash
+yarn workspace docs dev
+```
+
+## Build
+
+Build all workspaces:
+
+```bash
+yarn build
+```
+
+## Testing
+
+All workspaces:
+
+```bash
+yarn test
+```
+
+Backend only:
+
+```bash
+yarn workspace api test
+yarn workspace api test:e2e
+```
+
+Web only:
+
+```bash
+yarn workspace web test
+```
+
+## Linting and Typechecking
+
+All workspaces:
+
+```bash
+yarn lint
+yarn typecheck
+```
+
+Targeted examples:
+
+```bash
+yarn workspace api typecheck
+yarn workspace web lint
+yarn workspace worker typecheck
+```
+
+## API Response/Error Model
+
+- Success payloads remain endpoint-specific (no global success envelope).
+- Error payloads are standardized globally in API filter:
+  - `statusCode`
+  - `error`
+  - `message`
+  - `details?` (validation details)
+  - `path`
+  - `timestamp`
+  - `correlationId`
+
+## Swagger
+
+API bootstrap includes centralized Swagger wiring (`DocumentBuilder` + `createDocument`).
+
+If `@nestjs/swagger` is not installed in the environment, the API starts without docs and logs a warning. Install:
+
+```bash
+yarn workspace api add @nestjs/swagger swagger-ui-express
+```
+
+Then docs are available at:
+
+- `http://localhost:4000/api/docs`
+
+## Troubleshooting
+
+### Ollama/Embedding failures
+
+- Check Ollama container is running:
+
+```bash
+docker compose ps
+```
+
+- Verify Ollama endpoint from host:
+
+```bash
+curl -sS http://localhost:11434/api/tags
+```
+
+- Ensure models in `.env` are available (`OLLAMA_EMBED_MODEL`, `OLLAMA_MODEL`).
+- If embedding health fails in API, call:
+  - `GET /api/v1/admin/health/embedding-model` with `x-user-id` header.
+
+### Queue jobs not progressing
+
+- Confirm Redis is reachable (`REDIS_URL`).
+- Confirm worker process is running (`yarn workspace worker dev`).
+- Check API and worker logs for `correlationId`, `jobType`, and `documentId`.
+
+### Database issues
+
+- Ensure Postgres container is healthy.
+- Re-run schema push:
+
+```bash
+yarn workspace @repo/database db:push
+```
+
+### Web cannot reach API
+
+- Verify `NEXT_PUBLIC_API_URL` points to `http://localhost:4000/api/v1` (or your target API URL).
+- Confirm backend CORS origin (`WEB_URL`) matches web host.

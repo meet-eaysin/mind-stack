@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Inject, Headers } from '@nestjs/common';
-import { GetQueueMetricsUseCase } from '../application/get-queue-metrics.use-case.js';
-import { CleanupConceptsUseCase } from '../application/cleanup-concepts.use-case.js';
-import { PrismaService } from '../../../prisma/prisma.service.js';
-import { VECTOR_STORE } from '../../../common/tokens.js';
+import { GetQueueMetricsUseCase } from '../application/get-queue-metrics.use-case';
+import { CleanupConceptsUseCase } from '../application/cleanup-concepts.use-case';
+import { PrismaService } from '../../../prisma/prisma.service';
+import { VECTOR_STORE } from '../../../common/tokens';
 import type { VectorStore } from '@repo/vector-store';
 import {
   type QueueMetricsResponse,
@@ -11,9 +11,10 @@ import {
   type OrphansResponse,
   type FailedDocumentsResponse,
   type EmbeddingModelHealthResponse,
+  INGESTION_STATUS,
 } from '@repo/shared-types';
-import { CheckEmbeddingModelUseCase } from '../../settings/application/check-embedding-model.use-case.js';
-import { getUserIdFromHeader } from '../../../common/request-user.js';
+import { CheckEmbeddingModelUseCase } from '../../settings/application/check-embedding-model.use-case';
+import { getUserIdFromHeader } from '../../../common/request-user';
 
 @Controller('admin')
 export class AdminController {
@@ -52,9 +53,7 @@ export class AdminController {
     const allChunkIds = allChunks.map((c: { id: string }) => c.id);
 
     // 2. Check which of these IDs exist in Chroma
-    const existingIdsInChroma = (await this.vectorStore.getByIds(
-      allChunkIds,
-    )) as string[];
+    const existingIdsInChroma = await this.vectorStore.getByIds(allChunkIds);
     const existingIdsSet = new Set(existingIdsInChroma);
 
     // 3. Filter IDs that are in Prisma but NOT in Chroma
@@ -76,7 +75,7 @@ export class AdminController {
     const orphanChunks: Array<{ id: string; documentId: string }> = [];
 
     // 2. Embeddings in Chroma without Chunks in Postgres
-    const allChromaIds = (await this.vectorStore.getAllIds()) as string[];
+    const allChromaIds = await this.vectorStore.getAllIds();
     const allChunks = await this.prisma.chunk.findMany({
       select: { id: true },
     });
@@ -110,7 +109,7 @@ export class AdminController {
   async getFailedDocuments(): Promise<FailedDocumentsResponse> {
     const failedDocuments = await this.prisma.document.findMany({
       where: {
-        status: 'FAILED',
+        status: INGESTION_STATUS.FAILED,
       },
       select: {
         id: true,

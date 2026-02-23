@@ -3,7 +3,7 @@ import { OllamaModelRegistry } from "@repo/embeddings";
 import type { VectorStore, VectorDocument } from "@repo/vector-store";
 import { createLogger } from "@repo/logger";
 import { Job, Queue } from "bullmq";
-import { JOB_TYPE } from "@repo/shared-types";
+import { INGESTION_STATUS, JOB_TYPE } from "@repo/shared-types";
 import { resolveUserLlmConfig } from "../llm-config";
 
 const logger = createLogger("EmbeddingJob");
@@ -83,7 +83,10 @@ export async function handleEmbeddingJob(
   }
 
   // Only run if we are in the correct state (or retrying)
-  if (document.status !== "EMBEDDING" && document.status !== "CHUNKING") {
+  if (
+    document.status !== INGESTION_STATUS.EMBEDDING &&
+    document.status !== INGESTION_STATUS.CHUNKING
+  ) {
     logger.warn("Skipping embedding, document in wrong state", {
       documentId,
       status: document.status,
@@ -93,7 +96,7 @@ export async function handleEmbeddingJob(
 
   await prisma.document.update({
     where: { id: documentId },
-    data: { status: "EMBEDDING", processingError: null },
+    data: { status: INGESTION_STATUS.EMBEDDING, processingError: null },
   });
 
   try {
@@ -128,7 +131,7 @@ export async function handleEmbeddingJob(
       logger.warn("No chunks found for document", { documentId });
       await prisma.document.update({
         where: { id: documentId },
-        data: { status: "READY" },
+        data: { status: INGESTION_STATUS.READY },
       });
       return;
     }
@@ -171,7 +174,7 @@ export async function handleEmbeddingJob(
 
     await prisma.document.update({
       where: { id: documentId },
-      data: { status: "GRAPH_BUILDING" },
+      data: { status: INGESTION_STATUS.GRAPH_BUILDING },
     });
 
     await ingestionQueue.add(JOB_TYPE.CONCEPT_EXTRACTION, {
@@ -187,7 +190,7 @@ export async function handleEmbeddingJob(
     const message = error instanceof Error ? error.message : String(error);
     await prisma.document.update({
       where: { id: documentId },
-      data: { status: "FAILED", processingError: message },
+      data: { status: INGESTION_STATUS.FAILED, processingError: message },
     });
     logger.error("Embedding failed", { documentId, error: message });
     throw error;

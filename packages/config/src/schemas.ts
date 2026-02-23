@@ -15,6 +15,7 @@ export const serverEnvSchema = z.object({
   LOG_LEVEL: z
     .enum(["fatal", "error", "warn", "info", "debug", "trace"])
     .default("info"),
+  API_KEY: z.string().optional(),
   WEB_URL: z.string().default("http://localhost:3000"),
   API_URL: z.string().default("http://localhost:4000"),
 });
@@ -23,5 +24,12 @@ export const webEnvSchema = z.object({
   NEXT_PUBLIC_API_URL: z.string().url().default("http://localhost:4000/api/v1"),
 });
 
+export const runtimeEnvSchema = z.object({
+  NODE_ENV: z
+    .enum(["development", "production", "test"])
+    .default("development"),
+});
+
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
 export type WebEnv = z.infer<typeof webEnvSchema>;
+export type RuntimeEnv = z.infer<typeof runtimeEnvSchema>;

@@ -1,8 +1,12 @@
 import { randomUUID } from 'node:crypto';
-import type { DocumentRepository } from '../domain/document-repository.interface.js';
-import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port.js';
-import { createDocument } from '../domain/document.entity.js';
+import type { DocumentRepository } from '../domain/document-repository.interface';
+import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port';
+import { createDocument } from '../domain/document.entity';
 import { SOURCE_TYPE, INGESTION_STATUS } from '@repo/shared-types';
+import {
+  BadRequestException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 
 export class IngestYoutubeUseCase {
   constructor(
@@ -56,7 +60,7 @@ export class IngestYoutubeUseCase {
     const videoId =
       parsed.searchParams.get('v') ?? parsed.pathname.split('/').pop();
     if (!videoId) {
-      throw new Error(`Cannot extract video ID from URL: ${url}`);
+      throw new BadRequestException(`Cannot extract video ID from URL: ${url}`);
     }
     return videoId;
   }
@@ -64,19 +68,23 @@ export class IngestYoutubeUseCase {
   private async fetchTranscript(videoId: string): Promise<string> {
     const response = await fetch(`https://www.youtube.com/watch?v=${videoId}`);
     if (!response.ok) {
-      throw new Error(`Failed to fetch YouTube page: ${response.status}`);
+      throw new ServiceUnavailableException(
+        `Failed to fetch YouTube page: ${response.status}`,
+      );
     }
     const html = await response.text();
 
     const captionMatch = html.match(/"captionTracks":\[.*?"baseUrl":"(.*?)"/);
     if (!captionMatch?.[1]) {
-      throw new Error('No captions found for this video');
+      throw new BadRequestException('No captions found for this video');
     }
 
     const captionUrl = captionMatch[1].replace(/\\u0026/g, '&');
     const captionResponse = await fetch(captionUrl);
     if (!captionResponse.ok) {
-      throw new Error(`Failed to fetch captions: ${captionResponse.status}`);
+      throw new ServiceUnavailableException(
+        `Failed to fetch captions: ${captionResponse.status}`,
+      );
     }
 
     const captionXml = await captionResponse.text();

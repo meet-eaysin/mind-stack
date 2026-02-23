@@ -52,7 +52,7 @@ describe("Collections Behavior", () => {
       }),
     );
 
-    render(<CollectionList onSelect={() => {}} />);
+    render(<CollectionList onSelectAction={() => {}} />);
 
     await waitFor(() => {
       expect(screen.getByText("Systems Basics")).toBeInTheDocument();
@@ -81,7 +81,7 @@ describe("Collections Behavior", () => {
       }),
     );
 
-    render(<CollectionList onSelect={() => {}} />);
+    render(<CollectionList onSelectAction={() => {}} />);
     expect(
       screen.queryByText("No collections found matching your search."),
     ).toBeNull();
@@ -102,13 +102,13 @@ describe("Collections Behavior", () => {
         ),
       ),
     );
-    render(<CollectionList onSelect={() => {}} />);
+    render(<CollectionList onSelectAction={() => {}} />);
     await waitFor(() => {
       expect(screen.getByText("Invalid collection filter")).toBeInTheDocument();
     });
 
     server.use(http.get("*/collections", () => HttpResponse.error()));
-    render(<CollectionList onSelect={() => {}} />);
+    render(<CollectionList onSelectAction={() => {}} />);
     await waitFor(() => {
       expect(screen.getByText(/failed to fetch/i)).toBeInTheDocument();
     });

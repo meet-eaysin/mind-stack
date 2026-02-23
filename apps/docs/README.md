@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/create-next-app).
+# Docs (`apps/docs`)
 
-## Getting Started
+Next.js docs/playground app in the monorepo.
 
-First, run the development server:
+## Purpose
+
+- Hosts a standalone docs/demo surface.
+- Validates shared UI package usage (`@repo/ui`) in a separate app boundary.
+
+## Clean Architecture Role
+
+- Documentation/presentation-only app.
+- No backend orchestration or domain logic.
+
+## Runtime Dependencies
+
+- `@repo/ui`
+- Next.js runtime
+
+## Environment Variables
+
+- None required by this app currently.
+
+## Run Locally
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+yarn workspace docs dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Build
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+yarn workspace docs build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load Inter, a custom Google Font.
+## Tests
 
-## Learn More
+- No dedicated test script in this app.
+- Use lint/typecheck as quality gates.
 
-To learn more about Next.js, take a look at the following resources:
+## Lint and Typecheck
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+yarn workspace docs lint
+yarn workspace docs typecheck
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Debug
 
-## Deploy on Vercel
+- Run `yarn workspace docs dev` and inspect Next.js logs/browser output.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Port
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Dev port: `3001` (`next dev --port 3001`)
+
+## Integration
+
+- Uses shared UI package from `packages/ui`.
+- Does not depend on `apps/api` at runtime.

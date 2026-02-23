@@ -1,6 +1,7 @@
-import type { DocumentRepository } from '../domain/document-repository.interface.js';
-import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port.js';
+import type { DocumentRepository } from '../domain/document-repository.interface';
+import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port';
 import { INGESTION_STATUS } from '@repo/shared-types';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 
 export class RetryIngestionUseCase {
   constructor(
@@ -11,11 +12,13 @@ export class RetryIngestionUseCase {
   async execute(documentId: string): Promise<{ jobId: string }> {
     const document = await this.documentRepository.findById(documentId);
     if (!document) {
-      throw new Error(`Document not found: ${documentId}`);
+      throw new NotFoundException(`Document not found: ${documentId}`);
     }
 
     if (document.status !== INGESTION_STATUS.FAILED) {
-      throw new Error(`Cannot retry document with status: ${document.status}`);
+      throw new ConflictException(
+        `Cannot retry document with status: ${document.status}`,
+      );
     }
 
     await this.documentRepository.updateStatus(

@@ -10,17 +10,17 @@ import {
   Headers,
 } from '@nestjs/common';
 import type { GraphResponse } from '@repo/shared-types';
-import { BuildGraphUseCase } from '../application/build-graph.use-case.js';
-import { QueryGraphUseCase } from '../application/query-graph.use-case.js';
-import { GetNeighborhoodUseCase } from '../application/get-neighborhood.use-case.js';
-import { CreateRelationUseCase } from '../application/create-relation.use-case.js';
-import { DeleteRelationUseCase } from '../application/delete-relation.use-case.js';
+import { BuildGraphUseCase } from '../application/build-graph.use-case';
+import { QueryGraphUseCase } from '../application/query-graph.use-case';
+import { GetNeighborhoodUseCase } from '../application/get-neighborhood.use-case';
+import { CreateRelationUseCase } from '../application/create-relation.use-case';
+import { DeleteRelationUseCase } from '../application/delete-relation.use-case';
 import {
   ConceptNeighborhoodDto,
   BuildGraphDto,
   CreateRelationDto,
-} from './graph.dtos.js';
-import { getUserIdFromHeader } from '../../../common/request-user.js';
+} from './graph.dtos';
+import { getUserIdFromHeader } from '../../../common/request-user';
 
 @Controller('graph')
 export class GraphController {
@@ -66,12 +66,12 @@ export class GraphController {
   async addRelation(
     @Body() dto: CreateRelationDto,
     @Headers('x-user-id') userId?: string,
-  ): Promise<{ slug: string }> {
+  ): Promise<{ success: boolean }> {
     await this.createRelation.execute({
       ...dto,
       userId: getUserIdFromHeader(userId),
     });
-    return { slug: 'ok' };
+    return { success: true };
   }
 
   @Delete('relations/:id')

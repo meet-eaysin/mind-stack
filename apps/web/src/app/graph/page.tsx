@@ -130,7 +130,7 @@ export default function GraphPage() {
                 <GraphVisualization
                   nodes={filteredData.nodes}
                   edges={filteredData.edges}
-                  onNodeSelect={setSelectedNodeId}
+                  onNodeSelectAction={setSelectedNodeId}
                   selectedNodeId={selectedNodeId}
                 />
               </div>

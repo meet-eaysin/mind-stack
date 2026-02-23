@@ -27,6 +27,7 @@ export type {
   IngestYoutubeRequest,
   IngestionResponse,
   IngestionJobStatusResponse,
+  ApiErrorResponse,
   DocumentListItem,
   DocumentListResponse,
   ChunkResponse,

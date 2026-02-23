@@ -62,7 +62,11 @@ const learningStatusColors: Record<string, string> = {
   PENDING_COMPLETION: "bg-amber-500/10 text-amber-500 border-amber-500/20",
 };
 
-export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
+type DocumentListProps = {
+  onSelectAction: (id: string) => void;
+};
+
+export function DocumentList({ onSelectAction }: DocumentListProps) {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -180,7 +184,7 @@ export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
                   data-testid={`document-item-${doc.id}`}
                 >
                   <button
-                    onClick={() => onSelect(doc.id)}
+                    onClick={() => onSelectAction(doc.id)}
                     className="flex min-w-0 flex-1 items-center gap-3 text-left"
                   >
                     <div className="relative">
@@ -204,23 +208,25 @@ export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
                         >
                           {doc.learningStatus.replace("_", " ")}
                         </Badge>
-                        {doc.status === "FAILED" && (
+                        {doc.status === INGESTION_STATUS.FAILED && (
                           <Badge
                             variant="destructive"
                             className="h-4 text-[9px] px-1 py-0 gap-1 rounded"
                           >
-                            <AlertCircle className="size-2.5" /> FAILED
+                            <AlertCircle className="size-2.5" />{" "}
+                            {INGESTION_STATUS.FAILED}
                           </Badge>
                         )}
-                        {doc.status !== "READY" && doc.status !== "FAILED" && (
-                          <Badge
-                            variant="secondary"
-                            className="h-4 text-[9px] px-1 py-0 gap-1 text-muted-foreground bg-muted rounded"
-                          >
-                            <RefreshCw className="size-2.5 animate-spin" />{" "}
-                            {doc.status}
-                          </Badge>
-                        )}
+                        {doc.status !== INGESTION_STATUS.READY &&
+                          doc.status !== INGESTION_STATUS.FAILED && (
+                            <Badge
+                              variant="secondary"
+                              className="h-4 text-[9px] px-1 py-0 gap-1 text-muted-foreground bg-muted rounded"
+                            >
+                              <RefreshCw className="size-2.5 animate-spin" />{" "}
+                              {doc.status}
+                            </Badge>
+                          )}
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
                         <span className="capitalize">
@@ -236,7 +242,7 @@ export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
                     </div>
                   </button>
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {doc.status === "FAILED" && (
+                    {doc.status === INGESTION_STATUS.FAILED && (
                       <Button
                         variant="outline"
                         size="sm"

@@ -48,7 +48,7 @@ function useResizablePreview() {
 
 interface ResizablePreviewProviderProps extends React.ComponentProps<"div"> {
   defaultWidth?: string;
-  onWidthChange?: (width: string) => void;
+  onWidthChangeAction?: (width: string) => void;
   minWidthPx?: number;
   defaultBreakpoint?: ViewportBreakpoint;
 }
@@ -56,7 +56,7 @@ interface ResizablePreviewProviderProps extends React.ComponentProps<"div"> {
 function ResizablePreviewProvider({
   children,
   defaultWidth = "100%",
-  onWidthChange,
+  onWidthChangeAction,
   minWidthPx = 325,
   className,
   defaultBreakpoint = "desktop",
@@ -75,18 +75,18 @@ function ResizablePreviewProvider({
   React.useEffect(() => {
     if (isMobileDevice) {
       setWidthState("100%");
-      onWidthChange?.("100%");
+      onWidthChangeAction?.("100%");
     }
-  }, [isMobileDevice, onWidthChange]);
+  }, [isMobileDevice, onWidthChangeAction]);
 
   const handleWidthChangeFromHook = React.useCallback(
     (px: number) => {
       const newWidth = `${px}px`;
       setWidthState(newWidth);
       setBreakpointState(null);
-      onWidthChange?.(newWidth);
+      onWidthChangeAction?.(newWidth);
     },
-    [onWidthChange],
+    [onWidthChangeAction],
   );
 
   const {
@@ -98,15 +98,15 @@ function ResizablePreviewProvider({
     handlePointerUp,
   } = useResizableWidth({
     minWidthPx,
-    onWidthChange: handleWidthChangeFromHook,
+    onWidthChangeAction: handleWidthChangeFromHook,
   });
 
   const setWidth = React.useCallback(
     (newWidth: string) => {
       setWidthState(newWidth);
-      onWidthChange?.(newWidth);
+      onWidthChangeAction?.(newWidth);
     },
-    [onWidthChange],
+    [onWidthChangeAction],
   );
 
   const setBreakpoint = React.useCallback(
@@ -117,9 +117,9 @@ function ResizablePreviewProvider({
 
       setWidthState(newWidth);
       setBreakpointState(bp);
-      onWidthChange?.(newWidth);
+      onWidthChangeAction?.(newWidth);
     },
-    [onWidthChange],
+    [onWidthChangeAction],
   );
 
   const contextValue: ResizablePreviewContextValue = React.useMemo(

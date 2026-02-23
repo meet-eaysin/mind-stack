@@ -4,7 +4,16 @@ import * as React from "react";
 
 type UseResizableWidthOptions = {
   minWidthPx: number;
-  onWidthChange: (widthPx: number) => void;
+  onWidthChangeAction: (widthPx: number) => void;
+};
+
+type UseResizableWidthResult = {
+  isDragging: boolean;
+  boundaryRef: React.RefObject<HTMLDivElement | null>;
+  resizableContainerRef: React.RefObject<HTMLDivElement | null>;
+  handlePointerDown: (e: React.PointerEvent<HTMLDivElement>) => void;
+  handlePointerMove: (e: React.PointerEvent<HTMLDivElement>) => void;
+  handlePointerUp: (e: React.PointerEvent<HTMLDivElement>) => void;
 };
 
 function clamp(value: number, min: number, max: number) {
@@ -13,8 +22,8 @@ function clamp(value: number, min: number, max: number) {
 
 export function useResizableWidth({
   minWidthPx,
-  onWidthChange,
-}: UseResizableWidthOptions) {
+  onWidthChangeAction,
+}: UseResizableWidthOptions): UseResizableWidthResult {
   const [isDragging, setIsDragging] = React.useState(false);
 
   // Optional: Attach to define a specific boundary container
@@ -72,7 +81,9 @@ export function useResizableWidth({
 
       try {
         e.currentTarget.setPointerCapture(e.pointerId);
-      } catch {}
+      } catch {
+        // Pointer capture is not available in all environments.
+      }
     },
     [getCurrentWidth, calculateMaxWidth],
   );
@@ -88,9 +99,9 @@ export function useResizableWidth({
         maxAvailableWidth.current,
       );
 
-      onWidthChange(Math.round(newWidth));
+      onWidthChangeAction(Math.round(newWidth));
     },
-    [isDragging, minWidthPx, onWidthChange],
+    [isDragging, minWidthPx, onWidthChangeAction],
   );
 
   const handlePointerUp = React.useCallback(
@@ -102,7 +113,9 @@ export function useResizableWidth({
 
       try {
         e.currentTarget.releasePointerCapture(e.pointerId);
-      } catch {}
+      } catch {
+        // Pointer release can fail if capture was not acquired.
+      }
     },
     [isDragging],
   );
@@ -114,5 +127,5 @@ export function useResizableWidth({
     handlePointerDown,
     handlePointerMove,
     handlePointerUp,
-  } as const;
+  };
 }

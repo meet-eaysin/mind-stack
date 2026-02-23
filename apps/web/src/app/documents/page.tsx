@@ -32,7 +32,7 @@ function DocumentsPageContent() {
             onBackAction={() => setSelectedDocId(null)}
           />
         ) : (
-          <DocumentList onSelect={setSelectedDocId} />
+          <DocumentList onSelectAction={setSelectedDocId} />
         )}
       </div>
     </AppShell>

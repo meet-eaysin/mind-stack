@@ -31,7 +31,7 @@ export const handlers = [
   }),
   http.post("*/graph/relations", async ({ request }) => {
     CreateRelationRequestSchema.parse(await request.json());
-    return HttpResponse.json({ slug: "ok" });
+    return HttpResponse.json({ success: true });
   }),
   http.delete("*/graph/relations/:id", () => {
     return new HttpResponse(null, { status: 204 });

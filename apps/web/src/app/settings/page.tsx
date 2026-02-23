@@ -21,6 +21,7 @@ import {
   UserLlmConfigSchema,
 } from "@/features/settings/schemas/settings.schemas";
 import type { UpdateUserLlmConfig } from "@/features/settings/types";
+import { MODEL_PROVIDER } from "@repo/shared-types";
 
 export default function SettingsPage() {
   const configQuery = useLlmConfig();
@@ -30,9 +31,9 @@ export default function SettingsPage() {
   const form = useForm<UpdateUserLlmConfig>({
     resolver: zodResolver(UpdateUserLlmConfigSchema),
     defaultValues: {
-      embeddingProvider: "OLLAMA",
+      embeddingProvider: MODEL_PROVIDER.OLLAMA,
       embeddingModel: "",
-      generationProvider: "OLLAMA",
+      generationProvider: MODEL_PROVIDER.OLLAMA,
       generationModel: "",
     },
   });

@@ -7,6 +7,7 @@ import {
   DocumentTypeSchema,
   AnnotationTypeSchema,
 } from "@/schemas/api.schemas";
+import { DOCUMENT_TYPE, LEARNING_STATUS } from "@repo/shared-types";
 
 const MetadataValueSchema = z.union([
   z.string(),
@@ -23,8 +24,8 @@ export const DocumentListItemSchema = z.object({
   sourceUrl: z.string().nullable(),
   status: IngestionStatusSchema,
   processingError: z.string().nullable().optional(),
-  learningStatus: LearningStatusSchema.default("UPCOMING"),
-  type: DocumentTypeSchema.default("OTHER"),
+  learningStatus: LearningStatusSchema.default(LEARNING_STATUS.UPCOMING),
+  type: DocumentTypeSchema.default(DOCUMENT_TYPE.OTHER),
   author: z.string().nullable().optional(),
   publisher: z.string().nullable().optional(),
   publishedAt: z.string().nullable().optional(),
@@ -68,8 +69,8 @@ const DocumentDetailSchema = z.object({
   importanceScore: z.number().nullable(),
   status: IngestionStatusSchema,
   processingError: z.string().nullable().optional(),
-  learningStatus: LearningStatusSchema.default("UPCOMING"),
-  type: DocumentTypeSchema.default("OTHER"),
+  learningStatus: LearningStatusSchema.default(LEARNING_STATUS.UPCOMING),
+  type: DocumentTypeSchema.default(DOCUMENT_TYPE.OTHER),
   author: z.string().nullable().optional(),
   publisher: z.string().nullable().optional(),
   publishedAt: z.string().nullable().optional(),

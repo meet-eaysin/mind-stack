@@ -57,9 +57,6 @@ async function main(): Promise<void> {
   >(
     "ingestion",
     async (job) => {
-      console.log(
-        `[DEBUG] Received job: ${job.name} for document: ${job.data.documentId}`,
-      );
       logger.info(`Processing job ${job.name}`, {
         jobId: job.id,
         data: job.data,

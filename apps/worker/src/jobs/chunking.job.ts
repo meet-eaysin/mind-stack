@@ -2,7 +2,7 @@ import { Prisma, PrismaClient } from "@repo/database";
 import { createLogger } from "@repo/logger";
 import { randomUUID } from "node:crypto";
 import { Job, Queue } from "bullmq";
-import { JOB_TYPE } from "@repo/shared-types";
+import { INGESTION_STATUS, JOB_TYPE } from "@repo/shared-types";
 
 const logger = createLogger("ChunkingJob");
 
@@ -30,7 +30,7 @@ export async function handleChunkingJob(
     logger.info("Chunks already exist, skipping chunking", { documentId });
     await prisma.document.update({
       where: { id: documentId },
-      data: { status: "EMBEDDING", processingError: null },
+      data: { status: INGESTION_STATUS.EMBEDDING, processingError: null },
     });
     await ingestionQueue.add(JOB_TYPE.EMBEDDING, {
       documentId,
@@ -41,7 +41,7 @@ export async function handleChunkingJob(
 
   await prisma.document.update({
     where: { id: documentId },
-    data: { status: "CHUNKING", processingError: null },
+    data: { status: INGESTION_STATUS.CHUNKING, processingError: null },
   });
 
   try {
@@ -64,7 +64,7 @@ export async function handleChunkingJob(
 
     await prisma.document.update({
       where: { id: documentId },
-      data: { status: "EMBEDDING", processingError: null },
+      data: { status: INGESTION_STATUS.EMBEDDING, processingError: null },
     });
 
     await ingestionQueue.add(JOB_TYPE.EMBEDDING, {
@@ -80,7 +80,7 @@ export async function handleChunkingJob(
     const message = error instanceof Error ? error.message : String(error);
     await prisma.document.update({
       where: { id: documentId },
-      data: { status: "FAILED", processingError: message },
+      data: { status: INGESTION_STATUS.FAILED, processingError: message },
     });
     logger.error("Chunking failed", { documentId, error: message });
     throw error;

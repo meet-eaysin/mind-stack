@@ -3,7 +3,13 @@ import { env } from "@/config/env";
 
 export type ApiError =
   | { type: "network"; message: string }
-  | { type: "backend"; status: number; message: string }
+  | {
+      type: "backend";
+      status: number;
+      message: string;
+      details?: string[];
+      correlationId?: string;
+    }
   | { type: "validation"; issues: readonly string[] };
 
 const ApiErrorSchema = z.discriminatedUnion("type", [
@@ -12,6 +18,8 @@ const ApiErrorSchema = z.discriminatedUnion("type", [
     type: z.literal("backend"),
     status: z.number(),
     message: z.string(),
+    details: z.array(z.string()).optional(),
+    correlationId: z.string().optional(),
   }),
   z.object({
     type: z.literal("validation"),
@@ -36,7 +44,17 @@ export function getApiErrorMessage(error: object | null | undefined): string {
   }
 }
 
-const ErrorResponseSchema = z.object({
+const StandardizedErrorResponseSchema = z.object({
+  statusCode: z.number(),
+  error: z.string(),
+  message: z.string(),
+  details: z.array(z.string()).optional(),
+  correlationId: z.string().optional(),
+  path: z.string().optional(),
+  timestamp: z.string().optional(),
+});
+
+const LegacyErrorResponseSchema = z.object({
   message: z.string(),
 });
 
@@ -59,11 +77,20 @@ async function handleResponse<T>(
 ): Promise<T> {
   if (!response.ok) {
     let errorMessage = "An unexpected error occurred";
+    let details: string[] | undefined;
+    let correlationId: string | undefined;
     try {
       const errorData = await response.json();
-      const parsed = ErrorResponseSchema.safeParse(errorData);
-      if (parsed.success) {
-        errorMessage = parsed.data.message;
+      const standardized = StandardizedErrorResponseSchema.safeParse(errorData);
+      if (standardized.success) {
+        errorMessage = standardized.data.message;
+        details = standardized.data.details;
+        correlationId = standardized.data.correlationId;
+      } else {
+        const parsed = LegacyErrorResponseSchema.safeParse(errorData);
+        if (parsed.success) {
+          errorMessage = parsed.data.message;
+        }
       }
     } catch {
       // Failed to parse JSON error, fallback to default message
@@ -73,6 +100,8 @@ async function handleResponse<T>(
       type: "backend",
       status: response.status,
       message: errorMessage,
+      details,
+      correlationId,
     };
     throw backendError;
   }

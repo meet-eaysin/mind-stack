@@ -1,5 +1,9 @@
-import type { ConceptRepository } from '../domain/concept-repository.interface.js';
-import { HIERARCHY_RELATION_TYPES } from '../domain/document-graph.js';
+import type { ConceptRepository } from '../domain/concept-repository.interface';
+import { RELATION_TYPE } from '@repo/shared-types';
+
+const isHierarchyRelationType = (value: string): boolean =>
+  value === RELATION_TYPE.IS_PART_OF ||
+  value === RELATION_TYPE.IS_PREREQUISITE_OF;
 
 export class DeleteRelationUseCase {
   constructor(private readonly conceptRepository: ConceptRepository) {}
@@ -13,27 +17,26 @@ export class DeleteRelationUseCase {
     const root = await this.conceptRepository.getRootConcept();
     await this.conceptRepository.deleteRelation(relationId);
 
-    const isHierarchyRelation = HIERARCHY_RELATION_TYPES.includes(
-      relation.relationType,
-    );
+    const fromConceptId = String(relation.fromConceptId);
+    const relationType = String(relation.relationType);
+    const isHierarchyRelation = isHierarchyRelationType(relationType);
     if (!isHierarchyRelation) {
       return;
     }
 
-    const remaining = await this.conceptRepository.findRelationsForConcept(
-      relation.fromConceptId,
-    );
+    const remaining =
+      await this.conceptRepository.findRelationsForConcept(fromConceptId);
     const hasHierarchyParent = remaining.some(
       (rel) =>
-        rel.fromConceptId === relation.fromConceptId &&
-        HIERARCHY_RELATION_TYPES.includes(rel.relationType),
+        String(rel.fromConceptId) === fromConceptId &&
+        isHierarchyRelationType(String(rel.relationType)),
     );
 
     if (!hasHierarchyParent) {
       await this.conceptRepository.createRelation(
-        relation.fromConceptId,
-        root.id,
-        'IS_PART_OF',
+        fromConceptId,
+        String(root.id),
+        RELATION_TYPE.IS_PART_OF,
       );
     }
   }

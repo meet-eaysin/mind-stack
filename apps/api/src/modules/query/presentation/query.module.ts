@@ -7,10 +7,10 @@ import { AskQuestionUseCase } from '../application/ask-question.use-case';
 import { RetrieveChunksUseCase } from '../application/retrieve-chunks.use-case';
 import type { VectorStore } from '@repo/vector-store';
 
-import { VECTOR_STORE } from '../../../common/tokens.js';
-import { VectorModule } from '../../../common/vector.module.js';
-import { SettingsModule } from '../../settings/presentation/settings.module.js';
-import { LlmProviderFactory } from '../../settings/application/llm-provider.factory.js';
+import { VECTOR_STORE } from '../../../common/tokens';
+import { VectorModule } from '../../../common/vector.module';
+import { SettingsModule } from '../../settings/presentation/settings.module';
+import { LlmProviderFactory } from '../../settings/application/llm-provider.factory';
 
 @Module({
   imports: [VectorModule, SettingsModule],

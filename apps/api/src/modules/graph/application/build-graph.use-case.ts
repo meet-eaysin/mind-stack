@@ -1,13 +1,15 @@
-import type { ConceptRepository } from '../domain/concept-repository.interface.js';
-import type { DocumentRepository } from '../../ingestion/domain/document-repository.interface.js';
+import type { ConceptRepository } from '../domain/concept-repository.interface';
+import type { DocumentRepository } from '../../ingestion/domain/document-repository.interface';
 import { createLogger } from '@repo/logger';
+import { RELATION_TYPE } from '@repo/shared-types';
 import {
   DOCUMENT_RELATION_TYPES,
   HIERARCHY_RELATION_TYPES,
   ROOT_LABEL,
   toDocumentNodeLabel,
   parseDocumentIdFromLabel,
-} from '../domain/document-graph.js';
+} from '../domain/document-graph';
+import { NotFoundException } from '@nestjs/common';
 
 export class BuildGraphUseCase {
   private readonly logger = createLogger('BuildGraphUseCase');
@@ -114,7 +116,7 @@ export class BuildGraphUseCase {
         await this.conceptRepository.createRelation(
           conceptId,
           root.id,
-          'IS_PART_OF',
+          RELATION_TYPE.IS_PART_OF,
         );
       }
     }
@@ -142,10 +144,10 @@ export class BuildGraphUseCase {
         (document) => document.id === input.documentId,
       );
       if (!scopedDocument) {
-        throw new Error(`Document not found: ${input.documentId}`);
+        throw new NotFoundException(`Document not found: ${input.documentId}`);
       }
       if (input.userId && scopedDocument.userId !== input.userId) {
-        throw new Error(`Document not found: ${input.documentId}`);
+        throw new NotFoundException(`Document not found: ${input.documentId}`);
       }
       return allDocuments.filter(
         (document) => document.userId === scopedDocument.userId,

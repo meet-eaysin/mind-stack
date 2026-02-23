@@ -1,10 +1,11 @@
 import { Test, type TestingModule } from '@nestjs/testing';
-import { GraphController } from '../graph.controller.js';
-import { BuildGraphUseCase } from '../../application/build-graph.use-case.js';
-import { QueryGraphUseCase } from '../../application/query-graph.use-case.js';
-import { GetNeighborhoodUseCase } from '../../application/get-neighborhood.use-case.js';
-import { CreateRelationUseCase } from '../../application/create-relation.use-case.js';
-import { DeleteRelationUseCase } from '../../application/delete-relation.use-case.js';
+import { GraphController } from '../graph.controller';
+import { BuildGraphUseCase } from '../../application/build-graph.use-case';
+import { QueryGraphUseCase } from '../../application/query-graph.use-case';
+import { GetNeighborhoodUseCase } from '../../application/get-neighborhood.use-case';
+import { CreateRelationUseCase } from '../../application/create-relation.use-case';
+import { DeleteRelationUseCase } from '../../application/delete-relation.use-case';
+import { RELATION_TYPE } from '@repo/shared-types';
 
 describe('GraphController', () => {
   let controller: GraphController;
@@ -60,8 +61,12 @@ describe('GraphController', () => {
     });
 
     await expect(
-      controller.addRelation({ fromId: 'a', toId: 'b', type: 'IS_PART_OF' }),
-    ).resolves.toEqual({ slug: 'ok' });
+      controller.addRelation({
+        fromId: 'a',
+        toId: 'b',
+        type: RELATION_TYPE.IS_PART_OF,
+      }),
+    ).resolves.toEqual({ success: true });
 
     await expect(controller.removeRelation('rel-1')).resolves.toBeUndefined();
   });
