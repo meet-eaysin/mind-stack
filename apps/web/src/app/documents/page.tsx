@@ -1,11 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { DocumentList, DocumentDetail } from "@/features/documents";
 
 export default function DocumentsPage() {
-  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const docIdFromQuery = searchParams.get("id");
+  const [selectedDocId, setSelectedDocId] = useState<string | null>(
+    docIdFromQuery,
+  );
+
+  useEffect(() => {
+    setSelectedDocId(docIdFromQuery);
+  }, [docIdFromQuery]);
 
   return (
     <AppShell>

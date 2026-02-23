@@ -61,7 +61,30 @@ describe("Documents Behavior", () => {
       expect(screen.getByTestId("tag-new-tag")).toBeInTheDocument();
     });
 
+    await waitFor(() => {
+      expect(screen.getByTestId("related-resources-list")).toBeInTheDocument();
+    });
+    expect(screen.getByText("Related Test Document")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("related-open-document-doc-2"),
+    ).toBeInTheDocument();
+
+    const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
+    fireEvent.click(screen.getByTestId("related-open-source-doc-2"));
+    expect(openSpy).toHaveBeenCalled();
+    openSpy.mockRestore();
+
     expect(screen.getByText(/annotations/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("quick-annotation-type-QUESTION"));
+    fireEvent.change(screen.getByTestId("quick-note-input"), {
+      target: { value: "What tradeoffs does this approach have?" },
+    });
+    fireEvent.click(screen.getByTestId("quick-note-submit"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("note-type-QUESTION")).toBeInTheDocument();
+    });
 
     const importanceBtn = screen.getByTestId("importance-btn-5");
     fireEvent.click(importanceBtn);
@@ -73,6 +96,32 @@ describe("Documents Behavior", () => {
     const backBtn = screen.getByTestId("back-button");
     fireEvent.click(backBtn);
     expect(onBack).toHaveBeenCalled();
+  });
+
+  it("should show empty and error states for related resources", async () => {
+    server.use(
+      http.get("*/knowledge/documents/:id/related", () => {
+        return HttpResponse.json([]);
+      }),
+    );
+
+    render(<DocumentDetail id="doc-1" onBack={() => {}} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("related-resources-empty")).toBeInTheDocument();
+    });
+
+    server.use(
+      http.get("*/knowledge/documents/:id/related", () => {
+        return new HttpResponse(null, { status: 500 });
+      }),
+    );
+
+    fireEvent.click(screen.getByTestId("related-refresh"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("related-resources-error")).toBeInTheDocument();
+    });
   });
 
   it("should handles API error in document list", async () => {

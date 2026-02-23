@@ -63,6 +63,18 @@ export function DocumentResult({
         )}
       </div>
 
+      <div className="pt-1">
+        <button
+          type="button"
+          className="text-xs text-primary hover:underline"
+          data-testid={`open-document-${document.documentId}`}
+          onClick={() => {
+            window.location.href = `/documents?id=${document.documentId}`;
+          }}
+        >
+          Open document
+        </button>
+      </div>
     </div>
   );
 }

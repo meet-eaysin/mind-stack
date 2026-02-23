@@ -40,3 +40,13 @@ export const NeighborhoodRequestSchema = z.object({
   conceptId: z.string(),
   depth: z.number().optional(),
 });
+
+export const CreateRelationRequestSchema = z.object({
+  fromId: z.string(),
+  toId: z.string(),
+  type: RelationTypeSchema,
+});
+
+export const CreateRelationResponseSchema = z.object({
+  slug: z.string(),
+});

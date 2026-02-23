@@ -11,3 +11,9 @@ export type BuildGraphResponse = z.infer<
 export type NeighborhoodRequest = z.infer<
   typeof schemas.NeighborhoodRequestSchema
 >;
+export type CreateRelationRequest = z.infer<
+  typeof schemas.CreateRelationRequestSchema
+>;
+export type CreateRelationResponse = z.infer<
+  typeof schemas.CreateRelationResponseSchema
+>;

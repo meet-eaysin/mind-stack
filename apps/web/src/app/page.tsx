@@ -9,6 +9,7 @@ import {
   Network,
   Sparkles,
   Folder,
+  GraduationCap,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -46,6 +47,13 @@ const features = [
     title: "Collections",
     description:
       "Organize documents into structured learning paths and courses.",
+  },
+  {
+    href: "/courses",
+    icon: GraduationCap,
+    title: "Courses",
+    description:
+      "Track course progress, ordering, and prerequisites across collection items.",
   },
 ];
 

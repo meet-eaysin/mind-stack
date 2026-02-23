@@ -65,7 +65,22 @@ async function handleResponse<T>(
   }
 
   try {
-    const data = await response.json();
+    const raw = await response.text();
+    if (raw.length === 0) {
+      const emptyResult = schema.safeParse(undefined);
+      if (emptyResult.success) return emptyResult.data;
+
+      const emptyObjectResult = schema.safeParse({});
+      if (emptyObjectResult.success) return emptyObjectResult.data;
+
+      const validationError: ApiError = {
+        type: "validation",
+        issues: ["Expected response payload but received empty body"],
+      };
+      throw validationError;
+    }
+
+    const data = JSON.parse(raw);
     const result = schema.safeParse(data);
 
     if (!result.success) {

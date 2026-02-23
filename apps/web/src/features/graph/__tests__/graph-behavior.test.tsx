@@ -2,6 +2,8 @@ import { screen, waitFor } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import { render } from "@/test/test-utils";
 import GraphPage from "@/app/graph/page";
+import { NeighborhoodPanel } from "../components";
+import { fireEvent } from "@testing-library/react";
 
 describe("Graph Behavior", () => {
   it("should render graph and respond to window resize", async () => {
@@ -29,5 +31,31 @@ describe("Graph Behavior", () => {
     });
 
     expect(screen.queryByTestId("neighborhood-panel")).not.toBeInTheDocument();
+  });
+
+  it("should create and delete relation from neighborhood panel", async () => {
+    render(<NeighborhoodPanel conceptId="concept-1" />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("neighborhood-panel")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByPlaceholderText("Target Concept ID"), {
+      target: { value: "concept-2" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Create" }));
+
+    await waitFor(() => {
+      expect(screen.queryByText(/unexpected error/i)).not.toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByPlaceholderText("Relation ID"), {
+      target: { value: "rel-1" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+
+    await waitFor(() => {
+      expect(screen.queryByText(/unexpected error/i)).not.toBeInTheDocument();
+    });
   });
 });

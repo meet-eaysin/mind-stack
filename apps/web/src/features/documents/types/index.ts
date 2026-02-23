@@ -35,3 +35,7 @@ export type UpdateImportanceRequest = z.infer<
 export type NoteCreatedResponse = z.infer<
   typeof schemas.NoteCreatedResponseSchema
 >;
+export type RelatedSuggestion = z.infer<typeof schemas.RelatedSuggestionSchema>;
+export type RelatedSuggestionsResponse = z.infer<
+  typeof schemas.RelatedSuggestionsResponseSchema
+>;

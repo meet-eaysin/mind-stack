@@ -6,7 +6,11 @@ import {
 } from "@tanstack/react-query";
 import { documentsApi } from "../api";
 import { QUERY_KEYS } from "@/constants/query-keys";
-import type { DocumentListResponse, DocumentDetailResponse } from "../types";
+import type {
+  DocumentListResponse,
+  DocumentDetailResponse,
+  RelatedSuggestionsResponse,
+} from "../types";
 import type { ApiError } from "@/lib/api-client";
 
 export function useDocuments(page: number, pageSize: number, search?: string) {
@@ -21,6 +25,14 @@ export function useDocument(id: string) {
   return useQuery<DocumentDetailResponse, ApiError>({
     queryKey: QUERY_KEYS.KNOWLEDGE.DETAIL(id),
     queryFn: () => documentsApi.get(id),
+    enabled: !!id,
+  });
+}
+
+export function useRelatedDocuments(id: string) {
+  return useQuery<RelatedSuggestionsResponse, ApiError>({
+    queryKey: QUERY_KEYS.KNOWLEDGE.RELATED(id),
+    queryFn: () => documentsApi.getRelated(id),
     enabled: !!id,
   });
 }
@@ -63,19 +75,22 @@ export function useAddNote() {
     mutationFn: ({
       documentId,
       content,
+      type,
       chunkId,
       selectedText,
       metadata,
     }: {
       documentId: string;
       content: string;
+      type?: string;
       chunkId?: string;
       selectedText?: string;
-      metadata?: Record<string, unknown>;
+      metadata?: Record<string, string | number | boolean | null>;
     }) =>
       documentsApi.addNote(
         documentId,
         content,
+        type,
         chunkId,
         selectedText,
         metadata,

@@ -22,6 +22,11 @@ export const OrphansResponseSchema = z.object({
       label: z.string(),
     }),
   ),
+  orphanEmbeddings: z.array(
+    z.object({
+      id: z.string(),
+    }),
+  ),
 });
 
 export const FailedDocumentsResponseSchema = z.object({

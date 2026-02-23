@@ -110,6 +110,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
       },
       update: {
         title: document.title,
+        rawContent: document.rawContent,
         sourceUrl: document.sourceUrl,
         status: document.status,
         learningStatus: document.learningStatus,

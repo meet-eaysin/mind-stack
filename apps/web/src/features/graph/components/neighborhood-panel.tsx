@@ -1,10 +1,28 @@
+import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useNeighborhood } from "../hooks";
+import { useNeighborhood, useCreateRelation, useDeleteRelation } from "../hooks";
 import { FileText, ExternalLink, Hash, Link2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { getApiErrorMessage } from "@/lib/api-client";
+import type { CreateRelationRequest } from "../types";
 
 import { useRouter } from "next/navigation";
+
+const RELATION_TYPES: CreateRelationRequest["type"][] = [
+  "RELATES_TO",
+  "IS_PART_OF",
+  "DEPENDS_ON",
+  "SIMILAR_TO",
+  "LEADS_TO",
+  "IS_PREREQUISITE_OF",
+  "REFERENCES",
+  "EXTENDS",
+  "CONTRADICTS",
+  "FOLLOW_UP_TO",
+];
 
 export function NeighborhoodPanel({
   conceptId,
@@ -14,7 +32,13 @@ export function NeighborhoodPanel({
   onNodeSelect?: (id: string | null) => void;
 }) {
   const { data, isLoading } = useNeighborhood(conceptId);
+  const createRelation = useCreateRelation();
+  const deleteRelation = useDeleteRelation();
   const router = useRouter();
+  const [targetConceptId, setTargetConceptId] = useState("");
+  const [relationType, setRelationType] =
+    useState<CreateRelationRequest["type"]>("RELATES_TO");
+  const [relationIdToDelete, setRelationIdToDelete] = useState("");
 
   if (isLoading) {
     return (
@@ -140,6 +164,81 @@ export function NeighborhoodPanel({
               )}
             </div>
           </div>
+        )}
+      </div>
+
+      <div className="px-4 py-3 border-t bg-muted/10 space-y-3">
+        <div className="space-y-2">
+          <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+            Create Relation
+          </h4>
+          <Input
+            placeholder="Target Concept ID"
+            value={targetConceptId}
+            onChange={(e) => setTargetConceptId(e.target.value)}
+            className="h-8 text-xs"
+          />
+          <select
+            value={relationType}
+            onChange={(e) => {
+              const nextType = RELATION_TYPES.find(
+                (type) => type === e.target.value,
+              );
+              if (nextType) {
+                setRelationType(nextType);
+              }
+            }}
+            className="h-8 w-full rounded-md border bg-background px-2 text-xs"
+          >
+            {RELATION_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+          <Button
+            size="sm"
+            className="h-8 w-full"
+            disabled={!targetConceptId || createRelation.isPending}
+            onClick={() => {
+              createRelation.mutate({
+                fromId: conceptId,
+                toId: targetConceptId,
+                type: relationType,
+              });
+            }}
+          >
+            {createRelation.isPending ? "Creating..." : "Create"}
+          </Button>
+        </div>
+
+        <div className="space-y-2">
+          <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+            Delete Relation
+          </h4>
+          <Input
+            placeholder="Relation ID"
+            value={relationIdToDelete}
+            onChange={(e) => setRelationIdToDelete(e.target.value)}
+            className="h-8 text-xs"
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 w-full"
+            disabled={!relationIdToDelete || deleteRelation.isPending}
+            onClick={() => {
+              deleteRelation.mutate(relationIdToDelete);
+            }}
+          >
+            {deleteRelation.isPending ? "Deleting..." : "Delete"}
+          </Button>
+        </div>
+
+        {(createRelation.error || deleteRelation.error) && (
+          <p className="text-xs text-destructive">
+            {getApiErrorMessage(createRelation.error ?? deleteRelation.error)}
+          </p>
         )}
       </div>
 

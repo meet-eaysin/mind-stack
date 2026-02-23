@@ -16,4 +16,17 @@ describe("Graph Feature API", () => {
     const result = await graphApi.getNeighborhood("n1");
     expect(result.nodes).toHaveLength(1);
   });
+
+  it("should create relation correctly", async () => {
+    const result = await graphApi.createRelation({
+      fromId: "concept-1",
+      toId: "concept-2",
+      type: "RELATES_TO",
+    });
+    expect(result.slug).toBe("ok");
+  });
+
+  it("should delete relation correctly", async () => {
+    await expect(graphApi.deleteRelation("rel-1")).resolves.toBeUndefined();
+  });
 });

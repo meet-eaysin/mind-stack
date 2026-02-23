@@ -11,6 +11,7 @@ import {
   Folder,
   Activity,
   TrendingUp,
+  GraduationCap,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ const navItems = [
   { href: "/search", label: "Search", icon: Search },
   { href: "/documents", label: "Documents", icon: FileText },
   { href: "/collections", label: "Collections", icon: Folder },
+  { href: "/courses", label: "Courses", icon: GraduationCap },
   { href: "/review", label: "Review", icon: CalendarCheck },
   { href: "/graph", label: "Graph", icon: Network },
   { href: "/health", label: "Health", icon: Activity },

@@ -12,9 +12,10 @@ type MockDocument = {
   notes: Array<{
     id: string;
     content: string;
+    type: "HIGHLIGHT" | "NOTE" | "QUESTION" | "INSIGHT";
     chunkId: string | null;
     selectedText: string | null;
-    metadata: Record<string, unknown> | null;
+    metadata: Record<string, string | number | boolean | null> | null;
     createdAt: string;
   }>;
   importance: number;
@@ -102,13 +103,27 @@ export const handlers = [
         },
       ],
       tags: meta.tags,
-      notes: meta.notes.map((note) => ({
-        ...note,
-        type: "NOTE",
-      })),
+      notes: meta.notes,
       importanceScore: meta.importance,
       createdAt: new Date().toISOString(),
     });
+  }),
+  http.get("*/knowledge/documents/:id/related", ({ params }) => {
+    const id = String(params.id);
+    return HttpResponse.json([
+      {
+        chunkId: `${id}-related-1`,
+        documentId: "doc-2",
+        content: "Related resource summary",
+        documentTitle: "Related Test Document",
+        author: "Author A",
+        publishedAt: new Date().toISOString(),
+        sourceUrl: "https://example.com/related",
+        score: 0.88,
+        tags: ["related"],
+        hasNote: false,
+      },
+    ]);
   }),
   http.post("*/knowledge/tags/add", async ({ request }) => {
     const body = await request.json();
@@ -133,7 +148,7 @@ export const handlers = [
   }),
   http.post("*/knowledge/notes/add", async ({ request }) => {
     const body = await request.json();
-    const { documentId, content, chunkId, selectedText, metadata } =
+    const { documentId, content, type, chunkId, selectedText, metadata } =
       AddNoteRequestSchema.parse(body);
     if (!mockDocs[documentId]) {
       mockDocs[documentId] = { tags: [], notes: [], importance: 1 };
@@ -141,10 +156,10 @@ export const handlers = [
     const newNote = {
       id: "note-1",
       content,
-      type: "NOTE" as const,
+      type: type ?? "NOTE",
       chunkId: chunkId ?? null,
       selectedText: selectedText ?? null,
-      metadata: (metadata as Record<string, unknown>) ?? null,
+      metadata: metadata ?? null,
       createdAt: new Date().toISOString(),
     };
     mockDocs[documentId].notes.push(newNote);

@@ -1,13 +1,12 @@
 import { apiClient } from "@/lib/api-client";
 import { ENDPOINTS } from "@/constants/endpoints";
 import * as schemas from "../schemas/productivity.schemas";
-import { SuccessResponseSchema } from "@/schemas/api.schemas";
+import { z } from "zod";
 import type {
   TopicMasteryData,
   LearningGoalListItem,
   LearningGoalDetailResponse,
 } from "../types";
-import type { SuccessResponse } from "@/types";
 
 export const productivityApi = {
   getMastery: (): Promise<TopicMasteryData> =>
@@ -46,26 +45,14 @@ export const productivityApi = {
     ),
 
   deleteGoal: (id: string): Promise<void> =>
-    apiClient
-      .delete(ENDPOINTS.LEARNING_GOALS.DETAIL(id), {}, SuccessResponseSchema)
-      .then(() => {}),
+    apiClient.delete(ENDPOINTS.LEARNING_GOALS.DETAIL(id), {}, z.void()),
 
   addItemToGoal: (
     goalId: string,
     data: { collectionId?: string; documentId?: string },
-  ): Promise<SuccessResponse> =>
-    apiClient.post(
-      ENDPOINTS.LEARNING_GOALS.ITEMS(goalId),
-      data,
-      SuccessResponseSchema,
-    ),
+  ): Promise<void> =>
+    apiClient.post(ENDPOINTS.LEARNING_GOALS.ITEMS(goalId), data, z.void()),
 
   removeItemFromGoal: (itemId: string): Promise<void> =>
-    apiClient
-      .delete(
-        ENDPOINTS.LEARNING_GOALS.REMOVE_ITEM(itemId),
-        {},
-        SuccessResponseSchema,
-      )
-      .then(() => {}),
+    apiClient.delete(ENDPOINTS.LEARNING_GOALS.REMOVE_ITEM(itemId), {}, z.void()),
 };

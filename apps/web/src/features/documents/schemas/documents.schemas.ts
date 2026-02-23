@@ -118,3 +118,18 @@ export const UpdateImportanceRequestSchema = z.object({
 export const NoteCreatedResponseSchema = z.object({
   noteId: z.string(),
 });
+
+export const RelatedSuggestionSchema = z.object({
+  chunkId: z.string(),
+  documentId: z.string(),
+  content: z.string(),
+  documentTitle: z.string(),
+  author: z.string().optional().nullable(),
+  publishedAt: z.string().optional().nullable(),
+  sourceUrl: z.string().optional().nullable(),
+  score: z.number(),
+  tags: z.array(z.string()),
+  hasNote: z.boolean(),
+});
+
+export const RelatedSuggestionsResponseSchema = z.array(RelatedSuggestionSchema);

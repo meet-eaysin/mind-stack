@@ -33,6 +33,18 @@ export function ChunkResult({ chunk }: { chunk: ChunkReference }) {
           ))}
         </div>
       )}
+      <div className="mt-3">
+        <button
+          type="button"
+          className="text-xs text-primary hover:underline"
+          data-testid={`open-document-${chunk.documentId}`}
+          onClick={() => {
+            window.location.href = `/documents?id=${chunk.documentId}`;
+          }}
+        >
+          Open document
+        </button>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { apiClient } from "@/lib/api-client";
 import { ENDPOINTS } from "@/constants/endpoints";
 import * as schemas from "../schemas/collections.schemas";
-import { SuccessResponseSchema } from "@/schemas/api.schemas";
+import { z } from "zod";
 
 export const collectionsApi = {
   list: () =>
@@ -36,33 +36,25 @@ export const collectionsApi = {
     ),
 
   delete: (id: string) =>
-    apiClient.delete(
-      ENDPOINTS.COLLECTIONS.DETAIL(id),
-      {},
-      SuccessResponseSchema,
-    ),
+    apiClient.delete(ENDPOINTS.COLLECTIONS.DETAIL(id), {}, z.void()),
 
   addItem: (
     collectionId: string,
     data: { documentId: string; order?: number; prerequisiteId?: string },
   ) =>
-    apiClient.post(
-      ENDPOINTS.COLLECTIONS.ITEMS(collectionId),
-      data,
-      SuccessResponseSchema,
-    ),
+    apiClient.post(ENDPOINTS.COLLECTIONS.ITEMS(collectionId), data, z.void()),
 
   removeItem: (collectionId: string, documentId: string) =>
     apiClient.delete(
       ENDPOINTS.COLLECTIONS.REMOVE_ITEM(collectionId, documentId),
       {},
-      SuccessResponseSchema,
+      z.void(),
     ),
 
   reorderItems: (collectionId: string, itemIds: string[]) =>
     apiClient.post(
       ENDPOINTS.COLLECTIONS.REORDER(collectionId),
       { itemIds },
-      SuccessResponseSchema,
+      z.void(),
     ),
 };

@@ -23,6 +23,11 @@ export const documentsApi = {
       ENDPOINTS.KNOWLEDGE.DETAIL(id),
       schemas.DocumentDetailResponseSchema,
     ),
+  getRelated: (id: string) =>
+    apiClient.get(
+      ENDPOINTS.KNOWLEDGE.RELATED(id),
+      schemas.RelatedSuggestionsResponseSchema,
+    ),
   update: (
     id: string,
     updates: {
@@ -62,13 +67,14 @@ export const documentsApi = {
   addNote: (
     documentId: string,
     content: string,
+    type?: string,
     chunkId?: string,
     selectedText?: string,
-    metadata?: Record<string, unknown>,
+    metadata?: Record<string, string | number | boolean | null>,
   ) =>
     apiClient.post(
       ENDPOINTS.KNOWLEDGE.NOTES_ADD,
-      { documentId, content, chunkId, selectedText, metadata },
+      { documentId, content, type, chunkId, selectedText, metadata },
       schemas.NoteResponseSchema,
     ),
 

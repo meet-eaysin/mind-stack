@@ -1,10 +1,13 @@
 import { apiClient } from "@/lib/api-client";
 import { ENDPOINTS } from "@/constants/endpoints";
 import * as schemas from "../schemas/graph.schemas";
+import { z } from "zod";
 import type {
   GraphResponse,
   BuildGraphResponse,
   BuildGraphRequest,
+  CreateRelationRequest,
+  CreateRelationResponse,
 } from "../types";
 
 export const graphApi = {
@@ -26,4 +29,16 @@ export const graphApi = {
       { conceptId, depth },
       schemas.GraphResponseSchema,
     ),
+
+  createRelation: (
+    payload: CreateRelationRequest,
+  ): Promise<CreateRelationResponse> =>
+    apiClient.post(
+      ENDPOINTS.GRAPH.RELATIONS,
+      payload,
+      schemas.CreateRelationResponseSchema,
+    ),
+
+  deleteRelation: (relationId: string): Promise<void> =>
+    apiClient.delete(ENDPOINTS.GRAPH.RELATION(relationId), {}, z.void()),
 };

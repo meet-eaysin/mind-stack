@@ -1,6 +1,7 @@
 import { http, HttpResponse } from "msw";
 import {
   BuildGraphRequestSchema,
+  CreateRelationRequestSchema,
   NeighborhoodRequestSchema,
 } from "@/features/graph/schemas/graph.schemas";
 
@@ -23,5 +24,12 @@ export const handlers = [
       nodes: [{ id: "concept-1", label: "Concept A", chunkCount: 5 }],
       edges: [],
     });
+  }),
+  http.post("*/graph/relations", async ({ request }) => {
+    CreateRelationRequestSchema.parse(await request.json());
+    return HttpResponse.json({ slug: "ok" });
+  }),
+  http.delete("*/graph/relations/:id", () => {
+    return new HttpResponse(null, { status: 204 });
   }),
 ];

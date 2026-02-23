@@ -12,6 +12,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
+  DialogDescription,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
@@ -297,6 +298,10 @@ export default function ProductivityPage() {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Create Learning Goal</DialogTitle>
+                  <DialogDescription>
+                    Add a measurable learning objective with an optional
+                    deadline.
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 pt-2">
                   <div className="space-y-2">

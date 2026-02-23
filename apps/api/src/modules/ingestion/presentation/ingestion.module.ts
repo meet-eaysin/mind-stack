@@ -6,6 +6,7 @@ import {
   IngestionJobProducer,
   INGESTION_QUEUE,
 } from '../infrastructure/ingestion-job.producer.js';
+import { IngestionProcessor } from '../infrastructure/ingestion.processor.js';
 import { IngestUrlUseCase } from '../application/ingest-url.use-case.js';
 import { IngestTextUseCase } from '../application/ingest-text.use-case.js';
 import { IngestPdfUseCase } from '../application/ingest-pdf.use-case.js';
@@ -30,6 +31,7 @@ import { QueryModule } from '../../query/presentation/query.module.js';
   providers: [
     PrismaDocumentRepository,
     IngestionJobProducer,
+    IngestionProcessor,
     {
       provide: GetIngestionJobStatusUseCase,
       useFactory: (producer: IngestionJobProducer) =>

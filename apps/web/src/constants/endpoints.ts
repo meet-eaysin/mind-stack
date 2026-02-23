@@ -9,6 +9,7 @@ export const ENDPOINTS = {
   KNOWLEDGE: {
     ALL: "/knowledge/documents",
     DETAIL: (id: string) => `/knowledge/documents/${id}/details`,
+    RELATED: (id: string) => `/knowledge/documents/${id}/related`,
     STATUS: (id: string) => `/knowledge/documents/${id}/status`,
     TAGS_ADD: "/knowledge/tags/add",
     TAGS_REMOVE: "/knowledge/tags/remove",
@@ -34,6 +35,8 @@ export const ENDPOINTS = {
     ALL: "/graph",
     BUILD: "/graph/build",
     NEIGHBORHOOD: "/graph/neighborhood",
+    RELATIONS: "/graph/relations",
+    RELATION: (id: string) => `/graph/relations/${id}`,
   },
   EXPORT: {
     MARKDOWN: "/export/markdown",

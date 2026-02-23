@@ -68,6 +68,7 @@ export const ChunkSchema = z.object({
 
 export const ChunkReferenceSchema = z.object({
   chunkId: z.string(),
+  documentId: z.string(),
   content: z.string(),
   documentTitle: z.string(),
   score: z.number(),

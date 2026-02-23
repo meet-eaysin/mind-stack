@@ -12,6 +12,7 @@ import {
   Globe,
   Layout,
   Folder,
+  RefreshCw,
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ import {
   useAddTag,
   useRemoveTag,
   useAddNote,
+  useRelatedDocuments,
   useUpdateImportance,
   useDeleteDocument,
   useUpdateDocument,
@@ -36,7 +38,12 @@ import remarkGfm from "remark-gfm";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
-import { LEARNING_STATUS, DOCUMENT_TYPE } from "@repo/shared-types";
+import {
+  LEARNING_STATUS,
+  DOCUMENT_TYPE,
+  ANNOTATION_TYPE,
+  type AnnotationType,
+} from "@repo/shared-types";
 import { Label } from "@/components/ui/label";
 
 type SelectionState = {
@@ -47,10 +54,10 @@ type SelectionState = {
 
 export function DocumentDetail({
   id,
-  onBack,
+  onBackAction,
 }: {
   id: string;
-  onBack: () => void;
+  onBackAction: () => void;
 }) {
   const { data, isLoading, error } = useDocument(id);
   const addTag = useAddTag();
@@ -59,6 +66,7 @@ export function DocumentDetail({
   const updateImportance = useUpdateImportance();
   const deleteDocument = useDeleteDocument();
   const updateDocument = useUpdateDocument();
+  const relatedDocuments = useRelatedDocuments(id);
 
   const [newTag, setNewTag] = useState("");
   const [isEditing, setIsEditing] = useState(false);
@@ -124,6 +132,10 @@ export function DocumentDetail({
   const [selection, setSelection] = useState<SelectionState | null>(null);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [noteContent, setNoteContent] = useState("");
+  const [quickNoteContent, setQuickNoteContent] = useState("");
+  const [annotationType, setAnnotationType] = useState<AnnotationType>(
+    ANNOTATION_TYPE.NOTE,
+  );
   const [isAddingToCollection, setIsAddingToCollection] = useState(false);
 
   const articleRef = useRef<HTMLDivElement>(null);
@@ -193,7 +205,7 @@ export function DocumentDetail({
         <div className="text-destructive mb-4">
           {error ? getApiErrorMessage(error) : "Document not found"}
         </div>
-        <Button onClick={onBack}>Go back</Button>
+        <Button onClick={onBackAction}>Go back</Button>
       </div>
     );
   }
@@ -205,12 +217,25 @@ export function DocumentDetail({
       addNote.mutate({
         documentId: doc.id,
         content: noteContent.trim(),
+        type: annotationType,
         chunkId: selection.chunkId,
         selectedText: selection.text,
       });
       setNoteContent("");
       setSelection(null);
     }
+  };
+
+  const handleAddQuickNote = () => {
+    if (!quickNoteContent.trim()) {
+      return;
+    }
+    addNote.mutate({
+      documentId: doc.id,
+      content: quickNoteContent.trim(),
+      type: annotationType,
+    });
+    setQuickNoteContent("");
   };
 
   return (
@@ -225,7 +250,7 @@ export function DocumentDetail({
             <Button
               variant="ghost"
               size="sm"
-              onClick={onBack}
+              onClick={onBackAction}
               className="gap-2"
               data-testid="back-button"
             >
@@ -233,7 +258,7 @@ export function DocumentDetail({
               <span className="hidden sm:inline">Library</span>
             </Button>
             <Separator orientation="vertical" className="h-4" />
-            <span className="text-sm font-medium truncate max-w-[200px] sm:max-w-md">
+            <span className="text-sm font-medium truncate max-w-50 sm:max-w-md">
               {doc.title}
             </span>
           </div>
@@ -242,7 +267,7 @@ export function DocumentDetail({
               <Tabs
                 value={viewType}
                 onValueChange={(v) => setViewType(v as "source" | "reader")}
-                className="w-[200px]"
+                className="w-50"
               >
                 <TabsList className="grid w-full grid-cols-2 h-8">
                   <TabsTrigger value="source" className="text-xs gap-1.5">
@@ -681,10 +706,27 @@ export function DocumentDetail({
                     placeholder="Write your thought..."
                     value={noteContent}
                     onChange={(e) => setNoteContent(e.target.value)}
-                    className="min-h-[120px] bg-background text-sm focus:ring-primary/20"
+                    className="min-h-30 bg-background text-sm focus:ring-primary/20"
                     autoFocus
                     data-testid="add-note-input"
                   />
+                  <div className="grid grid-cols-2 gap-2">
+                    {Object.values(ANNOTATION_TYPE).map((type) => (
+                      <Button
+                        key={type}
+                        type="button"
+                        size="sm"
+                        variant={
+                          annotationType === type ? "default" : "outline"
+                        }
+                        className="text-xs"
+                        onClick={() => setAnnotationType(type)}
+                        data-testid={`annotation-type-${type}`}
+                      >
+                        {type.replace("_", " ")}
+                      </Button>
+                    ))}
+                  </div>
                   <div className="flex gap-2">
                     <Button
                       className="flex-1 rounded-full h-9"
@@ -704,6 +746,45 @@ export function DocumentDetail({
                 </div>
               ) : (
                 <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="space-y-3 p-3 rounded-xl border bg-muted/20">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Quick Annotation
+                    </p>
+                    <Textarea
+                      placeholder="Add a general note, question, insight, or highlight..."
+                      value={quickNoteContent}
+                      onChange={(e) => setQuickNoteContent(e.target.value)}
+                      className="min-h-25 bg-background text-sm"
+                      data-testid="quick-note-input"
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      {Object.values(ANNOTATION_TYPE).map((type) => (
+                        <Button
+                          key={type}
+                          type="button"
+                          size="sm"
+                          variant={
+                            annotationType === type ? "default" : "outline"
+                          }
+                          className="text-xs"
+                          onClick={() => setAnnotationType(type)}
+                          data-testid={`quick-annotation-type-${type}`}
+                        >
+                          {type.replace("_", " ")}
+                        </Button>
+                      ))}
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleAddQuickNote}
+                      disabled={!quickNoteContent.trim() || addNote.isPending}
+                      data-testid="quick-note-submit"
+                    >
+                      Add Annotation
+                    </Button>
+                  </div>
+
                   {doc.notes.length === 0 ? (
                     <div className="text-center py-12 px-4 rounded-xl border border-dashed text-muted-foreground">
                       <StickyNote className="size-8 mx-auto mb-3 opacity-20" />
@@ -731,6 +812,14 @@ export function DocumentDetail({
                         <p className="text-sm leading-relaxed">
                           {note.content}
                         </p>
+                        <div className="mt-2">
+                          <span
+                            className="inline-flex items-center rounded-full border bg-background px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground"
+                            data-testid={`note-type-${note.type}`}
+                          >
+                            {note.type.replace("_", " ")}
+                          </span>
+                        </div>
                         <div className="mt-3 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
                           <span className="text-[10px] text-muted-foreground font-medium">
                             {new Date(note.createdAt).toLocaleDateString()}
@@ -767,6 +856,110 @@ export function DocumentDetail({
                 </div>
               )}
 
+              <div className="pt-4 border-t space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Related Resources
+                  </h4>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-7"
+                    onClick={() => relatedDocuments.refetch()}
+                    disabled={relatedDocuments.isFetching}
+                    data-testid="related-refresh"
+                  >
+                    <RefreshCw
+                      className={cn(
+                        "size-3.5",
+                        relatedDocuments.isFetching && "animate-spin",
+                      )}
+                    />
+                  </Button>
+                </div>
+
+                {relatedDocuments.isLoading && (
+                  <div
+                    className="space-y-2"
+                    data-testid="related-resources-loading"
+                  >
+                    <Skeleton className="h-16 w-full rounded-lg" />
+                    <Skeleton className="h-16 w-full rounded-lg" />
+                  </div>
+                )}
+
+                {relatedDocuments.error && (
+                  <div
+                    className="rounded-md border border-destructive/40 bg-destructive/10 p-2 text-xs text-destructive"
+                    data-testid="related-resources-error"
+                  >
+                    {getApiErrorMessage(relatedDocuments.error)}
+                  </div>
+                )}
+
+                {relatedDocuments.data && relatedDocuments.data.length === 0 && (
+                  <div
+                    className="rounded-md border border-dashed p-3 text-xs text-muted-foreground"
+                    data-testid="related-resources-empty"
+                  >
+                    No related resources found for this document yet.
+                  </div>
+                )}
+
+                {relatedDocuments.data && relatedDocuments.data.length > 0 && (
+                  <div className="space-y-2" data-testid="related-resources-list">
+                    {relatedDocuments.data.map((item) => (
+                      <div
+                        key={item.chunkId}
+                        className="w-full rounded-lg border bg-background p-3 text-left hover:border-primary/40 transition-colors"
+                      >
+                        <p className="text-xs font-semibold line-clamp-1">
+                          {item.documentTitle}
+                        </p>
+                        <p className="mt-1 text-[11px] text-muted-foreground line-clamp-2">
+                          {item.content}
+                        </p>
+                        <div className="mt-2 flex items-center gap-2">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-[10px]"
+                            onClick={() => {
+                              window.location.href = `/documents?id=${item.documentId}`;
+                            }}
+                            data-testid={`related-open-document-${item.documentId}`}
+                          >
+                            Open document
+                          </Button>
+                          {item.sourceUrl && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 text-[10px]"
+                              onClick={() => {
+                                if (!item.sourceUrl) {
+                                  return;
+                                }
+                                window.open(
+                                  item.sourceUrl,
+                                  "_blank",
+                                  "noopener,noreferrer",
+                                );
+                              }}
+                              data-testid={`related-open-source-${item.documentId}`}
+                            >
+                              Open source
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {isEditing && (
                 <div className="pt-4 border-t space-y-4">
                   <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -791,14 +984,16 @@ export function DocumentDetail({
                       </button>
                     ))}
                   </div>
-                  <Button
-                    variant="destructive"
-                    className="w-full text-xs h-9 rounded-full gap-2"
-                    onClick={() => {
-                      if (window.confirm("Permanently delete this document?")) {
-                        deleteDocument.mutate(doc.id, { onSuccess: onBack });
-                      }
-                    }}
+                      <Button
+                        variant="destructive"
+                        className="w-full text-xs h-9 rounded-full gap-2"
+                        onClick={() => {
+                          if (window.confirm("Permanently delete this document?")) {
+                            deleteDocument.mutate(doc.id, {
+                              onSuccess: onBackAction,
+                            });
+                          }
+                        }}
                   >
                     <Trash2 className="size-3" />
                     Delete Document
