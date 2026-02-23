@@ -1,147 +1,86 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Search as SearchIcon,
-  Filter,
-  MessageSquare,
-  Zap,
-  FileText,
-} from "lucide-react";
+import { Search as SearchIcon, Filter, MessageSquare } from "lucide-react";
 import {
   useSearch,
   useFilteredSearch,
   useAskQuestion,
-  useRetrieve,
 } from "@/features/search/hooks";
-import { searchApi } from "@/features/search/api";
 import { getApiErrorMessage } from "@/lib/api-client";
 import { DocumentResult } from "@/features/search/components/document-result";
 import { ChunkResult } from "@/features/search/components/chunk-result";
 import type { ChunkReference, DocumentSearchResult } from "@/types";
-import { StreamingAskResponseChunkSchema } from "@/features/search/schemas/search.schemas";
 
-type SearchMode = "semantic" | "filtered" | "ask" | "retrieve" | "stream";
+type SearchMode = "semantic" | "ask";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<SearchMode>("semantic");
-  const [streamAnswer, setStreamAnswer] = useState("");
-  const [streamCitations, setStreamCitations] = useState<ChunkReference[]>([]);
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [chatHistory, setChatHistory] = useState<
-    {
-      question: string;
-      answer: string;
-      citations: ChunkReference[];
-    }[]
-  >([]);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
   const [tags, setTags] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [status, setStatus] = useState("");
-  const [collectionId, setCollectionId] = useState("");
-  const [conceptId, setConceptId] = useState("");
   const [keyword, setKeyword] = useState("");
 
   const search = useSearch();
   const filteredSearch = useFilteredSearch();
   const askQuestion = useAskQuestion();
-  const retrieve = useRetrieve();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
+  const hasAdvancedFilters = useMemo(() => {
+    return Boolean(
+      tags.trim() ||
+        fromDate.trim() ||
+        toDate.trim() ||
+        status.trim() ||
+        keyword.trim(),
+    );
+  }, [fromDate, keyword, status, tags, toDate]);
 
-    if (mode === "semantic") {
-      search.mutate({ query });
-    } else if (mode === "filtered") {
+  const isLoading =
+    search.isPending || filteredSearch.isPending || askQuestion.isPending;
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+    event.preventDefault();
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) return;
+
+    setHasSubmitted(true);
+
+    if (mode === "ask") {
+      askQuestion.mutate({ question: trimmedQuery });
+      return;
+    }
+
+    if (hasAdvancedFilters) {
       filteredSearch.mutate({
-        query,
+        query: trimmedQuery,
         tags: tags
           .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean),
+          .map((tag) => tag.trim())
+          .filter((tag) => tag.length > 0),
         fromDate: fromDate || undefined,
         toDate: toDate || undefined,
         status: status || undefined,
-        collectionId: collectionId || undefined,
-        conceptId: conceptId || undefined,
         keyword: keyword || undefined,
       });
-    } else if (mode === "ask") {
-      askQuestion.mutate({ question: query });
-    } else if (mode === "retrieve") {
-      retrieve.mutate({ query });
-    } else if (mode === "stream") {
-      setStreamAnswer("");
-      setStreamCitations([]);
-      setIsStreaming(true);
-      let finalAnswer = "";
-      let finalCitations: ChunkReference[] = [];
-      const currentQuery = query;
-
-      const eventSource = searchApi.askStream(query);
-      eventSource.onmessage = (event) => {
-        try {
-          const raw =
-            typeof event.data === "string" ? event.data : String(event.data);
-          const chunk = StreamingAskResponseChunkSchema.safeParse(
-            JSON.parse(raw),
-          );
-          if (chunk.success) {
-            const data = chunk.data;
-            if (data.type === "text") {
-              finalAnswer += data.data;
-              setStreamAnswer(finalAnswer);
-            } else if (data.type === "citations") {
-              finalCitations = data.data;
-              setStreamCitations(finalCitations);
-            } else if (data.type === "done") {
-              setIsStreaming(false);
-              setChatHistory((prev) => [
-                ...prev,
-                {
-                  question: currentQuery,
-                  answer: finalAnswer,
-                  citations: finalCitations,
-                },
-              ]);
-              setQuery("");
-              eventSource.close();
-            }
-          }
-        } catch {
-          // Ignore parse errors
-        }
-      };
-      eventSource.onerror = () => {
-        setIsStreaming(false);
-        eventSource.close();
-      };
+      return;
     }
+
+    search.mutate({ query: trimmedQuery });
   };
 
-  const isLoading =
-    search.isPending ||
-    filteredSearch.isPending ||
-    askQuestion.isPending ||
-    retrieve.isPending ||
-    isStreaming;
-
-  const modes: { value: SearchMode; label: string; icon: React.ElementType }[] =
-    [
-      { value: "semantic", label: "Search", icon: SearchIcon },
-      { value: "filtered", label: "Filtered", icon: Filter },
-      { value: "ask", label: "Ask AI", icon: MessageSquare },
-      { value: "stream", label: "Stream", icon: Zap },
-      { value: "retrieve", label: "Retrieve", icon: FileText },
-    ];
+  const semanticResults = search.data?.documents ?? filteredSearch.data?.documents;
+  const hasSemanticResults = (semanticResults?.length ?? 0) > 0;
+  const hasAskResult = Boolean(askQuestion.data);
 
   return (
     <AppShell>
@@ -149,166 +88,161 @@ export default function SearchPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Search</h1>
           <p className="text-muted-foreground">
-            Query your knowledge base with semantic search or ask AI questions.
+            Find documents quickly or ask questions grounded in your knowledge
+            base.
           </p>
         </div>
 
-        {/* Mode selector */}
-        <div className="flex flex-wrap gap-1">
-          {modes.map((m) => (
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant={mode === "semantic" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setMode("semantic")}
+            className="gap-1.5"
+          >
+            <SearchIcon className="size-3.5" />
+            Search
+          </Button>
+          <Button
+            variant={mode === "ask" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setMode("ask")}
+            className="gap-1.5"
+          >
+            <MessageSquare className="size-3.5" />
+            Ask AI
+          </Button>
+          {mode === "semantic" && (
             <Button
-              key={m.value}
-              variant={mode === m.value ? "default" : "outline"}
+              variant="ghost"
               size="sm"
-              onClick={() => setMode(m.value)}
-              className="gap-1.5"
+              onClick={() => setShowAdvancedFilters((value) => !value)}
+              className="gap-1.5 text-muted-foreground"
+              data-testid="toggle-advanced-filters"
             >
-              <m.icon className="size-3.5" />
-              {m.label}
+              <Filter className="size-3.5" />
+              {showAdvancedFilters ? "Hide filters" : "Advanced filters"}
             </Button>
-          ))}
+          )}
         </div>
 
-        {/* Filter controls */}
-        {mode === "filtered" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-lg border bg-muted/30">
+        {mode === "semantic" && showAdvancedFilters && (
+          <div className="grid grid-cols-1 gap-4 rounded-lg border bg-muted/30 p-4 md:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Tags (comma separated)
               </label>
               <Input
-                placeholder="tag1, tag2..."
+                placeholder="backend, rfc, typescript"
                 value={tags}
-                onChange={(e) => setTags(e.target.value)}
+                onChange={(event) => setTags(event.target.value)}
                 className="h-9 bg-background"
                 data-testid="filter-tags-input"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Status
+              </label>
+              <Input
+                placeholder="REVIEW, COMPLETED..."
+                value={status}
+                onChange={(event) => setStatus(event.target.value)}
+                className="h-9 bg-background"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 From Date
               </label>
               <Input
                 type="date"
                 value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
+                onChange={(event) => setFromDate(event.target.value)}
                 className="h-9 bg-background"
                 data-testid="filter-from-date"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 To Date
               </label>
               <Input
                 type="date"
                 value={toDate}
-                onChange={(e) => setToDate(e.target.value)}
+                onChange={(event) => setToDate(event.target.value)}
                 className="h-9 bg-background"
                 data-testid="filter-to-date"
               />
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Status
+            <div className="space-y-1.5 md:col-span-2">
+              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Keyword contains
               </label>
               <Input
-                placeholder="e.g. REVIEW"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="h-9 bg-background"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Collection ID
-              </label>
-              <Input
-                placeholder="Linked to collection..."
-                value={collectionId}
-                onChange={(e) => setCollectionId(e.target.value)}
-                className="h-9 bg-background"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Concept ID
-              </label>
-              <Input
-                placeholder="Linked to concept..."
-                value={conceptId}
-                onChange={(e) => setConceptId(e.target.value)}
-                className="h-9 bg-background"
-              />
-            </div>
-            <div className="space-y-1.5 md:col-span-3">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Keyword Filter (Full Text Match)
-              </label>
-              <Input
-                placeholder="Must contain keyword..."
+                placeholder="must include this text"
                 value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
+                onChange={(event) => setKeyword(event.target.value)}
                 className="h-9 bg-background"
               />
+            </div>
+            <div className="md:col-span-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setTags("");
+                  setFromDate("");
+                  setToDate("");
+                  setStatus("");
+                  setKeyword("");
+                }}
+                type="button"
+              >
+                Clear filters
+              </Button>
             </div>
           </div>
         )}
 
-        {/* Search form */}
         <form onSubmit={handleSubmit} className="flex gap-2">
           <Input
             placeholder={
-              mode === "ask" || mode === "stream"
-                ? "Ask a question..."
-                : "Search your knowledge..."
+              mode === "ask"
+                ? "Ask a question about your documents..."
+                : "Search documents..."
             }
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(event) => setQuery(event.target.value)}
             className="flex-1"
             data-testid="search-input"
           />
-          <Button
-            type="submit"
-            disabled={isLoading}
-            data-testid="search-submit"
-          >
-            {isLoading ? "..." : "Go"}
+          <Button type="submit" disabled={isLoading} data-testid="search-submit">
+            {isLoading ? "..." : mode === "ask" ? "Ask" : "Search"}
           </Button>
         </form>
 
         <Separator />
 
-        {/* Results */}
-        {isLoading && !isStreaming && (
+        {isLoading && (
           <div className="space-y-3" data-testid="search-loading">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-24 w-full" />
+            {Array.from({ length: 3 }).map((_, index) => (
+              <Skeleton key={index} className="h-24 w-full" />
             ))}
           </div>
         )}
 
-        {/* Semantic / Filtered / Retrieve results */}
-        {(search.data || filteredSearch.data || retrieve.data) && (
+        {mode === "semantic" && hasSemanticResults && (
           <div className="space-y-3" data-testid="search-results">
-            {(
-              search.data?.documents ||
-              filteredSearch.data?.documents ||
-              []
-            ).map((document: DocumentSearchResult) => (
+            {semanticResults?.map((document: DocumentSearchResult) => (
               <DocumentResult key={document.documentId} document={document} />
             ))}
-
-            {(retrieve.data?.chunks || []).map((chunk: ChunkReference) => (
-              <ChunkResult key={chunk.chunkId} chunk={chunk} />
-            ))}
           </div>
         )}
 
-        {/* Ask AI result */}
-        {askQuestion.data && (
+        {mode === "ask" && hasAskResult && (
           <div className="space-y-4" data-testid="ask-result">
-            {askQuestion.data.weakContext && (
+            {askQuestion.data?.weakContext && (
               <div
                 className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-400"
                 data-testid="weak-context-warning"
@@ -318,103 +252,46 @@ export default function SearchPage() {
             )}
             <div className="rounded-lg border bg-card p-4">
               <h3 className="mb-2 text-sm font-semibold">AI Answer</h3>
-              <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                {askQuestion.data.answer}
+              <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                {askQuestion.data?.answer}
               </p>
             </div>
-            {askQuestion.data.citations.length > 0 && (
+            {(askQuestion.data?.citations.length ?? 0) > 0 && (
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-muted-foreground">
                   Citations
                 </h4>
-                {askQuestion.data.citations.map((c: ChunkReference) => (
-                  <ChunkResult key={c.chunkId} chunk={c} />
+                {askQuestion.data?.citations.map((citation: ChunkReference) => (
+                  <ChunkResult key={citation.chunkId} chunk={citation} />
                 ))}
               </div>
             )}
           </div>
         )}
 
-        {/* Chat History for Stream Mode */}
-        {mode === "stream" && chatHistory.length > 0 && (
-          <div className="space-y-6 mb-6">
-            {chatHistory.map((chat, idx) => (
-              <div
-                key={idx}
-                className="space-y-4"
-                data-testid={`history-item-${idx}`}
-              >
-                <div className="flex justify-end">
-                  <div className="rounded-lg bg-primary text-primary-foreground px-4 py-2 max-w-[80%] text-sm">
-                    {chat.question}
-                  </div>
-                </div>
-                <div className="rounded-lg border bg-card p-4">
-                  <h3 className="mb-2 text-sm font-semibold">AI Answer</h3>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {chat.answer}
-                  </p>
-                </div>
-                {chat.citations.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-muted-foreground">
-                      Citations
-                    </h4>
-                    {chat.citations.map((c) => (
-                      <ChunkResult key={c.chunkId} chunk={c} />
-                    ))}
-                  </div>
-                )}
-                <Separator />
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Current Streaming result */}
-        {(streamAnswer || isStreaming) && mode === "stream" && (
-          <div className="space-y-4" data-testid="stream-result">
-            <div className="rounded-lg border bg-card p-4">
-              <h3 className="mb-2 text-sm font-semibold">
-                AI Answer{" "}
-                {isStreaming && (
-                  <span className="animate-pulse text-primary">●</span>
-                )}
-              </h3>
-              <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                {streamAnswer || "Thinking..."}
-              </p>
+        {mode === "semantic" &&
+          hasSubmitted &&
+          !isLoading &&
+          !hasSemanticResults && (
+            <div className="rounded-md border p-4 text-sm text-muted-foreground">
+              No matching documents found. Try broader terms or remove filters.
             </div>
-            {streamCitations.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-muted-foreground">
-                  Citations
-                </h4>
-                {streamCitations.map((c) => (
-                  <ChunkResult key={c.chunkId} chunk={c} />
-                ))}
-              </div>
-            )}
+          )}
+
+        {mode === "ask" && hasSubmitted && !isLoading && !hasAskResult && (
+          <div className="rounded-md border p-4 text-sm text-muted-foreground">
+            No answer returned. Try rephrasing the question.
           </div>
         )}
 
-        {/* Error display */}
-        {(search.error ||
-          filteredSearch.error ||
-          askQuestion.error ||
-          retrieve.error) && (
+        {(search.error || filteredSearch.error || askQuestion.error) && (
           <div
             className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive"
             data-testid="search-error"
           >
-            {(() => {
-              const err =
-                search.error ||
-                filteredSearch.error ||
-                askQuestion.error ||
-                retrieve.error;
-              return getApiErrorMessage(err);
-            })()}
+            {getApiErrorMessage(
+              search.error || filteredSearch.error || askQuestion.error,
+            )}
           </div>
         )}
       </div>
