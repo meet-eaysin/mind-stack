@@ -46,6 +46,11 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useDocuments } from "@/features/documents/hooks";
+import type {
+  CollectionDetailResponse,
+  CollectionItemResponse,
+} from "../types";
+import type { DocumentListItem } from "@/features/documents/types";
 
 const itemTypeIcons: Record<string, React.ElementType> = {
   ARTICLE: FileText,
@@ -77,7 +82,7 @@ export function CollectionDetail({
   const removeItem = useRemoveDocumentFromCollection();
   const addItem = useAddDocumentToCollection();
   const updateCollection = useUpdateCollection();
-  const documentsQuery = useDocuments(1, 200);
+  const documentsQuery = useDocuments(1, 100);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
   const [selectedDocumentId, setSelectedDocumentId] = useState("");
@@ -118,11 +123,14 @@ export function CollectionDetail({
   }
 
   if (!data) return null;
+  const collection: CollectionDetailResponse = data;
 
-  const existingDocumentIds = new Set(data.items.map((item) => item.documentId));
-  const availableDocuments = (documentsQuery.data?.documents ?? []).filter(
-    (document) => !existingDocumentIds.has(document.id),
+  const existingDocumentIds = new Set<string>(
+    collection.items.map((item: CollectionItemResponse) => item.documentId),
   );
+  const availableDocuments: DocumentListItem[] = (
+    documentsQuery.data?.documents ?? []
+  ).filter((document: DocumentListItem) => !existingDocumentIds.has(document.id));
 
   return (
     <div className="max-w-4xl mx-auto pb-20">
@@ -136,9 +144,11 @@ export function CollectionDetail({
         </Button>
         <div className="flex items-start justify-between gap-6">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">{data.name}</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {collection.name}
+            </h1>
             <p className="text-muted-foreground">
-              {data.description || "Project-based learning pathway."}
+              {collection.description || "Project-based learning pathway."}
             </p>
           </div>
           <div className="flex gap-2">
@@ -146,9 +156,9 @@ export function CollectionDetail({
               variant="outline"
               size="icon"
               onClick={() => {
-                setSettingsName(data.name);
-                setSettingsDescription(data.description ?? "");
-                setSettingsGoal(data.goal ?? "");
+                setSettingsName(collection.name);
+                setSettingsDescription(collection.description ?? "");
+                setSettingsGoal(collection.goal ?? "");
                 setIsSettingsDialogOpen(true);
               }}
             >
@@ -159,12 +169,12 @@ export function CollectionDetail({
             </Button>
           </div>
         </div>
-        {data.goal && (
+        {collection.goal && (
           <div className="mt-6 p-4 rounded-xl bg-primary/5 border border-primary/10">
             <span className="text-xs font-semibold uppercase tracking-wider text-primary">
               Goal
             </span>
-            <p className="text-sm mt-1">{data.goal}</p>
+            <p className="text-sm mt-1">{collection.goal}</p>
           </div>
         )}
       </header>
@@ -172,14 +182,17 @@ export function CollectionDetail({
       <div className="space-y-1">
         <div className="flex items-center justify-between px-2 py-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           <span>Curriculum</span>
-          <span>{data.items.length} items</span>
+          <span>{collection.items.length} items</span>
         </div>
         <Separator className="mb-4" />
 
         <div className="space-y-3">
-          {data.items
-            .sort((a, b) => a.order - b.order)
-            .map((item, _index) => {
+          {collection.items
+            .sort(
+              (a: CollectionItemResponse, b: CollectionItemResponse) =>
+                a.order - b.order,
+            )
+            .map((item: CollectionItemResponse) => {
               const Icon = itemTypeIcons[item.learningStatus] || FileText; // Simplified for now
 
               return (
@@ -280,7 +293,7 @@ export function CollectionDetail({
               );
             })}
 
-          {data.items.length === 0 && (
+          {collection.items.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 rounded-xl border border-dashed text-muted-foreground">
               <Play className="size-12 mb-4 opacity-10" />
               <p>This collection is empty.</p>
