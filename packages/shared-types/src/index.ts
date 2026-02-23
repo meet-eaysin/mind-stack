@@ -6,6 +6,7 @@ export {
   LEARNING_STATUS,
   DOCUMENT_TYPE,
   ANNOTATION_TYPE,
+  MODEL_PROVIDER,
 } from "./enums";
 export type {
   SourceType,
@@ -15,6 +16,7 @@ export type {
   LearningStatus,
   DocumentType,
   AnnotationType,
+  ModelProvider,
 } from "./enums";
 
 export type {
@@ -43,6 +45,9 @@ export type {
   SearchResponse,
   AskQuestionResponse,
   StreamingAskResponseChunk,
+  UserLlmConfigResponse,
+  UpdateUserLlmConfigRequest,
+  EmbeddingModelHealthResponse,
   ReviewItem,
   DailyReviewResponse,
   SubmitReviewFeedbackRequest,

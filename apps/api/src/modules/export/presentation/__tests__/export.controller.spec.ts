@@ -34,7 +34,9 @@ describe('ExportController', () => {
 
   it('exports markdown and notion payloads', async () => {
     mockExportMarkdown.execute.mockResolvedValue('# Test Content');
-    mockExportNotion.execute.mockResolvedValue([{ type: 'paragraph', content: 'A', metadata: {} }]);
+    mockExportNotion.execute.mockResolvedValue([
+      { type: 'paragraph', content: 'A', metadata: {} },
+    ]);
 
     await expect(
       controller.toMarkdown({ chunkIds: ['chunk-1', 'chunk-2'] }),

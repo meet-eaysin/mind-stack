@@ -5,6 +5,7 @@ import type {
   GenerationResponse,
   StreamChunk,
 } from '@repo/llm';
+import type { EmbeddingProvider } from '@repo/embeddings';
 import type {
   ChunkReference,
   StreamingAskResponseChunk,
@@ -59,8 +60,24 @@ class FakeSemanticSearchUseCase {
     this.results = results;
   }
 
-  execute(_input: { query: string; topK?: number }): Promise<ChunkReference[]> {
+  execute(_input: {
+    query: string;
+    topK?: number;
+    userId: string;
+  }): Promise<ChunkReference[]> {
     return Promise.resolve(this.results);
+  }
+}
+
+class FakeLlmProviderFactory {
+  constructor(private readonly provider: LLMProvider) {}
+
+  async getGenerationProvider(_userId: string): Promise<LLMProvider> {
+    return this.provider;
+  }
+
+  async getEmbeddingProvider(_userId: string): Promise<EmbeddingProvider> {
+    throw new Error('Embedding provider not used in this test');
   }
 }
 
@@ -69,12 +86,14 @@ class FakeSemanticSearchUseCase {
 describe('AskQuestionUseCase', () => {
   let useCase: AskQuestionUseCase;
   let llmProvider: FakeLLMProvider;
+  let providerFactory: FakeLlmProviderFactory;
   let semanticSearch: FakeSemanticSearchUseCase;
 
   beforeEach(() => {
     llmProvider = new FakeLLMProvider();
+    providerFactory = new FakeLlmProviderFactory(llmProvider);
     semanticSearch = new FakeSemanticSearchUseCase();
-    useCase = new AskQuestionUseCase(llmProvider, semanticSearch);
+    useCase = new AskQuestionUseCase(providerFactory, semanticSearch);
   });
 
   it('should return the LLM answer with citations when context is available', async () => {
@@ -95,7 +114,10 @@ describe('AskQuestionUseCase', () => {
       'TypeScript is a typed language [1] that compiles to JS [2].',
     );
 
-    const result = await useCase.execute({ question: 'What is TypeScript?' });
+    const result = await useCase.execute({
+      question: 'What is TypeScript?',
+      userId: 'default',
+    });
 
     expect(result.answer).toBe(
       'TypeScript is a typed language [1] that compiles to JS [2].',
@@ -122,7 +144,10 @@ describe('AskQuestionUseCase', () => {
     semanticSearch.setResults(citations);
     llmProvider.setResponse('Answer [1]');
 
-    const result = await useCase.execute({ question: 'TypeScript?' });
+    const result = await useCase.execute({
+      question: 'TypeScript?',
+      userId: 'default',
+    });
 
     expect(result.citations).toHaveLength(1);
     expect(result.citations[0]?.chunkId).toBe('c2');
@@ -132,7 +157,10 @@ describe('AskQuestionUseCase', () => {
   it('should return a fallback answer when no citations are found', async () => {
     semanticSearch.setResults([]);
 
-    const result = await useCase.execute({ question: 'Unknown topic?' });
+    const result = await useCase.execute({
+      question: 'Unknown topic?',
+      userId: 'default',
+    });
 
     expect(result.answer).toBe(
       "I don't have enough information to answer this question.",
@@ -145,11 +173,12 @@ describe('AskQuestionUseCase', () => {
     const executeSpy = jest.spyOn(semanticSearch, 'execute');
     semanticSearch.setResults([]);
 
-    await useCase.execute({ question: 'test', topK: 3 });
+    await useCase.execute({ question: 'test', topK: 3, userId: 'default' });
 
     expect(executeSpy).toHaveBeenCalledWith({
       query: 'test',
       topK: 3,
+      userId: 'default',
     });
   });
 
@@ -157,11 +186,12 @@ describe('AskQuestionUseCase', () => {
     const executeSpy = jest.spyOn(semanticSearch, 'execute');
     semanticSearch.setResults([]);
 
-    await useCase.execute({ question: 'test' });
+    await useCase.execute({ question: 'test', userId: 'default' });
 
     expect(executeSpy).toHaveBeenCalledWith({
       query: 'test',
       topK: 5,
+      userId: 'default',
     });
   });
 
@@ -171,7 +201,10 @@ describe('AskQuestionUseCase', () => {
     llmProvider.setResponse('Streamed answer');
 
     const chunks: StreamingAskResponseChunk[] = [];
-    for await (const chunk of useCase.executeStream({ question: 'test' })) {
+    for await (const chunk of useCase.executeStream({
+      question: 'test',
+      userId: 'default',
+    })) {
       chunks.push(chunk);
     }
 

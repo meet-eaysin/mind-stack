@@ -26,7 +26,10 @@ class FakeDocumentRepository implements DocumentRepository {
     return Promise.resolve(this.saved);
   }
 
-  async findBySourceUrl(url: string): Promise<DocumentEntity | null> {
+  async findBySourceUrl(
+    url: string,
+    _userId: string,
+  ): Promise<DocumentEntity | null> {
     return Promise.resolve(this.saved.find((d) => d.sourceUrl === url) ?? null);
   }
 
@@ -34,6 +37,16 @@ class FakeDocumentRepository implements DocumentRepository {
     const doc = this.saved.find((d) => d.id === _id);
     if (doc) {
       doc.status = _status;
+    }
+    return Promise.resolve();
+  }
+  async updateProcessingError(
+    _id: string,
+    _errorMessage: string | null,
+  ): Promise<void> {
+    const doc = this.saved.find((d) => d.id === _id);
+    if (doc) {
+      doc.processingError = _errorMessage;
     }
     return Promise.resolve();
   }
@@ -97,6 +110,7 @@ describe('IngestTextUseCase', () => {
     const result = await useCase.execute({
       title: 'My Note',
       content: 'Some important content',
+      userId: 'default',
     });
 
     expect(result.documentId).toBeDefined();
@@ -118,6 +132,7 @@ describe('IngestTextUseCase', () => {
     const result = await useCase.execute({
       title: 'Clip',
       content: 'Clipped content',
+      userId: 'default',
       sourceUrl: 'https://example.com/item',
     });
 

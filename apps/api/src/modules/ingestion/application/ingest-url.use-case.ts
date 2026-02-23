@@ -14,8 +14,12 @@ export class IngestUrlUseCase {
   async execute(input: {
     url: string;
     title?: string;
+    userId: string;
   }): Promise<{ documentId: string; jobId?: string }> {
-    const existing = await this.documentRepository.findBySourceUrl(input.url);
+    const existing = await this.documentRepository.findBySourceUrl(
+      input.url,
+      input.userId,
+    );
     if (existing) {
       if (
         existing.status !== INGESTION_STATUS.FAILED &&
@@ -34,6 +38,7 @@ export class IngestUrlUseCase {
     const document = createDocument({
       id: randomUUID(),
       title: input.title ?? new URL(input.url).hostname,
+      userId: input.userId,
       sourceType: SOURCE_TYPE.URL,
       sourceUrl: input.url,
       rawContent: '',
@@ -41,7 +46,10 @@ export class IngestUrlUseCase {
     });
 
     const saved = await this.documentRepository.save(document);
-    const jobId = await this.jobProducer.enqueueUrlExtractionJob(saved.id);
+    const jobId = await this.jobProducer.enqueueUrlExtractionJob(
+      saved.id,
+      input.userId,
+    );
     return { documentId: saved.id, jobId };
   }
 }

@@ -38,7 +38,10 @@ class FakeDocumentRepository implements DocumentRepository {
     return Promise.resolve(this.saved);
   }
 
-  async findBySourceUrl(url: string): Promise<DocumentEntity | null> {
+  async findBySourceUrl(
+    url: string,
+    _userId: string,
+  ): Promise<DocumentEntity | null> {
     return Promise.resolve(this.saved.find((d) => d.sourceUrl === url) ?? null);
   }
 
@@ -46,6 +49,16 @@ class FakeDocumentRepository implements DocumentRepository {
     const doc = this.saved.find((d) => d.id === _id);
     if (doc) {
       doc.status = _status;
+    }
+    return Promise.resolve();
+  }
+  async updateProcessingError(
+    _id: string,
+    _errorMessage: string | null,
+  ): Promise<void> {
+    const doc = this.saved.find((d) => d.id === _id);
+    if (doc) {
+      doc.processingError = _errorMessage;
     }
     return Promise.resolve();
   }
@@ -109,6 +122,7 @@ describe('IngestPdfUseCase', () => {
     const result = await useCase.execute({
       title: 'Manual.pdf',
       fileBase64: pdfBase64,
+      userId: 'default',
     });
 
     expect(result.documentId).toBeDefined();

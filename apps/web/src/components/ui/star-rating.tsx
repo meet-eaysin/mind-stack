@@ -40,7 +40,7 @@ export function StarRating({
         "flex flex-col items-center gap-1.5",
         "data-[orientation=horizontal]:flex-row",
         "data-[size=lg]:[--star-size:calc(--spacing(5))] data-[size=md]:[--star-size:calc(--spacing(4))] data-[size=sm]:[--star-size:calc(--spacing(3))]",
-        containerClassName
+        containerClassName,
       )}
       aria-label={`${clampedValue} out of ${safeMax} stars`}
       role="img"
@@ -56,7 +56,11 @@ export function StarRating({
               : 0;
 
           return (
-            <span key={index} className="relative inline-flex" aria-hidden="true">
+            <span
+              key={index}
+              className="relative inline-flex"
+              aria-hidden="true"
+            >
               {/* Base (unfilled) star */}
               <Star className="size-(--star-size)" />
               {/* Filled overlay */}
@@ -74,7 +78,10 @@ export function StarRating({
       </div>
 
       {label && (
-        <span data-slot="star-rating-label" className="text-xs text-muted-foreground">
+        <span
+          data-slot="star-rating-label"
+          className="text-xs text-muted-foreground"
+        >
           {label}
         </span>
       )}

@@ -5,11 +5,13 @@ import { GetQueueMetricsUseCase } from '../application/get-queue-metrics.use-cas
 import { CleanupConceptsUseCase } from '../application/cleanup-concepts.use-case.js';
 import { PrismaModule } from '../../../prisma/prisma.module.js';
 import { QueryModule } from '../../query/presentation/query.module.js';
+import { SettingsModule } from '../../settings/presentation/settings.module.js';
 
 @Module({
   imports: [
     PrismaModule,
     forwardRef(() => QueryModule),
+    SettingsModule,
     BullModule.registerQueue({
       name: 'ingestion',
     }),

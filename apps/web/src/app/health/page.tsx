@@ -307,12 +307,17 @@ export default function HealthPage() {
                     {failedDocs.data.failedDocuments.map((doc) => (
                       <div
                         key={doc.id}
-                        className="flex items-center justify-between px-4 py-3 text-sm"
+                        className="flex items-start justify-between gap-4 px-4 py-3 text-sm"
                       >
-                        <span className="font-medium truncate max-w-[60%]">
-                          {doc.title}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
+                        <div className="min-w-0">
+                          <p className="font-medium truncate">{doc.title}</p>
+                          {doc.processingError && (
+                            <p className="text-xs text-muted-foreground mt-1 truncate">
+                              {doc.processingError}
+                            </p>
+                          )}
+                        </div>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
                           {new Date(doc.createdAt).toLocaleDateString()}
                         </span>
                       </div>

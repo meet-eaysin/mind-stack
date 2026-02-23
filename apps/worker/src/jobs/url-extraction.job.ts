@@ -9,9 +9,9 @@ import type { LLMProvider } from "@repo/llm";
 const logger = createLogger("UrlExtractionJob");
 
 export async function handleUrlExtractionJob(
-  job: Job<{ documentId: string }, void, string>,
+  job: Job<{ documentId: string; userId?: string }, void, string>,
   prisma: PrismaClient,
-  llm: LLMProvider,
+  getGenerationProvider: (userId: string) => Promise<LLMProvider>,
   ingestionQueue: Queue,
 ): Promise<void> {
   const { documentId } = job.data;
@@ -30,6 +30,8 @@ export async function handleUrlExtractionJob(
   }
 
   try {
+    const llm = await getGenerationProvider(job.data.userId ?? "default");
+
     // 1. Fetch
     const response = await fetch(document.sourceUrl, {
       headers: {
@@ -108,18 +110,22 @@ export async function handleUrlExtractionJob(
             : document.title,
         rawContent: markdownContent || "",
         status: INGESTION_STATUS.INGESTED,
+        processingError: null,
       },
     });
 
     // 5. Chain to Chunking
-    await ingestionQueue.add(JOB_TYPE.CHUNKING, { documentId });
+    await ingestionQueue.add(JOB_TYPE.CHUNKING, {
+      documentId,
+      userId: job.data.userId ?? "default",
+    });
 
     logger.info("URL extraction completed", { documentId });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     await prisma.document.update({
       where: { id: documentId },
-      data: { status: INGESTION_STATUS.FAILED },
+      data: { status: INGESTION_STATUS.FAILED, processingError: message },
     });
     logger.error("URL extraction failed", { documentId, error: message });
     throw error;

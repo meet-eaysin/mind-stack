@@ -1,31 +1,75 @@
-import type { PrismaClient, Prisma } from "@repo/database";
-import type { EmbeddingProvider } from "@repo/embeddings";
+import { OllamaEmbeddingProvider } from "@repo/embeddings";
+import { OllamaModelRegistry } from "@repo/embeddings";
 import type { VectorStore, VectorDocument } from "@repo/vector-store";
 import { createLogger } from "@repo/logger";
 import { Job, Queue } from "bullmq";
 import { JOB_TYPE } from "@repo/shared-types";
+import { resolveUserLlmConfig } from "../llm-config";
 
 const logger = createLogger("EmbeddingJob");
 
-type ChunkWithDetails = Prisma.ChunkGetPayload<{
-  include: {
-    document: {
-      select: {
-        title: true;
-        DocumentTag: { include: { tag: true } };
-      };
-    };
+type ChunkWithDetails = {
+  id: string;
+  documentId: string;
+  content: string;
+  document: {
+    title: string;
+    DocumentTag: Array<{ tag: { name: string } }>;
   };
-}>;
+};
+
+type EmbeddingJobPrisma = {
+  document: {
+    findUnique: (args: { where: { id: string } }) => Promise<{
+      id: string;
+      status: string;
+      userId: string;
+    } | null>;
+    update: (args: {
+      where: { id: string };
+      data: { status?: string; processingError?: string | null };
+    }) => Promise<{
+      id: string;
+      status: string;
+      processingError: string | null;
+    }>;
+  };
+  chunk: {
+    findMany: (args: {
+      where: { documentId: string };
+      include: {
+        document: {
+          select: {
+            title: true;
+            DocumentTag: { include: { tag: true } };
+          };
+        };
+      };
+    }) => Promise<ChunkWithDetails[]>;
+  };
+  userLlmConfig: {
+    findUnique: (args: { where: { userId: string } }) => Promise<{
+      embeddingProvider: string;
+      embeddingModel: string;
+      generationProvider: string;
+      generationModel: string;
+    } | null>;
+  };
+};
 
 const BATCH_SIZE = 10;
 
 export async function handleEmbeddingJob(
-  job: Job<{ documentId: string }, void, string>,
-  prisma: PrismaClient,
-  embeddingProvider: EmbeddingProvider,
+  job: Job<{ documentId: string; userId?: string }, void, string>,
+  prisma: EmbeddingJobPrisma,
   vectorStore: VectorStore,
   ingestionQueue: Queue,
+  modelRegistry: OllamaModelRegistry,
+  defaults: {
+    baseUrl: string;
+    embeddingModel: string;
+    generationModel: string;
+  },
 ): Promise<void> {
   const { documentId } = job.data;
 
@@ -49,10 +93,25 @@ export async function handleEmbeddingJob(
 
   await prisma.document.update({
     where: { id: documentId },
-    data: { status: "EMBEDDING" },
+    data: { status: "EMBEDDING", processingError: null },
   });
 
   try {
+    const userId = job.data.userId ?? document.userId;
+    const config = await resolveUserLlmConfig(prisma, userId, defaults);
+
+    const modelAvailable = await modelRegistry.hasModel(config.embeddingModel);
+    if (!modelAvailable) {
+      throw new Error(
+        `Embedding model not available: ${config.embeddingModel}`,
+      );
+    }
+
+    const embeddingProvider = new OllamaEmbeddingProvider({
+      baseUrl: config.baseUrl,
+      model: config.embeddingModel,
+    });
+
     const chunks = await prisma.chunk.findMany({
       where: { documentId },
       include: {
@@ -115,7 +174,10 @@ export async function handleEmbeddingJob(
       data: { status: "GRAPH_BUILDING" },
     });
 
-    await ingestionQueue.add(JOB_TYPE.CONCEPT_EXTRACTION, { documentId });
+    await ingestionQueue.add(JOB_TYPE.CONCEPT_EXTRACTION, {
+      documentId,
+      userId,
+    });
 
     logger.info("Embedding completed", {
       documentId,
@@ -125,7 +187,7 @@ export async function handleEmbeddingJob(
     const message = error instanceof Error ? error.message : String(error);
     await prisma.document.update({
       where: { id: documentId },
-      data: { status: "FAILED" },
+      data: { status: "FAILED", processingError: message },
     });
     logger.error("Embedding failed", { documentId, error: message });
     throw error;

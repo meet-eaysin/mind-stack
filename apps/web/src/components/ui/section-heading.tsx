@@ -16,48 +16,62 @@ function SectionHeading({
         "group/section-heading flex flex-col gap-3",
         alignment === "left" && "items-start text-left",
         alignment === "center" && "items-center text-center",
-        className
+        className,
       )}
       {...props}
     />
   );
 }
 
-function SectionHeadingTagline({ ...props }: React.ComponentProps<typeof Tagline>) {
+function SectionHeadingTagline({
+  ...props
+}: React.ComponentProps<typeof Tagline>) {
   return <Tagline variant="default" {...props} />;
 }
 
-function SectionHeadingTitle({ className, ...props }: React.ComponentProps<"h2">) {
+function SectionHeadingTitle({
+  className,
+  ...props
+}: React.ComponentProps<"h2">) {
   return (
     <h2
       data-slot="section-heading-title"
       className={cn(
         "scroll-m-20 text-4xl font-medium tracking-tight text-foreground lg:text-5xl",
-        className
+        className,
       )}
       {...props}
     />
   );
 }
 
-function SectionHeadingBody({ className, ...props }: React.ComponentProps<"p">) {
+function SectionHeadingBody({
+  className,
+  ...props
+}: React.ComponentProps<"p">) {
   return (
     <p
       data-slot="section-heading-body"
       className={cn(
         "max-w-2xl text-base font-normal text-pretty text-muted-foreground",
-        className
+        className,
       )}
       {...props}
     />
   );
 }
 
-function SectionHeadingActions({ className, ...props }: React.ComponentProps<"div">) {
+function SectionHeadingActions({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="section-heading-actions"
-      className={cn("flex w-full flex-col gap-2 sm:w-fit sm:flex-row", className)}
+      className={cn(
+        "flex w-full flex-col gap-2 sm:w-fit sm:flex-row",
+        className,
+      )}
       {...props}
     />
   );

@@ -22,7 +22,11 @@ export class RetryIngestionUseCase {
       documentId,
       INGESTION_STATUS.INGESTED,
     );
-    const jobId = await this.jobProducer.enqueueChunkingJob(documentId);
+    await this.documentRepository.updateProcessingError(documentId, null);
+    const jobId = await this.jobProducer.enqueueChunkingJob(
+      documentId,
+      document.userId,
+    );
     return { jobId };
   }
 }

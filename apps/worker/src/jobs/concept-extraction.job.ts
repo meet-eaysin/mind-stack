@@ -11,7 +11,7 @@ const ROOT_LABEL = "user brain";
 const DOCUMENT_PREFIX = "doc:";
 
 export async function handleConceptExtractionJob(
-  job: Job<{ documentId: string }, void, string>,
+  job: Job<{ documentId: string; userId?: string }, void, string>,
   prisma: PrismaClient,
   llmProvider: LLMProvider,
 ): Promise<void> {
@@ -64,15 +64,16 @@ export async function handleConceptExtractionJob(
 
     await prisma.document.update({
       where: { id: documentId },
-      data: { status: "READY" },
+      data: { status: "READY", processingError: null },
     });
   } catch (error) {
     logger.error("Failed to sync document graph", {
       error: error instanceof Error ? error.message : String(error),
     });
+    const message = error instanceof Error ? error.message : String(error);
     await prisma.document.update({
       where: { id: documentId },
-      data: { status: "FAILED" },
+      data: { status: "FAILED", processingError: message },
     });
     throw error;
   }

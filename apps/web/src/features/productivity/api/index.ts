@@ -54,5 +54,9 @@ export const productivityApi = {
     apiClient.post(ENDPOINTS.LEARNING_GOALS.ITEMS(goalId), data, z.void()),
 
   removeItemFromGoal: (itemId: string): Promise<void> =>
-    apiClient.delete(ENDPOINTS.LEARNING_GOALS.REMOVE_ITEM(itemId), {}, z.void()),
+    apiClient.delete(
+      ENDPOINTS.LEARNING_GOALS.REMOVE_ITEM(itemId),
+      {},
+      z.void(),
+    ),
 };

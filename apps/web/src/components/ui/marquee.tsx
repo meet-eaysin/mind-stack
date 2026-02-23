@@ -49,7 +49,7 @@ function Marquee({
         "has-data-[fade='bottom']:mask-b-from-80%",
         "has-data-[fade='vertical']:mask-y-from-80%",
         "has-data-[fade='horizontal']:mask-x-from-80%",
-        className
+        className,
       )}
       {...props}
     >

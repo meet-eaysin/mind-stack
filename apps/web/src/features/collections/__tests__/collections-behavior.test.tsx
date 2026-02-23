@@ -6,9 +6,7 @@ import { server } from "@/test/msw/server";
 import { CollectionList } from "../components/collection-list";
 
 describe("Collections Behavior", () => {
-  it(
-    "renders collection list and supports create with refetch",
-    async () => {
+  it("renders collection list and supports create with refetch", async () => {
     let listCalls = 0;
     const collections = [
       {
@@ -64,16 +62,16 @@ describe("Collections Behavior", () => {
     fireEvent.change(screen.getByLabelText(/name/i), {
       target: { value: "Fresh Collection" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /^create collection$/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /^create collection$/i }),
+    );
 
     await waitFor(() => {
       expect(screen.getByText("Fresh Collection")).toBeInTheDocument();
     });
 
     expect(listCalls).toBeGreaterThan(1);
-    },
-    15000,
-  );
+  }, 15000);
 
   it("renders loading and empty states", async () => {
     server.use(
@@ -84,7 +82,9 @@ describe("Collections Behavior", () => {
     );
 
     render(<CollectionList onSelect={() => {}} />);
-    expect(screen.queryByText("No collections found matching your search.")).toBeNull();
+    expect(
+      screen.queryByText("No collections found matching your search."),
+    ).toBeNull();
 
     await waitFor(() => {
       expect(
@@ -96,7 +96,10 @@ describe("Collections Behavior", () => {
   it("shows backend and network errors", async () => {
     server.use(
       http.get("*/collections", () =>
-        HttpResponse.json({ message: "Invalid collection filter" }, { status: 400 }),
+        HttpResponse.json(
+          { message: "Invalid collection filter" },
+          { status: 400 },
+        ),
       ),
     );
     render(<CollectionList onSelect={() => {}} />);
@@ -104,9 +107,7 @@ describe("Collections Behavior", () => {
       expect(screen.getByText("Invalid collection filter")).toBeInTheDocument();
     });
 
-    server.use(
-      http.get("*/collections", () => HttpResponse.error()),
-    );
+    server.use(http.get("*/collections", () => HttpResponse.error()));
     render(<CollectionList onSelect={() => {}} />);
     await waitFor(() => {
       expect(screen.getByText(/failed to fetch/i)).toBeInTheDocument();

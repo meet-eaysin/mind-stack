@@ -310,6 +310,18 @@ export function DocumentDetail({
         onOpenChange={setIsAddingToCollection}
       />
 
+      {doc.status === "FAILED" && (
+        <div className="max-w-7xl mx-auto px-4 pt-6">
+          <div className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            <p className="font-semibold">Processing failed</p>
+            <p className="text-xs text-destructive/80 mt-1">
+              {doc.processingError ??
+                "Embedding failed. Check your model configuration and retry."}
+            </p>
+          </div>
+        </div>
+      )}
+
       <main className="max-w-7xl mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8">
         {/* Main Content Area */}
         <div className="flex-1 min-w-0">
@@ -897,17 +909,21 @@ export function DocumentDetail({
                   </div>
                 )}
 
-                {relatedDocuments.data && relatedDocuments.data.length === 0 && (
-                  <div
-                    className="rounded-md border border-dashed p-3 text-xs text-muted-foreground"
-                    data-testid="related-resources-empty"
-                  >
-                    No related resources found for this document yet.
-                  </div>
-                )}
+                {relatedDocuments.data &&
+                  relatedDocuments.data.length === 0 && (
+                    <div
+                      className="rounded-md border border-dashed p-3 text-xs text-muted-foreground"
+                      data-testid="related-resources-empty"
+                    >
+                      No related resources found for this document yet.
+                    </div>
+                  )}
 
                 {relatedDocuments.data && relatedDocuments.data.length > 0 && (
-                  <div className="space-y-2" data-testid="related-resources-list">
+                  <div
+                    className="space-y-2"
+                    data-testid="related-resources-list"
+                  >
                     {relatedDocuments.data.map((item) => (
                       <div
                         key={item.chunkId}
@@ -984,16 +1000,16 @@ export function DocumentDetail({
                       </button>
                     ))}
                   </div>
-                      <Button
-                        variant="destructive"
-                        className="w-full text-xs h-9 rounded-full gap-2"
-                        onClick={() => {
-                          if (window.confirm("Permanently delete this document?")) {
-                            deleteDocument.mutate(doc.id, {
-                              onSuccess: onBackAction,
-                            });
-                          }
-                        }}
+                  <Button
+                    variant="destructive"
+                    className="w-full text-xs h-9 rounded-full gap-2"
+                    onClick={() => {
+                      if (window.confirm("Permanently delete this document?")) {
+                        deleteDocument.mutate(doc.id, {
+                          onSuccess: onBackAction,
+                        });
+                      }
+                    }}
                   >
                     <Trash2 className="size-3" />
                     Delete Document

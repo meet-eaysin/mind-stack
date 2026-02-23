@@ -1,13 +1,13 @@
-import type { EmbeddingProvider } from '@repo/embeddings';
 import type { VectorStore } from '@repo/vector-store';
 import type { QueryRepository } from '../domain/query-repository.interface.js';
 import { rankResults } from '../domain/ranking.service.js';
 import { INGESTION_STATUS } from '@repo/shared-types';
 import type { ChunkReference } from '@repo/shared-types';
+import type { LlmProviderFactoryPort } from '../../settings/application/llm-provider.factory.js';
 
 export class SemanticSearchUseCase {
   constructor(
-    private readonly embeddingProvider: EmbeddingProvider,
+    private readonly providerFactory: LlmProviderFactoryPort,
     private readonly vectorStore: VectorStore,
     private readonly queryRepository: QueryRepository,
   ) {}
@@ -15,9 +15,13 @@ export class SemanticSearchUseCase {
   async execute(input: {
     query: string;
     topK?: number;
+    userId: string;
   }): Promise<ChunkReference[]> {
     const topK = input.topK ?? 10;
-    const { embedding } = await this.embeddingProvider.embed(input.query);
+    const embeddingProvider = await this.providerFactory.getEmbeddingProvider(
+      input.userId,
+    );
+    const { embedding } = await embeddingProvider.embed(input.query);
 
     const vectorResults = await this.vectorStore.search(embedding, { topK });
     if (vectorResults.length === 0) return [];

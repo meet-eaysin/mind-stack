@@ -9,7 +9,10 @@ import {
   createDocument,
   type DocumentEntity,
 } from '../../../ingestion/domain/document.entity.js';
-import { ROOT_LABEL, toDocumentNodeLabel } from '../../domain/document-graph.js';
+import {
+  ROOT_LABEL,
+  toDocumentNodeLabel,
+} from '../../domain/document-graph.js';
 import type {
   RelationType,
   IngestionStatus,
@@ -38,11 +41,20 @@ class FakeDocumentRepository implements DocumentRepository {
     return Promise.resolve([...this.documents.values()]);
   }
 
-  findBySourceUrl(_url: string): Promise<DocumentEntity | null> {
+  findBySourceUrl(
+    _url: string,
+    _userId: string,
+  ): Promise<DocumentEntity | null> {
     return Promise.resolve(null);
   }
 
   updateStatus(_id: string, _status: IngestionStatus): Promise<void> {
+    return Promise.resolve();
+  }
+  updateProcessingError(
+    _id: string,
+    _errorMessage: string | null,
+  ): Promise<void> {
     return Promise.resolve();
   }
 
@@ -85,9 +97,7 @@ class FakeConceptRepository implements ConceptRepository {
   }
 
   findOrCreate(label: string): Promise<ConceptEntity> {
-    const existing = [...this.concepts.values()].find(
-      (c) => c.label === label,
-    );
+    const existing = [...this.concepts.values()].find((c) => c.label === label);
     if (existing) return Promise.resolve(existing);
     const concept = { id: `concept-${++this.idCounter}`, label };
     this.concepts.set(concept.id, concept);
@@ -116,9 +126,7 @@ class FakeConceptRepository implements ConceptRepository {
     return Promise.resolve(relation);
   }
 
-  findRelationsForConcept(
-    conceptId: string,
-  ): Promise<ConceptRelationEntity[]> {
+  findRelationsForConcept(conceptId: string): Promise<ConceptRelationEntity[]> {
     return Promise.resolve(
       this.relations.filter(
         (r) => r.fromConceptId === conceptId || r.toConceptId === conceptId,

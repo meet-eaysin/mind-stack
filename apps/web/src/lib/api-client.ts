@@ -40,6 +40,19 @@ const ErrorResponseSchema = z.object({
   message: z.string(),
 });
 
+const getUserIdHeaderValue = (): string => {
+  if (typeof window === "undefined") return "default";
+  const stored = window.localStorage.getItem("mindstack_user_id");
+  if (!stored) return "default";
+  const trimmed = stored.trim();
+  return trimmed.length > 0 ? trimmed : "default";
+};
+
+const buildHeaders = (): HeadersInit => ({
+  "Content-Type": "application/json",
+  "x-user-id": getUserIdHeaderValue(),
+});
+
 async function handleResponse<T>(
   response: Response,
   schema: z.ZodSchema<T>,
@@ -119,9 +132,7 @@ export const apiClient = {
   get: async <T>(path: string, schema: z.ZodSchema<T>): Promise<T> => {
     const response = await safeFetch(`${env.NEXT_PUBLIC_API_URL}${path}`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: buildHeaders(),
     });
     return handleResponse(response, schema);
   },
@@ -133,9 +144,7 @@ export const apiClient = {
   ): Promise<T> => {
     const response = await safeFetch(`${env.NEXT_PUBLIC_API_URL}${path}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: buildHeaders(),
       body: JSON.stringify(body),
     });
     return handleResponse(response, schema);
@@ -148,9 +157,7 @@ export const apiClient = {
   ): Promise<T> => {
     const response = await safeFetch(`${env.NEXT_PUBLIC_API_URL}${path}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: buildHeaders(),
       body: JSON.stringify(body),
     });
     return handleResponse(response, schema);
@@ -163,9 +170,7 @@ export const apiClient = {
   ): Promise<T> => {
     const response = await safeFetch(`${env.NEXT_PUBLIC_API_URL}${path}`, {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: buildHeaders(),
       body: JSON.stringify(body),
     });
     return handleResponse(response, schema);
@@ -177,9 +182,7 @@ export const apiClient = {
   ): Promise<T> => {
     const response = await safeFetch(`${env.NEXT_PUBLIC_API_URL}${path}`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: buildHeaders(),
       body: JSON.stringify(body),
     });
     return handleResponse(response, schema);

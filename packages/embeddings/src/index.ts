@@ -4,3 +4,4 @@ export type {
 } from "./embedding-provider.interface.js";
 
 export { OllamaEmbeddingProvider } from "./ollama-embedding.provider.js";
+export { OllamaModelRegistry } from "./ollama-model.registry.js";

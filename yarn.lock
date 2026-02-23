@@ -16512,6 +16512,7 @@ __metadata:
   resolution: "web@workspace:apps/web"
   dependencies:
     "@hookform/resolvers": "npm:^5.2.2"
+    "@repo/config": "npm:*"
     "@tailwindcss/postcss": "npm:^4"
     "@tanstack/react-query": "npm:^5.90.21"
     "@testing-library/dom": "npm:^10.4.1"

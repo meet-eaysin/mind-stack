@@ -6,6 +6,7 @@ import {
   Body,
   Param,
   Query,
+  Headers,
 } from '@nestjs/common';
 import type {
   DocumentDetailResponse,
@@ -34,6 +35,7 @@ import {
   UpdateDocumentDto,
 } from './knowledge.dtos.js';
 import type { NoteEntity } from '../domain/note.entity.js';
+import { getUserIdFromHeader } from '../../../common/request-user.js';
 
 @Controller('knowledge')
 export class KnowledgeController {
@@ -85,6 +87,7 @@ export class KnowledgeController {
         addedByUserAt: d.addedByUserAt.toISOString(),
         chunkCount: d.chunkCount,
         createdAt: d.createdAt.toISOString(),
+        processingError: d.processingError,
       })),
       total: result.total,
       page,
@@ -133,12 +136,16 @@ export class KnowledgeController {
       language: document.language,
       addedByUserAt: document.addedByUserAt.toISOString(),
       createdAt: document.createdAt.toISOString(),
+      processingError: document.processingError,
     };
   }
 
   @Get('documents/:id/related')
-  async getRelated(@Param('id') id: string): Promise<ChunkReference[]> {
-    return this.getRelatedSuggestions.execute(id);
+  async getRelated(
+    @Param('id') id: string,
+    @Headers('x-user-id') userId?: string,
+  ): Promise<ChunkReference[]> {
+    return this.getRelatedSuggestions.execute(id, getUserIdFromHeader(userId));
   }
 
   @Get('documents/:id/status')
@@ -186,7 +193,7 @@ export class KnowledgeController {
     const note = await this.addNote.execute({
       documentId: dto.documentId,
       content: dto.content,
-      type: dto.type as AnnotationType | undefined,
+      type: dto.type,
       chunkId: dto.chunkId,
       selectedText: dto.selectedText,
       metadata: dto.metadata,

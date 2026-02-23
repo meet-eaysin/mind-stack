@@ -4,8 +4,11 @@
  * without depending on the concrete BullMQ-based producer.
  */
 export type IngestionJobProducerPort = {
-  enqueueUrlExtractionJob(documentId: string): Promise<string>;
-  enqueueChunkingJob(documentId: string): Promise<string>;
-  enqueueEmbeddingJob(documentId: string): Promise<string>;
-  enqueueConceptExtractionJob(documentId: string): Promise<string>;
+  enqueueUrlExtractionJob(documentId: string, userId: string): Promise<string>;
+  enqueueChunkingJob(documentId: string, userId: string): Promise<string>;
+  enqueueEmbeddingJob(documentId: string, userId: string): Promise<string>;
+  enqueueConceptExtractionJob(
+    documentId: string,
+    userId: string,
+  ): Promise<string>;
 };

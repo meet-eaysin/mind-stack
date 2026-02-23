@@ -21,6 +21,7 @@ function createDocumentFixture(
   return {
     id: 'doc-1',
     title: 'Title',
+    userId: 'default',
     sourceType: 'URL',
     sourceUrl: 'https://example.com',
     rawContent: 'Content',
@@ -33,6 +34,7 @@ function createDocumentFixture(
     language: 'en',
     addedByUserAt: new Date(),
     createdAt: new Date(),
+    processingError: null,
     deletedAt: null,
     ...overrides,
   };
@@ -76,7 +78,10 @@ class FakeDocumentRepository implements DocumentRepository {
     );
   }
 
-  async findBySourceUrl(url: string): Promise<DocumentEntity | null> {
+  async findBySourceUrl(
+    url: string,
+    _userId: string,
+  ): Promise<DocumentEntity | null> {
     return Promise.resolve(
       Array.from(this.documents.values()).find(
         (d) => d.sourceUrl === url && !d.deletedAt,
@@ -87,6 +92,14 @@ class FakeDocumentRepository implements DocumentRepository {
   async updateStatus(id: string, status: IngestionStatus): Promise<void> {
     const doc = this.documents.get(id);
     if (doc) doc.status = status;
+    return Promise.resolve();
+  }
+  async updateProcessingError(
+    id: string,
+    errorMessage: string | null,
+  ): Promise<void> {
+    const doc = this.documents.get(id);
+    if (doc) doc.processingError = errorMessage;
     return Promise.resolve();
   }
 

@@ -1,15 +1,22 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Headers } from '@nestjs/common';
 import { type IngestionResponse, INGESTION_STATUS } from '@repo/shared-types';
 import { IngestClipUseCase } from '../application/ingest-clip.use-case.js';
 import { IngestClipDto } from './ingestion.dtos.js';
+import { getUserIdFromHeader } from '../../../common/request-user.js';
 
 @Controller('ingest')
 export class ClipController {
   constructor(private readonly ingestClip: IngestClipUseCase) {}
 
   @Post('clip')
-  async ingestClipText(@Body() dto: IngestClipDto): Promise<IngestionResponse> {
-    const result = await this.ingestClip.execute(dto);
+  async ingestClipText(
+    @Body() dto: IngestClipDto,
+    @Headers('x-user-id') userId?: string,
+  ): Promise<IngestionResponse> {
+    const result = await this.ingestClip.execute({
+      ...dto,
+      userId: getUserIdFromHeader(userId),
+    });
     return {
       documentId: result.documentId,
       status: INGESTION_STATUS.INGESTED,

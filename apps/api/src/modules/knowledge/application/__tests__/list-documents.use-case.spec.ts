@@ -13,6 +13,7 @@ function createDocumentFixture(
   return {
     id: 'doc-1',
     title: 'Test Doc',
+    userId: 'default',
     sourceType: 'URL',
     sourceUrl: 'https://example.com',
     rawContent: 'raw',
@@ -25,6 +26,7 @@ function createDocumentFixture(
     language: 'en',
     addedByUserAt: new Date('2025-01-01T00:00:00Z'),
     createdAt: new Date('2025-01-01T00:00:00Z'),
+    processingError: null,
     deletedAt: null,
     ...overrides,
   };
@@ -52,13 +54,23 @@ class FakeDocumentRepository implements DocumentRepository {
     return Promise.resolve(this.documents);
   }
 
-  async findBySourceUrl(url: string): Promise<DocumentEntity | null> {
+  async findBySourceUrl(
+    url: string,
+    _userId: string,
+  ): Promise<DocumentEntity | null> {
     return Promise.resolve(
       this.documents.find((d) => d.sourceUrl === url) ?? null,
     );
   }
 
   async updateStatus(_id: string, _status: IngestionStatus): Promise<void> {
+    return Promise.resolve();
+  }
+
+  async updateProcessingError(
+    _id: string,
+    _errorMessage: string | null,
+  ): Promise<void> {
     return Promise.resolve();
   }
 

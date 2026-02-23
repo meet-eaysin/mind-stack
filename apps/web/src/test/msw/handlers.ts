@@ -7,6 +7,7 @@ import { handlers as exportHandlers } from "./handlers/export.handlers";
 import { handlers as collectionsHandlers } from "./handlers/collections.handlers";
 import { handlers as healthHandlers } from "./handlers/health.handlers";
 import { handlers as productivityHandlers } from "./handlers/productivity.handlers";
+import { handlers as settingsHandlers } from "./handlers/settings.handlers";
 
 export const handlers = [
   ...ingestionHandlers,
@@ -18,4 +19,5 @@ export const handlers = [
   ...collectionsHandlers,
   ...healthHandlers,
   ...productivityHandlers,
+  ...settingsHandlers,
 ];

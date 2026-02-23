@@ -5,12 +5,14 @@ Date: 2026-02-23
 ## 1) Feature checklist
 
 Legend:
+
 - PASS: implemented and covered by API/UI/tests in this repo.
 - PARTIAL: implemented with known gaps.
 - MISSING: no complete implementation found.
 - BLOCKED: requires runtime infra not available in this environment.
 
 ### A. Knowledge & Document Core
+
 - A1 ingestion: PARTIAL
   - PASS: paste text (`POST /ingest/text`), URL (`POST /ingest/url`), transcript path via YouTube (`POST /ingest/youtube`), uploaded file via PDF (`POST /ingest/pdf`), clip/extension entry (`POST /ingest/clip`).
   - PASS: ingestion now has real queue processor path (`URL_EXTRACTION -> CHUNKING -> EMBEDDING -> CONCEPT_EXTRACTION`).
@@ -25,6 +27,7 @@ Legend:
   - GAP: strict transition policy matrix is not centrally enforced.
 
 ### B. Chunking & Embeddings
+
 - B1 chunking pipeline: PASS
 - B2 embedding pipeline: PASS
 - B3 vector consistency: PARTIAL
@@ -32,25 +35,30 @@ Legend:
   - GAP: orphan diagnostics endpoint still reports existing drift from historical data.
 
 ### C. Search & Retrieval
+
 - C1 normal search returns documents only: PASS
 - C2 AI search/Q&A with citations: PASS
 
 ### D. RAG / AI answering
+
 - D grounded generation/context/citations: PARTIAL
   - PASS: Q&A retrieves chunks and returns citations mapped to documents.
   - PASS: weak context flag surfaced.
   - GAP: hard guarantee of “answer only from chunks” depends on LLM behavior, not cryptographically enforced.
 
 ### E. Tagging
+
 - PASS
 
 ### F. Annotation / Personal layer
+
 - PARTIAL
   - PASS: note API and document/chunk-linked note storage.
   - PASS: web UI now supports explicit annotation types (`HIGHLIGHT`, `NOTE`, `QUESTION`, `INSIGHT`) in both selection notes and quick notes.
   - GAP: searchable/linkable/graph-linkable behaviors for annotations need deeper end-to-end validation.
 
 ### G. Knowledge Graph
+
 - G1 root node: PASS (enforced by graph build flow)
 - G2 structure/no orphan: PASS/PARTIAL
   - PASS: orphan concepts are attached to root in build flow.
@@ -64,36 +72,44 @@ Legend:
 - G6 graph UI: PASS
 
 ### H. Collections / Courses
+
 - PASS (collections + ordering + prerequisites + derived progress present)
 
 ### I. Review & Resurfacing
+
 - PARTIAL
   - PASS: daily review generation, feedback, scheduling fields/history.
   - GAP: difficulty tuning and stale-important weighting need deeper validation under production data.
 
 ### J. Related knowledge suggestions
+
 - PARTIAL
   - PASS: related suggestions endpoint and UI section exist.
   - PASS: UI now provides explicit in-app navigation action (`Open document`) for related suggestions and optional `Open source` link.
   - GAP: no backend contract exists to accept arbitrary external suggestions into a new document and auto-create a document-level relation in one call.
 
 ### K. Productivity / integration adapters
+
 - PARTIAL
   - PASS: productivity goal/mastery UI + API exist.
   - GAP: pluggable external adapters (Notion/Obsidian style abstraction) not fully formalized.
 
 ### L. Export & ownership
+
 - PASS (full export + markdown/notion payload endpoints and UI trigger)
 
 ### M. Health & diagnostics
+
 - PASS (missing embeddings, orphans, failed docs, queue metrics)
 
 ### N. Learning productivity
+
 - PASS/PARTIAL
   - PASS: learning goals, progress, topic mastery, weak areas.
   - PARTIAL: advanced mastery calibration needs runtime data validation.
 
 ### O. UI features
+
 - PARTIAL
   - PASS: ingestion, document list/detail, search, AI Q&A with citations, tagging/notes, collection, course page, review, graph, related knowledge, goals/productivity, export trigger, diagnostics.
   - GAP: citation/related-resource acceptance still depends on existing endpoints; full "accept resource -> ingest + relation" requires backend contract support.

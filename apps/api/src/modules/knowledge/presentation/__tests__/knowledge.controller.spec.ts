@@ -131,9 +131,11 @@ describe('KnowledgeController', () => {
     expect(details.id).toBe('d1');
     expect(details.notes).toHaveLength(1);
 
-    await expect(controller.getStatus('d1')).resolves.toEqual({ status: 'READY' });
+    await expect(controller.getStatus('d1')).resolves.toEqual({
+      status: 'READY',
+    });
     await expect(controller.getNotes('d1')).resolves.toHaveLength(1);
-    await expect(controller.getRelated('d1')).resolves.toEqual([]);
+    await expect(controller.getRelated('d1', 'default')).resolves.toEqual([]);
   });
 
   it('updates, tags, annotates, scores, and deletes', async () => {
@@ -164,7 +166,9 @@ describe('KnowledgeController', () => {
     mockUpdateImportance.execute.mockResolvedValue(undefined);
     mockDeleteDocument.execute.mockResolvedValue(undefined);
 
-    await expect(controller.update('d1', { title: 'Updated' })).resolves.toEqual({
+    await expect(
+      controller.update('d1', { title: 'Updated' }),
+    ).resolves.toEqual({
       success: true,
     });
     await expect(

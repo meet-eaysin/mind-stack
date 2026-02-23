@@ -5,8 +5,9 @@ export type DocumentRepository = {
   save(document: DocumentEntity): Promise<DocumentEntity>;
   findById(id: string): Promise<DocumentEntity | null>;
   findAll(): Promise<DocumentEntity[]>;
-  findBySourceUrl(url: string): Promise<DocumentEntity | null>;
+  findBySourceUrl(url: string, userId: string): Promise<DocumentEntity | null>;
   updateStatus(id: string, status: IngestionStatus): Promise<void>;
+  updateProcessingError(id: string, errorMessage: string | null): Promise<void>;
   updateImportance(id: string, score: number): Promise<void>;
   getImportance(id: string): Promise<number | null>;
   delete(id: string): Promise<void>;

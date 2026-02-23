@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param, Get } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, Headers } from '@nestjs/common';
 import { type IngestionResponse, INGESTION_STATUS } from '@repo/shared-types';
 import { IngestUrlUseCase } from '../application/ingest-url.use-case.js';
 import { IngestTextUseCase } from '../application/ingest-text.use-case.js';
@@ -13,6 +13,7 @@ import {
   IngestPdfDto,
   IngestYoutubeDto,
 } from './ingestion.dtos.js';
+import { getUserIdFromHeader } from '../../../common/request-user.js';
 
 @Controller('ingest')
 export class IngestionController {
@@ -27,8 +28,14 @@ export class IngestionController {
   ) {}
 
   @Post('url')
-  async ingestFromUrl(@Body() dto: IngestUrlDto): Promise<IngestionResponse> {
-    const result = await this.ingestUrl.execute(dto);
+  async ingestFromUrl(
+    @Body() dto: IngestUrlDto,
+    @Headers('x-user-id') userId?: string,
+  ): Promise<IngestionResponse> {
+    const result = await this.ingestUrl.execute({
+      ...dto,
+      userId: getUserIdFromHeader(userId),
+    });
     return {
       documentId: result.documentId,
       jobId: result.jobId,
@@ -38,8 +45,14 @@ export class IngestionController {
   }
 
   @Post('text')
-  async ingestFromText(@Body() dto: IngestTextDto): Promise<IngestionResponse> {
-    const result = await this.ingestText.execute(dto);
+  async ingestFromText(
+    @Body() dto: IngestTextDto,
+    @Headers('x-user-id') userId?: string,
+  ): Promise<IngestionResponse> {
+    const result = await this.ingestText.execute({
+      ...dto,
+      userId: getUserIdFromHeader(userId),
+    });
     return {
       documentId: result.documentId,
       jobId: result.jobId,
@@ -49,8 +62,14 @@ export class IngestionController {
   }
 
   @Post('pdf')
-  async ingestFromPdf(@Body() dto: IngestPdfDto): Promise<IngestionResponse> {
-    const result = await this.ingestPdf.execute(dto);
+  async ingestFromPdf(
+    @Body() dto: IngestPdfDto,
+    @Headers('x-user-id') userId?: string,
+  ): Promise<IngestionResponse> {
+    const result = await this.ingestPdf.execute({
+      ...dto,
+      userId: getUserIdFromHeader(userId),
+    });
     return {
       documentId: result.documentId,
       jobId: result.jobId,
@@ -62,8 +81,12 @@ export class IngestionController {
   @Post('youtube')
   async ingestFromYoutube(
     @Body() dto: IngestYoutubeDto,
+    @Headers('x-user-id') userId?: string,
   ): Promise<IngestionResponse> {
-    const result = await this.ingestYoutube.execute(dto);
+    const result = await this.ingestYoutube.execute({
+      ...dto,
+      userId: getUserIdFromHeader(userId),
+    });
     return {
       documentId: result.documentId,
       jobId: result.jobId,

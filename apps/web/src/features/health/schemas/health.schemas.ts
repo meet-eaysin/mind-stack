@@ -35,6 +35,7 @@ export const FailedDocumentsResponseSchema = z.object({
       id: z.string(),
       title: z.string(),
       createdAt: z.string(),
+      processingError: z.string().nullable(),
     }),
   ),
 });

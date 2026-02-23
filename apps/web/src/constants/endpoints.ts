@@ -58,6 +58,7 @@ export const ENDPOINTS = {
       MISSING_EMBEDDINGS: "/admin/health/missing-embeddings",
       ORPHANS: "/admin/health/orphans",
       FAILED_DOCUMENTS: "/admin/health/failed-documents",
+      EMBEDDING_MODEL: "/admin/health/embedding-model",
     },
   },
   ANALYSIS: {
@@ -68,5 +69,8 @@ export const ENDPOINTS = {
     DETAIL: (id: string) => `/learning-goals/${id}`,
     ITEMS: (id: string) => `/learning-goals/${id}/items`,
     REMOVE_ITEM: (itemId: string) => `/learning-goals/items/${itemId}`,
+  },
+  SETTINGS: {
+    LLM: "/settings/llm",
   },
 } as const;

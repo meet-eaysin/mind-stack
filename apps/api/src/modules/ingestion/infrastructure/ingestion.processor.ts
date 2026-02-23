@@ -1,9 +1,8 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject } from '@nestjs/common';
 import { JOB_TYPE, INGESTION_STATUS } from '@repo/shared-types';
-import type { EmbeddingProvider } from '@repo/embeddings';
 import type { VectorStore, VectorDocument } from '@repo/vector-store';
-import { EMBEDDING_PROVIDER, VECTOR_STORE } from '../../../common/tokens.js';
+import { VECTOR_STORE } from '../../../common/tokens.js';
 import type { IngestionJob } from '../domain/ingestion-job.types.js';
 import { PrismaDocumentRepository } from './prisma-document.repository.js';
 import { PrismaChunkRepository } from '../../knowledge/infrastructure/prisma-chunk.repository.js';
@@ -12,6 +11,8 @@ import {
   IngestionJobProducer,
   INGESTION_QUEUE,
 } from './ingestion-job.producer.js';
+import { LlmProviderFactory } from '../../settings/application/llm-provider.factory.js';
+import { CheckEmbeddingModelUseCase } from '../../settings/application/check-embedding-model.use-case.js';
 
 const CHUNK_SIZE = 1200;
 const CHUNK_OVERLAP = 200;
@@ -23,8 +24,8 @@ export class IngestionProcessor extends WorkerHost {
     private readonly chunkRepository: PrismaChunkRepository,
     private readonly buildGraph: BuildGraphUseCase,
     private readonly jobProducer: IngestionJobProducer,
-    @Inject(EMBEDDING_PROVIDER)
-    private readonly embeddingProvider: EmbeddingProvider,
+    private readonly providerFactory: LlmProviderFactory,
+    private readonly checkEmbeddingModel: CheckEmbeddingModelUseCase,
     @Inject(VECTOR_STORE)
     private readonly vectorStore: VectorStore,
   ) {
@@ -36,6 +37,7 @@ export class IngestionProcessor extends WorkerHost {
     const { documentId } = job.data;
 
     try {
+      await this.documentRepository.updateProcessingError(documentId, null);
       if (jobType === JOB_TYPE.URL_EXTRACTION) {
         await this.processUrlExtraction(documentId);
         return;
@@ -55,6 +57,14 @@ export class IngestionProcessor extends WorkerHost {
 
       throw new Error(`Unsupported ingestion job type: ${jobType}`);
     } catch (error) {
+      const raw =
+        error instanceof Error
+          ? error.message
+          : typeof error === 'string'
+            ? error
+            : 'Unknown error';
+      const message = this.formatErrorMessage(raw);
+      await this.documentRepository.updateProcessingError(documentId, message);
       await this.transition(documentId, INGESTION_STATUS.FAILED);
       throw error;
     }
@@ -89,7 +99,7 @@ export class IngestionProcessor extends WorkerHost {
       rawContent: extracted,
     });
 
-    await this.jobProducer.enqueueChunkingJob(documentId);
+    await this.jobProducer.enqueueChunkingJob(documentId, document.userId);
   }
 
   private async processChunking(documentId: string): Promise<void> {
@@ -116,18 +126,32 @@ export class IngestionProcessor extends WorkerHost {
     }
 
     await this.chunkRepository.createMany(documentId, chunks);
-    await this.jobProducer.enqueueEmbeddingJob(documentId);
+    await this.jobProducer.enqueueEmbeddingJob(documentId, document.userId);
   }
 
   private async processEmbedding(documentId: string): Promise<void> {
     await this.transition(documentId, INGESTION_STATUS.EMBEDDING);
+
+    const document = await this.documentRepository.findById(documentId);
+    if (!document) {
+      throw new Error(`Document not found: ${documentId}`);
+    }
+
+    const health = await this.checkEmbeddingModel.execute(document.userId);
+    if (!health.available) {
+      throw new Error(health.reason ?? 'Embedding model not available');
+    }
+
+    const embeddingProvider = await this.providerFactory.getEmbeddingProvider(
+      document.userId,
+    );
 
     const chunks = await this.chunkRepository.findByDocumentId(documentId);
     if (chunks.length === 0) {
       throw new Error(`No chunks found for embedding: ${documentId}`);
     }
 
-    const embeddings = await this.embeddingProvider.embedBatch(
+    const embeddings = await embeddingProvider.embedBatch(
       chunks.map((chunk) => chunk.content),
     );
 
@@ -145,7 +169,10 @@ export class IngestionProcessor extends WorkerHost {
     });
 
     await this.vectorStore.upsert(vectorDocs);
-    await this.jobProducer.enqueueConceptExtractionJob(documentId);
+    await this.jobProducer.enqueueConceptExtractionJob(
+      documentId,
+      document.userId,
+    );
   }
 
   private async processConceptExtraction(documentId: string): Promise<void> {
@@ -222,5 +249,11 @@ export class IngestionProcessor extends WorkerHost {
       status,
       document.learningStatus,
     );
+  }
+
+  private formatErrorMessage(message: string): string {
+    const trimmed = message.trim();
+    if (trimmed.length <= 300) return trimmed;
+    return `${trimmed.slice(0, 300)}…`;
   }
 }

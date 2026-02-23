@@ -2,6 +2,7 @@ import { Test, type TestingModule } from '@nestjs/testing';
 import { AdminController } from '../admin.controller.js';
 import { GetQueueMetricsUseCase } from '../../application/get-queue-metrics.use-case.js';
 import { CleanupConceptsUseCase } from '../../application/cleanup-concepts.use-case.js';
+import { CheckEmbeddingModelUseCase } from '../../../settings/application/check-embedding-model.use-case.js';
 import { PrismaService } from '../../../../prisma/prisma.service.js';
 import { VECTOR_STORE } from '../../../../common/tokens.js';
 
@@ -15,6 +16,7 @@ describe('AdminController', () => {
     concept: { findMany: jest.fn() },
     document: { findMany: jest.fn() },
   };
+  const mockCheckEmbeddingModel = { execute: jest.fn() };
   const mockVectorStore = {
     getByIds: jest.fn(),
     getAllIds: jest.fn(),
@@ -26,6 +28,10 @@ describe('AdminController', () => {
       providers: [
         { provide: GetQueueMetricsUseCase, useValue: mockGetQueueMetrics },
         { provide: CleanupConceptsUseCase, useValue: mockCleanupConcepts },
+        {
+          provide: CheckEmbeddingModelUseCase,
+          useValue: mockCheckEmbeddingModel,
+        },
         { provide: PrismaService, useValue: mockPrisma },
         { provide: VECTOR_STORE, useValue: mockVectorStore },
       ],
@@ -73,7 +79,12 @@ describe('AdminController', () => {
     mockPrisma.chunk.findMany.mockResolvedValue([{ id: 'c1' }]);
     mockPrisma.concept.findMany.mockResolvedValue([{ id: 'k1', label: 'k' }]);
     mockPrisma.document.findMany.mockResolvedValue([
-      { id: 'd1', title: 'Failed', createdAt: new Date('2026-02-23T00:00:00Z') },
+      {
+        id: 'd1',
+        title: 'Failed',
+        createdAt: new Date('2026-02-23T00:00:00Z'),
+        processingError: null,
+      },
     ]);
 
     await expect(controller.getOrphans()).resolves.toEqual({
@@ -88,6 +99,7 @@ describe('AdminController', () => {
           id: 'd1',
           title: 'Failed',
           createdAt: '2026-02-23T00:00:00.000Z',
+          processingError: null,
         },
       ],
     });

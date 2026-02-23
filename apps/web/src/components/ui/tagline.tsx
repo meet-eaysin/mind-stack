@@ -25,7 +25,7 @@ const taglineVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 function Tagline({

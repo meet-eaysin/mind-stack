@@ -18,10 +18,12 @@ export function Contact11() {
         <div className="mx-auto w-full max-w-md">
           <SectionHeading alignment="center">
             <SectionHeadingTagline>Support</SectionHeadingTagline>
-            <SectionHeadingTitle>Need Help? We&apos;re Here to Help</SectionHeadingTitle>
+            <SectionHeadingTitle>
+              Need Help? We&apos;re Here to Help
+            </SectionHeadingTitle>
             <SectionHeadingBody>
-              Our support team is available to assist you with any questions or issues you
-              may have.
+              Our support team is available to assist you with any questions or
+              issues you may have.
             </SectionHeadingBody>
           </SectionHeading>
         </div>

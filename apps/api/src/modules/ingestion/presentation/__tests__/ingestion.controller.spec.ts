@@ -45,11 +45,14 @@ describe('IngestionController', () => {
     mockIngestUrl.execute.mockResolvedValue({ documentId: 'u1', jobId: 'j1' });
     mockIngestText.execute.mockResolvedValue({ documentId: 't1', jobId: 'j2' });
     mockIngestPdf.execute.mockResolvedValue({ documentId: 'p1', jobId: 'j3' });
-    mockIngestYoutube.execute.mockResolvedValue({ documentId: 'y1', jobId: 'j4' });
+    mockIngestYoutube.execute.mockResolvedValue({
+      documentId: 'y1',
+      jobId: 'j4',
+    });
     mockRetryIngestion.execute.mockResolvedValue({ jobId: 'jr' });
 
     await expect(
-      controller.ingestFromUrl({ url: 'https://example.com' }),
+      controller.ingestFromUrl({ url: 'https://example.com' }, 'default'),
     ).resolves.toEqual({
       documentId: 'u1',
       jobId: 'j1',
@@ -58,15 +61,20 @@ describe('IngestionController', () => {
     });
 
     await expect(
-      controller.ingestFromText({ title: 't', content: 'c' }),
+      controller.ingestFromText({ title: 't', content: 'c' }, 'default'),
     ).resolves.toMatchObject({ documentId: 't1' });
 
     await expect(
-      controller.ingestFromPdf({ title: 'p', fileBase64: 'aa' }),
+      controller.ingestFromPdf({ title: 'p', fileBase64: 'aa' }, 'default'),
     ).resolves.toMatchObject({ documentId: 'p1' });
 
     await expect(
-      controller.ingestFromYoutube({ url: 'https://youtube.com/watch?v=1' }),
+      controller.ingestFromYoutube(
+        {
+          url: 'https://youtube.com/watch?v=1',
+        },
+        'default',
+      ),
     ).resolves.toMatchObject({ documentId: 'y1' });
 
     await expect(controller.retry('doc-1')).resolves.toEqual({
@@ -78,7 +86,10 @@ describe('IngestionController', () => {
   });
 
   it('gets job and document status', async () => {
-    mockGetJobStatus.execute.mockResolvedValue({ jobId: 'j1', state: 'completed' });
+    mockGetJobStatus.execute.mockResolvedValue({
+      jobId: 'j1',
+      state: 'completed',
+    });
     mockDocumentRepository.findById.mockResolvedValue({
       id: 'doc-1',
       status: 'READY',

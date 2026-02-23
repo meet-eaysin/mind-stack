@@ -41,7 +41,10 @@ describe('GraphController', () => {
       edges: [],
     });
 
-    await expect(controller.getGraph()).resolves.toEqual({ nodes: [], edges: [] });
+    await expect(controller.getGraph()).resolves.toEqual({
+      nodes: [],
+      edges: [],
+    });
     await expect(
       controller.neighborhood({ conceptId: 'c1', depth: 2 }),
     ).resolves.toEqual({ nodes: [{ id: 'c1' }], edges: [] });

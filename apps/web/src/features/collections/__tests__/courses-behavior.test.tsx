@@ -43,7 +43,10 @@ describe("Courses Behavior", () => {
   it("renders backend and network errors", async () => {
     server.use(
       http.get("*/collections", () =>
-        HttpResponse.json({ message: "Invalid courses request" }, { status: 400 }),
+        HttpResponse.json(
+          { message: "Invalid courses request" },
+          { status: 400 },
+        ),
       ),
     );
     render(<CoursesPage />);
@@ -53,9 +56,7 @@ describe("Courses Behavior", () => {
     });
     expect(screen.getByText("Invalid courses request")).toBeInTheDocument();
 
-    server.use(
-      http.get("*/collections", () => HttpResponse.error()),
-    );
+    server.use(http.get("*/collections", () => HttpResponse.error()));
     render(<CoursesPage />);
 
     await waitFor(() => {

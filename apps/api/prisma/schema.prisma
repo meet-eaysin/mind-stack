@@ -14,6 +14,8 @@ model Document {
   sourceUrl      String?   @map("source_url")
   rawContent     String    @map("raw_content")
   status         String    @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  userId         String    @default("default") @map("user_id")
+  processingError String?  @map("processing_error")
   
   // New fields from FPR
   type           String    @default("OTHER") // ARTICLE, VIDEO, COURSE_LESSON, BOOK, NOTE, RFC, BLOG, TRANSCRIPT, OTHER
@@ -35,8 +37,33 @@ model Document {
   ReviewLog       ReviewLog[]
   collectionItems CollectionItem[]
   learningGoalItems LearningGoalItem[]
+  statusHistory     LearningStatusHistory[]
 
   @@map("documents")
+}
+
+model UserLlmConfig {
+  id                 String   @id @default(uuid())
+  userId             String   @unique @map("user_id")
+  embeddingProvider  String   @map("embedding_provider")
+  embeddingModel     String   @map("embedding_model")
+  generationProvider String   @map("generation_provider")
+  generationModel    String   @map("generation_model")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@map("user_llm_configs")
+}
+
+model LearningStatusHistory {
+  id             String   @id @default(uuid())
+  document       Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId     String   @map("document_id")
+  status         String
+  learningStatus String   @map("learning_status")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("learning_status_history")
 }
 
 model Chunk {
@@ -97,6 +124,8 @@ model Annotation {
   
   type       String   @default("NOTE") // HIGHLIGHT, NOTE, QUESTION, INSIGHT
   content    String
+  selectedText String?  @map("selected_text")
+  metadata   Json?
   createdAt  DateTime @default(now()) @map("created_at")
 
   @@map("annotations")

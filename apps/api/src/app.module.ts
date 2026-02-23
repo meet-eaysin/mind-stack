@@ -12,6 +12,7 @@ import { CollectionModule } from './modules/collection/presentation/collection.m
 import { LearningGoalModule } from './modules/learning-goal/presentation/learning-goal.module.js';
 import { AdminModule } from './modules/admin/presentation/admin.module.js';
 import { AnalysisModule } from './modules/analysis/presentation/analysis.module.js';
+import { SettingsModule } from './modules/settings/presentation/settings.module.js';
 import { APP_GUARD } from '@nestjs/core';
 import { ApiKeyGuard } from './common/guards/api-key.guard.js';
 import { loadConfig } from '@repo/config';
@@ -35,6 +36,7 @@ import { loadConfig } from '@repo/config';
     LearningGoalModule,
     AdminModule,
     AnalysisModule,
+    SettingsModule,
   ],
   providers: [
     {

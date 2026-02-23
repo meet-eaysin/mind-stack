@@ -5,6 +5,7 @@ import {
   Sse,
   MessageEvent,
   Query,
+  Headers,
 } from '@nestjs/common';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -23,6 +24,7 @@ import {
   AskQuestionDto,
 } from './query.dtos.js';
 import { groupChunksToDocuments } from '../application/group-chunks.util.js';
+import { getUserIdFromHeader } from '../../../common/request-user.js';
 
 @Controller('query')
 export class QueryController {
@@ -34,8 +36,14 @@ export class QueryController {
   ) {}
 
   @Post('search')
-  async search(@Body() dto: SemanticSearchDto): Promise<SearchResponse> {
-    const chunks = await this.semanticSearch.execute(dto);
+  async search(
+    @Body() dto: SemanticSearchDto,
+    @Headers('x-user-id') userId?: string,
+  ): Promise<SearchResponse> {
+    const chunks = await this.semanticSearch.execute({
+      ...dto,
+      userId: getUserIdFromHeader(userId),
+    });
     const documents = groupChunksToDocuments(chunks);
     return { documents };
   }
@@ -43,29 +51,49 @@ export class QueryController {
   @Post('search/filtered')
   async searchFiltered(
     @Body() dto: FilteredSearchDto,
+    @Headers('x-user-id') userId?: string,
   ): Promise<SearchResponse> {
-    const chunks = await this.filteredSearch.execute(dto);
+    const chunks = await this.filteredSearch.execute({
+      ...dto,
+      userId: getUserIdFromHeader(userId),
+    });
     const documents = groupChunksToDocuments(chunks);
     return { documents };
   }
 
   @Post('ask')
-  async ask(@Body() dto: AskQuestionDto): Promise<AskQuestionResponse> {
-    return this.askQuestion.execute(dto);
+  async ask(
+    @Body() dto: AskQuestionDto,
+    @Headers('x-user-id') userId?: string,
+  ): Promise<AskQuestionResponse> {
+    return this.askQuestion.execute({
+      ...dto,
+      userId: getUserIdFromHeader(userId),
+    });
   }
 
   @Sse('ask/stream')
-  askStream(@Query() dto: AskQuestionDto): Observable<MessageEvent> {
-    return from(this.askQuestion.executeStream(dto)).pipe(
-      map((chunk) => ({ data: chunk }) as MessageEvent),
-    );
+  askStream(
+    @Query() dto: AskQuestionDto,
+    @Headers('x-user-id') userId?: string,
+  ): Observable<MessageEvent> {
+    return from(
+      this.askQuestion.executeStream({
+        ...dto,
+        userId: getUserIdFromHeader(userId),
+      }),
+    ).pipe(map((chunk) => ({ data: chunk })));
   }
 
   @Post('retrieve')
   async retrieve(
     @Body() dto: SemanticSearchDto,
+    @Headers('x-user-id') userId?: string,
   ): Promise<{ chunks: ChunkReference[] }> {
-    const chunks = await this.retrieveChunks.execute(dto);
+    const chunks = await this.retrieveChunks.execute({
+      ...dto,
+      userId: getUserIdFromHeader(userId),
+    });
     return { chunks };
   }
 }

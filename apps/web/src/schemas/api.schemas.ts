@@ -56,6 +56,8 @@ export const AnnotationTypeSchema = z.enum([
   "INSIGHT",
 ]);
 
+export const ModelProviderSchema = z.enum(["OLLAMA"]);
+
 // ── Shared Models ──
 
 export const ChunkSchema = z.object({

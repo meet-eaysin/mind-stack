@@ -65,6 +65,7 @@ describe('Feature Flows (e2e)', () => {
             sourceUrl: 'https://example.com',
             rawContent: 'Content',
             status: 'READY',
+            userId: 'default',
             learningStatus: 'UPCOMING',
             type: 'ARTICLE',
             author: null,
@@ -73,6 +74,8 @@ describe('Feature Flows (e2e)', () => {
             language: 'en',
             addedByUserAt: new Date(),
             createdAt: new Date(),
+            processingError: null,
+            deletedAt: null,
           };
           documents.push(doc);
           return Promise.resolve(doc);

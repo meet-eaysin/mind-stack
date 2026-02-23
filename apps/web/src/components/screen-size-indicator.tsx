@@ -9,9 +9,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { runtimeEnv } from "@/config/runtime-env";
 
 export function ScreenSizeIndicator({
-  enabled = process.env.NODE_ENV === "development",
+  enabled = runtimeEnv.NODE_ENV === "development",
   showTooltip = false,
   className,
   ...props

@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useNeighborhood, useCreateRelation, useDeleteRelation } from "../hooks";
+import {
+  useNeighborhood,
+  useCreateRelation,
+  useDeleteRelation,
+} from "../hooks";
 import { FileText, ExternalLink, Hash, Link2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -75,10 +79,10 @@ export function NeighborhoodPanel({
         {/* Associated Chunks */}
         {rootNode?.associatedChunks && rootNode.associatedChunks.length > 0 && (
           <div className="space-y-3">
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
-            <FileText className="size-3" />
-            Source Context
-          </h4>
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+              <FileText className="size-3" />
+              Source Context
+            </h4>
             <div className="space-y-3">
               {rootNode.associatedChunks.map((chunk) => (
                 <div

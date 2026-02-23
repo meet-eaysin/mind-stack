@@ -18,7 +18,7 @@ function ProfileCard({
       className={cn(
         "group/profile-card flex flex-row items-center gap-2",
         "data-[variant=vertical]:flex-col data-[variant=vertical]:gap-3 data-[variant=vertical]:text-center",
-        className
+        className,
       )}
       {...props}
     >
@@ -47,7 +47,7 @@ function ProfileCardAvatar({
         size === "sm" && "size-6",
         size === "default" && "size-10",
         size === "lg" && "size-24",
-        className
+        className,
       )}
       {...props}
     >
@@ -77,17 +77,23 @@ function ProfileCardDetails({
         "flex flex-col",
         "group-data-[variant=horizontal]/profile-card:w-full group-data-[variant=horizontal]/profile-card:flex-row group-data-[variant=horizontal]/profile-card:items-center group-data-[variant=horizontal]/profile-card:justify-between group-data-[variant=horizontal]/profile-card:gap-4",
         "group-data-[variant=vertical]/profile-card:flex-col",
-        className
+        className,
       )}
       {...props}
     >
       {children ?? (
         <>
-          <p data-slot="details-name" className="text-sm font-semibold text-foreground">
+          <p
+            data-slot="details-name"
+            className="text-sm font-semibold text-foreground"
+          >
             {name}
           </p>
           {body && (
-            <span data-slot="details-body" className="text-xs text-muted-foreground">
+            <span
+              data-slot="details-body"
+              className="text-xs text-muted-foreground"
+            >
               {body}
             </span>
           )}

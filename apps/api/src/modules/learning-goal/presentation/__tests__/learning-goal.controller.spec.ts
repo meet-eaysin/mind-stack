@@ -49,7 +49,9 @@ describe('LearningGoalController', () => {
     mockListGoals.execute.mockResolvedValue([goal]);
     mockGetGoal.execute.mockResolvedValue(goal);
 
-    await expect(controller.create({ name: 'New Goal' })).resolves.toEqual(goal);
+    await expect(controller.create({ name: 'New Goal' })).resolves.toEqual(
+      goal,
+    );
     await expect(controller.list()).resolves.toEqual([goal]);
     await expect(controller.get('goal-1')).resolves.toEqual(goal);
   });

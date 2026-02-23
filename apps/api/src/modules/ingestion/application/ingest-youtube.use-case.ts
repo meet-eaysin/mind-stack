@@ -13,8 +13,12 @@ export class IngestYoutubeUseCase {
   async execute(input: {
     url: string;
     title?: string;
+    userId: string;
   }): Promise<{ documentId: string; jobId?: string }> {
-    const existing = await this.documentRepository.findBySourceUrl(input.url);
+    const existing = await this.documentRepository.findBySourceUrl(
+      input.url,
+      input.userId,
+    );
     if (existing) {
       if (
         existing.status !== INGESTION_STATUS.FAILED &&
@@ -33,13 +37,17 @@ export class IngestYoutubeUseCase {
     const document = createDocument({
       id: randomUUID(),
       title: input.title ?? `YouTube: ${videoId}`,
+      userId: input.userId,
       sourceType: SOURCE_TYPE.YOUTUBE,
       sourceUrl: input.url,
       rawContent: transcript,
     });
 
     const saved = await this.documentRepository.save(document);
-    const jobId = await this.jobProducer.enqueueChunkingJob(saved.id);
+    const jobId = await this.jobProducer.enqueueChunkingJob(
+      saved.id,
+      input.userId,
+    );
     return { documentId: saved.id, jobId };
   }
 

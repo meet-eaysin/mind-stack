@@ -24,8 +24,7 @@ export class GetNeighborhoodUseCase {
   }): Promise<GraphResponse> {
     const depth = input.depth ?? 2;
     const root = await this.conceptRepository.getRootConcept();
-    const rootConceptId =
-      input.conceptId === ROOT_NODE_ID ? root.id : null;
+    const rootConceptId = input.conceptId === ROOT_NODE_ID ? root.id : null;
     const documentId =
       input.conceptId !== ROOT_NODE_ID ? input.conceptId : null;
 

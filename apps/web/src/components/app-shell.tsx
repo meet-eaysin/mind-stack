@@ -12,6 +12,7 @@ import {
   Activity,
   TrendingUp,
   GraduationCap,
+  Settings,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ const navItems = [
   { href: "/graph", label: "Graph", icon: Network },
   { href: "/health", label: "Health", icon: Activity },
   { href: "/productivity", label: "Productivity", icon: TrendingUp },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {

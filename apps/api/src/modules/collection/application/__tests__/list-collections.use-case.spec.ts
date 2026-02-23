@@ -13,7 +13,7 @@ describe('ListCollectionsUseCase', () => {
       itemCount: 5,
       progress: 50,
       createdAt: new Date(),
-    deletedAt: null,
+      deletedAt: null,
       updatedAt: new Date(),
     },
     {
@@ -23,7 +23,7 @@ describe('ListCollectionsUseCase', () => {
       itemCount: 3,
       progress: 20,
       createdAt: new Date(),
-    deletedAt: null,
+      deletedAt: null,
       updatedAt: new Date(),
     },
   ];

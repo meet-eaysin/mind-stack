@@ -1,4 +1,5 @@
 import pino from "pino";
+import { loadLoggerEnv } from "./env";
 
 export type Logger = {
   info(message: string, context?: Record<string, unknown>): void;
@@ -61,8 +62,9 @@ function wrapPino(base: pino.Logger): Logger {
 }
 
 export function createLogger(name: string): Logger {
-  const isDev = process.env["NODE_ENV"] !== "production";
-  const level = process.env["LOG_LEVEL"] ?? (isDev ? "debug" : "info");
+  const env = loadLoggerEnv();
+  const isDev = env.NODE_ENV !== "production";
+  const level = env.LOG_LEVEL ?? (isDev ? "debug" : "info");
 
   const base = pino({
     name,

@@ -48,7 +48,8 @@ function CourseDetail({
   const completed = data.items.filter(
     (item) => item.learningStatus === "COMPLETED",
   ).length;
-  const percent = data.items.length === 0 ? 0 : (completed / data.items.length) * 100;
+  const percent =
+    data.items.length === 0 ? 0 : (completed / data.items.length) * 100;
 
   return (
     <div className="space-y-6" data-testid="course-detail">
@@ -134,7 +135,10 @@ export default function CoursesPage() {
             </div>
 
             {isLoading && (
-              <div className="grid gap-3 sm:grid-cols-2" data-testid="courses-loading">
+              <div
+                className="grid gap-3 sm:grid-cols-2"
+                data-testid="courses-loading"
+              >
                 <Skeleton className="h-28 w-full" />
                 <Skeleton className="h-28 w-full" />
               </div>
@@ -159,7 +163,10 @@ export default function CoursesPage() {
             )}
 
             {data && data.collections.length > 0 && (
-              <div className="grid gap-3 sm:grid-cols-2" data-testid="courses-list">
+              <div
+                className="grid gap-3 sm:grid-cols-2"
+                data-testid="courses-list"
+              >
                 {data.collections.map((course) => (
                   <button
                     key={course.id}

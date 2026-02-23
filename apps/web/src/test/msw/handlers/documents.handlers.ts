@@ -39,6 +39,7 @@ export const handlers = [
           sourceType: "PDF",
           sourceUrl: null,
           status: "READY",
+          processingError: null,
           learningStatus: "UPCOMING",
           type: "ARTICLE",
           author: null,
@@ -55,6 +56,7 @@ export const handlers = [
           sourceType: "URL",
           sourceUrl: "https://test.com",
           status: "READY",
+          processingError: null,
           learningStatus: "UPCOMING",
           type: "ARTICLE",
           author: null,
@@ -72,7 +74,7 @@ export const handlers = [
     });
   }),
   http.get("*/knowledge/documents/:id/details", ({ params }) => {
-    const id = params.id as string;
+    const id = String(params.id);
     const meta: MockDocument = mockDocs[id] || {
       tags: [],
       notes: [],
@@ -85,6 +87,7 @@ export const handlers = [
       sourceType: "PDF",
       sourceUrl: null,
       status: "READY",
+      processingError: null,
       learningStatus: "UPCOMING",
       type: "ARTICLE",
       author: null,

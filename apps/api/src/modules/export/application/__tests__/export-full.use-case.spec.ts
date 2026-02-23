@@ -39,7 +39,7 @@ describe('ExportFullUseCase', () => {
       title: 'Doc 1',
       addedByUserAt: new Date(),
       createdAt: new Date(),
-    deletedAt: null,
+      deletedAt: null,
     };
     mockPrisma.document.findMany.mockResolvedValue([mockDoc]);
 

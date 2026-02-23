@@ -1,18 +1,18 @@
-import type { EmbeddingProvider } from '@repo/embeddings';
 import type { VectorStore, VectorSearchResult } from '@repo/vector-store';
 import type { QueryRepository } from '../../query/domain/query-repository.interface.js';
 import type { ChunkRepository } from '../domain/chunk-repository.interface.js';
 import type { ChunkReference } from '@repo/shared-types';
+import type { LlmProviderFactoryPort } from '../../settings/application/llm-provider.factory.js';
 
 export class GetRelatedSuggestionsUseCase {
   constructor(
-    private readonly embeddingProvider: EmbeddingProvider,
+    private readonly providerFactory: LlmProviderFactoryPort,
     private readonly vectorStore: VectorStore,
     private readonly queryRepository: QueryRepository,
     private readonly chunkRepository: ChunkRepository,
   ) {}
 
-  async execute(documentId: string): Promise<ChunkReference[]> {
+  async execute(documentId: string, userId: string): Promise<ChunkReference[]> {
     // 1. Get chunks for the document
     const chunks = await this.chunkRepository.findByDocumentId(documentId);
     if (chunks.length === 0) return [];
@@ -22,8 +22,10 @@ export class GetRelatedSuggestionsUseCase {
     const allRelatedResults: VectorSearchResult[] = [];
     const seenDocumentIds = new Set<string>([documentId]);
 
+    const embeddingProvider =
+      await this.providerFactory.getEmbeddingProvider(userId);
     for (const chunk of seedChunks) {
-      const { embedding } = await this.embeddingProvider.embed(chunk.content);
+      const { embedding } = await embeddingProvider.embed(chunk.content);
       const results = await this.vectorStore.search(embedding, { topK: 5 });
 
       for (const res of results) {

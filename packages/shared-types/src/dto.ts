@@ -5,6 +5,7 @@ import type {
   LearningStatus,
   AnnotationType,
   DocumentType,
+  ModelProvider,
 } from "./enums";
 
 // ── Ingestion DTOs ──
@@ -66,6 +67,7 @@ export type DocumentListItem = {
   chunkCount: number;
   addedByUserAt: string;
   createdAt: string;
+  processingError: string | null;
 };
 
 export type DocumentListResponse = {
@@ -112,6 +114,7 @@ export type DocumentDetailResponse = {
   importanceScore: number | null;
   addedByUserAt: string;
   createdAt: string;
+  processingError: string | null;
 };
 
 export type AddTagRequest = {
@@ -167,7 +170,12 @@ export type OrphansResponse = {
 };
 
 export type FailedDocumentsResponse = {
-  failedDocuments: Array<{ id: string; title: string; createdAt: string }>;
+  failedDocuments: Array<{
+    id: string;
+    title: string;
+    createdAt: string;
+    processingError: string | null;
+  }>;
 };
 
 // ── Query DTOs ──
@@ -229,6 +237,31 @@ export type StreamingAskResponseChunk =
   | { type: "citations"; data: ChunkReference[] }
   | { type: "text"; data: string }
   | { type: "done" };
+
+// ── LLM Config DTOs ──
+
+export type UserLlmConfigResponse = {
+  userId: string;
+  embeddingProvider: ModelProvider;
+  embeddingModel: string;
+  generationProvider: ModelProvider;
+  generationModel: string;
+};
+
+export type UpdateUserLlmConfigRequest = {
+  embeddingProvider: ModelProvider;
+  embeddingModel: string;
+  generationProvider: ModelProvider;
+  generationModel: string;
+};
+
+export type EmbeddingModelHealthResponse = {
+  provider: ModelProvider;
+  model: string;
+  baseUrl: string;
+  available: boolean;
+  reason?: string | undefined;
+};
 
 // ── Review DTOs ──
 

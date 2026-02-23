@@ -14,6 +14,7 @@ export class IngestPdfUseCase {
   async execute(input: {
     title: string;
     fileBase64: string;
+    userId: string;
   }): Promise<{ documentId: string; jobId?: string }> {
     const buffer = Buffer.from(input.fileBase64, 'base64');
     const parser = new PDFParse({ data: new Uint8Array(buffer) });
@@ -23,13 +24,17 @@ export class IngestPdfUseCase {
     const document = createDocument({
       id: randomUUID(),
       title: input.title,
+      userId: input.userId,
       sourceType: SOURCE_TYPE.PDF,
       sourceUrl: null,
       rawContent,
     });
 
     const saved = await this.documentRepository.save(document);
-    const jobId = await this.jobProducer.enqueueChunkingJob(saved.id);
+    const jobId = await this.jobProducer.enqueueChunkingJob(
+      saved.id,
+      input.userId,
+    );
 
     return { documentId: saved.id, jobId };
   }

@@ -51,9 +51,9 @@ describe('CollectionController', () => {
     mockCreateCollection.execute.mockResolvedValue(created);
     mockListCollections.execute.mockResolvedValue([created]);
 
-    await expect(controller.create({ name: 'New Collection' })).resolves.toEqual(
-      created,
-    );
+    await expect(
+      controller.create({ name: 'New Collection' }),
+    ).resolves.toEqual(created);
     await expect(controller.list()).resolves.toEqual([created]);
   });
 

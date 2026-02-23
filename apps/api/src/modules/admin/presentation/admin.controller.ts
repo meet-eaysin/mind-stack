@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Inject } from '@nestjs/common';
+import { Controller, Get, Post, Inject, Headers } from '@nestjs/common';
 import { GetQueueMetricsUseCase } from '../application/get-queue-metrics.use-case.js';
 import { CleanupConceptsUseCase } from '../application/cleanup-concepts.use-case.js';
 import { PrismaService } from '../../../prisma/prisma.service.js';
@@ -10,13 +10,17 @@ import {
   type MissingEmbeddingsResponse,
   type OrphansResponse,
   type FailedDocumentsResponse,
+  type EmbeddingModelHealthResponse,
 } from '@repo/shared-types';
+import { CheckEmbeddingModelUseCase } from '../../settings/application/check-embedding-model.use-case.js';
+import { getUserIdFromHeader } from '../../../common/request-user.js';
 
 @Controller('admin')
 export class AdminController {
   constructor(
     private readonly getQueueMetrics: GetQueueMetricsUseCase,
     private readonly cleanupConcepts: CleanupConceptsUseCase,
+    private readonly checkEmbeddingModel: CheckEmbeddingModelUseCase,
     private readonly prisma: PrismaService,
     @Inject(VECTOR_STORE) private readonly vectorStore: VectorStore,
   ) {}
@@ -112,17 +116,31 @@ export class AdminController {
         id: true,
         title: true,
         createdAt: true,
+        processingError: true,
       },
     });
 
     return {
       failedDocuments: failedDocuments.map(
-        (d: { id: string; title: string; createdAt: Date }) => ({
+        (d: {
+          id: string;
+          title: string;
+          createdAt: Date;
+          processingError: string | null;
+        }) => ({
           id: d.id,
           title: d.title,
           createdAt: d.createdAt.toISOString(),
+          processingError: d.processingError,
         }),
       ),
     };
+  }
+
+  @Get('health/embedding-model')
+  async getEmbeddingModelHealth(
+    @Headers('x-user-id') userId?: string,
+  ): Promise<EmbeddingModelHealthResponse> {
+    return this.checkEmbeddingModel.execute(getUserIdFromHeader(userId));
   }
 }

@@ -140,4 +140,41 @@ describe("Documents Behavior", () => {
       screen.getByText(/an unexpected error occurred/i),
     ).toBeInTheDocument();
   });
+
+  it("shows processing error when ingestion failed", async () => {
+    server.use(
+      http.get("*/knowledge/documents/:id/details", () =>
+        HttpResponse.json({
+          id: "doc-failed",
+          title: "Failed Document",
+          sourceType: "URL",
+          sourceUrl: "https://example.com",
+          rawContent: "content",
+          chunks: [],
+          tags: [],
+          notes: [],
+          importanceScore: null,
+          status: "FAILED",
+          processingError: "Embedding model not available",
+          learningStatus: "UPCOMING",
+          type: "ARTICLE",
+          author: null,
+          publisher: null,
+          publishedAt: null,
+          language: "en",
+          addedByUserAt: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+        }),
+      ),
+    );
+
+    render(<DocumentDetail id="doc-failed" onBackAction={() => {}} />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Processing failed")).toBeInTheDocument();
+    });
+    expect(
+      screen.getByText("Embedding model not available"),
+    ).toBeInTheDocument();
+  });
 });

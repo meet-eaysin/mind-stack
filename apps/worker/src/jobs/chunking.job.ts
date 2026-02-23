@@ -10,7 +10,7 @@ const CHUNK_SIZE = 500;
 const CHUNK_OVERLAP = 50;
 
 export async function handleChunkingJob(
-  job: Job<{ documentId: string }, void, string>,
+  job: Job<{ documentId: string; userId?: string }, void, string>,
   prisma: PrismaClient,
   ingestionQueue: Queue,
 ): Promise<void> {
@@ -30,15 +30,18 @@ export async function handleChunkingJob(
     logger.info("Chunks already exist, skipping chunking", { documentId });
     await prisma.document.update({
       where: { id: documentId },
-      data: { status: "EMBEDDING" },
+      data: { status: "EMBEDDING", processingError: null },
     });
-    await ingestionQueue.add(JOB_TYPE.EMBEDDING, { documentId });
+    await ingestionQueue.add(JOB_TYPE.EMBEDDING, {
+      documentId,
+      userId: job.data.userId ?? "default",
+    });
     return;
   }
 
   await prisma.document.update({
     where: { id: documentId },
-    data: { status: "CHUNKING" },
+    data: { status: "CHUNKING", processingError: null },
   });
 
   try {
@@ -61,10 +64,13 @@ export async function handleChunkingJob(
 
     await prisma.document.update({
       where: { id: documentId },
-      data: { status: "EMBEDDING" },
+      data: { status: "EMBEDDING", processingError: null },
     });
 
-    await ingestionQueue.add(JOB_TYPE.EMBEDDING, { documentId });
+    await ingestionQueue.add(JOB_TYPE.EMBEDDING, {
+      documentId,
+      userId: job.data.userId ?? "default",
+    });
 
     logger.info("Chunking completed", {
       documentId: documentId,
@@ -74,7 +80,7 @@ export async function handleChunkingJob(
     const message = error instanceof Error ? error.message : String(error);
     await prisma.document.update({
       where: { id: documentId },
-      data: { status: "FAILED" },
+      data: { status: "FAILED", processingError: message },
     });
     logger.error("Chunking failed", { documentId, error: message });
     throw error;

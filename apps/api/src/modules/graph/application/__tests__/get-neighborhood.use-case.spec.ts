@@ -36,10 +36,19 @@ class FakeDocumentRepository implements DocumentRepository {
   findAll(): Promise<DocumentEntity[]> {
     return Promise.resolve([...this.documents.values()]);
   }
-  findBySourceUrl(_url: string): Promise<DocumentEntity | null> {
+  findBySourceUrl(
+    _url: string,
+    _userId: string,
+  ): Promise<DocumentEntity | null> {
     return Promise.resolve(null);
   }
   updateStatus(_id: string, _status: IngestionStatus): Promise<void> {
+    return Promise.resolve();
+  }
+  updateProcessingError(
+    _id: string,
+    _errorMessage: string | null,
+  ): Promise<void> {
     return Promise.resolve();
   }
   updateImportance(_id: string, _score: number): Promise<void> {
@@ -111,7 +120,9 @@ class FakeConceptRepository implements ConceptRepository {
     return Promise.resolve(this.concepts.find((c) => c.id === id) ?? null);
   }
   findByLabel(label: string): Promise<ConceptEntity | null> {
-    return Promise.resolve(this.concepts.find((c) => c.label === label) ?? null);
+    return Promise.resolve(
+      this.concepts.find((c) => c.label === label) ?? null,
+    );
   }
   findOrCreate(label: string): Promise<ConceptEntity> {
     const existing = this.concepts.find((c) => c.label === label);
@@ -134,9 +145,7 @@ class FakeConceptRepository implements ConceptRepository {
     this.relations.push(relation);
     return Promise.resolve(relation);
   }
-  findRelationsForConcept(
-    conceptId: string,
-  ): Promise<ConceptRelationEntity[]> {
+  findRelationsForConcept(conceptId: string): Promise<ConceptRelationEntity[]> {
     return Promise.resolve(
       this.relations.filter(
         (r) => r.fromConceptId === conceptId || r.toConceptId === conceptId,

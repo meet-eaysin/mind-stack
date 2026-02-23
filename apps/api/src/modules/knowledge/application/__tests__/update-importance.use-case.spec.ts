@@ -20,11 +20,21 @@ class FakeDocumentRepository implements DocumentRepository {
     return Promise.resolve([]);
   }
 
-  async findBySourceUrl(_url: string): Promise<DocumentEntity | null> {
+  async findBySourceUrl(
+    _url: string,
+    _userId: string,
+  ): Promise<DocumentEntity | null> {
     return Promise.resolve(null);
   }
 
   async updateStatus(_id: string, _status: IngestionStatus): Promise<void> {
+    return Promise.resolve();
+  }
+
+  async updateProcessingError(
+    _id: string,
+    _errorMessage: string | null,
+  ): Promise<void> {
     return Promise.resolve();
   }
 

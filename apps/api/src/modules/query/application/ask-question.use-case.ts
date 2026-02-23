@@ -1,17 +1,21 @@
-import type { LLMProvider } from '@repo/llm';
 import {
   type AskQuestionResponse,
   type ChunkReference,
   type StreamingAskResponseChunk,
 } from '@repo/shared-types';
+import type { LlmProviderFactoryPort } from '../../settings/application/llm-provider.factory.js';
 
 type SemanticSearchPort = {
-  execute(input: { query: string; topK?: number }): Promise<ChunkReference[]>;
+  execute(input: {
+    query: string;
+    topK?: number;
+    userId: string;
+  }): Promise<ChunkReference[]>;
 };
 
 export class AskQuestionUseCase {
   constructor(
-    private readonly llmProvider: LLMProvider,
+    private readonly providerFactory: LlmProviderFactoryPort,
     private readonly semanticSearch: SemanticSearchPort,
   ) {}
 
@@ -19,10 +23,12 @@ export class AskQuestionUseCase {
     question: string;
     tags?: string[];
     topK?: number;
+    userId: string;
   }): Promise<AskQuestionResponse> {
     const citations = await this.semanticSearch.execute({
       query: input.question,
       topK: input.topK ?? 5,
+      userId: input.userId,
     });
     const uniqueDocumentCitations = this.dedupeByDocument(citations);
     const weakContext = uniqueDocumentCitations.length < 2;
@@ -58,7 +64,10 @@ export class AskQuestionUseCase {
       'Answer with citations:',
     ].join('\n');
 
-    const response = await this.llmProvider.generate({
+    const llmProvider = await this.providerFactory.getGenerationProvider(
+      input.userId,
+    );
+    const response = await llmProvider.generate({
       prompt,
       systemPrompt,
       temperature: 0.3,
@@ -75,10 +84,12 @@ export class AskQuestionUseCase {
     question: string;
     tags?: string[];
     topK?: number;
+    userId: string;
   }): AsyncGenerator<StreamingAskResponseChunk, void, undefined> {
     const citations = await this.semanticSearch.execute({
       query: input.question,
       topK: input.topK ?? 5,
+      userId: input.userId,
     });
 
     if (citations.length === 0) {
@@ -112,7 +123,10 @@ export class AskQuestionUseCase {
       'Answer with citations:',
     ].join('\n');
 
-    const stream = this.llmProvider.generateStream({
+    const llmProvider = await this.providerFactory.getGenerationProvider(
+      input.userId,
+    );
+    const stream = llmProvider.generateStream({
       prompt,
       systemPrompt,
       temperature: 0.3,

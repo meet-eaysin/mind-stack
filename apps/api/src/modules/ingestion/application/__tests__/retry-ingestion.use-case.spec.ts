@@ -17,6 +17,7 @@ function createDocumentFixture(
   return {
     id: 'doc-1',
     title: 'Title',
+    userId: 'default',
     sourceType: SOURCE_TYPE.URL,
     sourceUrl: 'https://example.com',
     rawContent: 'Content',
@@ -29,6 +30,7 @@ function createDocumentFixture(
     language: 'en',
     addedByUserAt: new Date('2025-01-01T00:00:00Z'),
     createdAt: new Date('2025-01-01T00:00:00Z'),
+    processingError: null,
     deletedAt: null,
     ...overrides,
   };
@@ -56,7 +58,10 @@ class FakeDocumentRepository implements DocumentRepository {
     return Promise.resolve(Array.from(this.documents.values()));
   }
 
-  async findBySourceUrl(url: string): Promise<DocumentEntity | null> {
+  async findBySourceUrl(
+    url: string,
+    _userId: string,
+  ): Promise<DocumentEntity | null> {
     return Promise.resolve(
       Array.from(this.documents.values()).find((d) => d.sourceUrl === url) ??
         null,
@@ -67,6 +72,16 @@ class FakeDocumentRepository implements DocumentRepository {
     const doc = this.documents.get(id);
     if (doc) {
       doc.status = status;
+    }
+    return Promise.resolve();
+  }
+  async updateProcessingError(
+    id: string,
+    errorMessage: string | null,
+  ): Promise<void> {
+    const doc = this.documents.get(id);
+    if (doc) {
+      doc.processingError = errorMessage;
     }
     return Promise.resolve();
   }
@@ -133,6 +148,7 @@ describe('RetryIngestionUseCase', () => {
     const doc = createDocumentFixture({
       id: 'doc-fail',
       status: INGESTION_STATUS.FAILED,
+      processingError: 'Embedding failed',
     });
     documentRepository.seed(doc);
 
@@ -140,6 +156,7 @@ describe('RetryIngestionUseCase', () => {
 
     const updated = documentRepository.getDocument('doc-fail');
     expect(updated?.status).toBe(INGESTION_STATUS.INGESTED);
+    expect(updated?.processingError).toBeNull();
     expect(jobProducer.enqueuedIds).toEqual(['doc-fail']);
   });
 

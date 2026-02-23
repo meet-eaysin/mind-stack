@@ -39,4 +39,8 @@ export const QUERY_KEYS = {
     LIST: ["learning-goals", "list"] as const,
     DETAIL: (id: string) => ["learning-goals", "detail", id] as const,
   },
+  SETTINGS: {
+    LLM: ["settings", "llm"] as const,
+    EMBEDDING_HEALTH: ["settings", "embedding-health"] as const,
+  },
 } as const;

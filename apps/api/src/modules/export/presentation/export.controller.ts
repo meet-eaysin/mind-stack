@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import { Controller, Post, Body, Get, Headers } from '@nestjs/common';
 import {
   type ExportMarkdownResponse,
   type ExportNotionResponse,
@@ -11,6 +11,7 @@ import { ExportNotionUseCase } from '../application/export-notion.use-case.js';
 import { ExportFullUseCase } from '../application/export-full.use-case.js';
 import { IngestTextUseCase } from '../../ingestion/application/ingest-text.use-case.js';
 import { ExportChunksDto, NotionImportDto } from './export.dtos.js';
+import { getUserIdFromHeader } from '../../../common/request-user.js';
 
 @Controller('export')
 export class ExportController {
@@ -43,10 +44,12 @@ export class ExportController {
   @Post('import')
   async fromNotionImport(
     @Body() dto: NotionImportDto,
+    @Headers('x-user-id') userId?: string,
   ): Promise<IngestionResponse> {
     const result = await this.ingestText.execute({
       title: dto.title,
       content: dto.content,
+      userId: getUserIdFromHeader(userId),
     });
 
     return {

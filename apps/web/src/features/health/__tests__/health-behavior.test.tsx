@@ -35,19 +35,22 @@ describe("Health Behavior", () => {
   it("shows backend validation error", async () => {
     server.use(
       http.get("*/admin/health/missing-embeddings", () =>
-        HttpResponse.json({ message: "Invalid diagnostics request" }, { status: 400 }),
+        HttpResponse.json(
+          { message: "Invalid diagnostics request" },
+          { status: 400 },
+        ),
       ),
     );
     render(<HealthPage />);
     await waitFor(() => {
-      expect(screen.getByText("Invalid diagnostics request")).toBeInTheDocument();
+      expect(
+        screen.getByText("Invalid diagnostics request"),
+      ).toBeInTheDocument();
     });
   });
 
   it("shows network error", async () => {
-    server.use(
-      http.get("*/admin/jobs", () => HttpResponse.error()),
-    );
+    server.use(http.get("*/admin/jobs", () => HttpResponse.error()));
     render(<HealthPage />);
     await waitFor(() => {
       expect(screen.getByTestId("health-error")).toBeInTheDocument();

@@ -63,10 +63,7 @@ export class CreateRelationUseCase {
           HIERARCHY_RELATION_TYPES.includes(rel.relationType),
       );
 
-      if (
-        existingParent &&
-        existingParent.toConceptId !== toConcept.id
-      ) {
+      if (existingParent && existingParent.toConceptId !== toConcept.id) {
         throw new BadRequestException(
           'Document already has a hierarchy parent',
         );

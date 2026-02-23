@@ -19,6 +19,7 @@ import { ClipController } from './clip.controller.js';
 import { KnowledgeModule } from '../../knowledge/presentation/knowledge.module.js';
 import { GraphModule } from '../../graph/presentation/graph.module.js';
 import { QueryModule } from '../../query/presentation/query.module.js';
+import { SettingsModule } from '../../settings/presentation/settings.module.js';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { QueryModule } from '../../query/presentation/query.module.js';
     forwardRef(() => KnowledgeModule),
     GraphModule,
     QueryModule,
+    SettingsModule,
   ],
   controllers: [IngestionController, ClipController],
   providers: [

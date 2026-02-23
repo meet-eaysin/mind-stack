@@ -1,6 +1,7 @@
 import { FilteredSearchUseCase } from '../filtered-search.use-case.js';
 import { INGESTION_STATUS } from '@repo/shared-types';
 import type { EmbeddingProvider, EmbeddingResult } from '@repo/embeddings';
+import type { LlmProviderFactoryPort } from '../../../settings/application/llm-provider.factory.js';
 import type {
   VectorStore,
   VectorDocument,
@@ -35,6 +36,18 @@ class FakeEmbeddingProvider implements EmbeddingProvider {
 
   getDimensions(): number {
     return this.fixedEmbedding.length;
+  }
+}
+
+class FakeLlmProviderFactory implements LlmProviderFactoryPort {
+  constructor(private readonly embedding: EmbeddingProvider) {}
+
+  async getEmbeddingProvider(_userId: string): Promise<EmbeddingProvider> {
+    return this.embedding;
+  }
+
+  async getGenerationProvider(): Promise<never> {
+    throw new Error('Generation provider not used in this test');
   }
 }
 
@@ -104,15 +117,17 @@ class FakeQueryRepository implements QueryRepository {
 describe('FilteredSearchUseCase', () => {
   let useCase: FilteredSearchUseCase;
   let embeddingProvider: FakeEmbeddingProvider;
+  let providerFactory: FakeLlmProviderFactory;
   let vectorStore: FakeVectorStore;
   let queryRepository: FakeQueryRepository;
 
   beforeEach(() => {
     embeddingProvider = new FakeEmbeddingProvider();
+    providerFactory = new FakeLlmProviderFactory(embeddingProvider);
     vectorStore = new FakeVectorStore();
     queryRepository = new FakeQueryRepository();
     useCase = new FilteredSearchUseCase(
-      embeddingProvider,
+      providerFactory,
       vectorStore,
       queryRepository,
     );
@@ -143,6 +158,7 @@ describe('FilteredSearchUseCase', () => {
     const result = await useCase.execute({
       query: 'test',
       tags: ['tag1'],
+      userId: 'default',
     });
 
     expect(result).toHaveLength(1);
@@ -195,6 +211,7 @@ describe('FilteredSearchUseCase', () => {
     const result = await useCase.execute({
       query: 'test',
       topK: 5,
+      userId: 'default',
     });
 
     expect(result).toHaveLength(1);

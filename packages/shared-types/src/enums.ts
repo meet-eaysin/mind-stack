@@ -81,3 +81,10 @@ export const ANNOTATION_TYPE = {
 
 export type AnnotationType =
   (typeof ANNOTATION_TYPE)[keyof typeof ANNOTATION_TYPE];
+
+export const MODEL_PROVIDER = {
+  OLLAMA: "OLLAMA",
+} as const;
+
+export type ModelProvider =
+  (typeof MODEL_PROVIDER)[keyof typeof MODEL_PROVIDER];

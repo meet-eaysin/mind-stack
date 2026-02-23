@@ -8,7 +8,12 @@ import {
   AnnotationTypeSchema,
 } from "@/schemas/api.schemas";
 
-const MetadataValueSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+const MetadataValueSchema = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.null(),
+]);
 const MetadataSchema = z.record(z.string(), MetadataValueSchema);
 
 export const DocumentListItemSchema = z.object({
@@ -17,6 +22,7 @@ export const DocumentListItemSchema = z.object({
   sourceType: SourceTypeSchema,
   sourceUrl: z.string().nullable(),
   status: IngestionStatusSchema,
+  processingError: z.string().nullable().optional(),
   learningStatus: LearningStatusSchema.default("UPCOMING"),
   type: DocumentTypeSchema.default("OTHER"),
   author: z.string().nullable().optional(),
@@ -61,6 +67,7 @@ const DocumentDetailSchema = z.object({
   notes: z.array(NoteResponseSchema),
   importanceScore: z.number().nullable(),
   status: IngestionStatusSchema,
+  processingError: z.string().nullable().optional(),
   learningStatus: LearningStatusSchema.default("UPCOMING"),
   type: DocumentTypeSchema.default("OTHER"),
   author: z.string().nullable().optional(),
@@ -72,10 +79,7 @@ const DocumentDetailSchema = z.object({
 });
 
 export const DocumentDetailResponseSchema = z
-  .union([
-    z.object({ document: DocumentDetailSchema }),
-    DocumentDetailSchema,
-  ])
+  .union([z.object({ document: DocumentDetailSchema }), DocumentDetailSchema])
   .transform((value) => {
     if ("document" in value) {
       return value;
@@ -132,4 +136,6 @@ export const RelatedSuggestionSchema = z.object({
   hasNote: z.boolean(),
 });
 
-export const RelatedSuggestionsResponseSchema = z.array(RelatedSuggestionSchema);
+export const RelatedSuggestionsResponseSchema = z.array(
+  RelatedSuggestionSchema,
+);

@@ -8,6 +8,7 @@ import type {
 export type DocumentEntity = {
   id: string;
   title: string;
+  userId: string;
   sourceType: SourceType;
   sourceUrl: string | null;
   rawContent: string;
@@ -20,12 +21,14 @@ export type DocumentEntity = {
   language: string;
   addedByUserAt: Date;
   createdAt: Date;
+  processingError: string | null;
   deletedAt?: Date | null;
 };
 
 export function createDocument(params: {
   id: string;
   title: string;
+  userId?: string;
   sourceType: SourceType;
   sourceUrl: string | null;
   rawContent: string;
@@ -37,10 +40,12 @@ export function createDocument(params: {
   publishedAt?: Date | null;
   language?: string;
   addedByUserAt?: Date;
+  processingError?: string | null;
 }): DocumentEntity {
   return {
     id: params.id,
     title: params.title,
+    userId: params.userId ?? 'default',
     sourceType: params.sourceType,
     sourceUrl: params.sourceUrl,
     rawContent: params.rawContent,
@@ -53,6 +58,7 @@ export function createDocument(params: {
     language: params.language ?? 'en',
     addedByUserAt: params.addedByUserAt ?? new Date(),
     createdAt: new Date(),
+    processingError: params.processingError ?? null,
     deletedAt: null,
   };
 }

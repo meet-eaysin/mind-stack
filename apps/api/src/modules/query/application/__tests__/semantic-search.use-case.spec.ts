@@ -1,6 +1,7 @@
 import { SemanticSearchUseCase } from '../semantic-search.use-case.js';
 import { INGESTION_STATUS } from '@repo/shared-types';
 import type { EmbeddingProvider, EmbeddingResult } from '@repo/embeddings';
+import type { LlmProviderFactoryPort } from '../../../settings/application/llm-provider.factory.js';
 import type {
   VectorStore,
   VectorDocument,
@@ -35,6 +36,18 @@ class FakeEmbeddingProvider implements EmbeddingProvider {
 
   getDimensions(): number {
     return this.fixedEmbedding.length;
+  }
+}
+
+class FakeLlmProviderFactory implements LlmProviderFactoryPort {
+  constructor(private readonly embedding: EmbeddingProvider) {}
+
+  async getEmbeddingProvider(_userId: string): Promise<EmbeddingProvider> {
+    return this.embedding;
+  }
+
+  async getGenerationProvider(): Promise<never> {
+    throw new Error('Generation provider not used in this test');
   }
 }
 
@@ -104,15 +117,17 @@ class FakeQueryRepository implements QueryRepository {
 describe('SemanticSearchUseCase', () => {
   let useCase: SemanticSearchUseCase;
   let embeddingProvider: FakeEmbeddingProvider;
+  let providerFactory: FakeLlmProviderFactory;
   let vectorStore: FakeVectorStore;
   let queryRepository: FakeQueryRepository;
 
   beforeEach(() => {
     embeddingProvider = new FakeEmbeddingProvider();
+    providerFactory = new FakeLlmProviderFactory(embeddingProvider);
     vectorStore = new FakeVectorStore();
     queryRepository = new FakeQueryRepository();
     useCase = new SemanticSearchUseCase(
-      embeddingProvider,
+      providerFactory,
       vectorStore,
       queryRepository,
     );
@@ -157,7 +172,11 @@ describe('SemanticSearchUseCase', () => {
       },
     ]);
 
-    const result = await useCase.execute({ query: 'test query', topK: 5 });
+    const result = await useCase.execute({
+      query: 'test query',
+      topK: 5,
+      userId: 'default',
+    });
 
     expect(result).toHaveLength(2);
     expect(result[0]?.chunkId).toBe('chunk-1');
@@ -169,7 +188,11 @@ describe('SemanticSearchUseCase', () => {
   it('should return an empty array when vector search returns no results', async () => {
     vectorStore.setResults([]);
 
-    const result = await useCase.execute({ query: 'unknown', topK: 5 });
+    const result = await useCase.execute({
+      query: 'unknown',
+      topK: 5,
+      userId: 'default',
+    });
 
     expect(result).toHaveLength(0);
   });
@@ -178,7 +201,7 @@ describe('SemanticSearchUseCase', () => {
     const searchSpy = jest.spyOn(vectorStore, 'search');
     vectorStore.setResults([]);
 
-    await useCase.execute({ query: 'test' });
+    await useCase.execute({ query: 'test', userId: 'default' });
 
     expect(searchSpy).toHaveBeenCalledWith(
       expect.any(Array),

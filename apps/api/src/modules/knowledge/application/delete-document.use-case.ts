@@ -35,8 +35,9 @@ export class DeleteDocumentUseCase {
     );
 
     if (concept) {
-      const relations =
-        await this.conceptRepository.findRelationsForConcept(concept.id);
+      const relations = await this.conceptRepository.findRelationsForConcept(
+        concept.id,
+      );
       const parentRelation = relations.find(
         (rel) =>
           rel.fromConceptId === concept.id &&

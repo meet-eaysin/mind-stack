@@ -41,6 +41,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
   private mapToDomain(row: {
     id: string;
     title: string;
+    userId: string;
     sourceType: string;
     sourceUrl: string | null;
     rawContent: string;
@@ -53,6 +54,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
     language: string;
     addedByUserAt: Date;
     createdAt: Date;
+    processingError: string | null;
     deletedAt: Date | null;
   }): DocumentEntity {
     if (!this.isSourceType(row.sourceType)) {
@@ -73,6 +75,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
     return {
       id: row.id,
       title: row.title,
+      userId: row.userId,
       sourceType: row.sourceType,
       sourceUrl: row.sourceUrl,
       rawContent: row.rawContent,
@@ -85,6 +88,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
       language: row.language,
       addedByUserAt: row.addedByUserAt,
       createdAt: row.createdAt,
+      processingError: row.processingError,
       deletedAt: row.deletedAt,
     };
   }
@@ -95,6 +99,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
       create: {
         id: document.id,
         title: document.title,
+        userId: document.userId,
         sourceType: document.sourceType,
         sourceUrl: document.sourceUrl,
         rawContent: document.rawContent,
@@ -106,6 +111,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
         publishedAt: document.publishedAt,
         language: document.language,
         addedByUserAt: document.addedByUserAt,
+        processingError: document.processingError,
         deletedAt: document.deletedAt ?? null,
       },
       update: {
@@ -119,6 +125,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
         publisher: document.publisher,
         publishedAt: document.publishedAt,
         language: document.language,
+        processingError: document.processingError,
         deletedAt: document.deletedAt ?? null,
       },
     });
@@ -144,9 +151,12 @@ export class PrismaDocumentRepository implements DocumentRepository {
     return rows.map((row) => this.mapToDomain(row));
   }
 
-  async findBySourceUrl(url: string): Promise<DocumentEntity | null> {
+  async findBySourceUrl(
+    url: string,
+    userId: string,
+  ): Promise<DocumentEntity | null> {
     const row = await this.prisma.document.findFirst({
-      where: { sourceUrl: url, deletedAt: null },
+      where: { sourceUrl: url, userId, deletedAt: null },
     });
     if (!row) return null;
 
@@ -157,6 +167,16 @@ export class PrismaDocumentRepository implements DocumentRepository {
     await this.prisma.document.update({
       where: { id },
       data: { status },
+    });
+  }
+
+  async updateProcessingError(
+    id: string,
+    errorMessage: string | null,
+  ): Promise<void> {
+    await this.prisma.document.update({
+      where: { id },
+      data: { processingError: errorMessage },
     });
   }
 

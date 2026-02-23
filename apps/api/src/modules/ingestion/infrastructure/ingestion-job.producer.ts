@@ -14,20 +14,35 @@ export class IngestionJobProducer implements IngestionJobProducerPort {
     private readonly queue: Queue<IngestionJobData, void, JobType>,
   ) {}
 
-  async enqueueUrlExtractionJob(documentId: string): Promise<string> {
-    return this.addJob(JOB_TYPE.URL_EXTRACTION as JobType, { documentId });
+  async enqueueUrlExtractionJob(
+    documentId: string,
+    userId: string,
+  ): Promise<string> {
+    return this.addJob(JOB_TYPE.URL_EXTRACTION as JobType, {
+      documentId,
+      userId,
+    });
   }
 
-  async enqueueChunkingJob(documentId: string): Promise<string> {
-    return this.addJob(JOB_TYPE.CHUNKING, { documentId });
+  async enqueueChunkingJob(
+    documentId: string,
+    userId: string,
+  ): Promise<string> {
+    return this.addJob(JOB_TYPE.CHUNKING, { documentId, userId });
   }
 
-  async enqueueEmbeddingJob(documentId: string): Promise<string> {
-    return this.addJob(JOB_TYPE.EMBEDDING, { documentId });
+  async enqueueEmbeddingJob(
+    documentId: string,
+    userId: string,
+  ): Promise<string> {
+    return this.addJob(JOB_TYPE.EMBEDDING, { documentId, userId });
   }
 
-  async enqueueConceptExtractionJob(documentId: string): Promise<string> {
-    return this.addJob(JOB_TYPE.CONCEPT_EXTRACTION, { documentId });
+  async enqueueConceptExtractionJob(
+    documentId: string,
+    userId: string,
+  ): Promise<string> {
+    return this.addJob(JOB_TYPE.CONCEPT_EXTRACTION, { documentId, userId });
   }
 
   private async addJob(type: JobType, data: IngestionJobData): Promise<string> {

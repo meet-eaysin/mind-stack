@@ -1,6 +1,7 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
+  "globalEnv": ["OLLAMA_BASE_URL", "OLLAMA_EMBED_MODEL", "OLLAMA_MODEL"],
   "globalPassThroughEnv": ["NODE_ENV", "LOG_LEVEL"],
   "tasks": {
     "build": {

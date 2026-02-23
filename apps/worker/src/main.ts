@@ -1,8 +1,8 @@
 import { Worker, Queue, ConnectionOptions } from "bullmq";
 import { loadConfig } from "@repo/config";
 import { createLogger } from "@repo/logger";
-import { OllamaEmbeddingProvider } from "@repo/embeddings";
-import { OllamaLLMProvider } from "@repo/llm";
+import { OllamaModelRegistry } from "@repo/embeddings";
+import { OllamaLLMProvider, type LLMProvider } from "@repo/llm";
 import { ChromaVectorStore } from "@repo/vector-store";
 import { PrismaClient } from "@repo/database";
 import { JOB_TYPE } from "@repo/shared-types";
@@ -11,6 +11,7 @@ import { handleEmbeddingJob } from "./jobs/embedding.job";
 import { handleConceptExtractionJob } from "./jobs/concept-extraction.job";
 import { handleDailyReviewJob } from "./jobs/daily-review.job";
 import { handleUrlExtractionJob } from "./jobs/url-extraction.job";
+import { resolveUserLlmConfig } from "./llm-config";
 
 const logger = createLogger("Worker");
 
@@ -37,22 +38,23 @@ async function main(): Promise<void> {
     connection,
   });
 
-  const embeddingProvider = new OllamaEmbeddingProvider({
+  const modelRegistry = new OllamaModelRegistry(config.OLLAMA_BASE_URL);
+  const llmDefaults = {
     baseUrl: config.OLLAMA_BASE_URL,
-    model: config.OLLAMA_EMBED_MODEL,
-  });
-
-  const llmProvider = new OllamaLLMProvider({
-    baseUrl: config.OLLAMA_BASE_URL,
-    model: config.OLLAMA_MODEL,
-  });
+    embeddingModel: config.OLLAMA_EMBED_MODEL,
+    generationModel: config.OLLAMA_MODEL,
+  };
 
   const vectorStore = new ChromaVectorStore(
     config.CHROMA_URL,
     config.CHROMA_COLLECTION,
   );
 
-  const worker = new Worker<{ documentId: string }, void, string>(
+  const worker = new Worker<
+    { documentId: string; userId?: string },
+    void,
+    string
+  >(
     "ingestion",
     async (job) => {
       console.log(
@@ -68,7 +70,17 @@ async function main(): Promise<void> {
           await handleUrlExtractionJob(
             job,
             prisma,
-            llmProvider,
+            async (userId: string): Promise<LLMProvider> => {
+              const cfg = await resolveUserLlmConfig(
+                prisma,
+                userId,
+                llmDefaults,
+              );
+              return new OllamaLLMProvider({
+                baseUrl: cfg.baseUrl,
+                model: cfg.generationModel,
+              });
+            },
             ingestionQueue,
           );
           break;
@@ -81,14 +93,22 @@ async function main(): Promise<void> {
           await handleEmbeddingJob(
             job,
             prisma,
-            embeddingProvider,
             vectorStore,
             ingestionQueue,
+            modelRegistry,
+            llmDefaults,
           );
           break;
 
         case JOB_TYPE.CONCEPT_EXTRACTION:
-          await handleConceptExtractionJob(job, prisma, llmProvider);
+          await handleConceptExtractionJob(
+            job,
+            prisma,
+            new OllamaLLMProvider({
+              baseUrl: config.OLLAMA_BASE_URL,
+              model: config.OLLAMA_MODEL,
+            }),
+          );
           break;
 
         case JOB_TYPE.DAILY_REVIEW:

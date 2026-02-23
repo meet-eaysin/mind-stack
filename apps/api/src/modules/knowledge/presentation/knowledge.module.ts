@@ -18,11 +18,12 @@ import { UpdateDocumentUseCase } from '../application/update-document.use-case.j
 import { IngestionModule } from '../../ingestion/presentation/ingestion.module.js';
 import { QueryModule } from '../../query/presentation/query.module.js';
 import { PrismaQueryRepository } from '../../query/infrastructure/prisma-query.repository.js';
-import { VECTOR_STORE, EMBEDDING_PROVIDER } from '../../../common/tokens.js';
+import { VECTOR_STORE } from '../../../common/tokens.js';
 import type { VectorStore } from '@repo/vector-store';
-import type { EmbeddingProvider } from '@repo/embeddings';
 import { ConfigModule } from '@nestjs/config';
 import { VectorModule } from '../../../common/vector.module.js';
+import { SettingsModule } from '../../settings/presentation/settings.module.js';
+import { LlmProviderFactory } from '../../settings/application/llm-provider.factory.js';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { VectorModule } from '../../../common/vector.module.js';
     ConfigModule,
     forwardRef(() => QueryModule),
     VectorModule,
+    SettingsModule,
   ],
   controllers: [KnowledgeController],
   providers: [
@@ -68,12 +70,7 @@ import { VectorModule } from '../../../common/vector.module.js';
         vectorStore: VectorStore,
         conceptRepo: PrismaConceptRepository,
       ) =>
-        new DeleteDocumentUseCase(
-          docRepo,
-          chunkRepo,
-          vectorStore,
-          conceptRepo,
-        ),
+        new DeleteDocumentUseCase(docRepo, chunkRepo, vectorStore, conceptRepo),
       inject: [
         PrismaDocumentRepository,
         PrismaChunkRepository,
@@ -119,22 +116,22 @@ import { VectorModule } from '../../../common/vector.module.js';
     {
       provide: GetRelatedSuggestionsUseCase,
       useFactory: (
-        embeddingProvider: EmbeddingProvider,
         vectorStore: VectorStore,
         queryRepo: PrismaQueryRepository,
         chunkRepo: PrismaChunkRepository,
+        providerFactory: LlmProviderFactory,
       ) =>
         new GetRelatedSuggestionsUseCase(
-          embeddingProvider,
+          providerFactory,
           vectorStore,
           queryRepo,
           chunkRepo,
         ),
       inject: [
-        EMBEDDING_PROVIDER,
         VECTOR_STORE,
         PrismaQueryRepository,
         PrismaChunkRepository,
+        LlmProviderFactory,
       ],
     },
   ],

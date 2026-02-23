@@ -1,6 +1,7 @@
 import { RetrieveChunksUseCase } from '../retrieve-chunks.use-case.js';
 import { INGESTION_STATUS } from '@repo/shared-types';
 import type { EmbeddingProvider, EmbeddingResult } from '@repo/embeddings';
+import type { LlmProviderFactoryPort } from '../../../settings/application/llm-provider.factory.js';
 import type {
   VectorStore,
   VectorDocument,
@@ -35,6 +36,18 @@ class FakeEmbeddingProvider implements EmbeddingProvider {
 
   getDimensions(): number {
     return this.fixedEmbedding.length;
+  }
+}
+
+class FakeLlmProviderFactory implements LlmProviderFactoryPort {
+  constructor(private readonly embedding: EmbeddingProvider) {}
+
+  async getEmbeddingProvider(_userId: string): Promise<EmbeddingProvider> {
+    return this.embedding;
+  }
+
+  async getGenerationProvider(): Promise<never> {
+    throw new Error('Generation provider not used in this test');
   }
 }
 
@@ -104,15 +117,17 @@ class FakeQueryRepository implements QueryRepository {
 describe('RetrieveChunksUseCase', () => {
   let useCase: RetrieveChunksUseCase;
   let embeddingProvider: FakeEmbeddingProvider;
+  let providerFactory: FakeLlmProviderFactory;
   let vectorStore: FakeVectorStore;
   let queryRepository: FakeQueryRepository;
 
   beforeEach(() => {
     embeddingProvider = new FakeEmbeddingProvider();
+    providerFactory = new FakeLlmProviderFactory(embeddingProvider);
     vectorStore = new FakeVectorStore();
     queryRepository = new FakeQueryRepository();
     useCase = new RetrieveChunksUseCase(
-      embeddingProvider,
+      providerFactory,
       vectorStore,
       queryRepository,
     );
@@ -140,7 +155,11 @@ describe('RetrieveChunksUseCase', () => {
       },
     ]);
 
-    const result = await useCase.execute({ query: 'search', topK: 5 });
+    const result = await useCase.execute({
+      query: 'search',
+      topK: 5,
+      userId: 'default',
+    });
 
     expect(result).toHaveLength(1);
     expect(result[0]?.chunkId).toBe('chunk-1');
@@ -153,7 +172,10 @@ describe('RetrieveChunksUseCase', () => {
   it('should return an empty array when no vector results are found', async () => {
     vectorStore.setResults([]);
 
-    const result = await useCase.execute({ query: 'nothing' });
+    const result = await useCase.execute({
+      query: 'nothing',
+      userId: 'default',
+    });
 
     expect(result).toHaveLength(0);
   });
@@ -164,7 +186,7 @@ describe('RetrieveChunksUseCase', () => {
     ]);
     queryRepository.seed([]);
 
-    const result = await useCase.execute({ query: 'test' });
+    const result = await useCase.execute({ query: 'test', userId: 'default' });
 
     expect(result).toHaveLength(1);
     expect(result[0]?.content).toBe('fallback content');
