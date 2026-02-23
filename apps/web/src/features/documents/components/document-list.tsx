@@ -146,8 +146,8 @@ export function DocumentList({ onSelect }: { onSelect: (id: string) => void }) {
 
       <IngestionModal
         open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        onSuccess={handleIngestionSuccess}
+        onOpenChangeAction={setIsModalOpen}
+        onSuccessAction={handleIngestionSuccess}
       />
 
       {isLoading && (

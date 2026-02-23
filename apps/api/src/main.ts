@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { json, urlencoded } from 'express';
 import { AppModule } from './app.module.js';
 import { loadConfig } from '@repo/config';
 import { createLogger } from '@repo/logger';
@@ -9,6 +10,9 @@ async function bootstrap(): Promise<void> {
   const logger = createLogger('API');
 
   const app = await NestFactory.create(AppModule);
+
+  app.use(json({ limit: '25mb' }));
+  app.use(urlencoded({ extended: true, limit: '25mb' }));
 
   app.enableCors({
     origin: config.WEB_URL,

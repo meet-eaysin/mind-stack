@@ -39,8 +39,8 @@ import { FileText, Link, Youtube, Type, Upload } from "lucide-react";
 
 type IngestionModalProps = {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSuccess?: () => void;
+  onOpenChangeAction: (open: boolean) => void;
+  onSuccessAction?: () => void;
 };
 
 type UrlFormValues = {
@@ -54,12 +54,22 @@ type TextFormValues = {
 
 type PdfFormValues = {
   title: string;
-  file: FileList;
+  file: FileList | null;
 };
+
+const MAX_PDF_SIZE_BYTES = 10 * 1024 * 1024;
 
 const PdfFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  file: z.any().refine((val) => val && val.length > 0, "File is required"),
+  file: z
+    .custom<FileList | null>(
+      (value) =>
+        typeof FileList !== "undefined" &&
+        value instanceof FileList &&
+        value.length > 0,
+      "File is required",
+    )
+    .nullable(),
 });
 
 type YoutubeFormValues = {
@@ -75,10 +85,11 @@ function isIngestionTab(v: string): v is IngestionTab {
 
 export function IngestionModal({
   open,
-  onOpenChange,
-  onSuccess,
+  onOpenChangeAction,
+  onSuccessAction,
 }: IngestionModalProps) {
   const [activeTab, setActiveTab] = useState<IngestionTab>("url");
+  const [clientError, setClientError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const urlForm = useForm<UrlFormValues>({
@@ -93,6 +104,10 @@ export function IngestionModal({
 
   const pdfForm = useForm<PdfFormValues>({
     resolver: zodResolver(PdfFormSchema),
+    defaultValues: {
+      title: "",
+      file: null,
+    },
   });
 
   const youtubeForm = useForm<YoutubeFormValues>({
@@ -110,8 +125,9 @@ export function IngestionModal({
     textForm.reset();
     pdfForm.reset();
     youtubeForm.reset();
-    onOpenChange(false);
-    onSuccess?.();
+    onOpenChangeAction(false);
+    setClientError(null);
+    onSuccessAction?.();
   };
 
   const onUrlSubmit = (data: UrlFormValues) => {
@@ -126,6 +142,12 @@ export function IngestionModal({
     if (!data.file || data.file.length === 0) return;
 
     const file = data.file[0];
+    if (!file) return;
+    if (file.size > MAX_PDF_SIZE_BYTES) {
+      setClientError("PDF is too large. Max size is 10 MB.");
+      return;
+    }
+    setClientError(null);
     const reader = new FileReader();
 
     reader.onload = () => {
@@ -166,8 +188,8 @@ export function IngestionModal({
     ingestYoutube.error;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px]" data-testid="ingestion-modal">
+    <Dialog open={open} onOpenChange={onOpenChangeAction}>
+      <DialogContent className="sm:max-w-137.5" data-testid="ingestion-modal">
         <DialogHeader>
           <DialogTitle>Add New Document</DialogTitle>
           <DialogDescription>
@@ -177,7 +199,11 @@ export function IngestionModal({
 
         <Tabs
           value={activeTab}
-          onValueChange={(v) => isIngestionTab(v) && setActiveTab(v)}
+          onValueChange={(v) => {
+            if (!isIngestionTab(v)) return;
+            setActiveTab(v);
+            setClientError(null);
+          }}
           className="w-full"
         >
           <TabsList className="grid w-full grid-cols-4">
@@ -222,7 +248,7 @@ export function IngestionModal({
                     </FormItem>
                   )}
                 />
-                {renderActionButtons(() => onOpenChange(false), isPending)}
+                {renderActionButtons(() => onOpenChangeAction(false), isPending)}
               </form>
             </Form>
           </TabsContent>
@@ -259,7 +285,7 @@ export function IngestionModal({
                       <FormControl>
                         <Textarea
                           placeholder="Paste your text here..."
-                          className="min-h-[150px]"
+                          className="min-h-37.5"
                           {...field}
                           data-testid="ingest-text-content"
                         />
@@ -268,7 +294,7 @@ export function IngestionModal({
                     </FormItem>
                   )}
                 />
-                {renderActionButtons(() => onOpenChange(false), isPending)}
+                {renderActionButtons(() => onOpenChangeAction(false), isPending)}
               </form>
             </Form>
           </TabsContent>
@@ -313,7 +339,8 @@ export function IngestionModal({
                               fileInputRef.current = e;
                             }}
                             onChange={(e) => {
-                              onChange(e.target.files);
+                              onChange(e.target.files ?? null);
+                              setClientError(null);
                             }}
                           />
                           <PdfFileNameDisplay
@@ -326,7 +353,7 @@ export function IngestionModal({
                     </FormItem>
                   )}
                 />
-                {renderActionButtons(() => onOpenChange(false), isPending)}
+                {renderActionButtons(() => onOpenChangeAction(false), isPending)}
               </form>
             </Form>
           </TabsContent>
@@ -357,14 +384,14 @@ export function IngestionModal({
                   We will automatically extract and process the transcript from
                   this video.
                 </DialogDescription>
-                {renderActionButtons(() => onOpenChange(false), isPending)}
+                {renderActionButtons(() => onOpenChangeAction(false), isPending)}
               </form>
             </Form>
           </TabsContent>
 
-          {error && (
+          {(clientError || error) && (
             <p className="mt-2 text-sm font-medium text-destructive">
-              {getApiErrorMessage(error)}
+              {clientError ?? getApiErrorMessage(error)}
             </p>
           )}
         </Tabs>
