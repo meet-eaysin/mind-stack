@@ -5,10 +5,12 @@ import {
   Min,
   Max,
   IsArray,
+  Matches,
 } from 'class-validator';
 
 export class SemanticSearchDto {
   @IsString()
+  @Matches(/\S/, { message: 'query must not be empty' })
   query!: string;
 
   @IsOptional()
@@ -20,6 +22,7 @@ export class SemanticSearchDto {
 
 export class FilteredSearchDto {
   @IsString()
+  @Matches(/\S/, { message: 'query must not be empty' })
   query!: string;
 
   @IsOptional()
@@ -60,6 +63,7 @@ export class FilteredSearchDto {
 
 export class AskQuestionDto {
   @IsString()
+  @Matches(/\S/, { message: 'question must not be empty' })
   question!: string;
 
   @IsOptional()

@@ -152,6 +152,9 @@ describe('AskQuestionUseCase', () => {
     expect(result.citations).toHaveLength(1);
     expect(result.citations[0]?.chunkId).toBe('c2');
     expect(result.weakContext).toBe(true);
+    expect(result.answer).toContain(
+      'Note: Available context is limited; verify critical details.',
+    );
   });
 
   it('should return a fallback answer when no citations are found', async () => {
@@ -193,6 +196,37 @@ describe('AskQuestionUseCase', () => {
       topK: 5,
       userId: 'default',
     });
+  });
+
+  it('appends source list when answer has no citation markers', async () => {
+    semanticSearch.setResults([
+      createChunkReferenceFixture({ chunkId: 'c1', documentId: 'doc-1' }),
+      createChunkReferenceFixture({ chunkId: 'c2', documentId: 'doc-2' }),
+    ]);
+    llmProvider.setResponse('TypeScript helps catch errors early.');
+
+    const result = await useCase.execute({
+      question: 'Why use TypeScript?',
+      userId: 'default',
+    });
+
+    expect(result.answer).toContain('Sources: [1], [2]');
+  });
+
+  it('falls back when LLM returns empty text', async () => {
+    semanticSearch.setResults([
+      createChunkReferenceFixture({ chunkId: 'c1', documentId: 'doc-1' }),
+    ]);
+    llmProvider.setResponse('   ');
+
+    const result = await useCase.execute({
+      question: 'Question?',
+      userId: 'default',
+    });
+
+    expect(result.answer).toContain(
+      "I don't have enough information to answer this question.",
+    );
   });
 
   it('should yield citations then text chunks during streaming', async () => {

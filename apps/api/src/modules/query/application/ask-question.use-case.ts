@@ -48,12 +48,7 @@ export class AskQuestionUseCase {
       )
       .join('\n\n');
 
-    const systemPrompt = [
-      'You are a knowledgeable assistant that answers questions based on the provided context.',
-      'Always cite your sources using [N] notation referring to the context blocks.',
-      "If the context doesn't contain enough information, say so clearly.",
-      'Be concise and accurate.',
-    ].join('\n');
+    const systemPrompt = this.buildSystemPrompt();
 
     const prompt = [
       'Context:',
@@ -72,9 +67,14 @@ export class AskQuestionUseCase {
       systemPrompt,
       temperature: 0.3,
     });
+    const answer = this.finalizeAnswer(
+      response.text,
+      uniqueDocumentCitations.length,
+      weakContext,
+    );
 
     return {
-      answer: response.text,
+      answer,
       citations: uniqueDocumentCitations,
       weakContext,
     };
@@ -107,12 +107,7 @@ export class AskQuestionUseCase {
       .map((c, i) => `[${i + 1}] (Source: ${c.documentTitle})\n${c.content}`)
       .join('\n\n');
 
-    const systemPrompt = [
-      'You are a knowledgeable assistant that answers questions based on the provided context.',
-      'Always cite your sources using [N] notation referring to the context blocks.',
-      "If the context doesn't contain enough information, say so clearly.",
-      'Be concise and accurate.',
-    ].join('\n');
+    const systemPrompt = this.buildSystemPrompt();
 
     const prompt = [
       'Context:',
@@ -152,5 +147,48 @@ export class AskQuestionUseCase {
     }
 
     return Array.from(byDocument.values());
+  }
+
+  private buildSystemPrompt(): string {
+    return [
+      'You are a grounded assistant.',
+      'Use only the provided context blocks.',
+      'Do not invent facts beyond the context.',
+      'Cite claims with [N] notation that maps to context blocks.',
+      'If context is insufficient, explicitly say what is missing.',
+      'Keep the answer concise and structured.',
+    ].join('\n');
+  }
+
+  private finalizeAnswer(
+    rawAnswer: string,
+    citationCount: number,
+    weakContext: boolean,
+  ): string {
+    const trimmed = rawAnswer.trim();
+    const fallback = "I don't have enough information to answer this question.";
+    const base = trimmed.length > 0 ? trimmed : fallback;
+
+    const hasCitationMarkers = /\[\d+\]/.test(base);
+    const citationSuffix =
+      citationCount > 0
+        ? `\n\nSources: ${Array.from({ length: citationCount }, (_, index) => `[${index + 1}]`).join(', ')}`
+        : '';
+
+    if (weakContext) {
+      const weakContextNote =
+        '\n\nNote: Available context is limited; verify critical details.';
+      const withSources =
+        hasCitationMarkers || citationCount === 0
+          ? base
+          : `${base}${citationSuffix}`;
+      return `${withSources}${weakContextNote}`;
+    }
+
+    if (hasCitationMarkers || citationCount === 0) {
+      return base;
+    }
+
+    return `${base}${citationSuffix}`;
   }
 }
