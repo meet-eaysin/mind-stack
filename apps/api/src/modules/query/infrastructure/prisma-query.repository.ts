@@ -41,7 +41,7 @@ export class PrismaQueryRepository implements QueryRepository {
         createdAt: c.createdAt,
         hasNote: doc.annotations && doc.annotations.length > 0,
         reviewCount: doc.Review.length,
-        documentStatus: doc.learningStatus || doc.status, // Fallback to existing status if older data
+        documentStatus: doc.status,
         documentId: doc.id,
       };
     });

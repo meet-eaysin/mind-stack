@@ -6,9 +6,10 @@ import { ExportNotionUseCase } from '../application/export-notion.use-case.js';
 import { QueryModule } from '../../query/presentation/query.module.js';
 import { ExportFullUseCase } from '../application/export-full.use-case.js';
 import { PrismaService } from '../../../prisma/prisma.service.js';
+import { IngestionModule } from '../../ingestion/presentation/ingestion.module.js';
 
 @Module({
-  imports: [QueryModule],
+  imports: [QueryModule, IngestionModule],
   controllers: [ExportController],
   providers: [
     PrismaQueryRepository,

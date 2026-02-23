@@ -4,6 +4,7 @@ import { handlers as searchHandlers } from "./handlers/search.handlers";
 import { handlers as reviewHandlers } from "./handlers/review.handlers";
 import { handlers as graphHandlers } from "./handlers/graph.handlers";
 import { handlers as exportHandlers } from "./handlers/export.handlers";
+import { handlers as collectionsHandlers } from "./handlers/collections.handlers";
 
 export const handlers = [
   ...ingestionHandlers,
@@ -12,4 +13,5 @@ export const handlers = [
   ...reviewHandlers,
   ...graphHandlers,
   ...exportHandlers,
+  ...collectionsHandlers,
 ];

@@ -30,10 +30,6 @@ describe("Review Behavior", () => {
     fireEvent.click(recallBtn);
     // Success state is implicit since it's a mutation, but normally we'd check for a toast or UI change
 
-    // Adjust importance
-    const importanceBtn = screen.getByTestId("importance-btn-4");
-    fireEvent.click(importanceBtn);
-
     // Navigate to next
     const nextBtn = screen.getByTestId("next-btn");
     fireEvent.click(nextBtn);
@@ -48,7 +44,7 @@ describe("Review Behavior", () => {
 
   it("should show empty state when no items to review", async () => {
     server.use(
-      http.get("*/api/review/daily", () => {
+      http.get("*/review/daily", () => {
         return HttpResponse.json({ date: "2024-01-01", items: [] });
       }),
     );

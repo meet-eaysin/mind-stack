@@ -8,14 +8,22 @@ import {
   AnnotationTypeSchema,
 } from "@/schemas/api.schemas";
 
+const MetadataValueSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+const MetadataSchema = z.record(z.string(), MetadataValueSchema);
+
 export const DocumentListItemSchema = z.object({
   id: z.string(),
   title: z.string(),
   sourceType: SourceTypeSchema,
   sourceUrl: z.string().nullable(),
   status: IngestionStatusSchema,
-  learningStatus: LearningStatusSchema,
-  type: DocumentTypeSchema,
+  learningStatus: LearningStatusSchema.default("UPCOMING"),
+  type: DocumentTypeSchema.default("OTHER"),
+  author: z.string().nullable().optional(),
+  publisher: z.string().nullable().optional(),
+  publishedAt: z.string().nullable().optional(),
+  language: z.string().optional(),
+  addedByUserAt: z.string().optional(),
   chunkCount: z.number(),
   createdAt: z.string(),
 });
@@ -32,38 +40,48 @@ export const DocumentListResponseSchema = z.object({
   pageSize: z.number(),
 });
 
-export const DocumentDetailResponseSchema = z.object({
-  document: z.object({
-    id: z.string(),
-    title: z.string(),
-    sourceType: SourceTypeSchema,
-    sourceUrl: z.string().nullable(),
-    rawContent: z.string(),
-    chunks: z.array(ChunkSchema),
-    tags: z.array(z.string()),
-    notes: z.array(
-      z.object({
-        id: z.string(),
-        content: z.string(),
-        type: AnnotationTypeSchema,
-        chunkId: z.string().nullable(),
-        selectedText: z.string().nullable(),
-        metadata: z.record(z.string(), z.any()).nullable(),
-        createdAt: z.string(),
-      }),
-    ),
-    importanceScore: z.number().nullable(),
-    status: IngestionStatusSchema,
-    learningStatus: LearningStatusSchema,
-    type: DocumentTypeSchema,
-    author: z.string().nullable(),
-    publisher: z.string().nullable(),
-    publishedAt: z.string().nullable(),
-    language: z.string(),
-    addedByUserAt: z.string(),
-    createdAt: z.string(),
-  }),
+export const NoteResponseSchema = z.object({
+  id: z.string(),
+  content: z.string(),
+  type: AnnotationTypeSchema,
+  chunkId: z.string().nullable(),
+  selectedText: z.string().nullable(),
+  metadata: MetadataSchema.nullable(),
+  createdAt: z.string(),
 });
+
+const DocumentDetailSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  sourceType: SourceTypeSchema,
+  sourceUrl: z.string().nullable(),
+  rawContent: z.string(),
+  chunks: z.array(ChunkSchema),
+  tags: z.array(z.string()),
+  notes: z.array(NoteResponseSchema),
+  importanceScore: z.number().nullable(),
+  status: IngestionStatusSchema,
+  learningStatus: LearningStatusSchema.default("UPCOMING"),
+  type: DocumentTypeSchema.default("OTHER"),
+  author: z.string().nullable().optional(),
+  publisher: z.string().nullable().optional(),
+  publishedAt: z.string().nullable().optional(),
+  language: z.string().optional(),
+  addedByUserAt: z.string().optional(),
+  createdAt: z.string(),
+});
+
+export const DocumentDetailResponseSchema = z
+  .union([
+    z.object({ document: DocumentDetailSchema }),
+    DocumentDetailSchema,
+  ])
+  .transform((value) => {
+    if ("document" in value) {
+      return value;
+    }
+    return { document: value };
+  });
 
 export const DocumentStatusResponseSchema = z.object({
   status: IngestionStatusSchema,
@@ -85,7 +103,7 @@ export const AddNoteRequestSchema = z.object({
   type: AnnotationTypeSchema.optional(),
   chunkId: z.string().optional(),
   selectedText: z.string().optional(),
-  metadata: z.record(z.string(), z.any()).optional(),
+  metadata: MetadataSchema.optional(),
 });
 
 export const UpdateNoteRequestSchema = z.object({

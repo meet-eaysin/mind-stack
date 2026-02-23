@@ -63,23 +63,6 @@ export function DocumentResult({
         )}
       </div>
 
-      {document.matchingChunks.length > 0 && (
-        <div className="pl-4 border-l-2 border-muted space-y-3 mt-4">
-          <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-            Matching Highlights
-          </h4>
-          <div className="grid gap-3">
-            {document.matchingChunks.map((chunk) => (
-              <div
-                key={chunk.chunkId}
-                className="text-sm bg-muted/50 p-3 rounded text-foreground/90"
-              >
-                <p className="line-clamp-3">&quot;{chunk.content}&quot;</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

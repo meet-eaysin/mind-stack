@@ -308,6 +308,14 @@ export default function SearchPage() {
         {/* Ask AI result */}
         {askQuestion.data && (
           <div className="space-y-4" data-testid="ask-result">
+            {askQuestion.data.weakContext && (
+              <div
+                className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-400"
+                data-testid="weak-context-warning"
+              >
+                Limited context found. The answer may be incomplete.
+              </div>
+            )}
             <div className="rounded-lg border bg-card p-4">
               <h3 className="mb-2 text-sm font-semibold">AI Answer</h3>
               <p className="text-sm leading-relaxed whitespace-pre-wrap">

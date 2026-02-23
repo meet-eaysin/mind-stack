@@ -9,6 +9,7 @@ import {
 import { ExportMarkdownUseCase } from '../application/export-markdown.use-case.js';
 import { ExportNotionUseCase } from '../application/export-notion.use-case.js';
 import { ExportFullUseCase } from '../application/export-full.use-case.js';
+import { IngestTextUseCase } from '../../ingestion/application/ingest-text.use-case.js';
 import { ExportChunksDto, NotionImportDto } from './export.dtos.js';
 
 @Controller('export')
@@ -17,6 +18,7 @@ export class ExportController {
     private readonly exportMarkdown: ExportMarkdownUseCase,
     private readonly exportNotion: ExportNotionUseCase,
     private readonly exportFull: ExportFullUseCase,
+    private readonly ingestText: IngestTextUseCase,
   ) {}
 
   @Post('markdown')
@@ -40,13 +42,18 @@ export class ExportController {
 
   @Post('import')
   async fromNotionImport(
-    @Body() _dto: NotionImportDto,
+    @Body() dto: NotionImportDto,
   ): Promise<IngestionResponse> {
-    // Stub implementation for Notion tool import
+    const result = await this.ingestText.execute({
+      title: dto.title,
+      content: dto.content,
+    });
+
     return {
-      documentId: 'stub-notion-import-id',
-      status: INGESTION_STATUS.READY,
-      message: 'Notion data imported successfully (stub)',
+      documentId: result.documentId,
+      jobId: result.jobId,
+      status: INGESTION_STATUS.INGESTED,
+      message: 'Notion content ingestion started',
     };
   }
 }

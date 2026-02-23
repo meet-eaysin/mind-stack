@@ -1,7 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { Server } from 'node:http';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
-import request from 'supertest';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { LearningGoalController } from '../learning-goal.controller.js';
 import { CreateLearningGoalUseCase } from '../../application/create-learning-goal.use-case.js';
 import { ListLearningGoalsUseCase } from '../../application/list-learning-goals.use-case.js';
@@ -11,8 +8,8 @@ import { DeleteLearningGoalUseCase } from '../../application/delete-learning-goa
 import { AddItemToLearningGoalUseCase } from '../../application/add-item-to-learning-goal.use-case.js';
 import { RemoveItemFromLearningGoalUseCase } from '../../application/remove-item-from-learning-goal.use-case.js';
 
-describe('LearningGoalController (e2e)', () => {
-  let app: INestApplication<Server>;
+describe('LearningGoalController', () => {
+  let controller: LearningGoalController;
 
   const mockCreateGoal = { execute: jest.fn() };
   const mockListGoals = { execute: jest.fn() };
@@ -39,67 +36,39 @@ describe('LearningGoalController (e2e)', () => {
       ],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ transform: true }));
-    await app.init();
+    controller = moduleFixture.get(LearningGoalController);
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     jest.clearAllMocks();
-    await app.close();
   });
 
-  describe('POST /learning-goals', () => {
-    it('should create a goal', async () => {
-      const dto = { name: 'New Goal' };
-      mockCreateGoal.execute.mockResolvedValue({ id: '1', ...dto });
+  it('creates, lists and gets goals', async () => {
+    const goal = { id: 'goal-1', name: 'New Goal' };
+    mockCreateGoal.execute.mockResolvedValue(goal);
+    mockListGoals.execute.mockResolvedValue([goal]);
+    mockGetGoal.execute.mockResolvedValue(goal);
 
-      const response = await request(app.getHttpServer())
-        .post('/learning-goals')
-        .send(dto);
-
-      expect(response.status).toBe(201);
-      expect(response.body.id).toBe('1');
-    });
+    await expect(controller.create({ name: 'New Goal' })).resolves.toEqual(goal);
+    await expect(controller.list()).resolves.toEqual([goal]);
+    await expect(controller.get('goal-1')).resolves.toEqual(goal);
   });
 
-  describe('GET /learning-goals', () => {
-    it('should list goals', async () => {
-      mockListGoals.execute.mockResolvedValue([]);
-      const response = await request(app.getHttpServer()).get(
-        '/learning-goals',
-      );
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual([]);
+  it('updates, deletes and manages goal items', async () => {
+    mockUpdateGoal.execute.mockResolvedValue({ id: 'goal-1', name: 'Updated' });
+    mockDeleteGoal.execute.mockResolvedValue(undefined);
+    mockAddItem.execute.mockResolvedValue(undefined);
+    mockRemoveItem.execute.mockResolvedValue(undefined);
+
+    await controller.update('goal-1', { name: 'Updated' });
+    await controller.delete('goal-1');
+    await controller.addItemToGoal('goal-1', { documentId: 'doc-1' });
+    await controller.removeItemFromGoal('item-1');
+
+    expect(mockAddItem.execute).toHaveBeenCalledWith({
+      goalId: 'goal-1',
+      documentId: 'doc-1',
     });
-  });
-
-  describe('GET /learning-goals/:id', () => {
-    it('should get a goal', async () => {
-      mockGetGoal.execute.mockResolvedValue({ id: '1', name: 'Goal 1' });
-      const response = await request(app.getHttpServer()).get(
-        '/learning-goals/1',
-      );
-      expect(response.status).toBe(200);
-      expect(response.body.id).toBe('1');
-    });
-  });
-
-  describe('POST /learning-goals/:id/items', () => {
-    it('should add item to goal', async () => {
-      const goalId = '550e8400-e29b-41d4-a716-446655440003';
-      const documentId = '550e8400-e29b-41d4-a716-446655440004';
-      mockAddItem.execute.mockResolvedValue(undefined);
-
-      const response = await request(app.getHttpServer())
-        .post(`/learning-goals/${goalId}/items`)
-        .send({ documentId });
-
-      expect(response.status).toBe(201);
-      expect(mockAddItem.execute).toHaveBeenCalledWith({
-        goalId,
-        documentId,
-      });
-    });
+    expect(mockRemoveItem.execute).toHaveBeenCalledWith('item-1');
   });
 });

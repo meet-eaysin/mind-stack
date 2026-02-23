@@ -18,16 +18,10 @@ export function groupChunksToDocuments(
         score: chunk.score,
         tags: chunk.tags,
         hasNote: chunk.hasNote,
-        matchingChunks: [],
       });
     }
 
     const doc = docMap.get(docId)!;
-    doc.matchingChunks.push({
-      chunkId: chunk.chunkId,
-      content: chunk.content,
-      score: chunk.score,
-    });
 
     if (chunk.score > doc.score) {
       doc.score = chunk.score;

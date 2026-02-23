@@ -1,5 +1,4 @@
 import { AskQuestionUseCase } from '../ask-question.use-case.js';
-import type { SemanticSearchUseCase } from '../semantic-search.use-case.js';
 import type {
   LLMProvider,
   GenerationRequest,
@@ -75,17 +74,19 @@ describe('AskQuestionUseCase', () => {
   beforeEach(() => {
     llmProvider = new FakeLLMProvider();
     semanticSearch = new FakeSemanticSearchUseCase();
-    useCase = new AskQuestionUseCase(
-      llmProvider,
-      semanticSearch as unknown as SemanticSearchUseCase,
-    );
+    useCase = new AskQuestionUseCase(llmProvider, semanticSearch);
   });
 
   it('should return the LLM answer with citations when context is available', async () => {
     const citations = [
-      createChunkReferenceFixture({ chunkId: 'c1', content: 'TS is typed' }),
+      createChunkReferenceFixture({
+        chunkId: 'c1',
+        documentId: 'doc-1',
+        content: 'TS is typed',
+      }),
       createChunkReferenceFixture({
         chunkId: 'c2',
+        documentId: 'doc-2',
         content: 'TS compiles to JS',
       }),
     ];
@@ -102,6 +103,30 @@ describe('AskQuestionUseCase', () => {
     expect(result.citations).toHaveLength(2);
     expect(result.citations[0]?.chunkId).toBe('c1');
     expect(result.citations[1]?.chunkId).toBe('c2');
+    expect(result.weakContext).toBe(false);
+  });
+
+  it('deduplicates citations by document', async () => {
+    const citations = [
+      createChunkReferenceFixture({
+        chunkId: 'c1',
+        documentId: 'doc-1',
+        score: 0.6,
+      }),
+      createChunkReferenceFixture({
+        chunkId: 'c2',
+        documentId: 'doc-1',
+        score: 0.9,
+      }),
+    ];
+    semanticSearch.setResults(citations);
+    llmProvider.setResponse('Answer [1]');
+
+    const result = await useCase.execute({ question: 'TypeScript?' });
+
+    expect(result.citations).toHaveLength(1);
+    expect(result.citations[0]?.chunkId).toBe('c2');
+    expect(result.weakContext).toBe(true);
   });
 
   it('should return a fallback answer when no citations are found', async () => {
@@ -113,6 +138,7 @@ describe('AskQuestionUseCase', () => {
       "I don't have enough information to answer this question.",
     );
     expect(result.citations).toHaveLength(0);
+    expect(result.weakContext).toBe(true);
   });
 
   it('should pass the correct topK to semantic search', async () => {

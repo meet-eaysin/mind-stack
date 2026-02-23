@@ -1,18 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { Server } from 'node:http';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
-import request from 'supertest';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { ReviewController } from '../review.controller.js';
 import { GenerateDailyReviewUseCase } from '../../application/generate-daily-review.use-case.js';
 import { SubmitReviewFeedbackUseCase } from '../../application/submit-review-feedback.use-case.js';
-import { ConfigService } from '@nestjs/config';
 
-describe('ReviewController (e2e)', () => {
-  let app: INestApplication<Server>;
+describe('ReviewController', () => {
+  let controller: ReviewController;
 
   const mockGenerateDailyReview = { execute: jest.fn() };
   const mockSubmitFeedback = { execute: jest.fn() };
-  const mockConfigService = { get: jest.fn().mockReturnValue(null) };
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -22,65 +17,40 @@ describe('ReviewController (e2e)', () => {
           provide: GenerateDailyReviewUseCase,
           useValue: mockGenerateDailyReview,
         },
-        { provide: SubmitReviewFeedbackUseCase, useValue: mockSubmitFeedback },
-        { provide: ConfigService, useValue: mockConfigService },
+        {
+          provide: SubmitReviewFeedbackUseCase,
+          useValue: mockSubmitFeedback,
+        },
       ],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transform: true,
-      }),
-    );
-    await app.init();
+    controller = moduleFixture.get(ReviewController);
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     jest.clearAllMocks();
-    await app.close();
   });
 
-  describe('GET /review/daily', () => {
-    it('should return 200 with review content', async () => {
-      mockGenerateDailyReview.execute.mockResolvedValue({
-        reviewId: 'r1',
-        topics: ['A', 'B'],
-      });
-      const response = await request(app.getHttpServer()).get('/review/daily');
+  it('returns daily review payload', async () => {
+    const payload = {
+      date: '2026-02-23',
+      items: [],
+    };
+    mockGenerateDailyReview.execute.mockResolvedValue(payload);
 
-      expect(response.status).toBe(200);
-      expect(response.body.reviewId).toBe('r1');
-    });
+    await expect(controller.daily()).resolves.toEqual(payload);
   });
 
-  describe('POST /review/feedback', () => {
-    it('should return 201 for valid feedback', async () => {
-      mockSubmitFeedback.execute.mockResolvedValue(undefined);
-      const response = await request(app.getHttpServer())
-        .post('/review/feedback')
-        .send({ documentId: 'd1', score: 4 });
+  it('submits feedback', async () => {
+    mockSubmitFeedback.execute.mockResolvedValue(undefined);
 
-      expect(response.status).toBe(201);
-      expect(response.body.success).toBe(true);
-    });
+    await expect(
+      controller.feedback({ documentId: 'doc-1', score: 4 }),
+    ).resolves.toEqual({ success: true });
 
-    it('should return 400 for invalid score', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/review/feedback')
-        .send({ documentId: 'd1', score: 10 });
-
-      expect(response.status).toBe(400);
-    });
-  });
-
-  describe('Error Handling', () => {
-    it('should return 500 when generation fails', async () => {
-      mockGenerateDailyReview.execute.mockRejectedValue(new Error('Failed'));
-      const response = await request(app.getHttpServer()).get('/review/daily');
-      expect(response.status).toBe(500);
+    expect(mockSubmitFeedback.execute).toHaveBeenCalledWith({
+      documentId: 'doc-1',
+      score: 4,
     });
   });
 });

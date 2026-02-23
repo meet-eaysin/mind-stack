@@ -21,7 +21,6 @@ describe("Search Behavior", () => {
     });
 
     expect(screen.getByText("Test Documents")).toBeInTheDocument();
-    expect(screen.getByText("This is a result chunk.")).toBeInTheDocument();
     expect(screen.getByText("95% match")).toBeInTheDocument();
   });
 
@@ -44,11 +43,43 @@ describe("Search Behavior", () => {
 
     expect(screen.getByText("This is a mock AI answer.")).toBeInTheDocument();
     expect(screen.getByText("Citations")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("weak-context-warning"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("should show weak context warning when backend marks weak context", async () => {
+    server.use(
+      http.post("*/query/ask", () => {
+        return HttpResponse.json({
+          answer: "Partial answer.",
+          weakContext: true,
+          citations: [],
+        });
+      }),
+    );
+
+    render(<SearchPage />);
+
+    const askModeBtn = screen.getByRole("button", { name: /ask ai/i });
+    fireEvent.click(askModeBtn);
+
+    const input = screen.getByTestId("search-input");
+    const submit = screen.getByTestId("search-submit");
+
+    fireEvent.change(input, { target: { value: "hard question" } });
+    fireEvent.click(submit);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("ask-result")).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId("weak-context-warning")).toBeInTheDocument();
   });
 
   it("should handles search API error", async () => {
     server.use(
-      http.post("*/api/query/search", () => {
+      http.post("*/query/search", () => {
         return new HttpResponse(null, { status: 400 });
       }),
     );

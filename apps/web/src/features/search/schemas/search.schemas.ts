@@ -38,6 +38,7 @@ export const RetrieveResponseSchema = z.object({
 export const AskQuestionResponseSchema = z.object({
   answer: z.string(),
   citations: z.array(ChunkReferenceSchema),
+  weakContext: z.boolean().default(false),
 });
 
 export const StreamingAskResponseChunkSchema = z.discriminatedUnion("type", [

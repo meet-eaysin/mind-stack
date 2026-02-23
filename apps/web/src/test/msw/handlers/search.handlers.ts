@@ -16,25 +16,19 @@ export const handlers = [
           score: 0.95,
           tags: ["tag1"],
           hasNote: false,
-          matchingChunks: [
-            {
-              chunkId: "c1",
-              content: "This is a result chunk.",
-              score: 0.95,
-            },
-          ],
         },
       ],
     });
   }),
   http.post("*/query/search/filtered", async ({ request }) => {
     FilteredSearchRequestSchema.parse(await request.json());
-    return HttpResponse.json({ chunks: [] });
+    return HttpResponse.json({ documents: [] });
   }),
   http.post("*/query/ask", async ({ request }) => {
     AskQuestionRequestSchema.parse(await request.json());
     return HttpResponse.json({
       answer: "This is a mock AI answer.",
+      weakContext: false,
       citations: [
         {
           chunkId: "c1",

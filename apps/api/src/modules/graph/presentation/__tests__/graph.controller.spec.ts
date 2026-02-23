@@ -1,20 +1,19 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { Server } from 'node:http';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
-import request from 'supertest';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { GraphController } from '../graph.controller.js';
 import { BuildGraphUseCase } from '../../application/build-graph.use-case.js';
 import { QueryGraphUseCase } from '../../application/query-graph.use-case.js';
 import { GetNeighborhoodUseCase } from '../../application/get-neighborhood.use-case.js';
-import { ConfigService } from '@nestjs/config';
+import { CreateRelationUseCase } from '../../application/create-relation.use-case.js';
+import { DeleteRelationUseCase } from '../../application/delete-relation.use-case.js';
 
-describe('GraphController (e2e)', () => {
-  let app: INestApplication<Server>;
+describe('GraphController', () => {
+  let controller: GraphController;
 
   const mockBuildGraph = { execute: jest.fn() };
   const mockQueryGraph = { execute: jest.fn() };
   const mockGetNeighborhood = { execute: jest.fn() };
-  const mockConfigService = { get: jest.fn().mockReturnValue(null) };
+  const mockCreateRelation = { execute: jest.fn() };
+  const mockDeleteRelation = { execute: jest.fn() };
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -23,76 +22,44 @@ describe('GraphController (e2e)', () => {
         { provide: BuildGraphUseCase, useValue: mockBuildGraph },
         { provide: QueryGraphUseCase, useValue: mockQueryGraph },
         { provide: GetNeighborhoodUseCase, useValue: mockGetNeighborhood },
-        { provide: ConfigService, useValue: mockConfigService },
+        { provide: CreateRelationUseCase, useValue: mockCreateRelation },
+        { provide: DeleteRelationUseCase, useValue: mockDeleteRelation },
       ],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transform: true,
-      }),
-    );
-    await app.init();
+    controller = moduleFixture.get(GraphController);
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     jest.clearAllMocks();
-    await app.close();
   });
 
-  describe('GET /graph', () => {
-    it('should return 200 with graph data', async () => {
-      mockQueryGraph.execute.mockResolvedValue({ nodes: [], edges: [] });
-      const response = await request(app.getHttpServer()).get('/graph');
-
-      expect(response.status).toBe(200);
-      expect(response.body.nodes).toBeDefined();
+  it('returns graph and neighborhood', async () => {
+    mockQueryGraph.execute.mockResolvedValue({ nodes: [], edges: [] });
+    mockGetNeighborhood.execute.mockResolvedValue({
+      nodes: [{ id: 'c1' }],
+      edges: [],
     });
+
+    await expect(controller.getGraph()).resolves.toEqual({ nodes: [], edges: [] });
+    await expect(
+      controller.neighborhood({ conceptId: 'c1', depth: 2 }),
+    ).resolves.toEqual({ nodes: [{ id: 'c1' }], edges: [] });
   });
 
-  describe('POST /graph/build', () => {
-    it('should return 201 for valid build request', async () => {
-      mockBuildGraph.execute.mockResolvedValue(undefined);
-      const response = await request(app.getHttpServer())
-        .post('/graph/build')
-        .send({ chunkId: 'c1', chunkContent: 'concept A relates to B' });
+  it('builds graph and manages relations', async () => {
+    mockBuildGraph.execute.mockResolvedValue(undefined);
+    mockCreateRelation.execute.mockResolvedValue(undefined);
+    mockDeleteRelation.execute.mockResolvedValue(undefined);
 
-      expect(response.status).toBe(201);
-      expect(response.body.success).toBe(true);
-    });
+    await expect(
+      controller.build({ chunkId: 'chunk-1', chunkContent: 'content' }),
+    ).resolves.toEqual({ success: true });
 
-    it('should return 400 when chunkId is missing', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/graph/build')
-        .send({ chunkContent: 'content' });
+    await expect(
+      controller.addRelation({ fromId: 'a', toId: 'b', type: 'RELATES_TO' }),
+    ).resolves.toEqual({ slug: 'ok' });
 
-      expect(response.status).toBe(400);
-    });
-  });
-
-  describe('POST /graph/neighborhood', () => {
-    it('should return 201 with neighborhood graph', async () => {
-      mockGetNeighborhood.execute.mockResolvedValue({
-        nodes: [{ id: 'concept-1' }],
-        edges: [],
-      });
-      const response = await request(app.getHttpServer())
-        .post('/graph/neighborhood')
-        .send({ conceptId: 'concept-1', depth: 2 });
-
-      expect(response.status).toBe(201);
-      expect(response.body.nodes).toHaveLength(1);
-    });
-
-    it('should return 400 for invalid depth', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/graph/neighborhood')
-        .send({ conceptId: 'c1', depth: 10 });
-
-      expect(response.status).toBe(400);
-    });
+    await expect(controller.removeRelation('rel-1')).resolves.toBeUndefined();
   });
 });

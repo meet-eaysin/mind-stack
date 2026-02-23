@@ -1,12 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { Server } from 'node:http';
-import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { AnalysisController } from '../analysis.controller.js';
 import { GetTopicMasteryUseCase } from '../../application/get-topic-mastery.use-case.js';
 
-describe('AnalysisController (e2e)', () => {
-  let app: INestApplication<Server>;
+describe('AnalysisController', () => {
+  let controller: AnalysisController;
 
   const mockGetTopicMastery = { execute: jest.fn() };
 
@@ -18,31 +15,23 @@ describe('AnalysisController (e2e)', () => {
       ],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
-    await app.init();
+    controller = moduleFixture.get(AnalysisController);
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     jest.clearAllMocks();
-    await app.close();
   });
 
-  describe('GET /analysis/mastery', () => {
-    it('should return 200 with mastery data', async () => {
-      const mockResult = {
-        coverage: { totalConcepts: 0, reviewedConcepts: 0, percent: 0 },
-        levels: { mastered: 0, consolidating: 0, learning: 0, unseen: 0 },
-        weakAreas: [],
-        learningStatusDistribution: {},
-      };
-      mockGetTopicMastery.execute.mockResolvedValue(mockResult);
+  it('returns mastery data', async () => {
+    const expected = {
+      coverage: { totalConcepts: 0, reviewedConcepts: 0, percent: 0 },
+      levels: { mastered: 0, consolidating: 0, learning: 0, unseen: 0 },
+      weakAreas: [],
+      learningStatusDistribution: {},
+    };
 
-      const response = await request(app.getHttpServer()).get(
-        '/analysis/mastery',
-      );
+    mockGetTopicMastery.execute.mockResolvedValue(expected);
 
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockResult);
-    });
+    await expect(controller.getMastery()).resolves.toEqual(expected);
   });
 });

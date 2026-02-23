@@ -213,11 +213,6 @@ export type DocumentSearchResult = {
   score: number;
   tags: string[];
   hasNote: boolean;
-  matchingChunks: {
-    chunkId: string;
-    content: string;
-    score: number;
-  }[];
 };
 
 export type SearchResponse = {
@@ -227,6 +222,7 @@ export type SearchResponse = {
 export type AskQuestionResponse = {
   answer: string;
   citations: ChunkReference[];
+  weakContext: boolean;
 };
 
 export type StreamingAskResponseChunk =

@@ -83,6 +83,6 @@ import { QueryModule } from '../../query/presentation/query.module.js';
       inject: [IngestTextUseCase],
     },
   ],
-  exports: [PrismaDocumentRepository],
+  exports: [PrismaDocumentRepository, IngestTextUseCase],
 })
 export class IngestionModule {}

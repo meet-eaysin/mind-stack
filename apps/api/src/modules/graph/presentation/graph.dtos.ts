@@ -1,4 +1,12 @@
-import { IsString, IsOptional, IsInt, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsInt,
+  Min,
+  Max,
+  IsEnum,
+} from 'class-validator';
+import { RELATION_TYPE, type RelationType } from '@repo/shared-types';
 
 export class ConceptNeighborhoodDto {
   @IsString()
@@ -26,6 +34,6 @@ export class CreateRelationDto {
   @IsString()
   toId!: string;
 
-  @IsString()
-  type!: string;
+  @IsEnum(RELATION_TYPE)
+  type!: RelationType;
 }

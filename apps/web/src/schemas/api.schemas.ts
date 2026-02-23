@@ -94,11 +94,4 @@ export const DocumentSearchResultSchema = z.object({
   score: z.number(),
   tags: z.array(z.string()),
   hasNote: z.boolean(),
-  matchingChunks: z.array(
-    z.object({
-      chunkId: z.string(),
-      content: z.string(),
-      score: z.number(),
-    }),
-  ),
 });

@@ -20,6 +20,7 @@ describe("Documents Feature API", () => {
 
   it("should update note", async () => {
     const result = await documentsApi.updateNote("n1", "new content");
-    expect(result.success).toBe(true);
+    expect(result.id).toBe("note-1");
+    expect(result.content).toBe("new content");
   });
 });

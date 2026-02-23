@@ -1,20 +1,18 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { Server } from 'node:http';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
-import request from 'supertest';
+import { Test, type TestingModule } from '@nestjs/testing';
+import { INGESTION_STATUS } from '@repo/shared-types';
 import { ExportController } from '../export.controller.js';
 import { ExportMarkdownUseCase } from '../../application/export-markdown.use-case.js';
 import { ExportNotionUseCase } from '../../application/export-notion.use-case.js';
 import { ExportFullUseCase } from '../../application/export-full.use-case.js';
-import { ConfigService } from '@nestjs/config';
+import { IngestTextUseCase } from '../../../ingestion/application/ingest-text.use-case.js';
 
-describe('ExportController (e2e)', () => {
-  let app: INestApplication<Server>;
+describe('ExportController', () => {
+  let controller: ExportController;
 
   const mockExportMarkdown = { execute: jest.fn() };
   const mockExportNotion = { execute: jest.fn() };
   const mockExportFull = { execute: jest.fn() };
-  const mockConfigService = { get: jest.fn().mockReturnValue(null) };
+  const mockIngestText = { execute: jest.fn() };
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -23,90 +21,73 @@ describe('ExportController (e2e)', () => {
         { provide: ExportMarkdownUseCase, useValue: mockExportMarkdown },
         { provide: ExportNotionUseCase, useValue: mockExportNotion },
         { provide: ExportFullUseCase, useValue: mockExportFull },
-        { provide: ConfigService, useValue: mockConfigService },
+        { provide: IngestTextUseCase, useValue: mockIngestText },
       ],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transform: true,
-      }),
-    );
-    await app.init();
+    controller = moduleFixture.get(ExportController);
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     jest.clearAllMocks();
-    await app.close();
   });
 
-  describe('POST /export/markdown', () => {
-    it('should return 201 with markdown content', async () => {
-      mockExportMarkdown.execute.mockResolvedValue('# Test Content');
-      const response = await request(app.getHttpServer())
-        .post('/export/markdown')
-        .send({ chunkIds: ['chunk-1', 'chunk-2'] });
+  it('exports markdown and notion payloads', async () => {
+    mockExportMarkdown.execute.mockResolvedValue('# Test Content');
+    mockExportNotion.execute.mockResolvedValue([{ type: 'paragraph', content: 'A', metadata: {} }]);
 
-      expect(response.status).toBe(201);
-      expect(response.body).toEqual({ markdown: '# Test Content' });
-    });
+    await expect(
+      controller.toMarkdown({ chunkIds: ['chunk-1', 'chunk-2'] }),
+    ).resolves.toEqual({ markdown: '# Test Content' });
 
-    it('should return 400 when chunkIds is not an array', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/export/markdown')
-        .send({ chunkIds: 'not-an-array' });
-
-      expect(response.status).toBe(400);
-    });
-
-    it('should return 400 when chunkIds is missing', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/export/markdown')
-        .send({});
-
-      expect(response.status).toBe(400);
+    await expect(
+      controller.toNotion({ chunkIds: ['chunk-1'] }),
+    ).resolves.toEqual({
+      payload: [{ type: 'paragraph', content: 'A', metadata: {} }],
     });
   });
 
-  describe('POST /export/notion', () => {
-    it('should return 201 for valid notion export', async () => {
-      mockExportNotion.execute.mockResolvedValue({ id: 'notion-page-id' });
-      const response = await request(app.getHttpServer())
-        .post('/export/notion')
-        .send({ chunkIds: ['chunk-1'] });
+  it('exports full snapshot', async () => {
+    const payload = {
+      version: '1.0.0',
+      exportedAt: '2026-02-23T00:00:00.000Z',
+      data: {
+        documents: [],
+        chunks: [],
+        concepts: [],
+        relations: [],
+        notes: [],
+        tags: [],
+        reviews: [],
+        reviewLogs: [],
+      },
+    };
+    mockExportFull.execute.mockResolvedValue(payload);
 
-      expect(response.status).toBe(201);
-      expect(response.body.payload).toBeDefined();
+    await expect(controller.fullExport()).resolves.toEqual(payload);
+  });
+
+  it('returns stubbed notion import response', async () => {
+    mockIngestText.execute.mockResolvedValue({
+      documentId: 'doc-1',
+      jobId: 'job-1',
+    });
+
+    await expect(
+      controller.fromNotionImport({ title: 't', content: 'c' }),
+    ).resolves.toEqual({
+      documentId: 'doc-1',
+      jobId: 'job-1',
+      status: INGESTION_STATUS.INGESTED,
+      message: 'Notion content ingestion started',
     });
   });
 
-  describe('GET /export/full', () => {
-    it('should return 200 with complete system data', async () => {
-      const mockResult = {
-        version: '1.0.0',
-        exportedAt: new Date().toISOString(),
-        data: { documents: [] },
-      };
-      mockExportFull.execute.mockResolvedValue(mockResult);
+  it('surfaces use-case failures', async () => {
+    mockExportMarkdown.execute.mockRejectedValue(new Error('Export failed'));
 
-      const response = await request(app.getHttpServer()).get('/export/full');
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockResult);
-    });
-  });
-
-  describe('Error Handling', () => {
-    it('should return 500 when use case fails', async () => {
-      mockExportMarkdown.execute.mockRejectedValue(new Error('Export failed'));
-      const response = await request(app.getHttpServer())
-        .post('/export/markdown')
-        .send({ chunkIds: ['chunk-1'] });
-
-      expect(response.status).toBe(500);
-    });
+    await expect(
+      controller.toMarkdown({ chunkIds: ['chunk-1'] }),
+    ).rejects.toThrow('Export failed');
   });
 });

@@ -36,25 +36,25 @@ export const documentsApi = {
       language?: string;
     },
   ) =>
-    apiClient.patch(
-      ENDPOINTS.KNOWLEDGE.DETAIL(id),
+    apiClient.post(
+      ENDPOINTS.KNOWLEDGE.UPDATE(id),
       updates,
       SuccessResponseSchema,
     ),
 
   delete: (id: string) =>
-    apiClient.delete(ENDPOINTS.KNOWLEDGE.DETAIL(id), {}, SuccessResponseSchema),
+    apiClient.delete(ENDPOINTS.KNOWLEDGE.DELETE(id), {}, SuccessResponseSchema),
 
   addTag: (documentId: string, tagName: string) =>
     apiClient.post(
-      ENDPOINTS.KNOWLEDGE.TAGS,
+      ENDPOINTS.KNOWLEDGE.TAGS_ADD,
       { documentId, tagName },
       SuccessResponseSchema,
     ),
 
   removeTag: (documentId: string, tagName: string) =>
-    apiClient.delete(
-      ENDPOINTS.KNOWLEDGE.TAGS,
+    apiClient.post(
+      ENDPOINTS.KNOWLEDGE.TAGS_REMOVE,
       { documentId, tagName },
       SuccessResponseSchema,
     ),
@@ -67,9 +67,9 @@ export const documentsApi = {
     metadata?: Record<string, unknown>,
   ) =>
     apiClient.post(
-      ENDPOINTS.KNOWLEDGE.NOTES,
+      ENDPOINTS.KNOWLEDGE.NOTES_ADD,
       { documentId, content, chunkId, selectedText, metadata },
-      schemas.NoteCreatedResponseSchema,
+      schemas.NoteResponseSchema,
     ),
 
   updateImportance: (documentId: string, score: number) =>
@@ -80,9 +80,9 @@ export const documentsApi = {
     ),
 
   updateNote: (noteId: string, content: string) =>
-    apiClient.put(
-      ENDPOINTS.KNOWLEDGE.NOTE(noteId),
+    apiClient.post(
+      ENDPOINTS.KNOWLEDGE.NOTES_UPDATE(noteId),
       { content },
-      SuccessResponseSchema,
+      schemas.NoteResponseSchema,
     ),
 };

@@ -1,14 +1,18 @@
 import type { LLMProvider } from '@repo/llm';
 import {
   type AskQuestionResponse,
+  type ChunkReference,
   type StreamingAskResponseChunk,
 } from '@repo/shared-types';
-import { SemanticSearchUseCase } from './semantic-search.use-case.js';
+
+type SemanticSearchPort = {
+  execute(input: { query: string; topK?: number }): Promise<ChunkReference[]>;
+};
 
 export class AskQuestionUseCase {
   constructor(
     private readonly llmProvider: LLMProvider,
-    private readonly semanticSearch: SemanticSearchUseCase,
+    private readonly semanticSearch: SemanticSearchPort,
   ) {}
 
   async execute(input: {
@@ -20,11 +24,14 @@ export class AskQuestionUseCase {
       query: input.question,
       topK: input.topK ?? 5,
     });
+    const uniqueDocumentCitations = this.dedupeByDocument(citations);
+    const weakContext = uniqueDocumentCitations.length < 2;
 
     if (citations.length === 0) {
       return {
         answer: "I don't have enough information to answer this question.",
         citations: [],
+        weakContext: true,
       };
     }
 
@@ -59,7 +66,8 @@ export class AskQuestionUseCase {
 
     return {
       answer: response.text,
-      citations,
+      citations: uniqueDocumentCitations,
+      weakContext,
     };
   }
 
@@ -82,7 +90,7 @@ export class AskQuestionUseCase {
       return;
     }
 
-    yield { type: 'citations', data: citations };
+    yield { type: 'citations', data: this.dedupeByDocument(citations) };
 
     const contextBlock = citations
       .map((c, i) => `[${i + 1}] (Source: ${c.documentTitle})\n${c.content}`)
@@ -117,5 +125,18 @@ export class AskQuestionUseCase {
     }
 
     yield { type: 'done' };
+  }
+
+  private dedupeByDocument(citations: ChunkReference[]): ChunkReference[] {
+    const byDocument = new Map<string, ChunkReference>();
+
+    for (const citation of citations) {
+      const existing = byDocument.get(citation.documentId);
+      if (!existing || citation.score > existing.score) {
+        byDocument.set(citation.documentId, citation);
+      }
+    }
+
+    return Array.from(byDocument.values());
   }
 }

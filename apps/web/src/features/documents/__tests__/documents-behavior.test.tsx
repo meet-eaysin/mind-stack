@@ -77,7 +77,7 @@ describe("Documents Behavior", () => {
 
   it("should handles API error in document list", async () => {
     server.use(
-      http.get("*/api/knowledge/documents", () => {
+      http.get("*/knowledge/documents", () => {
         return new HttpResponse(null, { status: 500 });
       }),
     );

@@ -1,21 +1,23 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { Server } from 'node:http';
-import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { AdminController } from '../admin.controller.js';
 import { GetQueueMetricsUseCase } from '../../application/get-queue-metrics.use-case.js';
 import { CleanupConceptsUseCase } from '../../application/cleanup-concepts.use-case.js';
 import { PrismaService } from '../../../../prisma/prisma.service.js';
+import { VECTOR_STORE } from '../../../../common/tokens.js';
 
-describe('AdminController (e2e)', () => {
-  let app: INestApplication<Server>;
+describe('AdminController', () => {
+  let controller: AdminController;
 
   const mockGetQueueMetrics = { execute: jest.fn() };
   const mockCleanupConcepts = { execute: jest.fn() };
   const mockPrisma = {
-    $queryRaw: jest.fn(),
-    document: { findMany: jest.fn() },
+    chunk: { findMany: jest.fn() },
     concept: { findMany: jest.fn() },
+    document: { findMany: jest.fn() },
+  };
+  const mockVectorStore = {
+    getByIds: jest.fn(),
+    getAllIds: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -25,62 +27,69 @@ describe('AdminController (e2e)', () => {
         { provide: GetQueueMetricsUseCase, useValue: mockGetQueueMetrics },
         { provide: CleanupConceptsUseCase, useValue: mockCleanupConcepts },
         { provide: PrismaService, useValue: mockPrisma },
+        { provide: VECTOR_STORE, useValue: mockVectorStore },
       ],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
-    await app.init();
+    controller = moduleFixture.get(AdminController);
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     jest.clearAllMocks();
-    await app.close();
   });
 
-  describe('GET /admin/jobs', () => {
-    it('should return 200 with queue metrics', async () => {
-      mockGetQueueMetrics.execute.mockResolvedValue({
-        waiting: 0,
-        active: 0,
-        completed: 0,
-        failed: 0,
-      });
-      const response = await request(app.getHttpServer()).get('/admin/jobs');
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('waiting');
+  it('returns jobs and cleanup metrics', async () => {
+    mockGetQueueMetrics.execute.mockResolvedValue({
+      waiting: 0,
+      active: 0,
+      completed: 0,
+      failed: 0,
+    });
+    mockCleanupConcepts.execute.mockResolvedValue({ deletedCount: 2 });
+
+    await expect(controller.getJobs()).resolves.toEqual({
+      waiting: 0,
+      active: 0,
+      completed: 0,
+      failed: 0,
+    });
+    await expect(controller.runCleanup()).resolves.toEqual({ deletedCount: 2 });
+  });
+
+  it('returns missing embeddings report', async () => {
+    mockPrisma.chunk.findMany.mockResolvedValue([
+      { id: 'c1', documentId: 'd1' },
+      { id: 'c2', documentId: 'd2' },
+    ]);
+    mockVectorStore.getByIds.mockResolvedValue(['c1']);
+
+    await expect(controller.getMissingEmbeddings()).resolves.toEqual({
+      chunksWithoutEmbeddings: [{ id: 'c2', documentId: 'd2' }],
     });
   });
 
-  describe('POST /admin/cleanup', () => {
-    it('should return 201 with cleanup results', async () => {
-      mockCleanupConcepts.execute.mockResolvedValue({ deletedCount: 5 });
-      const response = await request(app.getHttpServer()).post(
-        '/admin/cleanup',
-      );
-      expect(response.status).toBe(201);
-      expect(response.body.deletedCount).toBe(5);
-    });
-  });
+  it('returns orphan and failed-document reports', async () => {
+    mockVectorStore.getAllIds.mockResolvedValue(['c1', 'c3']);
+    mockPrisma.chunk.findMany.mockResolvedValue([{ id: 'c1' }]);
+    mockPrisma.concept.findMany.mockResolvedValue([{ id: 'k1', label: 'k' }]);
+    mockPrisma.document.findMany.mockResolvedValue([
+      { id: 'd1', title: 'Failed', createdAt: new Date('2026-02-23T00:00:00Z') },
+    ]);
 
-  describe('GET /admin/health/missing-embeddings', () => {
-    it('should return missing embeddings', async () => {
-      mockPrisma.$queryRaw.mockResolvedValue([]);
-      const response = await request(app.getHttpServer()).get(
-        '/admin/health/missing-embeddings',
-      );
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('chunksWithoutEmbeddings');
+    await expect(controller.getOrphans()).resolves.toEqual({
+      orphanChunks: [],
+      orphanConcepts: [{ id: 'k1', label: 'k' }],
+      orphanEmbeddings: [{ id: 'c3' }],
     });
-  });
 
-  describe('GET /admin/health/failed-documents', () => {
-    it('should return failed documents', async () => {
-      mockPrisma.document.findMany.mockResolvedValue([]);
-      const response = await request(app.getHttpServer()).get(
-        '/admin/health/failed-documents',
-      );
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('failedDocuments');
+    await expect(controller.getFailedDocuments()).resolves.toEqual({
+      failedDocuments: [
+        {
+          id: 'd1',
+          title: 'Failed',
+          createdAt: '2026-02-23T00:00:00.000Z',
+        },
+      ],
     });
   });
 });
