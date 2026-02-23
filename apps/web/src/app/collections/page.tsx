@@ -28,7 +28,7 @@ export default function CollectionsPage() {
           <CollectionDetail
             id={selectedCollectionId}
             onBackAction={() => setSelectedCollectionId(null)}
-            onDocumentSelect={(docId) => {
+            onDocumentSelectAction={(docId) => {
               // Navigation to document detail will happen here or via separate router push
               window.location.href = `/documents?id=${docId}`;
             }}

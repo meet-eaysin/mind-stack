@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import type { DocumentRepository } from '../../ingestion/domain/document-repository.interface.js';
 import type { ChunkRepository } from '../domain/chunk-repository.interface.js';
 import type { TagRepository } from '../domain/tag-repository.interface.js';
@@ -26,7 +27,7 @@ export class ViewDocumentUseCase {
   async execute(documentId: string): Promise<ViewDocumentResult> {
     const doc = await this.documentRepository.findById(documentId);
     if (!doc) {
-      throw new Error(`Document not found: ${documentId}`);
+      throw new NotFoundException(`Document not found: ${documentId}`);
     }
 
     const chunks = await this.chunkRepository.findByDocumentId(documentId);

@@ -40,6 +40,11 @@ export class PrismaCollectionRepository implements CollectionRepository {
       where: { id },
       include: {
         items: {
+          where: {
+            document: {
+              deletedAt: null,
+            },
+          },
           include: {
             document: {
               select: {
@@ -90,6 +95,11 @@ export class PrismaCollectionRepository implements CollectionRepository {
     const collections = await this.prisma.collection.findMany({
       include: {
         items: {
+          where: {
+            document: {
+              deletedAt: null,
+            },
+          },
           include: {
             document: {
               select: {

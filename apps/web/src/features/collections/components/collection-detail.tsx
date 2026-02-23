@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   ArrowLeft,
   GripVertical,
@@ -24,10 +25,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { useCollection, useRemoveDocumentFromCollection } from "../hooks";
+import {
+  useCollection,
+  useRemoveDocumentFromCollection,
+  useAddDocumentToCollection,
+  useUpdateCollection,
+} from "../hooks";
 import { getApiErrorMessage } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useDocuments } from "@/features/documents/hooks";
 
 const itemTypeIcons: Record<string, React.ElementType> = {
   ARTICLE: FileText,
@@ -49,14 +67,23 @@ const learningStatusColors: Record<string, string> = {
 export function CollectionDetail({
   id,
   onBackAction,
-  onDocumentSelect,
+  onDocumentSelectAction,
 }: {
   id: string;
   onBackAction: () => void;
-  onDocumentSelect: (id: string) => void;
+  onDocumentSelectAction: (id: string) => void;
 }) {
   const { data, isLoading, error } = useCollection(id);
   const removeItem = useRemoveDocumentFromCollection();
+  const addItem = useAddDocumentToCollection();
+  const updateCollection = useUpdateCollection();
+  const documentsQuery = useDocuments(1, 200);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
+  const [selectedDocumentId, setSelectedDocumentId] = useState("");
+  const [settingsName, setSettingsName] = useState("");
+  const [settingsDescription, setSettingsDescription] = useState("");
+  const [settingsGoal, setSettingsGoal] = useState("");
 
   if (isLoading) {
     return (
@@ -92,6 +119,11 @@ export function CollectionDetail({
 
   if (!data) return null;
 
+  const existingDocumentIds = new Set(data.items.map((item) => item.documentId));
+  const availableDocuments = (documentsQuery.data?.documents ?? []).filter(
+    (document) => !existingDocumentIds.has(document.id),
+  );
+
   return (
     <div className="max-w-4xl mx-auto pb-20">
       <header className="mb-8">
@@ -110,10 +142,19 @@ export function CollectionDetail({
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="icon">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                setSettingsName(data.name);
+                setSettingsDescription(data.description ?? "");
+                setSettingsGoal(data.goal ?? "");
+                setIsSettingsDialogOpen(true);
+              }}
+            >
               <Settings className="size-4" />
             </Button>
-            <Button className="gap-2">
+            <Button className="gap-2" onClick={() => setIsAddDialogOpen(true)}>
               <Plus className="size-4" /> Add Document
             </Button>
           </div>
@@ -159,7 +200,9 @@ export function CollectionDetail({
                       <div className="flex items-center gap-2">
                         <h4
                           className="font-medium truncate cursor-pointer hover:text-primary transition-colors"
-                          onClick={() => onDocumentSelect(item.documentId)}
+                          onClick={() =>
+                            onDocumentSelectAction(item.documentId)
+                          }
                         >
                           {item.documentTitle}
                         </h4>
@@ -168,7 +211,7 @@ export function CollectionDetail({
                           className={cn(
                             "h-4 text-[9px] uppercase font-bold tracking-tight px-1.5 py-0 rounded",
                             learningStatusColors[item.learningStatus] ||
-                              learningStatusColors.UPCOMING,
+                            learningStatusColors.UPCOMING,
                           )}
                         >
                           {item.learningStatus.replace("_", " ")}
@@ -194,7 +237,7 @@ export function CollectionDetail({
                         variant="ghost"
                         size="sm"
                         className="h-8 gap-1.5 bg-primary/5 text-primary hover:bg-primary hover:text-primary-foreground"
-                        onClick={() => onDocumentSelect(item.documentId)}
+                        onClick={() => onDocumentSelectAction(item.documentId)}
                       >
                         <Play className="size-3.5 fill-current" /> Start
                       </Button>
@@ -241,11 +284,145 @@ export function CollectionDetail({
             <div className="flex flex-col items-center justify-center py-20 rounded-xl border border-dashed text-muted-foreground">
               <Play className="size-12 mb-4 opacity-10" />
               <p>This collection is empty.</p>
-              <Button variant="link">Add your first document</Button>
+              <Button variant="link" onClick={() => setIsAddDialogOpen(true)}>
+                Add your first document
+              </Button>
             </div>
           )}
         </div>
       </div>
+
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Document</DialogTitle>
+            <DialogDescription>
+              Select a document to add to this collection.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="collectionDocument">Document</Label>
+            <select
+              id="collectionDocument"
+              value={selectedDocumentId}
+              onChange={(event) => setSelectedDocumentId(event.target.value)}
+              className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+            >
+              <option value="">Select a document</option>
+              {availableDocuments.map((document) => (
+                <option key={document.id} value={document.id}>
+                  {document.title}
+                </option>
+              ))}
+            </select>
+            {availableDocuments.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                No available documents to add.
+              </p>
+            )}
+            {addItem.error && (
+              <p className="text-xs text-destructive">
+                {getApiErrorMessage(addItem.error)}
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setIsAddDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              disabled={!selectedDocumentId || addItem.isPending}
+              onClick={() => {
+                addItem.mutate(
+                  {
+                    collectionId: id,
+                    documentId: selectedDocumentId,
+                  },
+                  {
+                    onSuccess: () => {
+                      setSelectedDocumentId("");
+                      setIsAddDialogOpen(false);
+                    },
+                  },
+                );
+              }}
+            >
+              {addItem.isPending ? "Adding..." : "Add"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={isSettingsDialogOpen}
+        onOpenChange={setIsSettingsDialogOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Collection Settings</DialogTitle>
+            <DialogDescription>
+              Update name, description, and learning goal.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-3">
+            <div className="grid gap-2">
+              <Label htmlFor="collectionName">Name</Label>
+              <Input
+                id="collectionName"
+                value={settingsName}
+                onChange={(event) => setSettingsName(event.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="collectionDescription">Description</Label>
+              <Textarea
+                id="collectionDescription"
+                value={settingsDescription}
+                onChange={(event) => setSettingsDescription(event.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="collectionGoal">Goal</Label>
+              <Textarea
+                id="collectionGoal"
+                value={settingsGoal}
+                onChange={(event) => setSettingsGoal(event.target.value)}
+              />
+            </div>
+            {updateCollection.error && (
+              <p className="text-xs text-destructive">
+                {getApiErrorMessage(updateCollection.error)}
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => setIsSettingsDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              disabled={!settingsName.trim() || updateCollection.isPending}
+              onClick={() => {
+                updateCollection.mutate(
+                  {
+                    id,
+                    name: settingsName.trim(),
+                    description: settingsDescription.trim(),
+                    goal: settingsGoal.trim(),
+                  },
+                  {
+                    onSuccess: () => setIsSettingsDialogOpen(false),
+                  },
+                );
+              }}
+            >
+              {updateCollection.isPending ? "Saving..." : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
