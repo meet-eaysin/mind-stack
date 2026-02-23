@@ -29,7 +29,7 @@ export default function DocumentsPage() {
         {selectedDocId ? (
           <DocumentDetail
             id={selectedDocId}
-            onBack={() => setSelectedDocId(null)}
+            onBackAction={() => setSelectedDocId(null)}
           />
         ) : (
           <DocumentList onSelect={setSelectedDocId} />

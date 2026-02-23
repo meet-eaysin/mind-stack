@@ -12,10 +12,10 @@ import { ArrowLeft, GraduationCap, Lock } from "lucide-react";
 
 function CourseDetail({
   courseId,
-  onBack,
+  onBackAction,
 }: {
   courseId: string;
-  onBack: () => void;
+  onBackAction: () => void;
 }) {
   const { data, isLoading, error } = useCollection(courseId);
 
@@ -32,7 +32,7 @@ function CourseDetail({
   if (error) {
     return (
       <div className="space-y-4" data-testid="courses-error">
-        <Button variant="ghost" onClick={onBack} className="gap-2">
+        <Button variant="ghost" onClick={onBackAction} className="gap-2">
           <ArrowLeft className="size-4" />
           Back to courses
         </Button>
@@ -52,7 +52,7 @@ function CourseDetail({
 
   return (
     <div className="space-y-6" data-testid="course-detail">
-      <Button variant="ghost" onClick={onBack} className="gap-2">
+      <Button variant="ghost" onClick={onBackAction} className="gap-2">
         <ArrowLeft className="size-4" />
         Back to courses
       </Button>
@@ -119,7 +119,7 @@ export default function CoursesPage() {
         {selectedCourseId ? (
           <CourseDetail
             courseId={selectedCourseId}
-            onBack={() => setSelectedCourseId(null)}
+            onBackAction={() => setSelectedCourseId(null)}
           />
         ) : (
           <>

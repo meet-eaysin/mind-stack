@@ -26,8 +26,8 @@ describe("Documents Behavior", () => {
   });
 
   it("should render document detail and manage chunks", async () => {
-    const onBack = vi.fn();
-    render(<DocumentDetail id="doc-1" onBack={onBack} />);
+    const onBackAction = vi.fn();
+    render(<DocumentDetail id="doc-1" onBackAction={onBackAction} />);
 
     await waitFor(() => {
       expect(screen.getByTestId("document-detail")).toBeInTheDocument();
@@ -95,7 +95,7 @@ describe("Documents Behavior", () => {
 
     const backBtn = screen.getByTestId("back-button");
     fireEvent.click(backBtn);
-    expect(onBack).toHaveBeenCalled();
+    expect(onBackAction).toHaveBeenCalled();
   });
 
   it("should show empty and error states for related resources", async () => {
@@ -105,7 +105,7 @@ describe("Documents Behavior", () => {
       }),
     );
 
-    render(<DocumentDetail id="doc-1" onBack={() => {}} />);
+    render(<DocumentDetail id="doc-1" onBackAction={() => {}} />);
 
     await waitFor(() => {
       expect(screen.getByTestId("related-resources-empty")).toBeInTheDocument();

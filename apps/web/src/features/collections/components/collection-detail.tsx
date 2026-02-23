@@ -48,11 +48,11 @@ const learningStatusColors: Record<string, string> = {
 
 export function CollectionDetail({
   id,
-  onBack,
+  onBackAction,
   onDocumentSelect,
 }: {
   id: string;
-  onBack: () => void;
+  onBackAction: () => void;
   onDocumentSelect: (id: string) => void;
 }) {
   const { data, isLoading, error } = useCollection(id);
@@ -80,7 +80,7 @@ export function CollectionDetail({
   if (error) {
     return (
       <div className="max-w-4xl mx-auto">
-        <Button variant="ghost" onClick={onBack} className="mb-6 gap-2">
+        <Button variant="ghost" onClick={onBackAction} className="mb-6 gap-2">
           <ArrowLeft className="size-4" /> Back to Collections
         </Button>
         <div className="rounded-xl border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
@@ -97,7 +97,7 @@ export function CollectionDetail({
       <header className="mb-8">
         <Button
           variant="ghost"
-          onClick={onBack}
+          onClick={onBackAction}
           className="mb-6 -ml-3 gap-2 text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="size-4" /> Back to Collections
