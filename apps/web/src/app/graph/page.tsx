@@ -29,12 +29,16 @@ export default function GraphPage() {
     const filteredNodes = data.nodes.filter((n) =>
       n.label.toLowerCase().includes(term),
     );
-    const nodeIds = new Set(filteredNodes.map((n) => n.id));
+    const rootNode = data.nodes.find((node) => node.id === "root");
+    const hasRoot = filteredNodes.some((node) => node.id === "root");
+    const rootIncluded =
+      rootNode && !hasRoot ? [...filteredNodes, rootNode] : filteredNodes;
+    const nodeIds = new Set(rootIncluded.map((n) => n.id));
     const filteredEdges = data.edges.filter(
-      (e) => nodeIds.has(e.fromId) || nodeIds.has(e.toId),
+      (e) => nodeIds.has(e.fromId) && nodeIds.has(e.toId),
     );
 
-    return { nodes: filteredNodes, edges: filteredEdges };
+    return { nodes: rootIncluded, edges: filteredEdges };
   }, [data, searchQuery]);
 
   return (

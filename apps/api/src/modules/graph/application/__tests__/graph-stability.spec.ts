@@ -142,6 +142,11 @@ class FakeConceptRepository implements ConceptRepository {
     this.concepts.set(concept.id, concept);
     return concept;
   }
+  findRelationById(relationId: string): Promise<ConceptRelationEntity | null> {
+    return Promise.resolve(
+      this.relations.find((relation) => relation.id === relationId) ?? null,
+    );
+  }
   detectCycle(): Promise<boolean> {
     return Promise.resolve(false);
   }

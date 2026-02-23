@@ -19,6 +19,7 @@ export class CreateRelationUseCase {
     fromId: string;
     toId: string;
     type: RelationType;
+    userId: string;
   }): Promise<void> {
     if (input.fromId === input.toId) {
       throw new BadRequestException('Cannot create self relation');
@@ -34,7 +35,7 @@ export class CreateRelationUseCase {
 
     const root = await this.conceptRepository.getRootConcept();
     const fromDocument = await this.documentRepository.findById(input.fromId);
-    if (!fromDocument) {
+    if (!fromDocument || fromDocument.userId !== input.userId) {
       throw new BadRequestException('Source document not found');
     }
 
@@ -45,7 +46,7 @@ export class CreateRelationUseCase {
     let toConcept = root;
     if (input.toId !== ROOT_NODE_ID) {
       const targetDocument = await this.documentRepository.findById(input.toId);
-      if (!targetDocument) {
+      if (!targetDocument || targetDocument.userId !== input.userId) {
         throw new BadRequestException('Target document not found');
       }
       toConcept = await this.conceptRepository.findOrCreate(
@@ -64,14 +65,13 @@ export class CreateRelationUseCase {
       );
 
       if (existingParent && existingParent.toConceptId !== toConcept.id) {
-        throw new BadRequestException(
-          'Document already has a hierarchy parent',
-        );
+        await this.conceptRepository.deleteRelation(existingParent.id);
       }
 
       const hasCycle = await this.conceptRepository.detectCycle(
         fromConcept.id,
         toConcept.id,
+        HIERARCHY_RELATION_TYPES,
         10,
       );
 

@@ -42,9 +42,11 @@ export type ConceptRepository = {
     }>
   >;
   getRootConcept(): Promise<ConceptEntity>;
+  findRelationById(relationId: string): Promise<ConceptRelationEntity | null>;
   detectCycle(
     fromId: string,
     toId: string,
+    relationTypes?: RelationType[],
     maxDepth?: number,
   ): Promise<boolean>;
   deleteRelation(relationId: string): Promise<void>;

@@ -192,6 +192,11 @@ class FakeConceptRepository implements ConceptRepository {
     this.concepts.push(concept);
     return concept;
   }
+  findRelationById(relationId: string): Promise<ConceptRelationEntity | null> {
+    return Promise.resolve(
+      this.relations.find((relation) => relation.id === relationId) ?? null,
+    );
+  }
   detectCycle(): Promise<boolean> {
     return Promise.resolve(false);
   }
@@ -236,7 +241,10 @@ describe('GetNeighborhoodUseCase', () => {
     const root = await conceptRepo.getRootConcept();
     await conceptRepo.createRelation(docConcept.id, root.id, 'IS_PART_OF');
 
-    const result = await useCase.execute({ conceptId: 'doc-1' });
+    const result = await useCase.execute({
+      conceptId: 'doc-1',
+      userId: 'default',
+    });
 
     expect(result.nodes).toHaveLength(1);
     expect(result.nodes[0]?.id).toBe('doc-1');
@@ -254,7 +262,10 @@ describe('GetNeighborhoodUseCase', () => {
     );
 
     const root = await conceptRepo.getRootConcept();
-    const result = await useCase.execute({ conceptId: ROOT_NODE_ID });
+    const result = await useCase.execute({
+      conceptId: ROOT_NODE_ID,
+      userId: 'default',
+    });
 
     expect(result.nodes).toHaveLength(1);
     expect(result.nodes[0]?.label).toBe(root.label);

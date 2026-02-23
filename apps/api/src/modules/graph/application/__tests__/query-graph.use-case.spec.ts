@@ -183,6 +183,11 @@ class FakeConceptRepository implements ConceptRepository {
     this.concepts.push(concept);
     return concept;
   }
+  findRelationById(relationId: string): Promise<ConceptRelationEntity | null> {
+    return Promise.resolve(
+      this.relations.find((relation) => relation.id === relationId) ?? null,
+    );
+  }
   detectCycle(): Promise<boolean> {
     return Promise.resolve(false);
   }
@@ -239,7 +244,7 @@ describe('QueryGraphUseCase', () => {
     await conceptRepository.createRelation(doc1.id, root.id, 'IS_PART_OF');
     await conceptRepository.createRelation(doc1.id, doc2.id, 'RELATES_TO');
 
-    const result = await useCase.execute();
+    const result = await useCase.execute({ userId: 'default' });
 
     expect(result.nodes).toHaveLength(3);
     expect(result.nodes.find((n) => n.id === 'doc-1')?.chunkCount).toBe(3);

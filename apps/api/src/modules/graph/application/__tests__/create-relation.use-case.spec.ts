@@ -145,6 +145,11 @@ class FakeConceptRepository implements ConceptRepository {
     this.concepts.push(concept);
     return concept;
   }
+  findRelationById(relationId: string): Promise<ConceptRelationEntity | null> {
+    return Promise.resolve(
+      this.relations.find((relation) => relation.id === relationId) ?? null,
+    );
+  }
   detectCycle(): Promise<boolean> {
     return Promise.resolve(this.cycleResult);
   }
@@ -159,6 +164,10 @@ class FakeConceptRepository implements ConceptRepository {
     );
     return Promise.resolve();
   }
+
+  getRelations(): ConceptRelationEntity[] {
+    return this.relations;
+  }
 }
 
 describe('CreateRelationUseCase', () => {
@@ -172,6 +181,7 @@ describe('CreateRelationUseCase', () => {
         fromId: 'doc-1',
         toId: 'doc-1',
         type: 'IS_PART_OF',
+        userId: 'default',
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
@@ -203,6 +213,7 @@ describe('CreateRelationUseCase', () => {
         fromId: 'doc-1',
         toId: 'doc-2',
         type: 'RELATES_TO',
+        userId: 'default',
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
@@ -238,7 +249,64 @@ describe('CreateRelationUseCase', () => {
         fromId: 'doc-1',
         toId: 'doc-2',
         type: 'IS_PART_OF',
+        userId: 'default',
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('reparents hierarchy relation when parent already exists', async () => {
+    const conceptRepo = new FakeConceptRepository();
+    const documentRepo = new FakeDocumentRepository();
+    documentRepo.seed([
+      createDocument({
+        id: 'doc-1',
+        title: 'Doc 1',
+        sourceType: 'TEXT',
+        sourceUrl: null,
+        rawContent: 'content',
+      }),
+      createDocument({
+        id: 'doc-2',
+        title: 'Doc 2',
+        sourceType: 'TEXT',
+        sourceUrl: null,
+        rawContent: 'content',
+      }),
+    ]);
+
+    const root = await conceptRepo.getRootConcept();
+    const fromConcept = await conceptRepo.findOrCreate(
+      toDocumentNodeLabel('doc-1'),
+    );
+    await conceptRepo.createRelation(fromConcept.id, root.id, 'IS_PART_OF');
+
+    const useCase = new CreateRelationUseCase(conceptRepo, documentRepo);
+    await useCase.execute({
+      fromId: 'doc-1',
+      toId: 'doc-2',
+      type: 'IS_PART_OF',
+      userId: 'default',
+    });
+
+    const relations = conceptRepo.getRelations();
+    expect(
+      relations.some(
+        (relation) =>
+          relation.fromConceptId === fromConcept.id &&
+          relation.toConceptId === root.id &&
+          relation.relationType === 'IS_PART_OF',
+      ),
+    ).toBe(false);
+    const doc2Concept = await conceptRepo.findOrCreate(
+      toDocumentNodeLabel('doc-2'),
+    );
+    expect(
+      relations.some(
+        (relation) =>
+          relation.fromConceptId === fromConcept.id &&
+          relation.toConceptId === doc2Concept.id &&
+          relation.relationType === 'IS_PART_OF',
+      ),
+    ).toBe(true);
   });
 });

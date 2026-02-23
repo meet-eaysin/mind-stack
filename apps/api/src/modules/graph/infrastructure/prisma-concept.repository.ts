@@ -7,6 +7,7 @@ import type {
   ConceptRelationEntity,
 } from '../domain/concept-repository.interface.js';
 import type { RelationType } from '@repo/shared-types';
+import { RELATION_TYPE } from '@repo/shared-types';
 
 @Injectable()
 export class PrismaConceptRepository implements ConceptRepository {
@@ -17,13 +18,23 @@ export class PrismaConceptRepository implements ConceptRepository {
     fromConceptId: string;
     toConceptId: string;
     relationType: string;
-  }): ConceptRelationEntity {
+  }): ConceptRelationEntity | null {
+    const relationType = this.toRelationType(r.relationType);
+    if (!relationType) {
+      return null;
+    }
     return {
       id: r.id,
       fromConceptId: r.fromConceptId,
       toConceptId: r.toConceptId,
-      relationType: r.relationType as RelationType,
+      relationType,
     };
+  }
+
+  private toRelationType(value: string): RelationType | null {
+    const relationTypes = Object.values(RELATION_TYPE);
+    const matched = relationTypes.find((type) => type === value);
+    return matched ?? null;
   }
 
   async findById(id: string): Promise<ConceptEntity | null> {
@@ -68,7 +79,11 @@ export class PrismaConceptRepository implements ConceptRepository {
     });
 
     if (existing) {
-      return this.mapRelation(existing);
+      const mapped = this.mapRelation(existing);
+      if (!mapped) {
+        throw new Error(`Invalid relation type: ${existing.relationType}`);
+      }
+      return mapped;
     }
 
     const created = await this.prisma.conceptRelation.create({
@@ -80,7 +95,11 @@ export class PrismaConceptRepository implements ConceptRepository {
       },
     });
 
-    return this.mapRelation(created);
+    const mapped = this.mapRelation(created);
+    if (!mapped) {
+      throw new Error(`Invalid relation type: ${created.relationType}`);
+    }
+    return mapped;
   }
 
   async findRelationsForConcept(
@@ -91,7 +110,11 @@ export class PrismaConceptRepository implements ConceptRepository {
         OR: [{ fromConceptId: conceptId }, { toConceptId: conceptId }],
       },
     });
-    return rows.map((r) => this.mapRelation(r));
+    return rows
+      .map((r) => this.mapRelation(r))
+      .filter(
+        (relation): relation is ConceptRelationEntity => relation !== null,
+      );
   }
 
   async findAll(): Promise<ConceptEntity[]> {
@@ -101,7 +124,23 @@ export class PrismaConceptRepository implements ConceptRepository {
 
   async findAllRelations(): Promise<ConceptRelationEntity[]> {
     const rows = await this.prisma.conceptRelation.findMany();
-    return rows.map((r) => this.mapRelation(r));
+    return rows
+      .map((r) => this.mapRelation(r))
+      .filter(
+        (relation): relation is ConceptRelationEntity => relation !== null,
+      );
+  }
+
+  async findRelationById(
+    relationId: string,
+  ): Promise<ConceptRelationEntity | null> {
+    const relation = await this.prisma.conceptRelation.findUnique({
+      where: { id: relationId },
+    });
+    if (!relation) {
+      return null;
+    }
+    return this.mapRelation(relation);
   }
 
   async findNeighborhood(
@@ -130,7 +169,9 @@ export class PrismaConceptRepository implements ConceptRepository {
       const nextIds: string[] = [];
       for (const r of relations) {
         const mapped = this.mapRelation(r);
-        allRelations.push(mapped);
+        if (mapped) {
+          allRelations.push(mapped);
+        }
 
         if (!visitedIds.has(r.fromConceptId)) {
           visitedIds.add(r.fromConceptId);
@@ -247,6 +288,7 @@ export class PrismaConceptRepository implements ConceptRepository {
   async detectCycle(
     fromId: string,
     toId: string,
+    relationTypes: RelationType[] = [],
     maxDepth: number = 5,
   ): Promise<boolean> {
     // We are trying to add: fromId -> toId.
@@ -266,6 +308,9 @@ export class PrismaConceptRepository implements ConceptRepository {
       const outgoing = await this.prisma.conceptRelation.findMany({
         where: {
           fromConceptId: { in: currentLevelIds },
+          ...(relationTypes.length > 0
+            ? { relationType: { in: relationTypes } }
+            : {}),
         },
         select: { toConceptId: true },
       });

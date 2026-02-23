@@ -174,6 +174,12 @@ class FakeConceptRepository implements ConceptRepository {
     return concept;
   }
 
+  findRelationById(relationId: string): Promise<ConceptRelationEntity | null> {
+    return Promise.resolve(
+      this.relations.find((relation) => relation.id === relationId) ?? null,
+    );
+  }
+
   detectCycle(): Promise<boolean> {
     return Promise.resolve(false);
   }
@@ -270,5 +276,48 @@ describe('BuildGraphUseCase', () => {
     expect(relations.some((rel) => rel.relationType === 'RELATES_TO')).toBe(
       false,
     );
+  });
+
+  it('reattaches unrelated documents to root during document-scoped rebuild', async () => {
+    documentRepository.seed([
+      createDocument({
+        id: 'doc-1',
+        title: 'Document 1',
+        sourceType: 'TEXT',
+        sourceUrl: null,
+        rawContent: 'content',
+      }),
+      createDocument({
+        id: 'doc-2',
+        title: 'Document 2',
+        sourceType: 'TEXT',
+        sourceUrl: null,
+        rawContent: 'content',
+      }),
+    ]);
+
+    const doc2 = await conceptRepository.findOrCreate(
+      toDocumentNodeLabel('doc-2'),
+    );
+    const root = await conceptRepository.getRootConcept();
+    await conceptRepository.createRelation(doc2.id, root.id, 'IS_PART_OF');
+    const relation = conceptRepository
+      .getRelations()
+      .find((item) => item.fromConceptId === doc2.id);
+    if (relation) {
+      await conceptRepository.deleteRelation(relation.id);
+    }
+
+    await useCase.execute({ documentId: 'doc-1' });
+
+    const relations = conceptRepository.getRelations();
+    expect(
+      relations.some(
+        (item) =>
+          item.fromConceptId === doc2.id &&
+          item.toConceptId === root.id &&
+          item.relationType === 'IS_PART_OF',
+      ),
+    ).toBe(true);
   });
 });

@@ -20,6 +20,7 @@ export class BuildGraphUseCase {
   async execute(input: {
     documentId?: string;
     forceRebuild?: boolean;
+    userId?: string;
   }): Promise<void> {
     const root = await this.conceptRepository.getRootConcept();
     const shouldCleanup = input.forceRebuild ?? true;
@@ -32,9 +33,7 @@ export class BuildGraphUseCase {
       await this.cleanupNonDocumentNodes(root.id);
     }
 
-    const documents = input.documentId
-      ? await this.findDocumentOrThrow(input.documentId)
-      : await this.documentRepository.findAll();
+    const documents = await this.resolveScopedDocuments(input);
 
     const docIdToConceptId = new Map<string, string>();
     for (const doc of documents) {
@@ -132,11 +131,33 @@ export class BuildGraphUseCase {
     }
   }
 
-  private async findDocumentOrThrow(documentId: string) {
-    const document = await this.documentRepository.findById(documentId);
-    if (!document) {
-      throw new Error(`Document not found: ${documentId}`);
+  private async resolveScopedDocuments(input: {
+    documentId?: string;
+    userId?: string;
+  }): ReturnType<DocumentRepository['findAll']> {
+    const allDocuments = await this.documentRepository.findAll();
+
+    if (input.documentId) {
+      const scopedDocument = allDocuments.find(
+        (document) => document.id === input.documentId,
+      );
+      if (!scopedDocument) {
+        throw new Error(`Document not found: ${input.documentId}`);
+      }
+      if (input.userId && scopedDocument.userId !== input.userId) {
+        throw new Error(`Document not found: ${input.documentId}`);
+      }
+      return allDocuments.filter(
+        (document) => document.userId === scopedDocument.userId,
+      );
     }
-    return [document];
+
+    if (input.userId) {
+      return allDocuments.filter(
+        (document) => document.userId === input.userId,
+      );
+    }
+
+    return allDocuments;
   }
 }

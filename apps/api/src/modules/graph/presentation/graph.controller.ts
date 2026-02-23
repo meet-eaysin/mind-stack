@@ -7,6 +7,7 @@ import {
   Param,
   HttpCode,
   HttpStatus,
+  Headers,
 } from '@nestjs/common';
 import type { GraphResponse } from '@repo/shared-types';
 import { BuildGraphUseCase } from '../application/build-graph.use-case.js';
@@ -19,6 +20,7 @@ import {
   BuildGraphDto,
   CreateRelationDto,
 } from './graph.dtos.js';
+import { getUserIdFromHeader } from '../../../common/request-user.js';
 
 @Controller('graph')
 export class GraphController {
@@ -31,26 +33,44 @@ export class GraphController {
   ) {}
 
   @Get()
-  async getGraph(): Promise<GraphResponse> {
-    return this.queryGraph.execute();
+  async getGraph(
+    @Headers('x-user-id') userId?: string,
+  ): Promise<GraphResponse> {
+    return this.queryGraph.execute({ userId: getUserIdFromHeader(userId) });
   }
 
   @Post('build')
-  async build(@Body() dto: BuildGraphDto): Promise<{ success: boolean }> {
-    await this.buildGraph.execute(dto);
+  async build(
+    @Body() dto: BuildGraphDto,
+    @Headers('x-user-id') userId?: string,
+  ): Promise<{ success: boolean }> {
+    await this.buildGraph.execute({
+      ...dto,
+      userId: getUserIdFromHeader(userId),
+    });
     return { success: true };
   }
 
   @Post('neighborhood')
   async neighborhood(
     @Body() dto: ConceptNeighborhoodDto,
+    @Headers('x-user-id') userId?: string,
   ): Promise<GraphResponse> {
-    return this.getNeighborhood.execute(dto);
+    return this.getNeighborhood.execute({
+      ...dto,
+      userId: getUserIdFromHeader(userId),
+    });
   }
 
   @Post('relations')
-  async addRelation(@Body() dto: CreateRelationDto): Promise<{ slug: string }> {
-    await this.createRelation.execute(dto);
+  async addRelation(
+    @Body() dto: CreateRelationDto,
+    @Headers('x-user-id') userId?: string,
+  ): Promise<{ slug: string }> {
+    await this.createRelation.execute({
+      ...dto,
+      userId: getUserIdFromHeader(userId),
+    });
     return { slug: 'ok' };
   }
 

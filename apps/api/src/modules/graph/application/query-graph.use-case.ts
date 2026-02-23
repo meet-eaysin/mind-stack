@@ -16,9 +16,10 @@ export class QueryGraphUseCase {
     private readonly chunkRepository: ChunkRepository,
   ) {}
 
-  async execute(): Promise<GraphResponse> {
+  async execute(input: { userId: string }): Promise<GraphResponse> {
     const root = await this.conceptRepository.getRootConcept();
-    const documents = await this.documentRepository.findAll();
+    const allDocuments = await this.documentRepository.findAll();
+    const documents = allDocuments.filter((doc) => doc.userId === input.userId);
     const docIdToConceptId = new Map<string, string>();
 
     for (const doc of documents) {

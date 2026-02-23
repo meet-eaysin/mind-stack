@@ -21,6 +21,7 @@ export class GetNeighborhoodUseCase {
   async execute(input: {
     conceptId: string;
     depth?: number;
+    userId: string;
   }): Promise<GraphResponse> {
     const depth = input.depth ?? 2;
     const root = await this.conceptRepository.getRootConcept();
@@ -31,7 +32,7 @@ export class GetNeighborhoodUseCase {
     let conceptId = rootConceptId;
     if (!conceptId && documentId) {
       const doc = await this.documentRepository.findById(documentId);
-      if (!doc) {
+      if (!doc || doc.userId !== input.userId) {
         throw new NotFoundException('Document not found');
       }
       const concept = await this.conceptRepository.findOrCreate(
@@ -48,7 +49,8 @@ export class GetNeighborhoodUseCase {
       await this.conceptRepository.findNeighborhood(conceptId, depth);
 
     const documentMap = new Map<string, { id: string; title: string }>();
-    const documents = await this.documentRepository.findAll();
+    const allDocuments = await this.documentRepository.findAll();
+    const documents = allDocuments.filter((doc) => doc.userId === input.userId);
     for (const doc of documents) {
       documentMap.set(doc.id, { id: doc.id, title: doc.title });
     }
