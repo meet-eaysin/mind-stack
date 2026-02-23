@@ -53,7 +53,7 @@ export default function GraphPage() {
             <div className="relative w-64">
               <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
               <Input
-                placeholder="Search concepts..."
+                placeholder="Search documents..."
                 className="pl-9 bg-muted/20"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -62,7 +62,7 @@ export default function GraphPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => buildGraph.mutate({ forceRebuild: false })}
+              onClick={() => buildGraph.mutate({ forceRebuild: true })}
               disabled={buildGraph.isPending}
               className="gap-2"
             >
@@ -120,7 +120,7 @@ export default function GraphPage() {
                     variant="secondary"
                     className="bg-background/80 backdrop-blur-md border-primary/20 text-[10px] font-bold"
                   >
-                    {filteredData.nodes.length} PERSISTED CONCEPTS
+                    {filteredData.nodes.length} DOCUMENTS
                   </Badge>
                 </div>
                 <GraphVisualization

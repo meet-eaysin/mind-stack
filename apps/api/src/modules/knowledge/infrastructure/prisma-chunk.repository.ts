@@ -41,6 +41,12 @@ export class PrismaChunkRepository implements ChunkRepository {
     };
   }
 
+  async countByDocumentId(documentId: string): Promise<number> {
+    return this.prisma.chunk.count({
+      where: { documentId },
+    });
+  }
+
   async createMany(
     documentId: string,
     chunks: Array<{ content: string; startOffset: number; endOffset: number }>,

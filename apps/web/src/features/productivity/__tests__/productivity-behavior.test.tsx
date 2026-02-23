@@ -13,7 +13,7 @@ describe("Productivity Behavior", () => {
       const goals: Array<{
         id: string;
         name: string;
-        deadline: string | null;
+        deadline: string;
         progress: number;
         itemCount: number;
         createdAt: string;
@@ -51,7 +51,7 @@ describe("Productivity Behavior", () => {
           goals.push({
             id: "goal-2",
             name: body.name ?? "New Goal",
-            deadline: body.deadline ?? null,
+            deadline: body.deadline ?? "2026-01-03T00:00:00.000Z",
             progress: 0,
             itemCount: 0,
             createdAt: "2026-01-03T00:00:00.000Z",
@@ -60,7 +60,7 @@ describe("Productivity Behavior", () => {
           return HttpResponse.json({
             id: "goal-2",
             name: body.name ?? "New Goal",
-            deadline: body.deadline ?? null,
+            deadline: body.deadline ?? "2026-01-03T00:00:00.000Z",
             progress: 0,
             items: [],
             createdAt: "2026-01-03T00:00:00.000Z",

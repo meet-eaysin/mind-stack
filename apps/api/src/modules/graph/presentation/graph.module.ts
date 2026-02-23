@@ -7,38 +7,57 @@ import { GetNeighborhoodUseCase } from '../application/get-neighborhood.use-case
 import { CreateRelationUseCase } from '../application/create-relation.use-case.js';
 import { DeleteRelationUseCase } from '../application/delete-relation.use-case.js';
 import { QueryModule } from '../../query/presentation/query.module.js';
-import type { LLMProvider } from '@repo/llm';
-
-import { LLM_PROVIDER } from '../../../common/tokens.js';
+import { PrismaDocumentRepository } from '../../ingestion/infrastructure/prisma-document.repository.js';
+import { PrismaChunkRepository } from '../../knowledge/infrastructure/prisma-chunk.repository.js';
 
 @Module({
   imports: [QueryModule],
   controllers: [GraphController],
   providers: [
     PrismaConceptRepository,
+    PrismaDocumentRepository,
+    PrismaChunkRepository,
     {
       provide: BuildGraphUseCase,
-      useFactory: (conceptRepo: PrismaConceptRepository, llm: LLMProvider) =>
-        new BuildGraphUseCase(conceptRepo, llm),
-      inject: [PrismaConceptRepository, LLM_PROVIDER],
+      useFactory: (
+        conceptRepo: PrismaConceptRepository,
+        documentRepo: PrismaDocumentRepository,
+      ) => new BuildGraphUseCase(conceptRepo, documentRepo),
+      inject: [PrismaConceptRepository, PrismaDocumentRepository],
     },
     {
       provide: QueryGraphUseCase,
-      useFactory: (conceptRepo: PrismaConceptRepository) =>
-        new QueryGraphUseCase(conceptRepo),
-      inject: [PrismaConceptRepository],
+      useFactory: (
+        conceptRepo: PrismaConceptRepository,
+        documentRepo: PrismaDocumentRepository,
+        chunkRepo: PrismaChunkRepository,
+      ) => new QueryGraphUseCase(conceptRepo, documentRepo, chunkRepo),
+      inject: [
+        PrismaConceptRepository,
+        PrismaDocumentRepository,
+        PrismaChunkRepository,
+      ],
     },
     {
       provide: GetNeighborhoodUseCase,
-      useFactory: (conceptRepo: PrismaConceptRepository) =>
-        new GetNeighborhoodUseCase(conceptRepo),
-      inject: [PrismaConceptRepository],
+      useFactory: (
+        conceptRepo: PrismaConceptRepository,
+        documentRepo: PrismaDocumentRepository,
+        chunkRepo: PrismaChunkRepository,
+      ) => new GetNeighborhoodUseCase(conceptRepo, documentRepo, chunkRepo),
+      inject: [
+        PrismaConceptRepository,
+        PrismaDocumentRepository,
+        PrismaChunkRepository,
+      ],
     },
     {
       provide: CreateRelationUseCase,
-      useFactory: (conceptRepo: PrismaConceptRepository) =>
-        new CreateRelationUseCase(conceptRepo),
-      inject: [PrismaConceptRepository],
+      useFactory: (
+        conceptRepo: PrismaConceptRepository,
+        documentRepo: PrismaDocumentRepository,
+      ) => new CreateRelationUseCase(conceptRepo, documentRepo),
+      inject: [PrismaConceptRepository, PrismaDocumentRepository],
     },
     {
       provide: DeleteRelationUseCase,

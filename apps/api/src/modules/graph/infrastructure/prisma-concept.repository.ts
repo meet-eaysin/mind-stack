@@ -26,6 +26,22 @@ export class PrismaConceptRepository implements ConceptRepository {
     };
   }
 
+  async findById(id: string): Promise<ConceptEntity | null> {
+    const concept = await this.prisma.concept.findUnique({
+      where: { id },
+    });
+    if (!concept) return null;
+    return { id: concept.id, label: concept.label };
+  }
+
+  async findByLabel(label: string): Promise<ConceptEntity | null> {
+    const concept = await this.prisma.concept.findUnique({
+      where: { label },
+    });
+    if (!concept) return null;
+    return { id: concept.id, label: concept.label };
+  }
+
   async findOrCreate(label: string): Promise<ConceptEntity> {
     const concept = await this.prisma.concept.upsert({
       where: { label },
@@ -65,6 +81,17 @@ export class PrismaConceptRepository implements ConceptRepository {
     });
 
     return this.mapRelation(created);
+  }
+
+  async findRelationsForConcept(
+    conceptId: string,
+  ): Promise<ConceptRelationEntity[]> {
+    const rows = await this.prisma.conceptRelation.findMany({
+      where: {
+        OR: [{ fromConceptId: conceptId }, { toConceptId: conceptId }],
+      },
+    });
+    return rows.map((r) => this.mapRelation(r));
   }
 
   async findAll(): Promise<ConceptEntity[]> {
@@ -262,6 +289,22 @@ export class PrismaConceptRepository implements ConceptRepository {
   async deleteRelation(relationId: string): Promise<void> {
     await this.prisma.conceptRelation.delete({
       where: { id: relationId },
+    });
+  }
+
+  async deleteConcept(conceptId: string): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      await tx.conceptChunk.deleteMany({
+        where: { conceptId },
+      });
+      await tx.conceptRelation.deleteMany({
+        where: {
+          OR: [{ fromConceptId: conceptId }, { toConceptId: conceptId }],
+        },
+      });
+      await tx.concept.deleteMany({
+        where: { id: conceptId },
+      });
     });
   }
 }

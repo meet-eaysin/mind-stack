@@ -261,6 +261,7 @@ export type ConceptNode = {
   associatedChunks?: Array<{
     id: string;
     content: string;
+    documentId: string;
     documentTitle: string;
   }>;
 };

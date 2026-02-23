@@ -13,12 +13,15 @@ export type ConceptRelationEntity = {
 };
 
 export type ConceptRepository = {
+  findById(id: string): Promise<ConceptEntity | null>;
+  findByLabel(label: string): Promise<ConceptEntity | null>;
   findOrCreate(label: string): Promise<ConceptEntity>;
   createRelation(
     fromId: string,
     toId: string,
     relationType: RelationType,
   ): Promise<ConceptRelationEntity>;
+  findRelationsForConcept(conceptId: string): Promise<ConceptRelationEntity[]>;
   findAll(): Promise<ConceptEntity[]>;
   findAllRelations(): Promise<ConceptRelationEntity[]>;
   findNeighborhood(
@@ -45,4 +48,5 @@ export type ConceptRepository = {
     maxDepth?: number,
   ): Promise<boolean>;
   deleteRelation(relationId: string): Promise<void>;
+  deleteConcept(conceptId: string): Promise<void>;
 };

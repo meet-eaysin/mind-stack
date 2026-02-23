@@ -12,15 +12,12 @@ import type { CreateRelationRequest } from "../types";
 import { useRouter } from "next/navigation";
 
 const RELATION_TYPES: CreateRelationRequest["type"][] = [
-  "RELATES_TO",
   "IS_PART_OF",
-  "DEPENDS_ON",
-  "SIMILAR_TO",
-  "LEADS_TO",
   "IS_PREREQUISITE_OF",
   "REFERENCES",
   "EXTENDS",
   "CONTRADICTS",
+  "SIMILAR_TO",
   "FOLLOW_UP_TO",
 ];
 
@@ -37,7 +34,7 @@ export function NeighborhoodPanel({
   const router = useRouter();
   const [targetConceptId, setTargetConceptId] = useState("");
   const [relationType, setRelationType] =
-    useState<CreateRelationRequest["type"]>("RELATES_TO");
+    useState<CreateRelationRequest["type"]>("IS_PART_OF");
   const [relationIdToDelete, setRelationIdToDelete] = useState("");
 
   if (isLoading) {
@@ -78,16 +75,18 @@ export function NeighborhoodPanel({
         {/* Associated Chunks */}
         {rootNode?.associatedChunks && rootNode.associatedChunks.length > 0 && (
           <div className="space-y-3">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
-              <FileText className="size-3" />
-              Source Context
-            </h4>
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+            <FileText className="size-3" />
+            Source Context
+          </h4>
             <div className="space-y-3">
               {rootNode.associatedChunks.map((chunk) => (
                 <div
                   key={chunk.id}
                   className="p-3 bg-background/50 border rounded-lg hover:border-primary/50 transition-colors group cursor-pointer"
-                  onClick={() => router.push(`/documents/${chunk.documentId}`)}
+                  onClick={() =>
+                    router.push(`/documents?id=${chunk.documentId}`)
+                  }
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-[10px] font-medium text-muted-foreground truncate max-w-[150px]">
@@ -110,7 +109,7 @@ export function NeighborhoodPanel({
         <div className="space-y-3">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
             <Link2 className="size-3" />
-            Related Concepts
+            Related Documents
           </h4>
           <div className="grid grid-cols-1 gap-2">
             {neighbors.map((node) => (
@@ -141,12 +140,6 @@ export function NeighborhoodPanel({
                   if (type === "IS_PART_OF")
                     colorClass =
                       "bg-blue-500/10 text-blue-400 border-blue-500/20";
-                  if (type === "LEADS_TO")
-                    colorClass =
-                      "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-                  if (type === "DEPENDS_ON")
-                    colorClass =
-                      "bg-amber-500/10 text-amber-400 border-amber-500/20";
                   if (type === "SIMILAR_TO")
                     colorClass =
                       "bg-purple-500/10 text-purple-400 border-purple-500/20";
@@ -173,7 +166,7 @@ export function NeighborhoodPanel({
             Create Relation
           </h4>
           <Input
-            placeholder="Target Concept ID"
+            placeholder="Target Document ID"
             value={targetConceptId}
             onChange={(e) => setTargetConceptId(e.target.value)}
             className="h-8 text-xs"

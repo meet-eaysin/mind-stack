@@ -297,7 +297,7 @@ export function GraphVisualization({
                   className="stroke-muted-foreground/30 transition-all duration-300"
                   strokeWidth={1.5}
                   strokeDasharray={
-                    edge.relationType === "RELATES_TO" ? "4 2" : "none"
+                    edge.relationType === "SIMILAR_TO" ? "4 2" : "none"
                   }
                 />
               );

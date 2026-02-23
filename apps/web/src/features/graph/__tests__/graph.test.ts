@@ -4,7 +4,7 @@ import { graphApi } from "../api";
 describe("Graph Feature API", () => {
   it("should get graph correctly", async () => {
     const result = await graphApi.get();
-    expect(result.nodes).toHaveLength(1);
+    expect(result.nodes).toHaveLength(2);
   });
 
   it("should build graph correctly", async () => {
@@ -14,14 +14,14 @@ describe("Graph Feature API", () => {
 
   it("should get neighborhood correctly", async () => {
     const result = await graphApi.getNeighborhood("n1");
-    expect(result.nodes).toHaveLength(1);
+    expect(result.nodes).toHaveLength(2);
   });
 
   it("should create relation correctly", async () => {
     const result = await graphApi.createRelation({
-      fromId: "concept-1",
-      toId: "concept-2",
-      type: "RELATES_TO",
+      fromId: "doc-1",
+      toId: "doc-2",
+      type: "IS_PART_OF",
     });
     expect(result.slug).toBe("ok");
   });

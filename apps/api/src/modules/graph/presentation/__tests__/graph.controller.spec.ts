@@ -52,12 +52,12 @@ describe('GraphController', () => {
     mockCreateRelation.execute.mockResolvedValue(undefined);
     mockDeleteRelation.execute.mockResolvedValue(undefined);
 
-    await expect(
-      controller.build({ chunkId: 'chunk-1', chunkContent: 'content' }),
-    ).resolves.toEqual({ success: true });
+    await expect(controller.build({ forceRebuild: true })).resolves.toEqual({
+      success: true,
+    });
 
     await expect(
-      controller.addRelation({ fromId: 'a', toId: 'b', type: 'RELATES_TO' }),
+      controller.addRelation({ fromId: 'a', toId: 'b', type: 'IS_PART_OF' }),
     ).resolves.toEqual({ slug: 'ok' });
 
     await expect(controller.removeRelation('rel-1')).resolves.toBeUndefined();

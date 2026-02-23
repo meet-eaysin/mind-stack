@@ -4,6 +4,7 @@ import { PrismaChunkRepository } from '../infrastructure/prisma-chunk.repository
 import { PrismaTagRepository } from '../infrastructure/prisma-tag.repository.js';
 import { PrismaNoteRepository } from '../infrastructure/prisma-note.repository.js';
 import { PrismaDocumentRepository } from '../../ingestion/infrastructure/prisma-document.repository.js';
+import { PrismaConceptRepository } from '../../graph/infrastructure/prisma-concept.repository.js';
 import { ListDocumentsUseCase } from '../application/list-documents.use-case.js';
 import { ViewDocumentUseCase } from '../application/view-document.use-case.js';
 import { GetRelatedSuggestionsUseCase } from '../application/get-related-suggestions.use-case.js';
@@ -35,6 +36,7 @@ import { VectorModule } from '../../../common/vector.module.js';
     PrismaChunkRepository,
     PrismaTagRepository,
     PrismaNoteRepository,
+    PrismaConceptRepository,
     {
       provide: ListDocumentsUseCase,
       useFactory: (
@@ -64,8 +66,20 @@ import { VectorModule } from '../../../common/vector.module.js';
         docRepo: PrismaDocumentRepository,
         chunkRepo: PrismaChunkRepository,
         vectorStore: VectorStore,
-      ) => new DeleteDocumentUseCase(docRepo, chunkRepo, vectorStore),
-      inject: [PrismaDocumentRepository, PrismaChunkRepository, VECTOR_STORE],
+        conceptRepo: PrismaConceptRepository,
+      ) =>
+        new DeleteDocumentUseCase(
+          docRepo,
+          chunkRepo,
+          vectorStore,
+          conceptRepo,
+        ),
+      inject: [
+        PrismaDocumentRepository,
+        PrismaChunkRepository,
+        VECTOR_STORE,
+        PrismaConceptRepository,
+      ],
     },
     {
       provide: AddTagUseCase,

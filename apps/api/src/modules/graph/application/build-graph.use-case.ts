@@ -1,168 +1,142 @@
 import type { ConceptRepository } from '../domain/concept-repository.interface.js';
-import type { LLMProvider } from '@repo/llm';
-import { ExtractedConceptsSchema } from './dto/extraction.dto.js';
-import { ExtractedConcept } from '../domain/graph.types.js';
+import type { DocumentRepository } from '../../ingestion/domain/document-repository.interface.js';
 import { createLogger } from '@repo/logger';
+import {
+  DOCUMENT_RELATION_TYPES,
+  HIERARCHY_RELATION_TYPES,
+  ROOT_LABEL,
+  toDocumentNodeLabel,
+  parseDocumentIdFromLabel,
+} from '../domain/document-graph.js';
 
 export class BuildGraphUseCase {
   private readonly logger = createLogger('BuildGraphUseCase');
 
   constructor(
     private readonly conceptRepository: ConceptRepository,
-    private readonly llmProvider: LLMProvider,
+    private readonly documentRepository: DocumentRepository,
   ) {}
 
   async execute(input: {
-    chunkContent: string;
-    chunkId: string;
+    documentId?: string;
+    forceRebuild?: boolean;
   }): Promise<void> {
-    const extracted = await this.extractConcepts(input.chunkContent);
-    if (!extracted.length) return;
+    const root = await this.conceptRepository.getRootConcept();
+    const shouldCleanup = input.forceRebuild ?? true;
 
-    const rootConcept = await this.conceptRepository.getRootConcept();
-    const createdConceptIds = new Set<string>();
-    const conceptHasRelations = new Set<string>();
-
-    // 1. Create or Find all extracted concepts and link to chunk
-    for (const concept of extracted) {
-      const normalizedLabel = this.normalizeLabel(concept.label);
-      if (!normalizedLabel) continue;
-
-      const source = await this.conceptRepository.findOrCreate(normalizedLabel);
-      createdConceptIds.add(source.id);
-      await this.conceptRepository.linkConceptToChunk(source.id, input.chunkId);
+    if (root.label !== ROOT_LABEL) {
+      this.logger.warn(`Root label mismatch: ${root.label}`);
     }
 
-    // 2. Process relations and enforce graph constraints
-    for (const concept of extracted) {
-      const normalizedLabel = this.normalizeLabel(concept.label);
-      if (!normalizedLabel) continue;
+    if (shouldCleanup) {
+      await this.cleanupNonDocumentNodes(root.id);
+    }
 
-      const source = await this.conceptRepository.findOrCreate(normalizedLabel);
+    const documents = input.documentId
+      ? await this.findDocumentOrThrow(input.documentId)
+      : await this.documentRepository.findAll();
 
-      for (const relation of concept.relations) {
-        const normalizedTarget = this.normalizeLabel(relation.target);
-        if (!normalizedTarget || normalizedTarget === normalizedLabel) continue;
+    const docIdToConceptId = new Map<string, string>();
+    for (const doc of documents) {
+      const concept = await this.conceptRepository.findOrCreate(
+        toDocumentNodeLabel(doc.id),
+      );
+      docIdToConceptId.set(doc.id, concept.id);
+    }
 
-        const target =
-          await this.conceptRepository.findOrCreate(normalizedTarget);
+    const allRelations = await this.conceptRepository.findAllRelations();
+    const conceptIdToDocId = new Map<string, string>();
+    const allConcepts = await this.conceptRepository.findAll();
 
-        // Prevent Hierarchy Cycles
-        let relationTypeToSave = relation.type;
-        if (
-          relationTypeToSave === 'IS_PART_OF' ||
-          relationTypeToSave === 'IS_PREREQUISITE_OF'
-        ) {
-          const hasCycle = await this.conceptRepository.detectCycle(
-            source.id,
-            target.id,
-            5,
-          );
-          if (hasCycle) {
-            this.logger.warn(
-              `Cycle detected for ${source.id} -> ${target.id}. Downgrading to RELATES_TO.`,
-            );
-            relationTypeToSave = 'RELATES_TO';
-          }
-        }
-
-        await this.conceptRepository.createRelation(
-          source.id,
-          target.id,
-          relationTypeToSave,
-        );
-
-        conceptHasRelations.add(source.id);
-        conceptHasRelations.add(target.id);
+    for (const concept of allConcepts) {
+      const docId = parseDocumentIdFromLabel(concept.label);
+      if (docId) {
+        conceptIdToDocId.set(concept.id, docId);
       }
     }
 
-    // 3. Orphan Attachment: Ensure all chunks connect to the root graph
-    for (const conceptId of createdConceptIds) {
-      if (!conceptHasRelations.has(conceptId) && conceptId !== rootConcept.id) {
-        this.logger.debug(
-          `Attaching orphaned concept ${conceptId} to User Brain`,
+    // Cleanup relations that target non-document nodes or unsupported types
+    for (const relation of allRelations) {
+      const fromDocId = conceptIdToDocId.get(relation.fromConceptId);
+      const toDocId = conceptIdToDocId.get(relation.toConceptId);
+      const isRoot = relation.toConceptId === root.id;
+
+      const allowedType = DOCUMENT_RELATION_TYPES.includes(
+        relation.relationType,
+      );
+
+      if (relation.fromConceptId === root.id) {
+        await this.conceptRepository.deleteRelation(relation.id);
+        continue;
+      }
+
+      if (!allowedType) {
+        await this.conceptRepository.deleteRelation(relation.id);
+        continue;
+      }
+
+      if (isRoot && !HIERARCHY_RELATION_TYPES.includes(relation.relationType)) {
+        await this.conceptRepository.deleteRelation(relation.id);
+        continue;
+      }
+
+      if (!fromDocId) {
+        await this.conceptRepository.deleteRelation(relation.id);
+        continue;
+      }
+
+      if (!toDocId && !isRoot) {
+        await this.conceptRepository.deleteRelation(relation.id);
+      }
+    }
+
+    // Enforce single hierarchy parent and attach orphans to root
+    for (const conceptId of docIdToConceptId.values()) {
+      const relationsForDoc =
+        await this.conceptRepository.findRelationsForConcept(conceptId);
+      const outgoingHierarchy = relationsForDoc.filter(
+        (rel) =>
+          rel.fromConceptId === conceptId &&
+          HIERARCHY_RELATION_TYPES.includes(rel.relationType),
+      );
+
+      if (outgoingHierarchy.length > 1) {
+        const sorted = [...outgoingHierarchy].sort((a, b) =>
+          a.id.localeCompare(b.id),
         );
+        const toRemove = sorted.slice(1);
+        for (const rel of toRemove) {
+          await this.conceptRepository.deleteRelation(rel.id);
+        }
+      }
+
+      const hasHierarchyParent = outgoingHierarchy.length > 0;
+      if (!hasHierarchyParent) {
         await this.conceptRepository.createRelation(
           conceptId,
-          rootConcept.id,
+          root.id,
           'IS_PART_OF',
         );
       }
     }
   }
 
-  private normalizeLabel(label: string): string {
-    return label
-      .trim()
-      .toLowerCase()
-      .replace(/[.,;:!?]+$/, '') // Remove trailing punctuation
-      .replace(/^["']|["']$/g, '') // Remove wrapping quotes
-      .trim();
+  private async cleanupNonDocumentNodes(rootId: string): Promise<void> {
+    const concepts = await this.conceptRepository.findAll();
+    for (const concept of concepts) {
+      if (concept.id === rootId) continue;
+      const docId = parseDocumentIdFromLabel(concept.label);
+      if (!docId) {
+        await this.conceptRepository.deleteConcept(concept.id);
+      }
+    }
   }
 
-  private async extractConcepts(content: string): Promise<ExtractedConcept[]> {
-    try {
-      const response = await this.llmProvider.generate({
-        prompt: `Chunk Content: "${content.substring(0, 4000)}"`,
-        systemPrompt: [
-          'Extract technical concepts, entities, and their semantic relations from the text.',
-          'Format: JSON Array of objects exactly matching this structure:',
-          '[{ "label": "Concept Name", "relations": [{ "target": "Related Concept", "type": "RELATES_TO" | "IS_PART_OF" | "DEPENDS_ON" | "SIMILAR_TO" | "LEADS_TO" }] }]',
-          '',
-          'Guidelines:',
-          '1. Focus on core technical terms, frameworks, architectural patterns, and key entities.',
-          '2. Avoid generic words; capture meaningful knowledge nodes.',
-          '3. Relations must be directional and semantically accurate.',
-          '4. Output ONLY the JSON array. NO preamble, NO explanation, NO markdown code blocks.',
-          '5. If no concepts are found, return [].',
-        ].join('\n'),
-        temperature: 0,
-        responseFormat: 'json',
-      });
-
-      let rawBody = response.text.trim();
-
-      // Robust JSON Repairing
-      // 1. Remove markdown code blocks
-      rawBody = rawBody.replace(/^```(?:json)?\n?|```$/gm, '').trim();
-
-      // 2. Find the bounds of the JSON array or object
-      const startIdx = rawBody.indexOf('[');
-      const endIdx = rawBody.lastIndexOf(']');
-
-      if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
-        rawBody = rawBody.substring(startIdx, endIdx + 1);
-      }
-
-      if (!rawBody) {
-        this.logger.warn('LLM returned empty or non-JSON content');
-        return [];
-      }
-
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(rawBody);
-      } catch (e) {
-        // Attempt minor repairs: handle trailing commas
-        try {
-          const repaired = rawBody.replace(/,\s*([\]}])/g, '$1');
-          parsed = JSON.parse(repaired);
-        } catch (_innerError) {
-          this.logger.error(`JSON Parse failed even after repair: ${rawBody}`);
-          throw e;
-        }
-      }
-
-      const normalized = Array.isArray(parsed) ? parsed : [parsed];
-      const validated = ExtractedConceptsSchema.parse(normalized);
-
-      return validated as ExtractedConcept[];
-    } catch (error) {
-      this.logger.error(
-        `GRAPH_EXTRACT: Failed: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      return []; // Return empty instead of throwing to prevent crashing the worker job
+  private async findDocumentOrThrow(documentId: string) {
+    const document = await this.documentRepository.findById(documentId);
+    if (!document) {
+      throw new Error(`Document not found: ${documentId}`);
     }
+    return [document];
   }
 }

@@ -5,6 +5,7 @@ import {
   Min,
   Max,
   IsEnum,
+  IsBoolean,
 } from 'class-validator';
 import { RELATION_TYPE, type RelationType } from '@repo/shared-types';
 
@@ -20,11 +21,9 @@ export class ConceptNeighborhoodDto {
 }
 
 export class BuildGraphDto {
-  @IsString()
-  chunkContent!: string;
-
-  @IsString()
-  chunkId!: string;
+  @IsOptional()
+  @IsBoolean()
+  forceRebuild?: boolean;
 }
 
 export class CreateRelationDto {

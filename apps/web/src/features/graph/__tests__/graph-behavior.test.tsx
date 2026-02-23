@@ -17,7 +17,7 @@ describe("Graph Behavior", () => {
       expect(screen.getByTestId("graph-visualization")).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId("graph-node-concept-1")).toBeInTheDocument();
+    expect(screen.getByTestId("graph-node-doc-1")).toBeInTheDocument();
   });
 
   it("should show neighborhood panel when node selected", async () => {
@@ -34,14 +34,14 @@ describe("Graph Behavior", () => {
   });
 
   it("should create and delete relation from neighborhood panel", async () => {
-    render(<NeighborhoodPanel conceptId="concept-1" />);
+    render(<NeighborhoodPanel conceptId="doc-1" />);
 
     await waitFor(() => {
       expect(screen.getByTestId("neighborhood-panel")).toBeInTheDocument();
     });
 
-    fireEvent.change(screen.getByPlaceholderText("Target Concept ID"), {
-      target: { value: "concept-2" },
+    fireEvent.change(screen.getByPlaceholderText("Target Document ID"), {
+      target: { value: "doc-2" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Create" }));
 

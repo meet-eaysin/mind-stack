@@ -106,6 +106,10 @@ class FakeChunkRepository implements ChunkRepository {
     return Promise.resolve(null);
   }
 
+  async countByDocumentId(documentId: string): Promise<number> {
+    return Promise.resolve((this.chunksByDoc.get(documentId) ?? []).length);
+  }
+
   async createMany(
     _documentId: string,
     _chunks: Array<{ content: string; startOffset: number; endOffset: number }>,

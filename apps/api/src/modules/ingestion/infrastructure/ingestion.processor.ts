@@ -151,13 +151,7 @@ export class IngestionProcessor extends WorkerHost {
   private async processConceptExtraction(documentId: string): Promise<void> {
     await this.transition(documentId, INGESTION_STATUS.GRAPH_BUILDING);
 
-    const chunks = await this.chunkRepository.findByDocumentId(documentId);
-    for (const chunk of chunks) {
-      await this.buildGraph.execute({
-        chunkContent: chunk.content,
-        chunkId: chunk.id,
-      });
-    }
+    await this.buildGraph.execute({ documentId });
 
     await this.transition(documentId, INGESTION_STATUS.READY);
   }

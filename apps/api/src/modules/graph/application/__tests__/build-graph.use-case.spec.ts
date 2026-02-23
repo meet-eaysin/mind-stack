@@ -4,53 +4,92 @@ import type {
   ConceptEntity,
   ConceptRelationEntity,
 } from '../../domain/concept-repository.interface.js';
+import type { DocumentRepository } from '../../../ingestion/domain/document-repository.interface.js';
+import {
+  createDocument,
+  type DocumentEntity,
+} from '../../../ingestion/domain/document.entity.js';
+import { ROOT_LABEL, toDocumentNodeLabel } from '../../domain/document-graph.js';
 import type {
-  LLMProvider,
-  GenerationRequest,
-  GenerationResponse,
-  StreamChunk,
-} from '@repo/llm';
-import type { RelationType } from '@repo/shared-types';
+  RelationType,
+  IngestionStatus,
+  LearningStatus,
+} from '@repo/shared-types';
 
-// ── Fakes ──
+class FakeDocumentRepository implements DocumentRepository {
+  private documents = new Map<string, DocumentEntity>();
 
-class FakeLLMProvider implements LLMProvider {
-  private responseText = '[]';
-
-  setResponse(text: string): void {
-    this.responseText = text;
+  seed(docs: DocumentEntity[]): void {
+    for (const doc of docs) {
+      this.documents.set(doc.id, doc);
+    }
   }
 
-  generate(_request: GenerationRequest): Promise<GenerationResponse> {
-    return Promise.resolve({
-      text: this.responseText,
-      finishReason: 'stop',
-      tokenCount: this.responseText.split(' ').length,
-    });
+  save(document: DocumentEntity): Promise<DocumentEntity> {
+    this.documents.set(document.id, document);
+    return Promise.resolve(document);
   }
 
-  async *generateStream(
-    _request: GenerationRequest,
-  ): AsyncGenerator<StreamChunk, void, undefined> {
-    await Promise.resolve();
-    yield { text: this.responseText, done: true };
+  findById(id: string): Promise<DocumentEntity | null> {
+    return Promise.resolve(this.documents.get(id) ?? null);
+  }
+
+  findAll(): Promise<DocumentEntity[]> {
+    return Promise.resolve([...this.documents.values()]);
+  }
+
+  findBySourceUrl(_url: string): Promise<DocumentEntity | null> {
+    return Promise.resolve(null);
+  }
+
+  updateStatus(_id: string, _status: IngestionStatus): Promise<void> {
+    return Promise.resolve();
+  }
+
+  updateImportance(_id: string, _score: number): Promise<void> {
+    return Promise.resolve();
+  }
+
+  getImportance(_id: string): Promise<number | null> {
+    return Promise.resolve(null);
+  }
+
+  delete(id: string): Promise<void> {
+    this.documents.delete(id);
+    return Promise.resolve();
+  }
+
+  addStatusHistory(
+    _documentId: string,
+    _status: IngestionStatus,
+    _learningStatus: LearningStatus,
+  ): Promise<void> {
+    return Promise.resolve();
   }
 }
 
 class FakeConceptRepository implements ConceptRepository {
-  private concepts: Map<string, ConceptEntity> = new Map();
+  private concepts = new Map<string, ConceptEntity>();
   private relations: ConceptRelationEntity[] = [];
   private idCounter = 0;
 
-  findOrCreate(label: string): Promise<ConceptEntity> {
+  findById(id: string): Promise<ConceptEntity | null> {
+    return Promise.resolve(this.concepts.get(id) ?? null);
+  }
+
+  findByLabel(label: string): Promise<ConceptEntity | null> {
     for (const concept of this.concepts.values()) {
       if (concept.label === label) return Promise.resolve(concept);
     }
-    this.idCounter += 1;
-    const concept: ConceptEntity = {
-      id: `concept-${String(this.idCounter)}`,
-      label,
-    };
+    return Promise.resolve(null);
+  }
+
+  findOrCreate(label: string): Promise<ConceptEntity> {
+    const existing = [...this.concepts.values()].find(
+      (c) => c.label === label,
+    );
+    if (existing) return Promise.resolve(existing);
+    const concept = { id: `concept-${++this.idCounter}`, label };
     this.concepts.set(concept.id, concept);
     return Promise.resolve(concept);
   }
@@ -60,14 +99,31 @@ class FakeConceptRepository implements ConceptRepository {
     toId: string,
     relationType: RelationType,
   ): Promise<ConceptRelationEntity> {
-    const relation: ConceptRelationEntity = {
-      id: `rel-${String(this.relations.length + 1)}`,
+    const existing = this.relations.find(
+      (r) =>
+        r.fromConceptId === fromId &&
+        r.toConceptId === toId &&
+        r.relationType === relationType,
+    );
+    if (existing) return Promise.resolve(existing);
+    const relation = {
+      id: `rel-${this.relations.length + 1}`,
       fromConceptId: fromId,
       toConceptId: toId,
       relationType,
     };
     this.relations.push(relation);
     return Promise.resolve(relation);
+  }
+
+  findRelationsForConcept(
+    conceptId: string,
+  ): Promise<ConceptRelationEntity[]> {
+    return Promise.resolve(
+      this.relations.filter(
+        (r) => r.fromConceptId === conceptId || r.toConceptId === conceptId,
+      ),
+    );
   }
 
   findAll(): Promise<ConceptEntity[]> {
@@ -96,40 +152,21 @@ class FakeConceptRepository implements ConceptRepository {
     return Promise.resolve();
   }
 
-  getCreatedConcepts(): ConceptEntity[] {
-    return [...this.concepts.values()];
-  }
-
-  getCreatedRelations(): ConceptRelationEntity[] {
-    return this.relations;
-  }
-  findAssociatedChunks(
-    _conceptId: string,
-  ): Promise<
+  findAssociatedChunks(): Promise<
     { id: string; content: string; documentTitle: string; documentId: string }[]
   > {
     return Promise.resolve([]);
   }
 
-  getRootConcept(): Promise<ConceptEntity> {
-    const rootId = 'root-user-brain';
-    const rootLabel = 'user brain';
-    let root = null;
-    for (const concept of this.concepts.values()) {
-      if (concept.id === rootId) root = concept;
-    }
-    if (!root) {
-      root = { id: rootId, label: rootLabel };
-      this.concepts.set(rootId, root);
-    }
-    return Promise.resolve(root);
+  async getRootConcept(): Promise<ConceptEntity> {
+    const existing = await this.findByLabel(ROOT_LABEL);
+    if (existing) return existing;
+    const concept = { id: `concept-${++this.idCounter}`, label: ROOT_LABEL };
+    this.concepts.set(concept.id, concept);
+    return concept;
   }
 
-  detectCycle(
-    _fromId: string,
-    _toId: string,
-    _maxDepth?: number,
-  ): Promise<boolean> {
+  detectCycle(): Promise<boolean> {
     return Promise.resolve(false);
   }
 
@@ -137,70 +174,93 @@ class FakeConceptRepository implements ConceptRepository {
     this.relations = this.relations.filter((r) => r.id !== relationId);
     return Promise.resolve();
   }
-}
 
-// ── Tests ──
+  deleteConcept(conceptId: string): Promise<void> {
+    this.concepts.delete(conceptId);
+    this.relations = this.relations.filter(
+      (r) => r.fromConceptId !== conceptId && r.toConceptId !== conceptId,
+    );
+    return Promise.resolve();
+  }
+
+  getRelations(): ConceptRelationEntity[] {
+    return this.relations;
+  }
+}
 
 describe('BuildGraphUseCase', () => {
   let useCase: BuildGraphUseCase;
-  let llmProvider: FakeLLMProvider;
   let conceptRepository: FakeConceptRepository;
+  let documentRepository: FakeDocumentRepository;
 
   beforeEach(() => {
-    llmProvider = new FakeLLMProvider();
     conceptRepository = new FakeConceptRepository();
-    useCase = new BuildGraphUseCase(conceptRepository, llmProvider);
+    documentRepository = new FakeDocumentRepository();
+    useCase = new BuildGraphUseCase(conceptRepository, documentRepository);
   });
 
-  it('should extract concepts from LLM and create concepts with relations', async () => {
-    const llmResponse = JSON.stringify([
-      {
-        label: 'TypeScript',
-        relations: [
-          { target: 'JavaScript', type: 'RELATES_TO' },
-          { target: 'Node.js', type: 'DEPENDS_ON' },
-        ],
-      },
+  it('attaches orphan documents to root', async () => {
+    documentRepository.seed([
+      createDocument({
+        id: 'doc-1',
+        title: 'Document 1',
+        sourceType: 'TEXT',
+        sourceUrl: null,
+        rawContent: 'content',
+      }),
     ]);
-    llmProvider.setResponse(llmResponse);
 
-    await useCase.execute({
-      chunkContent: 'TypeScript is a typed superset of JavaScript...',
-      chunkId: 'chunk-1',
-    });
+    await useCase.execute({});
 
-    const concepts = conceptRepository.getCreatedConcepts();
-    expect(concepts).toHaveLength(4); // 3 original + 1 root concept ('user brain')
-    const labels = concepts.map((c) => c.label);
-    expect(labels).toContain('typescript');
-    expect(labels).toContain('javascript');
-    expect(labels).toContain('node.js');
+    const root = await conceptRepository.getRootConcept();
+    const docConcept = await conceptRepository.findByLabel(
+      toDocumentNodeLabel('doc-1'),
+    );
 
-    const relations = conceptRepository.getCreatedRelations();
-    expect(relations).toHaveLength(2);
+    expect(docConcept).not.toBeNull();
+    expect(
+      conceptRepository
+        .getRelations()
+        .some(
+          (rel) =>
+            rel.fromConceptId === docConcept?.id &&
+            rel.toConceptId === root.id &&
+            rel.relationType === 'IS_PART_OF',
+        ),
+    ).toBe(true);
   });
 
-  it('should handle malformed LLM JSON gracefully', async () => {
-    llmProvider.setResponse('not valid json');
+  it('removes unsupported relation types', async () => {
+    documentRepository.seed([
+      createDocument({
+        id: 'doc-1',
+        title: 'Document 1',
+        sourceType: 'TEXT',
+        sourceUrl: null,
+        rawContent: 'content',
+      }),
+      createDocument({
+        id: 'doc-2',
+        title: 'Document 2',
+        sourceType: 'TEXT',
+        sourceUrl: null,
+        rawContent: 'content',
+      }),
+    ]);
 
-    await useCase.execute({
-      chunkContent: 'Some random content',
-      chunkId: 'chunk-1',
-    });
+    const doc1 = await conceptRepository.findOrCreate(
+      toDocumentNodeLabel('doc-1'),
+    );
+    const doc2 = await conceptRepository.findOrCreate(
+      toDocumentNodeLabel('doc-2'),
+    );
+    await conceptRepository.createRelation(doc1.id, doc2.id, 'RELATES_TO');
 
-    const concepts = conceptRepository.getCreatedConcepts();
-    expect(concepts).toHaveLength(0);
-  });
+    await useCase.execute({});
 
-  it('should handle empty LLM response array', async () => {
-    llmProvider.setResponse('[]');
-
-    await useCase.execute({
-      chunkContent: 'Simple content',
-      chunkId: 'chunk-1',
-    });
-
-    const concepts = conceptRepository.getCreatedConcepts();
-    expect(concepts).toHaveLength(0);
+    const relations = conceptRepository.getRelations();
+    expect(relations.some((rel) => rel.relationType === 'RELATES_TO')).toBe(
+      false,
+    );
   });
 });

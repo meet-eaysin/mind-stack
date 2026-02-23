@@ -1,9 +1,19 @@
 import { BadRequestException } from '@nestjs/common';
 import type { ConceptRepository } from '../domain/concept-repository.interface.js';
-import { RELATION_TYPE, type RelationType } from '@repo/shared-types';
+import type { DocumentRepository } from '../../ingestion/domain/document-repository.interface.js';
+import type { RelationType } from '@repo/shared-types';
+import {
+  DOCUMENT_RELATION_TYPES,
+  HIERARCHY_RELATION_TYPES,
+  ROOT_NODE_ID,
+  toDocumentNodeLabel,
+} from '../domain/document-graph.js';
 
 export class CreateRelationUseCase {
-  constructor(private readonly conceptRepository: ConceptRepository) {}
+  constructor(
+    private readonly conceptRepository: ConceptRepository,
+    private readonly documentRepository: DocumentRepository,
+  ) {}
 
   async execute(input: {
     fromId: string;
@@ -14,15 +24,57 @@ export class CreateRelationUseCase {
       throw new BadRequestException('Cannot create self relation');
     }
 
-    const hierarchyRelationTypes: RelationType[] = [
-      RELATION_TYPE.IS_PART_OF,
-      RELATION_TYPE.IS_PREREQUISITE_OF,
-    ];
+    if (!DOCUMENT_RELATION_TYPES.includes(input.type)) {
+      throw new BadRequestException('Unsupported relation type');
+    }
 
-    if (hierarchyRelationTypes.includes(input.type)) {
+    if (input.fromId === ROOT_NODE_ID) {
+      throw new BadRequestException('Root cannot be a child relation');
+    }
+
+    const root = await this.conceptRepository.getRootConcept();
+    const fromDocument = await this.documentRepository.findById(input.fromId);
+    if (!fromDocument) {
+      throw new BadRequestException('Source document not found');
+    }
+
+    const fromConcept = await this.conceptRepository.findOrCreate(
+      toDocumentNodeLabel(fromDocument.id),
+    );
+
+    let toConcept = root;
+    if (input.toId !== ROOT_NODE_ID) {
+      const targetDocument = await this.documentRepository.findById(input.toId);
+      if (!targetDocument) {
+        throw new BadRequestException('Target document not found');
+      }
+      toConcept = await this.conceptRepository.findOrCreate(
+        toDocumentNodeLabel(targetDocument.id),
+      );
+    }
+
+    if (HIERARCHY_RELATION_TYPES.includes(input.type)) {
+      const existing = await this.conceptRepository.findRelationsForConcept(
+        fromConcept.id,
+      );
+      const existingParent = existing.find(
+        (rel) =>
+          rel.fromConceptId === fromConcept.id &&
+          HIERARCHY_RELATION_TYPES.includes(rel.relationType),
+      );
+
+      if (
+        existingParent &&
+        existingParent.toConceptId !== toConcept.id
+      ) {
+        throw new BadRequestException(
+          'Document already has a hierarchy parent',
+        );
+      }
+
       const hasCycle = await this.conceptRepository.detectCycle(
-        input.fromId,
-        input.toId,
+        fromConcept.id,
+        toConcept.id,
         10,
       );
 
@@ -34,8 +86,8 @@ export class CreateRelationUseCase {
     }
 
     await this.conceptRepository.createRelation(
-      input.fromId,
-      input.toId,
+      fromConcept.id,
+      toConcept.id,
       input.type,
     );
   }
