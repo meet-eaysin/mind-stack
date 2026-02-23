@@ -148,4 +148,56 @@ describe('FilteredSearchUseCase', () => {
     expect(result).toHaveLength(1);
     expect(result[0]?.chunkId).toBe('chunk-1');
   });
+
+  it('should exclude chunks that belong to non-ready documents', async () => {
+    vectorStore.setResults([
+      { id: 'chunk-ready', score: 0.95, metadata: {}, content: 'ready' },
+      {
+        id: 'chunk-processing',
+        score: 0.99,
+        metadata: {},
+        content: 'processing',
+      },
+    ]);
+    queryRepository.seed([
+      {
+        chunkId: 'chunk-ready',
+        content: 'ready content',
+        documentTitle: 'Ready doc',
+        author: null,
+        publishedAt: null,
+        sourceUrl: null,
+        importanceScore: 3,
+        tags: ['tag1'],
+        createdAt: new Date(),
+        hasNote: false,
+        reviewCount: 0,
+        documentStatus: INGESTION_STATUS.READY,
+        documentId: 'doc-ready',
+      },
+      {
+        chunkId: 'chunk-processing',
+        content: 'processing content',
+        documentTitle: 'Processing doc',
+        author: null,
+        publishedAt: null,
+        sourceUrl: null,
+        importanceScore: 3,
+        tags: ['tag1'],
+        createdAt: new Date(),
+        hasNote: false,
+        reviewCount: 0,
+        documentStatus: INGESTION_STATUS.INITIALIZING,
+        documentId: 'doc-processing',
+      },
+    ]);
+
+    const result = await useCase.execute({
+      query: 'test',
+      topK: 5,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.chunkId).toBe('chunk-ready');
+  });
 });

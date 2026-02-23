@@ -3,6 +3,7 @@ import type { VectorStore } from '@repo/vector-store';
 import type { QueryRepository } from '../domain/query-repository.interface.js';
 import { rankResults } from '../domain/ranking.service.js';
 import type { ChunkReference } from '@repo/shared-types';
+import { INGESTION_STATUS } from '@repo/shared-types';
 
 export class FilteredSearchUseCase {
   constructor(
@@ -82,11 +83,16 @@ export class FilteredSearchUseCase {
         createdAt: detail?.createdAt ?? new Date(),
         hasNote: detail?.hasNote ?? false,
         reviewCount: detail?.reviewCount ?? 0,
+        documentStatus: detail?.documentStatus,
         queryTags: input.tags,
       };
     });
 
-    const ranked = rankResults(merged);
+    const readyMerged = merged.filter(
+      (item) => item.documentStatus === INGESTION_STATUS.READY,
+    );
+
+    const ranked = rankResults(readyMerged);
 
     const unique = new Map<string, ChunkReference>();
     for (const r of ranked) {

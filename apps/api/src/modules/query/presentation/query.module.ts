@@ -78,6 +78,11 @@ import { VectorModule } from '../../../common/vector.module.js';
       inject: [EMBEDDING_PROVIDER, VECTOR_STORE, PrismaQueryRepository],
     },
   ],
-  exports: [SemanticSearchUseCase, EMBEDDING_PROVIDER, LLM_PROVIDER],
+  exports: [
+    SemanticSearchUseCase,
+    EMBEDDING_PROVIDER,
+    LLM_PROVIDER,
+    PrismaQueryRepository,
+  ],
 })
 export class QueryModule {}
