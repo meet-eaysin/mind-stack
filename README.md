@@ -105,7 +105,7 @@ cp .env.example .env
 3. Start infrastructure services:
 
 ```bash
-docker compose up -d
+docker compose up -d --wait
 ```
 
 4. Sync database schema:
@@ -144,7 +144,7 @@ Services in `docker-compose.yml`:
 Common commands:
 
 ```bash
-docker compose up -d
+docker compose up -d --wait
 docker compose ps
 docker compose logs -f postgres redis chroma ollama
 docker compose down
@@ -155,6 +155,7 @@ Docker vs non-Docker workflow:
 - Docker-backed: DB, queue, vector DB, and Ollama run in containers.
 - Local apps: `apps/api`, `apps/web`, `apps/worker` run via Yarn scripts on host.
 - `ollama-init` may appear as `Exited (0)` after successful model pull; this is expected.
+- On first run, model pull can take several minutes. Embedding jobs now retry automatically until models are ready.
 - Current gap: no `Dockerfile` exists for app-level containerized execution yet.
 
 ## Environment Variables

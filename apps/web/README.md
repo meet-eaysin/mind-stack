@@ -82,7 +82,7 @@ App URL:
 Current Docker workflow for web is Docker-assisted (dependencies only):
 
 ```bash
-docker compose up -d
+docker compose up -d --wait
 yarn workspace web dev
 ```
 

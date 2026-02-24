@@ -1,7 +1,11 @@
 import type { DocumentRepository } from '../domain/document-repository.interface';
 import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port';
-import { INGESTION_STATUS } from '@repo/shared-types';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { INGESTION_STATUS, SOURCE_TYPE } from '@repo/shared-types';
+import {
+  ConflictException,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 
 export class RetryIngestionUseCase {
   constructor(
@@ -26,10 +30,32 @@ export class RetryIngestionUseCase {
       INGESTION_STATUS.INGESTED,
     );
     await this.documentRepository.updateProcessingError(documentId, null);
-    const jobId = await this.jobProducer.enqueueChunkingJob(
-      documentId,
-      document.userId,
-    );
+    const jobId = await this.enqueueRetryJob(document);
     return { jobId };
+  }
+
+  private enqueueRetryJob(document: {
+    id: string;
+    userId: string;
+    sourceType: string;
+    sourceUrl: string | null;
+    rawContent: string;
+  }): Promise<string> {
+    if (
+      document.sourceType === SOURCE_TYPE.URL &&
+      document.rawContent.trim().length === 0
+    ) {
+      if (!document.sourceUrl) {
+        throw new ServiceUnavailableException(
+          'Cannot retry URL document without source URL',
+        );
+      }
+      return this.jobProducer.enqueueUrlExtractionJob(
+        document.id,
+        document.userId,
+      );
+    }
+
+    return this.jobProducer.enqueueChunkingJob(document.id, document.userId);
   }
 }

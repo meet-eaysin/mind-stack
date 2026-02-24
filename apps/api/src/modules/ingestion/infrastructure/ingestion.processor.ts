@@ -1,6 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject } from '@nestjs/common';
-import { JOB_TYPE, INGESTION_STATUS } from '@repo/shared-types';
+import { JOB_TYPE, INGESTION_STATUS, SOURCE_TYPE } from '@repo/shared-types';
 import type { VectorStore, VectorDocument } from '@repo/vector-store';
 import { VECTOR_STORE } from '../../../common/tokens';
 import type { IngestionJob } from '../domain/ingestion-job.types';
@@ -71,13 +71,28 @@ export class IngestionProcessor extends WorkerHost {
             ? error
             : 'Unknown error';
       const message = this.formatErrorMessage(raw);
+      const maxAttempts = this.getAttempts(job);
+      const attemptNumber = job.attemptsMade + 1;
+      const willRetry = attemptNumber < maxAttempts;
+
       await this.documentRepository.updateProcessingError(documentId, message);
-      await this.transition(documentId, INGESTION_STATUS.FAILED);
-      logger.error('Ingestion job failed', {
-        jobType,
-        documentId,
-        error: message,
-      });
+
+      if (willRetry) {
+        logger.warn('Ingestion job failed; retry scheduled', {
+          jobType,
+          documentId,
+          attempt: attemptNumber,
+          maxAttempts,
+          error: message,
+        });
+      } else {
+        await this.transition(documentId, INGESTION_STATUS.FAILED);
+        logger.error('Ingestion job failed', {
+          jobType,
+          documentId,
+          error: message,
+        });
+      }
       throw error;
     }
   }
@@ -88,6 +103,13 @@ export class IngestionProcessor extends WorkerHost {
     const document = await this.documentRepository.findById(documentId);
     if (!document) {
       throw new Error(`Document not found: ${documentId}`);
+    }
+    if (document.sourceType !== SOURCE_TYPE.URL) {
+      logger.warn('Skipping URL extraction for non-URL source', {
+        documentId,
+        sourceType: document.sourceType,
+      });
+      return;
     }
     if (!document.sourceUrl) {
       throw new Error(`URL extraction requires sourceUrl: ${documentId}`);
@@ -115,13 +137,38 @@ export class IngestionProcessor extends WorkerHost {
   }
 
   private async processChunking(documentId: string): Promise<void> {
-    await this.transition(documentId, INGESTION_STATUS.CHUNKING);
-
     const document = await this.documentRepository.findById(documentId);
     if (!document) {
       throw new Error(`Document not found: ${documentId}`);
     }
+    const allowedStatuses: string[] = [
+      INGESTION_STATUS.INGESTED,
+      INGESTION_STATUS.INITIALIZING,
+      INGESTION_STATUS.CHUNKING,
+    ];
+    if (!allowedStatuses.includes(document.status)) {
+      logger.warn('Skipping chunking for document in incompatible status', {
+        documentId,
+        status: document.status,
+      });
+      return;
+    }
+
+    await this.transition(documentId, INGESTION_STATUS.CHUNKING);
+
     if (!document.rawContent.trim()) {
+      if (document.sourceType === SOURCE_TYPE.URL && document.sourceUrl) {
+        logger.warn(
+          'Chunking received URL document with empty content; re-queueing URL extraction',
+          { documentId },
+        );
+        await this.transition(documentId, INGESTION_STATUS.INITIALIZING);
+        await this.jobProducer.enqueueUrlExtractionJob(
+          documentId,
+          document.userId,
+        );
+        return;
+      }
       throw new Error(`Document has empty content: ${documentId}`);
     }
 
@@ -142,12 +189,23 @@ export class IngestionProcessor extends WorkerHost {
   }
 
   private async processEmbedding(documentId: string): Promise<void> {
-    await this.transition(documentId, INGESTION_STATUS.EMBEDDING);
-
     const document = await this.documentRepository.findById(documentId);
     if (!document) {
       throw new Error(`Document not found: ${documentId}`);
     }
+    const allowedStatuses: string[] = [
+      INGESTION_STATUS.CHUNKING,
+      INGESTION_STATUS.EMBEDDING,
+    ];
+    if (!allowedStatuses.includes(document.status)) {
+      logger.warn('Skipping embedding for document in incompatible status', {
+        documentId,
+        status: document.status,
+      });
+      return;
+    }
+
+    await this.transition(documentId, INGESTION_STATUS.EMBEDDING);
 
     const health = await this.checkEmbeddingModel.execute(document.userId);
     if (!health.available) {
@@ -160,6 +218,14 @@ export class IngestionProcessor extends WorkerHost {
 
     const chunks = await this.chunkRepository.findByDocumentId(documentId);
     if (chunks.length === 0) {
+      if (document.rawContent.trim().length > 0) {
+        logger.warn(
+          'Embedding received document without chunks; re-queueing chunking',
+          { documentId },
+        );
+        await this.jobProducer.enqueueChunkingJob(documentId, document.userId);
+        return;
+      }
       throw new Error(`No chunks found for embedding: ${documentId}`);
     }
 
@@ -188,6 +254,25 @@ export class IngestionProcessor extends WorkerHost {
   }
 
   private async processConceptExtraction(documentId: string): Promise<void> {
+    const document = await this.documentRepository.findById(documentId);
+    if (!document) {
+      throw new Error(`Document not found: ${documentId}`);
+    }
+    const allowedStatuses: string[] = [
+      INGESTION_STATUS.EMBEDDING,
+      INGESTION_STATUS.GRAPH_BUILDING,
+    ];
+    if (!allowedStatuses.includes(document.status)) {
+      logger.warn(
+        'Skipping concept extraction for document in incompatible status',
+        {
+          documentId,
+          status: document.status,
+        },
+      );
+      return;
+    }
+
     await this.transition(documentId, INGESTION_STATUS.GRAPH_BUILDING);
 
     await this.buildGraph.execute({ documentId });
@@ -267,5 +352,13 @@ export class IngestionProcessor extends WorkerHost {
     const trimmed = message.trim();
     if (trimmed.length <= 300) return trimmed;
     return `${trimmed.slice(0, 300)}…`;
+  }
+
+  private getAttempts(job: IngestionJob): number {
+    const value = job.opts.attempts;
+    if (typeof value === 'number' && Number.isInteger(value) && value > 0) {
+      return value;
+    }
+    return 1;
   }
 }

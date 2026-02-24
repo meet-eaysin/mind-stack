@@ -112,14 +112,16 @@ class FakeDocumentRepository implements DocumentRepository {
 }
 
 class FakeIngestionJobProducer implements IngestionJobProducerPort {
-  readonly enqueuedIds: string[] = [];
+  readonly chunkingEnqueuedIds: string[] = [];
+  readonly urlExtractionEnqueuedIds: string[] = [];
 
-  async enqueueUrlExtractionJob(_documentId: string): Promise<string> {
+  async enqueueUrlExtractionJob(documentId: string): Promise<string> {
+    this.urlExtractionEnqueuedIds.push(documentId);
     return 'mock-job-id';
   }
 
   async enqueueChunkingJob(documentId: string): Promise<string> {
-    this.enqueuedIds.push(documentId);
+    this.chunkingEnqueuedIds.push(documentId);
     return 'mock-job-id';
   }
 
@@ -144,11 +146,13 @@ describe('RetryIngestionUseCase', () => {
     useCase = new RetryIngestionUseCase(documentRepository, jobProducer);
   });
 
-  it('should reset a FAILED document to INGESTED and enqueue a chunking job', async () => {
+  it('should reset a FAILED document to INGESTED and enqueue URL extraction for URL documents without content', async () => {
     const doc = createDocumentFixture({
       id: 'doc-fail',
       status: INGESTION_STATUS.FAILED,
       processingError: 'Embedding failed',
+      sourceType: SOURCE_TYPE.URL,
+      rawContent: '',
     });
     documentRepository.seed(doc);
 
@@ -157,7 +161,23 @@ describe('RetryIngestionUseCase', () => {
     const updated = documentRepository.getDocument('doc-fail');
     expect(updated?.status).toBe(INGESTION_STATUS.INGESTED);
     expect(updated?.processingError).toBeNull();
-    expect(jobProducer.enqueuedIds).toEqual(['doc-fail']);
+    expect(jobProducer.urlExtractionEnqueuedIds).toEqual(['doc-fail']);
+    expect(jobProducer.chunkingEnqueuedIds).toEqual([]);
+  });
+
+  it('should enqueue chunking when retrying a document that already has raw content', async () => {
+    const doc = createDocumentFixture({
+      id: 'doc-with-content',
+      status: INGESTION_STATUS.FAILED,
+      sourceType: SOURCE_TYPE.TEXT,
+      rawContent: 'already extracted content',
+    });
+    documentRepository.seed(doc);
+
+    await useCase.execute('doc-with-content');
+
+    expect(jobProducer.chunkingEnqueuedIds).toEqual(['doc-with-content']);
+    expect(jobProducer.urlExtractionEnqueuedIds).toEqual([]);
   });
 
   it('should throw when the document is not found', async () => {

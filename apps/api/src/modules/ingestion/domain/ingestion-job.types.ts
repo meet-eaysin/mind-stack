@@ -1,3 +1,4 @@
+import type { Job } from 'bullmq';
 import { JobType } from '@repo/shared-types';
 
 export type IngestionJobData = {
@@ -6,7 +7,4 @@ export type IngestionJobData = {
   rawContent?: string;
 };
 
-export type IngestionJob = {
-  name: JobType | string;
-  data: IngestionJobData;
-};
+export type IngestionJob = Job<IngestionJobData, void, JobType>;

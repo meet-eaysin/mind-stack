@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
-import type { Queue } from 'bullmq';
+import type { JobsOptions, Queue } from 'bullmq';
 import { JOB_TYPE, type JobType } from '@repo/shared-types';
 import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port.js';
 import type { IngestionJobData } from '../domain/ingestion-job.types.js';
@@ -46,16 +46,67 @@ export class IngestionJobProducer implements IngestionJobProducerPort {
   }
 
   private async addJob(type: JobType, data: IngestionJobData): Promise<string> {
-    const job = await this.queue.add(type, data, {
+    const options = this.optionsFor(type);
+    const job = await this.queue.add(type, data, options);
+    return job.id!;
+  }
+
+  private optionsFor(type: JobType): JobsOptions {
+    const base: JobsOptions = {
+      removeOnComplete: true,
+      removeOnFail: false,
+    };
+
+    if (type === JOB_TYPE.CHUNKING) {
+      // Chunking errors are usually deterministic (e.g. empty content).
+      return {
+        ...base,
+        attempts: 1,
+      };
+    }
+
+    if (type === JOB_TYPE.EMBEDDING) {
+      // Embedding may need extra time while model bootstrapping/pull completes.
+      return {
+        ...base,
+        attempts: 20,
+        backoff: {
+          type: 'fixed',
+          delay: 15_000,
+        },
+      };
+    }
+
+    if (type === JOB_TYPE.URL_EXTRACTION) {
+      return {
+        ...base,
+        attempts: 5,
+        backoff: {
+          type: 'exponential',
+          delay: 3_000,
+        },
+      };
+    }
+
+    if (type === JOB_TYPE.CONCEPT_EXTRACTION) {
+      return {
+        ...base,
+        attempts: 5,
+        backoff: {
+          type: 'exponential',
+          delay: 2_000,
+        },
+      };
+    }
+
+    return {
+      ...base,
       attempts: 3,
       backoff: {
         type: 'exponential',
-        delay: 1000,
+        delay: 1_000,
       },
-      removeOnComplete: true,
-      removeOnFail: false,
-    });
-    return job.id!;
+    };
   }
 
   async getJobStatus(jobId: string) {

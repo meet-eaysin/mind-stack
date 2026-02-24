@@ -79,7 +79,7 @@ Cross-cutting backend concerns are centralized in:
 From repository root:
 
 ```bash
-docker compose up -d
+docker compose up -d --wait
 yarn workspace @repo/database db:push
 yarn workspace api dev
 ```
@@ -96,12 +96,13 @@ Swagger (if `@nestjs/swagger` and `swagger-ui-express` are installed):
 
 Current Docker workflow is dependency-oriented:
 
-- Start infra with `docker compose up -d` (Postgres, Redis, Chroma, Ollama).
+- Start infra with `docker compose up -d --wait` (Postgres, Redis, Chroma, Ollama).
 - Run API process on host via `yarn workspace api dev`.
 
 Note:
 
 - There is currently no `Dockerfile` for `apps/api`, so full API container execution is not yet defined in this repository.
+- First startup may spend time pulling Ollama models; embedding jobs use retry policy to tolerate model warm-up.
 
 ## Scripts
 
