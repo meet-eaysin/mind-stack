@@ -1,5 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
+import { ConfigService } from '@nestjs/config';
 import { IngestionController } from './ingestion.controller.js';
 import { PrismaDocumentRepository } from '../infrastructure/prisma-document.repository.js';
 import {
@@ -69,8 +70,13 @@ import { SettingsModule } from '../../settings/presentation/settings.module.js';
       useFactory: (
         repo: PrismaDocumentRepository,
         producer: IngestionJobProducer,
-      ) => new IngestYoutubeUseCase(repo, producer),
-      inject: [PrismaDocumentRepository, IngestionJobProducer],
+        config: ConfigService,
+      ) =>
+        new IngestYoutubeUseCase(repo, producer, {
+          youtubeCookie: config.get<string>('YOUTUBE_COOKIE'),
+          youtubeProxyUrl: config.get<string>('YOUTUBE_PROXY_URL'),
+        }),
+      inject: [PrismaDocumentRepository, IngestionJobProducer, ConfigService],
     },
     {
       provide: RetryIngestionUseCase,

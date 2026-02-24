@@ -73,6 +73,13 @@ Cross-cutting backend concerns are centralized in:
 | `WEB_URL` | No | `http://localhost:3000` |
 | `API_URL` | No | `http://localhost:4000` |
 | `API_KEY` | No | unset |
+| `YOUTUBE_COOKIE` | No | unset |
+| `YOUTUBE_PROXY_URL` | No | unset |
+
+Notes:
+
+- `YOUTUBE_COOKIE` can be used for authenticated YouTube fetches when caption endpoints are bot-gated.
+- `YOUTUBE_PROXY_URL` lets YouTube requests run through a proxy egress (useful when the host IP is rate-limited with `429`).
 
 ## Local Development
 

@@ -174,6 +174,8 @@ Server/runtime variables (`@repo/config` -> `serverEnvSchema`):
 | `CHROMA_COLLECTION`  | No       | `mind-stack`             | API, Worker               |
 | `REDIS_URL`          | No       | `redis://localhost:6379` | API, Worker               |
 | `LOG_LEVEL`          | No       | `info`                   | API, Worker               |
+| `YOUTUBE_COOKIE`     | No       | unset                    | API (YouTube ingest)      |
+| `YOUTUBE_PROXY_URL`  | No       | unset                    | API (YouTube ingest)      |
 | `WEB_URL`            | No       | `http://localhost:3000`  | API CORS                  |
 | `API_URL`            | No       | `http://localhost:4000`  | Internal/shared config    |
 | `API_KEY`            | No       | unset                    | API guard (optional auth) |

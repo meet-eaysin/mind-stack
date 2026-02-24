@@ -103,6 +103,12 @@ function buildCaptionXml(texts: string[]): string {
   return `<?xml version="1.0"?><transcript>${entries}</transcript>`;
 }
 
+function buildCaptionJson3(texts: string[]): string {
+  return JSON.stringify({
+    events: texts.map((t) => ({ segs: [{ utf8: t }] })),
+  });
+}
+
 // ── Tests ──
 
 describe('IngestYoutubeUseCase', () => {
@@ -159,5 +165,95 @@ describe('IngestYoutubeUseCase', () => {
         userId: 'default',
       }),
     ).rejects.toThrow('Failed to fetch YouTube page: 500');
+  });
+
+  it('should extract transcript from json3 caption payload', async () => {
+    const captionUrl = 'https://captions.example.com/en?foo=bar';
+    const pageHtml = buildYoutubePageHtml(captionUrl);
+    const captionJson = buildCaptionJson3(['Never', 'Gonna Give You Up']);
+
+    const fetchSpy = jest.spyOn(globalThis, 'fetch');
+    fetchSpy.mockResolvedValueOnce(new Response(pageHtml, { status: 200 }));
+    fetchSpy.mockResolvedValueOnce(new Response(captionJson, { status: 200 }));
+
+    const result = await useCase.execute({
+      url: 'https://www.youtube.com/watch?v=abc123',
+      title: 'JSON3 Video',
+      userId: 'default',
+    });
+
+    expect(result.documentId).toBeDefined();
+    expect(documentRepository.saved).toHaveLength(1);
+    expect(documentRepository.saved[0]?.rawContent).toBe(
+      'Never Gonna Give You Up',
+    );
+    expect(jobProducer.enqueuedIds).toHaveLength(1);
+  });
+
+  it('should throw when captions exist but contain no transcript text', async () => {
+    const captionUrl = 'https://captions.example.com/en';
+    const pageHtml = buildYoutubePageHtml(captionUrl);
+    const emptyCaptionXml = '<?xml version="1.0"?><transcript></transcript>';
+
+    const fetchSpy = jest.spyOn(globalThis, 'fetch');
+    fetchSpy.mockResolvedValueOnce(new Response(pageHtml, { status: 200 }));
+    fetchSpy.mockResolvedValueOnce(
+      new Response(emptyCaptionXml, { status: 200 }),
+    );
+    fetchSpy.mockResolvedValueOnce(
+      new Response(emptyCaptionXml, { status: 200 }),
+    );
+
+    await expect(
+      useCase.execute({
+        url: 'https://www.youtube.com/watch?v=abc123',
+        userId: 'default',
+      }),
+    ).rejects.toThrow('No transcript text found for this video captions');
+
+    expect(documentRepository.saved).toHaveLength(0);
+    expect(jobProducer.enqueuedIds).toHaveLength(0);
+  });
+
+  it('should throw when caption endpoint is rate limited', async () => {
+    const captionUrl = 'https://captions.example.com/en';
+    const pageHtml = buildYoutubePageHtml(captionUrl);
+
+    const fetchSpy = jest.spyOn(globalThis, 'fetch');
+    fetchSpy.mockResolvedValueOnce(new Response(pageHtml, { status: 200 }));
+    fetchSpy.mockResolvedValue(new Response('Sorry...', { status: 429 }));
+
+    await expect(
+      useCase.execute({
+        url: 'https://www.youtube.com/watch?v=abc123',
+        userId: 'default',
+      }),
+    ).rejects.toThrow('Failed to fetch captions: 429');
+
+    expect(documentRepository.saved).toHaveLength(0);
+    expect(jobProducer.enqueuedIds).toHaveLength(0);
+  });
+
+  it('should recover when caption request is rate limited once then succeeds', async () => {
+    const captionUrl = 'https://captions.example.com/en?lang=en';
+    const pageHtml = buildYoutubePageHtml(captionUrl);
+    const captionXml = buildCaptionXml(['Recovered', 'Transcript']);
+
+    const fetchSpy = jest.spyOn(globalThis, 'fetch');
+    fetchSpy.mockResolvedValueOnce(new Response(pageHtml, { status: 200 }));
+    fetchSpy.mockResolvedValueOnce(new Response('Sorry...', { status: 429 }));
+    fetchSpy.mockResolvedValueOnce(new Response(captionXml, { status: 200 }));
+
+    const result = await useCase.execute({
+      url: 'https://www.youtube.com/watch?v=abc123',
+      userId: 'default',
+    });
+
+    expect(result.documentId).toBeDefined();
+    expect(documentRepository.saved).toHaveLength(1);
+    expect(documentRepository.saved[0]?.rawContent).toBe(
+      'Recovered Transcript',
+    );
+    expect(jobProducer.enqueuedIds).toHaveLength(1);
   });
 });

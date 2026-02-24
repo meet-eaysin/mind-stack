@@ -16,6 +16,8 @@ export const serverEnvSchema = z.object({
     .enum(["fatal", "error", "warn", "info", "debug", "trace"])
     .default("info"),
   API_KEY: z.string().optional(),
+  YOUTUBE_COOKIE: z.string().optional(),
+  YOUTUBE_PROXY_URL: z.string().url().optional(),
   WEB_URL: z.string().default("http://localhost:3000"),
   API_URL: z.string().default("http://localhost:4000"),
 });

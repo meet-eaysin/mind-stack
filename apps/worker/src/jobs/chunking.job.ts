@@ -47,6 +47,9 @@ export async function handleChunkingJob(
   try {
     const content = document.rawContent;
     const chunks = splitIntoChunks(content, CHUNK_SIZE, CHUNK_OVERLAP);
+    if (chunks.length === 0) {
+      throw new Error(`Failed to produce chunks for document: ${documentId}`);
+    }
 
     await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       for (const chunk of chunks) {
