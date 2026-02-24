@@ -1,100 +1,92 @@
-# Mind Stack Monorepo
+# Mind Stack
 
-Mind Stack is a Turborepo monorepo for personal knowledge ingestion, retrieval, graph exploration, and spaced review.
+Mind Stack is a production-grade experimental monorepo showcasing modern full-stack architecture, AI-powered ingestion pipelines, and scalable developer workflows.
 
-## Overview
+## Project Purpose
 
-- `apps/api`: NestJS backend (HTTP API + ingestion processor + clean-architecture modules)
-- `apps/web`: Next.js application for the product UI
-- `apps/worker`: BullMQ worker for asynchronous ingestion/review jobs
-- `apps/docs`: Next.js docs playground app
-- `packages/*`: shared runtime libraries and build-time tooling
+This repository showcases:
 
-## Architecture
+- Modular backend design with NestJS and clear architectural boundaries.
+- A feature-driven frontend built with Next.js App Router and React Query.
+- Shared internal packages for contracts, config, logging, database, and AI integrations.
+- Queue-based ingestion and processing workflows.
+- Monorepo developer experience with Turborepo + Yarn workspaces.
 
-### Apps and responsibilities
+## Tech Stack
 
-- `api`: composition root for backend modules; orchestrates use-cases, validation, guards, filters, interceptors, and infrastructure adapters.
-- `web`: presentation layer for end users; feature-scoped API clients/hooks/components built on React Query.
-- `worker`: asynchronous execution boundary for queue jobs (chunking, embedding, concept extraction, daily review, URL extraction).
-- `docs`: isolated docs/demo app using shared UI package.
+- Monorepo: Turborepo, Yarn 4 workspaces
+- Backend: NestJS, BullMQ, Prisma, PostgreSQL, Redis
+- AI & Retrieval: Ollama, ChromaDB
+- Frontend: Next.js 16, React 19, TanStack Query, Zod, Tailwind CSS
+- Tooling: TypeScript, ESLint, Prettier, Jest, Vitest, MSW
+- Containers: Docker Compose (infrastructure services)
 
-### Shared packages
+## High-Level Architecture
 
-- `@repo/shared-types`: cross-app domain enums and DTO contracts.
-- `@repo/config`: centralized env schema/loader.
-- `@repo/logger`: centralized structured logger.
-- `@repo/database`: Prisma client package.
-- `@repo/llm`, `@repo/embeddings`, `@repo/vector-store`: external service adapters.
-- `@repo/eslint-config`, `@repo/typescript-config`: shared build/lint policy.
-- `@repo/ui`: shared UI primitives.
+```text
+apps/web (Next.js UI)
+  -> calls apps/api (NestJS REST API)
+     -> persists metadata/content in PostgreSQL (Prisma)
+     -> queues ingestion jobs in Redis (BullMQ)
+     -> reads/writes embeddings in ChromaDB
+     -> calls Ollama for embeddings/generation
 
-## Clean Architecture In This Repo
+apps/worker (BullMQ worker)
+  -> consumes ingestion jobs
+  -> performs chunking, embedding, concept extraction, review jobs
 
-Backend modules follow `domain` / `application` / `infrastructure` / `presentation` separation:
-
-- `domain`: entities, value rules, repository interfaces.
-- `application`: use-cases and orchestration logic.
-- `infrastructure`: Prisma repositories, queue adapters, external integrations.
-- `presentation`: Nest controllers/modules/DTOs.
-
-Dependency direction stays inward:
-
-- `presentation -> application -> domain`
-- `infrastructure -> domain` (implements domain ports)
-
-Frontend keeps data logic in feature API/hook layers and keeps components presentation-focused.
+packages/*
+  -> shared contracts, infra adapters, and build tooling
+```
 
 ## Monorepo Structure
 
 ```text
 apps/
-  api/
-  web/
-  worker/
-  docs/
+  api/      # NestJS backend API
+  web/      # Next.js frontend
+  worker/   # BullMQ background worker
+  docs/     # docs/demo app (Next.js)
 packages/
-  config/
-  database/
-  embeddings/
-  eslint-config/
-  llm/
-  logger/
-  shared-types/
-  typescript-config/
-  ui/
-  vector-store/
+  config/            # env schemas + loaders
+  database/          # Prisma client package
+  embeddings/        # embedding provider abstractions
+  llm/               # LLM provider abstractions
+  vector-store/      # Chroma adapter + vector interface
+  logger/            # shared structured logger
+  shared-types/      # shared DTO/enums contracts
+  ui/                # shared UI primitives
+  eslint-config/     # lint presets
+  typescript-config/ # tsconfig presets
 ```
 
-## Prerequisites
+## Workspace Configuration
 
-- Node.js `>= 18`
-- Yarn `4.x`
-- Docker + Docker Compose
+- Package manager: `yarn@4.12.0`
+- Workspace globs: `apps/*`, `packages/*`
+- Node linker: `node-modules` (`.yarnrc.yml`)
+- Turborepo pipeline: `build`, `dev`, `test`, `lint`, `typecheck`, `clean`
 
-## Environment Configuration
+## Turborepo Pipelines
 
-Root `.env` is consumed by backend/worker config via `@repo/config`.
+Root scripts:
 
-Required server variables:
+```bash
+yarn dev
+yarn build
+yarn lint
+yarn typecheck
+yarn test
+yarn clean
+```
 
-- `NODE_ENV`
-- `DATABASE_URL`
-- `API_PORT`
-- `OLLAMA_BASE_URL`
-- `OLLAMA_MODEL`
-- `OLLAMA_EMBED_MODEL`
-- `CHROMA_URL`
-- `CHROMA_COLLECTION`
-- `REDIS_URL`
-- `LOG_LEVEL`
-- `WEB_URL`
-- `API_URL`
-- `API_KEY` (optional; enables API key guard when set)
+Pipeline behavior (`turbo.json`):
 
-Web variable:
-
-- `NEXT_PUBLIC_API_URL` (for `apps/web`, defaults to `http://localhost:4000/api/v1`)
+- `build`: depends on upstream package builds, caches `dist/**` and `.next/**`
+- `dev`: non-cached, persistent
+- `test`: depends on `^build`
+- `lint`/`typecheck`: run across dependency graph
+- `globalEnv`: `OLLAMA_BASE_URL`, `OLLAMA_EMBED_MODEL`, `OLLAMA_MODEL`, `NEXT_PUBLIC_API_URL`
 
 ## Local Development Setup
 
@@ -104,90 +96,211 @@ Web variable:
 yarn install
 ```
 
-2. Start infrastructure:
+2. Create/update root `.env` (see Environment Variables section).
+
+3. Start infrastructure services:
 
 ```bash
 docker compose up -d
 ```
 
-3. Optional: pull Ollama models defined in `.env`:
+4. Optional: pull Ollama models declared in `.env`:
 
 ```bash
 docker compose --profile init-models up ollama-init
 ```
 
-4. Sync Prisma schema:
+5. Sync database schema:
 
 ```bash
 yarn workspace @repo/database db:push
 ```
 
-## Run Services
-
-Run everything (all workspace `dev` scripts through Turbo):
+6. Start the monorepo:
 
 ```bash
 yarn dev
 ```
 
-Run backend only:
+Targeted starts:
 
 ```bash
 yarn workspace api dev
-```
-
-Run web only:
-
-```bash
 yarn workspace web dev
-```
-
-Run worker/jobs only:
-
-```bash
 yarn workspace worker dev
-```
-
-Run docs app only:
-
-```bash
 yarn workspace docs dev
 ```
 
-## Build
+## Docker and Docker Compose
 
-Build all workspaces:
+This repository currently uses Docker Compose for infrastructure dependencies (not for app containers).
+
+Services in `docker-compose.yml`:
+
+- `postgres` on `5432`
+- `redis` on `6379`
+- `chroma` on `8000`
+- `ollama` on `11434`
+- `ollama-init` profile job for model pre-pull
+
+Common commands:
 
 ```bash
-yarn build
+docker compose up -d
+docker compose ps
+docker compose logs -f postgres redis chroma ollama
+docker compose down
 ```
 
-## Testing
+Docker vs non-Docker workflow:
 
-All workspaces:
+- Docker-backed: DB, queue, vector DB, and Ollama run in containers.
+- Local apps: `apps/api`, `apps/web`, `apps/worker` run via Yarn scripts on host.
+- Current gap: no `Dockerfile` exists for app-level containerized execution yet.
+
+## Environment Variables
+
+Server/runtime variables (`@repo/config` -> `serverEnvSchema`):
+
+| Variable             | Required | Default                  | Used by                   |
+| -------------------- | -------- | ------------------------ | ------------------------- |
+| `NODE_ENV`           | No       | `development`            | API, Worker               |
+| `DATABASE_URL`       | Yes      | -                        | API, Worker, Prisma       |
+| `API_PORT`           | No       | `4000`                   | API                       |
+| `OLLAMA_BASE_URL`    | No       | `http://localhost:11434` | API, Worker               |
+| `OLLAMA_MODEL`       | Yes      | -                        | API, Worker               |
+| `OLLAMA_EMBED_MODEL` | Yes      | -                        | API, Worker               |
+| `CHROMA_URL`         | No       | `http://localhost:8000`  | API, Worker               |
+| `CHROMA_COLLECTION`  | No       | `mind-stack`             | API, Worker               |
+| `REDIS_URL`          | No       | `redis://localhost:6379` | API, Worker               |
+| `LOG_LEVEL`          | No       | `info`                   | API, Worker               |
+| `WEB_URL`            | No       | `http://localhost:3000`  | API CORS                  |
+| `API_URL`            | No       | `http://localhost:4000`  | Internal/shared config    |
+| `API_KEY`            | No       | unset                    | API guard (optional auth) |
+
+Web variable (`webEnvSchema`):
+
+| Variable              | Required | Default                        | Used by        |
+| --------------------- | -------- | ------------------------------ | -------------- |
+| `NEXT_PUBLIC_API_URL` | No       | `http://localhost:4000/api/v1` | Web API client |
+
+## Backend Architecture (NestJS + Clean Architecture)
+
+The backend modules follow a layered structure:
+
+- `domain`: entities and repository/port interfaces
+- `application`: use-cases and orchestration logic
+- `infrastructure`: Prisma adapters, queue adapters, external providers
+- `presentation`: NestJS controllers, modules, DTOs
+
+Dependency direction:
+
+- `presentation -> application -> domain`
+- `infrastructure -> domain` (implements ports)
+- Domain never imports presentation or infrastructure.
+
+## Frontend Architecture
+
+`apps/web` uses feature-first organization:
+
+- `src/app`: route-level pages (App Router)
+- `src/features/*`: per-domain API clients, hooks, schemas, components
+- `src/lib/api-client.ts`: centralized fetch/error handling + Zod validation
+- `src/lib/query-client.ts`: React Query defaults and caching policy
+- `src/constants/endpoints.ts`: backend route contract surface
+
+## Unified API Response Standard
+
+Current state:
+
+- Error responses are globally standardized in API middleware/filter.
+- Success responses are currently inconsistent (`{ success: true }`, resource objects, and `204` empty bodies).
+
+Project standard (to enforce for all new/refactored endpoints):
+
+### Success format
+
+```json
+{
+  "success": true,
+  "data": {},
+  "meta": {
+    "correlationId": "uuid"
+  }
+}
+```
+
+### Error format
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "RESOURCE_NOT_FOUND",
+    "message": "Document not found",
+    "details": []
+  },
+  "meta": {
+    "correlationId": "uuid",
+    "timestamp": "2026-02-24T12:00:00.000Z",
+    "path": "/api/v1/knowledge/documents/123"
+  }
+}
+```
+
+### Pagination format
+
+```json
+{
+  "success": true,
+  "data": [],
+  "meta": {
+    "pagination": {
+      "page": 1,
+      "pageSize": 20,
+      "totalItems": 240,
+      "totalPages": 12
+    },
+    "correlationId": "uuid"
+  }
+}
+```
+
+### Standard error codes
+
+- `VALIDATION_ERROR`
+- `UNAUTHORIZED`
+- `FORBIDDEN`
+- `RESOURCE_NOT_FOUND`
+- `CONFLICT`
+- `RATE_LIMITED`
+- `EMBEDDING_MODEL_UNAVAILABLE`
+- `INGESTION_FAILED`
+- `INTERNAL_ERROR`
+
+### HTTP status mapping
+
+| Scenario                    | Status                       |
+| --------------------------- | ---------------------------- |
+| Successful read             | `200 OK`                     |
+| Resource created            | `201 Created`                |
+| Async accepted              | `202 Accepted`               |
+| Successful update           | `200 OK` or `204 No Content` |
+| Successful delete           | `204 No Content`             |
+| Validation failure          | `400 Bad Request`            |
+| Missing/invalid auth        | `401 Unauthorized`           |
+| Authenticated but forbidden | `403 Forbidden`              |
+| Resource missing            | `404 Not Found`              |
+| Business conflict           | `409 Conflict`               |
+| Rate limit reached          | `429 Too Many Requests`      |
+| Unexpected server failure   | `500 Internal Server Error`  |
+
+## Testing and Linting
+
+Run across the monorepo:
 
 ```bash
 yarn test
-```
-
-Backend only:
-
-```bash
-yarn workspace api test
-yarn workspace api test:e2e
-```
-
-Web only:
-
-```bash
-yarn workspace web test
-```
-
-## Linting and Typechecking
-
-All workspaces:
-
-```bash
 yarn lint
 yarn typecheck
 ```
@@ -195,73 +308,47 @@ yarn typecheck
 Targeted examples:
 
 ```bash
-yarn workspace api typecheck
-yarn workspace web lint
-yarn workspace worker typecheck
+yarn workspace api test
+yarn workspace api test:e2e
+yarn workspace web test
+yarn workspace worker lint
 ```
 
-## API Response/Error Model
+## Contribution Guidelines
 
-- Success payloads remain endpoint-specific (no global success envelope).
-- Error payloads are standardized globally in API filter:
-  - `statusCode`
-  - `error`
-  - `message`
-  - `details?` (validation details)
-  - `path`
-  - `timestamp`
-  - `correlationId`
+1. Create a feature branch from `main`.
+2. Keep changes scoped and atomic.
+3. Follow existing architectural boundaries and naming conventions.
+4. Add or update tests for behavior changes.
+5. Run `yarn lint`, `yarn typecheck`, and relevant tests before opening PR.
+6. Update documentation for new modules, endpoints, env vars, or operational changes.
 
-## Swagger
+## Roadmap
 
-API bootstrap includes centralized Swagger wiring (`DocumentBuilder` + `createDocument`).
+- Add app-level Dockerfiles and compose profiles for full containerized local development.
+- Enforce unified success/pagination envelopes across all API endpoints.
+- Standardize REST resource naming for action-style endpoints.
+- Add dedicated READMEs for `apps/worker` and `apps/docs`.
+- Add CI workflow docs and architecture decision records (ADRs).
 
-If `@nestjs/swagger` is not installed in the environment, the API starts without docs and logs a warning. Install:
+## Clean Code and Architecture Principles
 
-```bash
-yarn workspace api add @nestjs/swagger swagger-ui-express
-```
+- Keep business rules in use-cases, not controllers.
+- Depend on interfaces/ports, not concrete adapters.
+- Centralize cross-cutting concerns (config, logging, error handling).
+- Prefer explicit DTO/contracts over ad-hoc payloads.
+- Preserve strict type safety and schema validation at boundaries.
+- Keep modules cohesive and feature-oriented.
 
-Then docs are available at:
+## Architecture & Documentation Review Notes
 
-- `http://localhost:4000/api/docs`
-
-## Troubleshooting
-
-### Ollama/Embedding failures
-
-- Check Ollama container is running:
-
-```bash
-docker compose ps
-```
-
-- Verify Ollama endpoint from host:
-
-```bash
-curl -sS http://localhost:11434/api/tags
-```
-
-- Ensure models in `.env` are available (`OLLAMA_EMBED_MODEL`, `OLLAMA_MODEL`).
-- If embedding health fails in API, call:
-  - `GET /api/v1/admin/health/embedding-model` with `x-user-id` header.
-
-### Queue jobs not progressing
-
-- Confirm Redis is reachable (`REDIS_URL`).
-- Confirm worker process is running (`yarn workspace worker dev`).
-- Check API and worker logs for `correlationId`, `jobType`, and `documentId`.
-
-### Database issues
-
-- Ensure Postgres container is healthy.
-- Re-run schema push:
-
-```bash
-yarn workspace @repo/database db:push
-```
-
-### Web cannot reach API
-
-- Verify `NEXT_PUBLIC_API_URL` points to `http://localhost:4000/api/v1` (or your target API URL).
-- Confirm backend CORS origin (`WEB_URL`) matches web host.
+- `docker-compose.yml` currently provisions only dependencies; no app container build workflow exists.  
+  Suggested improvement: add Dockerfiles for `apps/api`, `apps/web`, and `apps/worker` with compose profiles for full-stack containerized development.
+- API responses are not fully uniform (mix of raw objects, `{ success: true }`, and `204`).  
+  Suggested improvement: adopt one response envelope with shared serializers/interceptors.
+- Several endpoints use action-style verbs (`/tags/add`, `/notes/update/:id`) instead of resource-first REST patterns.  
+  Suggested improvement: migrate to resource-centric routes (`POST /documents/:id/tags`, `PATCH /notes/:id`).
+- Ingestion processing exists in both API (`IngestionProcessor`) and dedicated worker app, which can cause operational ambiguity.  
+  Suggested improvement: explicitly designate one runtime as the ingestion consumer per environment and document that policy.
+- App docs are strong for API/Web but missing for `apps/worker` and `apps/docs`.  
+  Suggested improvement: add README parity for all apps to strengthen open-source onboarding.

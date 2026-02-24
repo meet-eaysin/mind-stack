@@ -1,93 +1,136 @@
 # API (`apps/api`)
 
-NestJS backend for Mind Stack.
+NestJS HTTP API for Mind Stack. This app is the backend composition root for ingestion, knowledge retrieval, graph operations, learning workflows, export, and diagnostics.
 
-## Purpose
+## Responsibility
 
-- Exposes HTTP API under `/api/v1/*` for ingestion, knowledge, query, review, graph, collections, learning goals, settings, export, admin, and analysis.
-- Composes clean-architecture modules (`domain`, `application`, `infrastructure`, `presentation`).
+- Expose REST endpoints under `/api/v1/*`.
+- Orchestrate use-cases and module boundaries.
+- Validate requests and standardize error handling.
+- Enqueue/track ingestion jobs via BullMQ.
+- Connect persistence and AI infrastructure adapters through shared packages.
 
-## Clean Architecture Role
+## Main Technologies
 
-- Composition boundary for backend modules.
-- Controllers orchestrate use-cases.
-- Repositories/integrations stay in infrastructure layers.
-- Global HTTP concerns (validation, request logging, error filter, correlation id) are centralized in bootstrap/module wiring.
+- NestJS 11
+- BullMQ (`@nestjs/bullmq`)
+- Prisma (`@repo/database`)
+- Shared contracts (`@repo/shared-types`)
+- Zod config validation (`@repo/config`)
+- Structured logging (`@repo/logger`)
 
-## Runtime Dependencies
+## Backend Architecture (Clean Architecture)
 
-- Postgres (`DATABASE_URL`)
-- Redis (`REDIS_URL`)
-- Chroma (`CHROMA_URL`, `CHROMA_COLLECTION`)
-- Ollama (`OLLAMA_BASE_URL`, `OLLAMA_EMBED_MODEL`, `OLLAMA_MODEL`)
-- Worker for queue consumption (`apps/worker`)
+Each feature module uses:
+
+- `domain`: entities and repository/port contracts
+- `application`: use-cases
+- `infrastructure`: Prisma/external adapters
+- `presentation`: Nest module/controller/DTO
+
+Dependency rules:
+
+- `presentation -> application -> domain`
+- `infrastructure -> domain` (port implementations)
+- Domain layer stays framework-agnostic.
+
+Cross-cutting backend concerns are centralized in:
+
+- Global validation pipe
+- API key guard (`x-api-key`, optional via `API_KEY`)
+- Correlation ID middleware (`x-correlation-id`)
+- Global exception filter
+- Request logging interceptor
+
+## API Surface (Modules)
+
+- `ingest`
+- `knowledge`
+- `query`
+- `review`
+- `graph`
+- `export`
+- `collections`
+- `learning-goals`
+- `settings`
+- `admin`
+- `analysis`
 
 ## Environment Variables
 
-Used by this app via `@repo/config` / Nest `ConfigService`:
+| Variable | Required | Default |
+| --- | --- | --- |
+| `NODE_ENV` | No | `development` |
+| `DATABASE_URL` | Yes | - |
+| `API_PORT` | No | `4000` |
+| `OLLAMA_BASE_URL` | No | `http://localhost:11434` |
+| `OLLAMA_MODEL` | Yes | - |
+| `OLLAMA_EMBED_MODEL` | Yes | - |
+| `CHROMA_URL` | No | `http://localhost:8000` |
+| `CHROMA_COLLECTION` | No | `mind-stack` |
+| `REDIS_URL` | No | `redis://localhost:6379` |
+| `LOG_LEVEL` | No | `info` |
+| `WEB_URL` | No | `http://localhost:3000` |
+| `API_URL` | No | `http://localhost:4000` |
+| `API_KEY` | No | unset |
 
-- `NODE_ENV`
-- `DATABASE_URL`
-- `API_PORT`
-- `OLLAMA_BASE_URL`
-- `OLLAMA_MODEL`
-- `OLLAMA_EMBED_MODEL`
-- `CHROMA_URL`
-- `CHROMA_COLLECTION`
-- `REDIS_URL`
-- `LOG_LEVEL`
-- `WEB_URL`
-- `API_URL`
-- `API_KEY` (optional)
+## Local Development
 
-## Run Locally
-
-1. Start infra from repo root:
+From repository root:
 
 ```bash
 docker compose up -d
-```
-
-2. Push schema (repo root):
-
-```bash
 yarn workspace @repo/database db:push
-```
-
-3. Start API:
-
-```bash
 yarn workspace api dev
 ```
 
-## Build
+API URL:
+
+- `http://localhost:4000/api/v1`
+
+Swagger (if `@nestjs/swagger` and `swagger-ui-express` are installed):
+
+- `http://localhost:4000/api/docs`
+
+## Docker Usage
+
+Current Docker workflow is dependency-oriented:
+
+- Start infra with `docker compose up -d` (Postgres, Redis, Chroma, Ollama).
+- Run API process on host via `yarn workspace api dev`.
+
+Note:
+
+- There is currently no `Dockerfile` for `apps/api`, so full API container execution is not yet defined in this repository.
+
+## Scripts
 
 ```bash
+yarn workspace api dev
 yarn workspace api build
-```
-
-## Tests
-
-```bash
+yarn workspace api start
+yarn workspace api start:debug
 yarn workspace api test
 yarn workspace api test:e2e
-yarn workspace api typecheck
 yarn workspace api lint
-```
-
-## Debug
-
-```bash
-yarn workspace api start:debug
+yarn workspace api typecheck
 ```
 
 ## Port
 
-- Default: `4000` (`API_PORT`)
+- `API_PORT` (default `4000`)
 
-## Integration
+## API Response Standard
 
-- Consumed by `apps/web` through REST endpoints.
-- Enqueues ingestion jobs consumed by `apps/worker`.
-- Shares contracts via `@repo/shared-types`.
-- Uses shared infra libraries: `@repo/config`, `@repo/logger`, `@repo/database`, `@repo/llm`, `@repo/embeddings`, `@repo/vector-store`.
+Current implementation:
+
+- Error responses are standardized globally and include status, message, details, path, timestamp, and correlation ID.
+- Success responses are not yet consistently enveloped across all endpoints.
+
+Project standard (for all new/refactored endpoints):
+
+- Use a single success envelope (`success`, `data`, `meta`).
+- Use typed error codes with consistent HTTP mapping.
+- Use uniform pagination metadata for list endpoints.
+
+See root README section `Unified API Response Standard` for the canonical contract.
