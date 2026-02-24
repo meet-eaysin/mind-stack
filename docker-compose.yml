@@ -31,22 +31,36 @@ services:
       OLLAMA_HOST: "0.0.0.0:11434"
     volumes:
       - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   ollama-init:
     image: ollama/ollama:latest
     depends_on:
-      - ollama
-    profiles:
-      - init-models
+      ollama:
+        condition: service_healthy
     environment:
       OLLAMA_HOST: "http://ollama:11434"
-      OLLAMA_EMBED_MODEL: "${OLLAMA_EMBED_MODEL}"
-      OLLAMA_MODEL: "${OLLAMA_MODEL}"
-    entrypoint: ["/bin/sh", "-c"]
-    command: >
-      until ollama list >/dev/null 2>&1; do sleep 2; done;
-      ollama pull "$OLLAMA_EMBED_MODEL";
-      if [ "$OLLAMA_MODEL" != "$OLLAMA_EMBED_MODEL" ]; then ollama pull "$OLLAMA_MODEL"; fi
+      OLLAMA_EMBED_MODEL: "${OLLAMA_EMBED_MODEL:-all-minilm}"
+      OLLAMA_MODEL: "${OLLAMA_MODEL:-tinyllama}"
+    entrypoint: ["/bin/sh"]
+    command:
+      - -c
+      - |
+        set -e
+        until ollama list >/dev/null 2>&1; do sleep 2; done
+        EMBED_MODEL="$OLLAMA_EMBED_MODEL"
+        GENERATION_MODEL="$OLLAMA_MODEL"
+        if [ "$$EMBED_MODEL" = "all-minillm" ]; then EMBED_MODEL="all-minilm"; fi
+        if [ "$$GENERATION_MODEL" = "all-minillm" ]; then GENERATION_MODEL="all-minilm"; fi
+        ollama pull "$$EMBED_MODEL"
+        if [ "$$GENERATION_MODEL" != "$$EMBED_MODEL" ]; then
+          ollama pull "$$GENERATION_MODEL"
+        fi
+    restart: "no"
 
 volumes:
   ollama_data:

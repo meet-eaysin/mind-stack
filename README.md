@@ -96,7 +96,11 @@ Pipeline behavior (`turbo.json`):
 yarn install
 ```
 
-2. Create/update root `.env` (see Environment Variables section).
+2. Create/update root `.env` (see Environment Variables section):
+
+```bash
+cp .env.example .env
+```
 
 3. Start infrastructure services:
 
@@ -104,19 +108,13 @@ yarn install
 docker compose up -d
 ```
 
-4. Optional: pull Ollama models declared in `.env`:
-
-```bash
-docker compose --profile init-models up ollama-init
-```
-
-5. Sync database schema:
+4. Sync database schema:
 
 ```bash
 yarn workspace @repo/database db:push
 ```
 
-6. Start the monorepo:
+5. Start the monorepo:
 
 ```bash
 yarn dev
@@ -141,7 +139,7 @@ Services in `docker-compose.yml`:
 - `redis` on `6379`
 - `chroma` on `8000`
 - `ollama` on `11434`
-- `ollama-init` profile job for model pre-pull
+- `ollama-init` one-shot bootstrap service that auto-pulls required models
 
 Common commands:
 
@@ -156,6 +154,7 @@ Docker vs non-Docker workflow:
 
 - Docker-backed: DB, queue, vector DB, and Ollama run in containers.
 - Local apps: `apps/api`, `apps/web`, `apps/worker` run via Yarn scripts on host.
+- `ollama-init` may appear as `Exited (0)` after successful model pull; this is expected.
 - Current gap: no `Dockerfile` exists for app-level containerized execution yet.
 
 ## Environment Variables
@@ -328,7 +327,6 @@ yarn workspace worker lint
 - Add app-level Dockerfiles and compose profiles for full containerized local development.
 - Enforce unified success/pagination envelopes across all API endpoints.
 - Standardize REST resource naming for action-style endpoints.
-- Add dedicated READMEs for `apps/worker` and `apps/docs`.
 - Add CI workflow docs and architecture decision records (ADRs).
 
 ## Clean Code and Architecture Principles
@@ -350,5 +348,5 @@ yarn workspace worker lint
   Suggested improvement: migrate to resource-centric routes (`POST /documents/:id/tags`, `PATCH /notes/:id`).
 - Ingestion processing exists in both API (`IngestionProcessor`) and dedicated worker app, which can cause operational ambiguity.  
   Suggested improvement: explicitly designate one runtime as the ingestion consumer per environment and document that policy.
-- App docs are strong for API/Web but missing for `apps/worker` and `apps/docs`.  
-  Suggested improvement: add README parity for all apps to strengthen open-source onboarding.
+- App documentation exists across all apps; depth and operational detail are still uneven.  
+  Suggested improvement: keep README sections standardized (setup, env, ports, Docker, troubleshooting) across every app.
