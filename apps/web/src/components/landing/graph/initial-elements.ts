@@ -1,61 +1,105 @@
-import type { Edge, Node } from "@xyflow/react"
+import { MarkerType, type Edge, type Node } from "@xyflow/react"
+import type { GraphNodeData } from "@/components/landing/graph/types"
 
-type NodeData = {
-  label: string
+const EDGE_COLOR = "rgba(226, 232, 240, 0.68)"
+
+function createEdge(
+  id: string,
+  source: string,
+  target: string,
+  sourceHandle: string,
+  targetHandle: string
+): Edge {
+  return {
+    id,
+    source,
+    target,
+    sourceHandle,
+    targetHandle,
+    type: "smoothstep",
+    style: { stroke: EDGE_COLOR, strokeWidth: 1.7 },
+    markerEnd: {
+      type: MarkerType.ArrowClosed,
+      width: 14,
+      height: 14,
+      color: EDGE_COLOR,
+    },
+  }
 }
 
-const nodeBaseStyle = {
-  border: "1px solid var(--border)",
-  borderRadius: 10,
-  background: "var(--card)",
-  color: "var(--card-foreground)",
-  fontSize: 12,
-  padding: 8,
-}
-
-export const initialNodes: Node<NodeData>[] = [
+export const initialNodes: Node<GraphNodeData>[] = [
   {
     id: "brain",
-    position: { x: 420, y: 190 },
-    data: { label: "Your Brain" },
-    style: {
-      ...nodeBaseStyle,
-      fontSize: 14,
-      fontWeight: 600,
-      borderRadius: 999,
-      padding: "10px 16px",
-    },
+    type: "graphNode",
+    position: { x: 520, y: 210 },
+    data: { label: "Your Brain", kind: "root" },
+  },
+  {
+    id: "doc-capture",
+    type: "graphNode",
+    position: { x: 70, y: 84 },
+    data: { label: "Capture Inbox", kind: "document" },
   },
   {
     id: "doc-api",
-    position: { x: 120, y: 70 },
-    data: { label: "API Design RFC" },
-    style: nodeBaseStyle,
+    type: "graphNode",
+    position: { x: 300, y: 84 },
+    data: { label: "API Design RFC", kind: "document" },
   },
   {
-    id: "doc-react",
-    position: { x: 640, y: 80 },
-    data: { label: "React Performance" },
-    style: nodeBaseStyle,
+    id: "doc-status",
+    type: "graphNode",
+    position: { x: 70, y: 324 },
+    data: { label: "Status Workflow", kind: "document" },
   },
   {
     id: "doc-vector",
-    position: { x: 180, y: 300 },
-    data: { label: "Vector Search Notes" },
-    style: nodeBaseStyle,
+    type: "graphNode",
+    position: { x: 300, y: 324 },
+    data: { label: "Vector Search Notes", kind: "document" },
+  },
+  {
+    id: "doc-llm",
+    type: "graphNode",
+    position: { x: 520, y: 30 },
+    data: { label: "LLM Prompt Playbook", kind: "document" },
+  },
+  {
+    id: "doc-source",
+    type: "graphNode",
+    position: { x: 740, y: 84 },
+    data: { label: "Source Citation Rules", kind: "document" },
+  },
+  {
+    id: "doc-react",
+    type: "graphNode",
+    position: { x: 980, y: 84 },
+    data: { label: "React Performance", kind: "document" },
+  },
+  {
+    id: "doc-folder",
+    type: "graphNode",
+    position: { x: 740, y: 324 },
+    data: { label: "Folder Course Map", kind: "document" },
   },
   {
     id: "doc-typescript",
-    position: { x: 650, y: 315 },
-    data: { label: "TypeScript Patterns" },
-    style: nodeBaseStyle,
+    type: "graphNode",
+    position: { x: 980, y: 324 },
+    data: { label: "TypeScript Patterns", kind: "document" },
   },
 ]
 
 export const initialEdges: Edge[] = [
-  { id: "e-api-brain", source: "doc-api", target: "brain", animated: true },
-  { id: "e-react-api", source: "doc-react", target: "doc-api" },
-  { id: "e-api-typescript", source: "doc-api", target: "doc-typescript" },
-  { id: "e-vector-brain", source: "doc-vector", target: "brain", animated: true },
-  { id: "e-typescript-brain", source: "doc-typescript", target: "brain" },
+  createEdge("e-capture-api", "doc-capture", "doc-api", "right-source", "left-target"),
+  createEdge("e-status-vector", "doc-status", "doc-vector", "right-source", "left-target"),
+  createEdge("e-source-react", "doc-source", "doc-react", "right-source", "left-target"),
+  createEdge("e-folder-typescript", "doc-folder", "doc-typescript", "right-source", "left-target"),
+  createEdge("e-api-brain", "doc-api", "brain", "right-source", "left-target"),
+  createEdge("e-vector-brain", "doc-vector", "brain", "right-source", "left-target"),
+  createEdge("e-source-brain", "doc-source", "brain", "left-source", "right-target"),
+  createEdge("e-folder-brain", "doc-folder", "brain", "left-source", "right-target"),
+  createEdge("e-llm-brain", "doc-llm", "brain", "bottom-source", "top-target"),
+  createEdge("e-react-brain", "doc-react", "brain", "left-source", "right-target"),
+  createEdge("e-typescript-brain", "doc-typescript", "brain", "left-source", "right-target"),
 ]
