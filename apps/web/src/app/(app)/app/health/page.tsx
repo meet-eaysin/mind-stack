@@ -6,7 +6,6 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import {
-  Activity,
   AlertTriangle,
   CheckCircle2,
   Database,
@@ -51,21 +50,19 @@ function StatCard({
 }) {
   const statusConfig = {
     healthy: {
-      bg: "bg-emerald-500/10 border-emerald-500/20",
+      bg: "bg-card border-border",
       icon: "text-emerald-500",
-      badge:
-        "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20",
+      badge: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
     },
     warning: {
-      bg: "bg-amber-500/10 border-amber-500/20",
+      bg: "bg-card border-border",
       icon: "text-amber-500",
-      badge:
-        "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
+      badge: "bg-amber-500/10 text-amber-600 border-amber-500/20",
     },
     critical: {
-      bg: "bg-red-500/10 border-red-500/20",
+      bg: "bg-card border-border",
       icon: "text-red-500",
-      badge: "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20",
+      badge: "bg-red-500/10 text-red-600 border-red-500/20",
     },
   };
 
@@ -175,10 +172,7 @@ export default function HealthPage() {
     <AppPage width="wide">
       <AppPageHeader>
         <AppPageHeading>
-          <AppPageTitle className="flex items-center gap-3">
-            <Activity className="size-7 text-primary" />
-            Knowledge Health
-          </AppPageTitle>
+          <AppPageTitle>Knowledge Health</AppPageTitle>
           <AppPageDescription>
             Monitor the integrity of your knowledge base.
           </AppPageDescription>
@@ -216,7 +210,7 @@ export default function HealthPage() {
           </AppPageActions>
         )}
       </AppPageHeader>
-      <AppPageContent className="gap-8">
+      <AppPageContent className="gap-6">
         {/* Loading */}
         {isLoading && (
           <PageSkeleton

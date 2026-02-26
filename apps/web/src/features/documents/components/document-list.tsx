@@ -1,17 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
-  ExternalLink,
   File,
   FileCode,
   FileText,
   Globe,
   GraduationCap,
+  MoreHorizontal,
   RefreshCw,
   StickyNote,
   Trash2,
@@ -30,10 +31,15 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -120,13 +126,10 @@ const ingestionStatusFilterOptions = [
   INGESTION_STATUS.FAILED,
 ] as const;
 
-type DocumentListProps = {
-  onSelectAction: (id: string) => void;
-};
-
 type FilterValue = "all" | string;
 
-export function DocumentList({ onSelectAction }: DocumentListProps) {
+export function DocumentList() {
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [sourceTypeFilter, setSourceTypeFilter] = useState<FilterValue>("all");
@@ -367,39 +370,77 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
               return (
                 <Card
                   key={doc.id}
-                  className="gap-2 overflow-hidden py-0"
+                  className="group relative gap-2 overflow-hidden py-0"
                   data-testid={`document-item-${doc.id}`}
+                  onClick={() => router.push(`/app/documents/${doc.id}`)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      router.push(`/app/documents/${doc.id}`);
+                    }
+                  }}
+                  tabIndex={0}
+                  role="link"
+                  aria-label={`Open ${doc.title}`}
                 >
-                  <CardHeader className="gap-1.5 p-3 pb-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex min-w-0 items-center gap-2">
-                        <div className="rounded-md bg-primary/10 p-1.5 text-primary">
-                          <TypeIcon className="size-4" />
-                        </div>
-                        <div className="rounded-full border bg-background p-1 text-muted-foreground">
-                          <SourceIcon className="size-3" />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            "h-5 rounded px-1.5 py-0 text-[10px] font-semibold uppercase tracking-tight",
-                            learningStatusColors[doc.learningStatus] ||
-                              learningStatusColors.UPCOMING,
-                          )}
+                  <div className="absolute top-2.5 right-2.5 z-10">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-7"
+                          onClick={(event) => event.stopPropagation()}
                         >
-                          {formatEnumLabel(doc.learningStatus)}
-                        </Badge>
+                          <MoreHorizontal className="size-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        onClick={(event) => event.stopPropagation()}
+                      >
                         {isFailed && (
-                          <Badge
-                            variant="destructive"
-                            className="h-5 gap-1 rounded px-1.5 py-0 text-[10px]"
+                          <DropdownMenuItem
+                            onClick={() => retryIngestion.mutate(doc.id)}
+                            disabled={
+                              retryIngestion.isPending &&
+                              retryIngestion.variables === doc.id
+                            }
                           >
-                            <AlertCircle className="size-2.5" />
-                            Failed
-                          </Badge>
+                            <RefreshCw className="mr-2 size-4" />
+                            Retry ingestion
+                          </DropdownMenuItem>
                         )}
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive"
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                "Are you sure you want to delete this document?",
+                              )
+                            ) {
+                              deleteDocument.mutate(doc.id);
+                            }
+                          }}
+                          disabled={
+                            deleteDocument.isPending &&
+                            deleteDocument.variables === doc.id
+                          }
+                        >
+                          <Trash2 className="mr-2 size-4" />
+                          Delete document
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  <CardHeader className="gap-1.5 p-3 pb-0 pr-10">
+                    <div className="flex items-start gap-2">
+                      <div className="rounded-md bg-primary/10 p-1.5 text-primary">
+                        <TypeIcon className="size-4" />
+                      </div>
+                      <div className="rounded-full border bg-background p-1 text-muted-foreground">
+                        <SourceIcon className="size-3" />
                       </div>
                     </div>
                     <CardTitle className="line-clamp-2 text-base leading-5">
@@ -416,7 +457,7 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
                     </CardDescription>
                   </CardHeader>
 
-                  <CardContent className="px-3">
+                  <CardContent className="space-y-2 px-3 pb-3">
                     <div className="overflow-hidden rounded-lg border bg-muted/20">
                       {doc.sourceType === SOURCE_TYPE.YOUTUBE &&
                       youtubeEmbedUrl ? (
@@ -448,74 +489,40 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
                         </div>
                       )}
                     </div>
-                  </CardContent>
 
-                  <CardFooter className="flex items-center justify-between gap-1.5 border-t p-3">
                     <div className="flex items-center gap-1">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => onSelectAction(doc.id)}
-                        className="h-7 gap-1 px-2 text-xs"
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "h-5 rounded px-1.5 py-0 text-[10px] font-semibold uppercase tracking-tight",
+                          learningStatusColors[doc.learningStatus] ||
+                            learningStatusColors.UPCOMING,
+                        )}
                       >
-                        Open
-                        <ExternalLink className="size-3" />
-                      </Button>
+                        {formatEnumLabel(doc.learningStatus)}
+                      </Badge>
+
                       {isFailed && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => retryIngestion.mutate(doc.id)}
-                          disabled={
-                            retryIngestion.isPending &&
-                            retryIngestion.variables === doc.id
-                          }
-                          className="h-7 gap-1 px-2 text-xs"
+                        <Badge
+                          variant="destructive"
+                          className="h-5 gap-1 rounded px-1.5 py-0 text-[10px]"
                         >
-                          <RefreshCw
-                            className={cn(
-                              "size-3",
-                              retryIngestion.isPending &&
-                                retryIngestion.variables === doc.id &&
-                                "animate-spin",
-                            )}
-                          />
-                          Retry
-                        </Button>
+                          <AlertCircle className="size-2.5" />
+                          Failed
+                        </Badge>
                       )}
+
                       {isProcessing && (
                         <Badge
                           variant="secondary"
-                          className="h-7 gap-1 rounded-md px-1.5 text-[11px] text-muted-foreground"
+                          className="h-5 gap-1 rounded-md px-1.5 text-[10px] text-muted-foreground"
                         >
                           <RefreshCw className="size-3 animate-spin" />
                           {formatEnumLabel(doc.status)}
                         </Badge>
                       )}
                     </div>
-
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            "Are you sure you want to delete this document?",
-                          )
-                        ) {
-                          deleteDocument.mutate(doc.id);
-                        }
-                      }}
-                      disabled={
-                        deleteDocument.isPending &&
-                        deleteDocument.variables === doc.id
-                      }
-                      className="size-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      data-testid={`delete-doc-${doc.id}`}
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
-                  </CardFooter>
+                  </CardContent>
                 </Card>
               );
             })}

@@ -53,9 +53,7 @@ export default function GraphPage() {
     <AppPage width="wide">
       <AppPageHeader>
         <AppPageHeading>
-          <AppPageTitle className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Knowledge Map
-          </AppPageTitle>
+          <AppPageTitle>Knowledge Map</AppPageTitle>
           <AppPageDescription>
             Discover connections and trace knowledge across your documents.
           </AppPageDescription>
@@ -127,11 +125,11 @@ export default function GraphPage() {
         {data && filteredData && (
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2">
-              <div className="relative rounded-xl border bg-background/50 overflow-hidden">
+              <div className="relative overflow-hidden rounded-xl border bg-background">
                 <div className="absolute top-4 left-4 z-10">
                   <Badge
                     variant="secondary"
-                    className="bg-background/80 backdrop-blur-md border-primary/20 text-[10px] font-bold"
+                    className="border-border/70 bg-background/90 text-[10px] font-medium"
                   >
                     {filteredData.nodes.length} DOCUMENTS
                   </Badge>
@@ -149,10 +147,10 @@ export default function GraphPage() {
                 <NeighborhoodPanel conceptId={selectedNodeId} />
               ) : (
                 <div
-                  className="rounded-xl border bg-card/50 p-6 text-center space-y-3"
+                  className="space-y-3 rounded-xl border bg-card p-6 text-center"
                   data-testid="graph-selection-hint"
                 >
-                  <div className="mx-auto size-12 rounded-full bg-primary/5 flex items-center justify-center text-primary/40">
+                  <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
                     <Info className="size-6" />
                   </div>
                   <div className="space-y-1">
@@ -167,25 +165,25 @@ export default function GraphPage() {
                 </div>
               )}
 
-              <div className="rounded-xl border bg-card/40 p-5 shadow-sm">
+              <div className="rounded-xl border bg-card p-5">
                 <div className="flex items-center gap-2 mb-4">
-                  <Activity className="size-4 text-primary" />
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <Activity className="size-4 text-muted-foreground" />
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Network Insights
                   </h3>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <p className="text-[10px] text-muted-foreground uppercase font-bold">
+                    <p className="text-[10px] font-semibold uppercase text-muted-foreground">
                       Total Nodes
                     </p>
-                    <p className="text-2xl font-black">{data.nodes.length}</p>
+                    <p className="text-2xl font-semibold">{data.nodes.length}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[10px] text-muted-foreground uppercase font-bold">
+                    <p className="text-[10px] font-semibold uppercase text-muted-foreground">
                       Total Links
                     </p>
-                    <p className="text-2xl font-black">{data.edges.length}</p>
+                    <p className="text-2xl font-semibold">{data.edges.length}</p>
                   </div>
                   <div className="col-span-2 pt-2">
                     <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">

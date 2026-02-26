@@ -8,7 +8,6 @@ import {
   MoreVertical,
   Trash2,
   Edit3,
-  ExternalLink,
   Clock,
   CheckCircle2,
 } from "lucide-react";
@@ -87,13 +86,19 @@ export function CollectionList({ onSelectAction }: CollectionListProps) {
           {filteredCollections.map((collection) => (
             <div
               key={collection.id}
-              className="group relative flex flex-col gap-4 rounded-xl border bg-card p-5 transition-all hover:shadow-lg hover:border-primary/20"
+              className="group relative flex cursor-pointer flex-col gap-4 rounded-xl border bg-card p-5 transition-all hover:border-primary/20 hover:shadow-sm"
+              role="button"
+              tabIndex={0}
+              onClick={() => onSelectAction(collection.id)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onSelectAction(collection.id);
+                }
+              }}
             >
               <div className="flex items-start justify-between gap-2">
-                <div
-                  className="flex items-center gap-3 cursor-pointer"
-                  onClick={() => onSelectAction(collection.id)}
-                >
+                <div className="flex items-center gap-3">
                   <div className="p-2.5 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                     <Folder className="size-6" />
                   </div>
@@ -110,11 +115,19 @@ export function CollectionList({ onSelectAction }: CollectionListProps) {
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="size-8">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8"
+                      onClick={(event) => event.stopPropagation()}
+                    >
                       <MoreVertical className="size-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent
+                    align="end"
+                    onClick={(event) => event.stopPropagation()}
+                  >
                     <DropdownMenuItem className="gap-2">
                       <Edit3 className="size-4" /> Edit
                     </DropdownMenuItem>
@@ -152,16 +165,6 @@ export function CollectionList({ onSelectAction }: CollectionListProps) {
                 </div>
                 <Progress value={collection.progress} className="h-1.5" />
               </div>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                className="mt-2 w-full justify-between font-normal text-muted-foreground group-hover:text-primary group-hover:bg-primary/5 h-8"
-                onClick={() => onSelectAction(collection.id)}
-              >
-                View Collection
-                <ExternalLink className="size-3.5" />
-              </Button>
             </div>
           ))}
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   AppPage,
   AppPageContent,
@@ -13,6 +14,7 @@ import { CollectionList } from "@/features/collections/components/collection-lis
 import { CollectionDetail } from "@/features/collections/components/collection-detail";
 
 export default function CollectionsPage() {
+  const router = useRouter();
   const [selectedCollectionId, setSelectedCollectionId] = useState<
     string | null
   >(null);
@@ -27,18 +29,15 @@ export default function CollectionsPage() {
           </AppPageDescription>
         </AppPageHeading>
       </AppPageHeader>
-      <AppPageContent className="max-w-6xl">
+      <AppPageContent className="gap-5">
         {!selectedCollectionId ? (
-          <div className="space-y-8">
-            <CollectionList onSelectAction={setSelectedCollectionId} />
-          </div>
+          <CollectionList onSelectAction={setSelectedCollectionId} />
         ) : (
           <CollectionDetail
             id={selectedCollectionId}
             onBackAction={() => setSelectedCollectionId(null)}
             onDocumentSelectAction={(docId) => {
-              // Navigation to document detail will happen here or via separate router push
-              window.location.href = `/app/documents?id=${docId}`;
+              router.push(`/app/documents/${docId}`);
             }}
           />
         )}

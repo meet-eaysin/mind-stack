@@ -133,7 +133,7 @@ export default function CoursesPage() {
           </AppPageDescription>
         </AppPageHeading>
       </AppPageHeader>
-      <AppPageContent>
+      <AppPageContent className="gap-5">
         {selectedCourseId ? (
           <CourseDetail
             courseId={selectedCourseId}
@@ -169,14 +169,14 @@ export default function CoursesPage() {
 
             {data && data.collections.length > 0 && (
               <div
-                className="grid gap-3 sm:grid-cols-2"
+                className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
                 data-testid="courses-list"
               >
                 {data.collections.map((course) => (
                   <button
                     key={course.id}
                     type="button"
-                    className="rounded-lg border p-4 text-left hover:border-primary/40 transition-colors"
+                    className="rounded-lg border bg-card p-4 text-left transition-colors hover:border-primary/40"
                     onClick={() => setSelectedCourseId(course.id)}
                   >
                     <p className="font-semibold">{course.name}</p>

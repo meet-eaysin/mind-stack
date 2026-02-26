@@ -1,20 +1,31 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { StickyNote } from "lucide-react";
 import type { ChunkReference } from "@/types";
 
 export function ChunkResult({ chunk }: { chunk: ChunkReference }) {
+  const router = useRouter();
+
   return (
     <div
-      className="rounded-lg border bg-card p-4"
+      className="cursor-pointer rounded-lg border bg-card p-4 transition-colors hover:bg-accent/30"
       data-testid={`chunk-result-${chunk.chunkId}`}
+      role="link"
+      tabIndex={0}
+      onClick={() => router.push(`/app/documents/${chunk.documentId}`)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          router.push(`/app/documents/${chunk.documentId}`);
+        }
+      }}
+      aria-label={`Open ${chunk.documentTitle}`}
     >
       <div className="mb-2 flex items-center justify-between">
         <span className="flex items-center gap-1.5 text-xs font-medium text-primary">
           {chunk.documentTitle}
-          {chunk.hasNote && (
-            <StickyNote className="size-3 text-muted-foreground" />
-          )}
+          {chunk.hasNote && <StickyNote className="size-3 text-muted-foreground" />}
         </span>
         <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
           {(chunk.score * 100).toFixed(0)}% match
@@ -24,27 +35,12 @@ export function ChunkResult({ chunk }: { chunk: ChunkReference }) {
       {chunk.tags.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {chunk.tags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full bg-muted px-2 py-0.5 text-xs"
-            >
+            <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-xs">
               {tag}
             </span>
           ))}
         </div>
       )}
-      <div className="mt-3">
-        <button
-          type="button"
-          className="text-xs text-primary hover:underline"
-          data-testid={`open-document-${chunk.documentId}`}
-          onClick={() => {
-            window.location.href = `/app/documents?id=${chunk.documentId}`;
-          }}
-        >
-          Open document
-        </button>
-      </div>
     </div>
   );
 }

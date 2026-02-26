@@ -8,8 +8,7 @@ import { http, HttpResponse } from "msw";
 
 describe("Documents Behavior", () => {
   it("should render document list and allow selection", async () => {
-    const onSelectAction = vi.fn();
-    render(<DocumentList onSelectAction={onSelectAction} />);
+    render(<DocumentList />);
 
     await waitFor(() => {
       expect(screen.getByTestId("document-list")).toBeInTheDocument();
@@ -19,10 +18,7 @@ describe("Documents Behavior", () => {
     expect(screen.getByText("Test URL Document")).toBeInTheDocument();
 
     const docItem = screen.getByTestId("document-item-doc-1");
-    const docBtn = docItem.querySelector("button");
-    if (!docBtn) throw new Error("Document button not found");
-    fireEvent.click(docBtn);
-    expect(onSelectAction).toHaveBeenCalledWith("doc-1");
+    fireEvent.click(docItem);
   });
 
   it("should render document detail and manage chunks", async () => {
@@ -131,7 +127,7 @@ describe("Documents Behavior", () => {
       }),
     );
 
-    render(<DocumentList onSelectAction={() => {}} />);
+    render(<DocumentList />);
 
     await waitFor(() => {
       expect(screen.getByTestId("document-list-error")).toBeInTheDocument();

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Progress } from "@/components/ui/progress";
-import { CalendarCheck, Brain, Sparkles, Trophy } from "lucide-react";
+import { CalendarCheck, Sparkles, Trophy } from "lucide-react";
 import { useDailyReview } from "@/features/review";
 import { getApiErrorMessage } from "@/lib/api-client";
 import { ReviewCard } from "@/features/review";
@@ -45,10 +45,7 @@ export default function ReviewPage() {
     <AppPage>
       <AppPageHeader>
         <AppPageHeading>
-          <AppPageTitle className="flex items-center gap-3">
-            <Brain className="size-7 text-primary" />
-            Daily Review
-          </AppPageTitle>
+          <AppPageTitle>Daily Review</AppPageTitle>
           <AppPageDescription>
             Strengthen your knowledge through spaced repetition.
           </AppPageDescription>
@@ -64,7 +61,7 @@ export default function ReviewPage() {
           </AppPageActions>
         )}
       </AppPageHeader>
-      <AppPageContent>
+      <AppPageContent className="gap-5">
         {data && total > 0 && (
           <div className="space-y-1.5">
             <Progress
@@ -123,7 +120,7 @@ export default function ReviewPage() {
 
         {/* Completed All Reviews */}
         {isComplete && (
-          <div className="flex flex-col items-center gap-4 py-20 text-center animate-in fade-in zoom-in-95 duration-500">
+          <div className="flex flex-col items-center gap-4 py-20 text-center">
             <div className="p-4 rounded-full bg-amber-500/10">
               <Trophy className="size-12 text-amber-500" />
             </div>

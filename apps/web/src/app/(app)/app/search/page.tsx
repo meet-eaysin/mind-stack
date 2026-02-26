@@ -101,38 +101,40 @@ export default function SearchPage() {
           </AppPageDescription>
         </AppPageHeading>
       </AppPageHeader>
-      <AppPageContent>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant={mode === "semantic" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setMode("semantic")}
-            className="gap-1.5"
-          >
-            <SearchIcon className="size-3.5" />
-            Search
-          </Button>
-          <Button
-            variant={mode === "ask" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setMode("ask")}
-            className="gap-1.5"
-          >
-            <MessageSquare className="size-3.5" />
-            Ask AI
-          </Button>
-          {mode === "semantic" && (
+      <AppPageContent className="gap-5">
+        <div className="rounded-lg border bg-card p-3">
+          <div className="flex flex-wrap gap-2">
             <Button
-              variant="ghost"
+              variant={mode === "semantic" ? "default" : "outline"}
               size="sm"
-              onClick={() => setShowAdvancedFilters((value) => !value)}
-              className="gap-1.5 text-muted-foreground"
-              data-testid="toggle-advanced-filters"
+              onClick={() => setMode("semantic")}
+              className="gap-1.5"
             >
-              <Filter className="size-3.5" />
-              {showAdvancedFilters ? "Hide filters" : "Advanced filters"}
+              <SearchIcon className="size-3.5" />
+              Search
             </Button>
-          )}
+            <Button
+              variant={mode === "ask" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setMode("ask")}
+              className="gap-1.5"
+            >
+              <MessageSquare className="size-3.5" />
+              Ask AI
+            </Button>
+            {mode === "semantic" && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAdvancedFilters((value) => !value)}
+                className="gap-1.5 text-muted-foreground"
+                data-testid="toggle-advanced-filters"
+              >
+                <Filter className="size-3.5" />
+                {showAdvancedFilters ? "Hide filters" : "Advanced filters"}
+              </Button>
+            )}
+          </div>
         </div>
 
         {mode === "semantic" && showAdvancedFilters && (
@@ -214,7 +216,7 @@ export default function SearchPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex gap-2">
+        <form onSubmit={handleSubmit} className="flex gap-2 rounded-lg border bg-card p-3">
           <Input
             placeholder={
               mode === "ask"

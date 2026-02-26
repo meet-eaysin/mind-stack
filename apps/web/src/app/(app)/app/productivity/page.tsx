@@ -18,7 +18,6 @@ import {
 import { Label } from "@/components/ui/label";
 import {
   Target,
-  TrendingUp,
   AlertTriangle,
   Plus,
   Trash2,
@@ -65,11 +64,11 @@ function MasteryRing({
     <div className="flex flex-col items-center gap-1.5 text-center">
       <div
         className={cn(
-          "relative flex size-16 items-center justify-center rounded-full border-4",
+          "relative flex size-14 items-center justify-center rounded-full border-2",
           color,
         )}
       >
-        <span className="text-lg font-bold tabular-nums">{value}</span>
+        <span className="text-base font-semibold tabular-nums">{value}</span>
       </div>
       <span className="text-xs font-medium text-muted-foreground">{label}</span>
       <span className="text-[10px] text-muted-foreground">{percent}%</span>
@@ -108,16 +107,13 @@ export default function ProductivityPage() {
     <AppPage width="wide">
       <AppPageHeader>
         <AppPageHeading>
-          <AppPageTitle className="flex items-center gap-3">
-            <TrendingUp className="size-7 text-primary" />
-            Learning Productivity
-          </AppPageTitle>
+          <AppPageTitle>Learning Productivity</AppPageTitle>
           <AppPageDescription>
             Track your mastery, set goals, and measure progress.
           </AppPageDescription>
         </AppPageHeading>
       </AppPageHeader>
-      <AppPageContent className="gap-8">
+      <AppPageContent className="gap-6">
         {/* Topic Mastery Section */}
         <section className="space-y-4">
           <h2 className="text-lg font-semibold flex items-center gap-2">

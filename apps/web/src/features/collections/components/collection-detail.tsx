@@ -4,7 +4,6 @@ import { useState } from "react";
 import {
   ArrowLeft,
   GripVertical,
-  Play,
   Lock,
   Unlock,
   MoreVertical,
@@ -15,6 +14,7 @@ import {
   Video,
   Book,
   GraduationCap,
+  Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -200,7 +200,16 @@ export function CollectionDetail({
               return (
                 <div
                   key={item.id}
-                  className="group relative flex items-center gap-4 rounded-xl border bg-card p-1 transition-all hover:border-primary/20 hover:shadow-sm"
+                  className="group relative flex cursor-pointer items-center gap-4 rounded-xl border bg-card p-1 transition-all hover:border-primary/20 hover:shadow-sm"
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => onDocumentSelectAction(item.documentId)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onDocumentSelectAction(item.documentId);
+                    }
+                  }}
                 >
                   <div className="flex items-center justify-center size-10 text-muted-foreground/30 group-hover:text-primary/40 transition-colors">
                     <GripVertical className="size-5" />
@@ -213,12 +222,7 @@ export function CollectionDetail({
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <h4
-                          className="font-medium truncate cursor-pointer hover:text-primary transition-colors"
-                          onClick={() =>
-                            onDocumentSelectAction(item.documentId)
-                          }
-                        >
+                        <h4 className="truncate font-medium transition-colors group-hover:text-primary">
                           {item.documentTitle}
                         </h4>
                         <Badge
@@ -226,7 +230,7 @@ export function CollectionDetail({
                           className={cn(
                             "h-4 text-[9px] uppercase font-bold tracking-tight px-1.5 py-0 rounded",
                             learningStatusColors[item.learningStatus] ||
-                              learningStatusColors.UPCOMING,
+                            learningStatusColors.UPCOMING,
                           )}
                         >
                           {item.learningStatus.replace("_", " ")}
@@ -247,26 +251,22 @@ export function CollectionDetail({
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 gap-1.5 bg-primary/5 text-primary hover:bg-primary hover:text-primary-foreground"
-                        onClick={() => onDocumentSelectAction(item.documentId)}
-                      >
-                        <Play className="size-3.5 fill-current" /> Start
-                      </Button>
+                    <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="size-8"
+                            onClick={(event) => event.stopPropagation()}
                           >
                             <MoreVertical className="size-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent
+                          align="end"
+                          onClick={(event) => event.stopPropagation()}
+                        >
                           <DropdownMenuItem className="gap-2">
                             <Settings className="size-4" /> Set Prerequisite
                           </DropdownMenuItem>
