@@ -1,32 +1,32 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    image: ${POSTGRES_IMAGE:-postgres:16-alpine}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: mindstack
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-mindstack}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   redis:
-    image: redis:7-alpine
+    image: ${REDIS_IMAGE:-redis:7-alpine}
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
 
   chroma:
-    image: chromadb/chroma:latest
+    image: ${CHROMA_IMAGE:-chromadb/chroma:latest}
     ports:
-      - "8000:8000"
+      - "${CHROMA_PORT:-8000}:8000"
 
   ollama:
-    image: ollama/ollama:latest
+    image: ${OLLAMA_IMAGE:-ollama/ollama:latest}
     ports:
-      - "11434:11434"
+      - "${OLLAMA_PORT:-11434}:11434"
     environment:
       OLLAMA_HOST: "0.0.0.0:11434"
     volumes:
@@ -38,7 +38,7 @@ services:
       retries: 10
 
   ollama-init:
-    image: ollama/ollama:latest
+    image: ${OLLAMA_IMAGE:-ollama/ollama:latest}
     depends_on:
       ollama:
         condition: service_healthy

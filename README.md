@@ -108,13 +108,13 @@ cp .env.example .env
 docker compose up -d --wait
 ```
 
-4. Sync database schema:
+5. Sync database schema:
 
 ```bash
 yarn workspace @repo/database db:push
 ```
 
-5. Start the monorepo:
+6. Start the monorepo:
 
 ```bash
 yarn dev
@@ -140,6 +140,13 @@ Services in `docker-compose.yml`:
 - `chroma` on `8000`
 - `ollama` on `11434`
 - `ollama-init` one-shot bootstrap service that auto-pulls required models
+
+Compose reads `.env` and supports infra overrides:
+
+- `POSTGRES_IMAGE`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
+- `REDIS_IMAGE`, `REDIS_PORT`
+- `CHROMA_IMAGE`, `CHROMA_PORT`
+- `OLLAMA_IMAGE`, `OLLAMA_PORT`
 
 Common commands:
 

@@ -2648,13 +2648,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@next/env@npm:16.1.5":
-  version: 16.1.5
-  resolution: "@next/env@npm:16.1.5"
-  checksum: 10c0/9d6442bee75386593d5da6e952146cf3c4338202e68a0ba9464d70c24ab7abb0c7e4ecd0ab661ca211e544fe7d6bd075270379bee3e97c5da3b6d082f95a04cd
-  languageName: node
-  linkType: hard
-
 "@next/env@npm:16.1.6":
   version: 16.1.6
   resolution: "@next/env@npm:16.1.6"
@@ -2680,24 +2673,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@next/swc-darwin-arm64@npm:16.1.5":
-  version: 16.1.5
-  resolution: "@next/swc-darwin-arm64@npm:16.1.5"
-  conditions: os=darwin & cpu=arm64
-  languageName: node
-  linkType: hard
-
 "@next/swc-darwin-arm64@npm:16.1.6":
   version: 16.1.6
   resolution: "@next/swc-darwin-arm64@npm:16.1.6"
   conditions: os=darwin & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"@next/swc-darwin-x64@npm:16.1.5":
-  version: 16.1.5
-  resolution: "@next/swc-darwin-x64@npm:16.1.5"
-  conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
@@ -2708,24 +2687,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@next/swc-linux-arm64-gnu@npm:16.1.5":
-  version: 16.1.5
-  resolution: "@next/swc-linux-arm64-gnu@npm:16.1.5"
-  conditions: os=linux & cpu=arm64 & libc=glibc
-  languageName: node
-  linkType: hard
-
 "@next/swc-linux-arm64-gnu@npm:16.1.6":
   version: 16.1.6
   resolution: "@next/swc-linux-arm64-gnu@npm:16.1.6"
   conditions: os=linux & cpu=arm64 & libc=glibc
-  languageName: node
-  linkType: hard
-
-"@next/swc-linux-arm64-musl@npm:16.1.5":
-  version: 16.1.5
-  resolution: "@next/swc-linux-arm64-musl@npm:16.1.5"
-  conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
@@ -2736,24 +2701,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@next/swc-linux-x64-gnu@npm:16.1.5":
-  version: 16.1.5
-  resolution: "@next/swc-linux-x64-gnu@npm:16.1.5"
-  conditions: os=linux & cpu=x64 & libc=glibc
-  languageName: node
-  linkType: hard
-
 "@next/swc-linux-x64-gnu@npm:16.1.6":
   version: 16.1.6
   resolution: "@next/swc-linux-x64-gnu@npm:16.1.6"
   conditions: os=linux & cpu=x64 & libc=glibc
-  languageName: node
-  linkType: hard
-
-"@next/swc-linux-x64-musl@npm:16.1.5":
-  version: 16.1.5
-  resolution: "@next/swc-linux-x64-musl@npm:16.1.5"
-  conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
@@ -2764,24 +2715,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@next/swc-win32-arm64-msvc@npm:16.1.5":
-  version: 16.1.5
-  resolution: "@next/swc-win32-arm64-msvc@npm:16.1.5"
-  conditions: os=win32 & cpu=arm64
-  languageName: node
-  linkType: hard
-
 "@next/swc-win32-arm64-msvc@npm:16.1.6":
   version: 16.1.6
   resolution: "@next/swc-win32-arm64-msvc@npm:16.1.6"
   conditions: os=win32 & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"@next/swc-win32-x64-msvc@npm:16.1.5":
-  version: 16.1.5
-  resolution: "@next/swc-win32-x64-msvc@npm:16.1.5"
-  conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
@@ -4404,7 +4341,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@repo/ui@npm:*, @repo/ui@workspace:packages/ui":
+"@repo/ui@workspace:packages/ui":
   version: 0.0.0-use.local
   resolution: "@repo/ui@workspace:packages/ui"
   dependencies:
@@ -7796,24 +7733,6 @@ __metadata:
   checksum: 10c0/d29321c70d3545fdcb56c5fdd76028c3f04c012462779e062303d4c3c531af80d2c360c26b871e6e2b9a971d2422d47e1779a859106c4cac4b5d2d143df70e20
   languageName: node
   linkType: hard
-
-"docs@workspace:apps/docs":
-  version: 0.0.0-use.local
-  resolution: "docs@workspace:apps/docs"
-  dependencies:
-    "@repo/eslint-config": "npm:*"
-    "@repo/typescript-config": "npm:*"
-    "@repo/ui": "npm:*"
-    "@types/node": "npm:^22.15.3"
-    "@types/react": "npm:19.2.2"
-    "@types/react-dom": "npm:19.2.2"
-    eslint: "npm:^9.39.1"
-    next: "npm:16.1.5"
-    react: "npm:^19.2.0"
-    react-dom: "npm:^19.2.0"
-    typescript: "npm:5.9.2"
-  languageName: unknown
-  linkType: soft
 
 "doctrine@npm:^2.1.0":
   version: 2.1.0
@@ -12528,66 +12447,6 @@ __metadata:
     react: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
     react-dom: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
   checksum: 10c0/83590c11d359ce7e4ced14f6ea9dd7a691d5ce6843fe2dc520fc27e29ae1c535118478d03e7f172609c41b1ef1b8da6b8dd2d2acd6cd79cac1abbdbd5b99f2c4
-  languageName: node
-  linkType: hard
-
-"next@npm:16.1.5":
-  version: 16.1.5
-  resolution: "next@npm:16.1.5"
-  dependencies:
-    "@next/env": "npm:16.1.5"
-    "@next/swc-darwin-arm64": "npm:16.1.5"
-    "@next/swc-darwin-x64": "npm:16.1.5"
-    "@next/swc-linux-arm64-gnu": "npm:16.1.5"
-    "@next/swc-linux-arm64-musl": "npm:16.1.5"
-    "@next/swc-linux-x64-gnu": "npm:16.1.5"
-    "@next/swc-linux-x64-musl": "npm:16.1.5"
-    "@next/swc-win32-arm64-msvc": "npm:16.1.5"
-    "@next/swc-win32-x64-msvc": "npm:16.1.5"
-    "@swc/helpers": "npm:0.5.15"
-    baseline-browser-mapping: "npm:^2.8.3"
-    caniuse-lite: "npm:^1.0.30001579"
-    postcss: "npm:8.4.31"
-    sharp: "npm:^0.34.4"
-    styled-jsx: "npm:5.1.6"
-  peerDependencies:
-    "@opentelemetry/api": ^1.1.0
-    "@playwright/test": ^1.51.1
-    babel-plugin-react-compiler: "*"
-    react: ^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0
-    react-dom: ^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0
-    sass: ^1.3.0
-  dependenciesMeta:
-    "@next/swc-darwin-arm64":
-      optional: true
-    "@next/swc-darwin-x64":
-      optional: true
-    "@next/swc-linux-arm64-gnu":
-      optional: true
-    "@next/swc-linux-arm64-musl":
-      optional: true
-    "@next/swc-linux-x64-gnu":
-      optional: true
-    "@next/swc-linux-x64-musl":
-      optional: true
-    "@next/swc-win32-arm64-msvc":
-      optional: true
-    "@next/swc-win32-x64-msvc":
-      optional: true
-    sharp:
-      optional: true
-  peerDependenciesMeta:
-    "@opentelemetry/api":
-      optional: true
-    "@playwright/test":
-      optional: true
-    babel-plugin-react-compiler:
-      optional: true
-    sass:
-      optional: true
-  bin:
-    next: dist/bin/next
-  checksum: 10c0/ff9f7dd0cae79f7ba2a64ac0d29ca77c94921dfc37b36899f4f997b948242f72585f4bb75829aaf8704d46c6f7d1a9796b8ff30688a3467c04c738b3a4247a9f
   languageName: node
   linkType: hard
 
