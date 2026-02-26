@@ -1,24 +1,5 @@
-import {
-  AppPage,
-  AppPageContent,
-  AppPageDescription,
-  AppPageHeader,
-  AppPageHeading,
-  AppPageTitle,
-} from "@/components/layouts/app-page"
+import { redirect } from "next/navigation"
 
-export default function Page() {
-  return (
-    <AppPage>
-      <AppPageHeader>
-        <AppPageHeading>
-          <AppPageTitle>Dashboard</AppPageTitle>
-          <AppPageDescription>
-            Overview of your knowledge workflows and study progress.
-          </AppPageDescription>
-        </AppPageHeading>
-      </AppPageHeader>
-      <AppPageContent />
-    </AppPage>
-  )
+export default function AppIndexPage() {
+  redirect("/app/search")
 }

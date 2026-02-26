@@ -4,7 +4,6 @@ export type AppMenuItem = {
 }
 
 export const APP_MENU_ITEMS: AppMenuItem[] = [
-  { href: "/app", label: "Dashboard" },
   { href: "/app/search", label: "Search" },
   { href: "/app/documents", label: "Documents" },
   { href: "/app/collections", label: "Collections" },

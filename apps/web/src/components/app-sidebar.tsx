@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation"
 import {
   IconActivity,
   IconCalendarCheck,
-  IconDashboard,
   IconFolder,
   IconFolders,
   IconGitBranch,
@@ -40,7 +39,6 @@ const data = {
 }
 
 const navIconByHref = {
-  "/app": IconDashboard,
   "/app/search": IconSearch,
   "/app/documents": IconFolder,
   "/app/collections": IconFolders,
@@ -74,7 +72,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuItem>
               <SidebarMenuButton
                 tooltip="Mind Stack"
-                className="data-[slot=sidebar-menu-button]:!p-1.5"
+                className="data-[slot=sidebar-menu-button]:p-1.5!"
               >
                 <span className="text-base font-semibold">Menu</span>
               </SidebarMenuButton>
