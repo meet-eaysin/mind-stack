@@ -53,10 +53,12 @@ class FakeLlmConfigRepository implements LlmConfigRepository {
 describe('ResolveLlmConfigUseCase', () => {
   const originalBaseUrl = process.env['OLLAMA_BASE_URL'];
   const originalModel = process.env['OLLAMA_MODEL'];
+  const originalEmbedModel = process.env['OLLAMA_EMBED_MODEL'];
 
   afterEach(() => {
     process.env['OLLAMA_BASE_URL'] = originalBaseUrl;
     process.env['OLLAMA_MODEL'] = originalModel;
+    process.env['OLLAMA_EMBED_MODEL'] = originalEmbedModel;
   });
 
   it('returns defaults when user has no persisted config', async () => {
@@ -102,6 +104,26 @@ describe('ResolveLlmConfigUseCase', () => {
       baseUrl: 'https://api.openai.com',
       encryptedApiKey: 'encrypted',
       enabledCapabilities: [MODEL_CAPABILITY.CHAT],
+    });
+  });
+
+  it('uses OLLAMA_EMBED_MODEL for embedding fallback when config is missing', async () => {
+    const repo = new FakeLlmConfigRepository();
+    process.env['OLLAMA_BASE_URL'] = 'http://localhost:11434';
+    process.env['OLLAMA_MODEL'] = 'tinyllama';
+    process.env['OLLAMA_EMBED_MODEL'] = 'all-minilm';
+    const config = new ConfigService();
+    const useCase = new ResolveLlmConfigUseCase(repo, config);
+
+    await expect(
+      useCase.execute('u-embed', MODEL_CAPABILITY.EMBEDDING),
+    ).resolves.toEqual({
+      userId: 'u-embed',
+      provider: MODEL_PROVIDER.OLLAMA,
+      model: 'all-minilm',
+      baseUrl: 'http://localhost:11434',
+      encryptedApiKey: null,
+      enabledCapabilities: [MODEL_CAPABILITY.CHAT, MODEL_CAPABILITY.EMBEDDING],
     });
   });
 });

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@repo/database';
+import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import type { LlmConfigRepository } from '../domain/llm-config.repository.interface.js';
 import type { LlmConfigEntity } from '../domain/llm-config.entity.js';
@@ -82,20 +83,24 @@ export class PrismaLlmConfigRepository implements LlmConfigRepository {
 
     const rows = await this.prisma.$queryRaw<LlmConfigRow[]>`
       INSERT INTO "user_llm_configs" (
+        "id",
         "user_id",
         "provider",
         "model",
         "base_url",
         "encrypted_api_key",
-        "enabled_capabilities"
+        "enabled_capabilities",
+        "updated_at"
       )
       VALUES (
+        ${randomUUID()},
         ${userId},
         ${data.provider},
         ${data.model},
         ${data.baseUrl},
         ${data.encryptedApiKey},
-        ${enabledCapabilitiesSql}
+        ${enabledCapabilitiesSql},
+        NOW()
       )
       ON CONFLICT ("user_id")
       DO UPDATE SET

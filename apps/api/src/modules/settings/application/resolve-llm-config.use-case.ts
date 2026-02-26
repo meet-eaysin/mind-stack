@@ -18,7 +18,10 @@ export class ResolveLlmConfigUseCase {
     private readonly configService: ConfigService,
   ) {}
 
-  async execute(userId: string): Promise<ResolvedLlmConfig> {
+  async execute(
+    userId: string,
+    preferredCapability: ModelCapability = MODEL_CAPABILITY.CHAT,
+  ): Promise<ResolvedLlmConfig> {
     const stored = await this.repository.findByUserId(userId);
 
     if (stored) {
@@ -38,7 +41,10 @@ export class ResolveLlmConfigUseCase {
     return {
       userId,
       provider: MODEL_PROVIDER.OLLAMA,
-      model: this.configService.getOrThrow<string>('OLLAMA_MODEL'),
+      model:
+        preferredCapability === MODEL_CAPABILITY.EMBEDDING
+          ? this.configService.getOrThrow<string>('OLLAMA_EMBED_MODEL')
+          : this.configService.getOrThrow<string>('OLLAMA_MODEL'),
       baseUrl: this.configService.getOrThrow<string>('OLLAMA_BASE_URL'),
       encryptedApiKey: null,
       enabledCapabilities: [MODEL_CAPABILITY.CHAT, MODEL_CAPABILITY.EMBEDDING],

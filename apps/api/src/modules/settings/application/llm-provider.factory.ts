@@ -28,7 +28,10 @@ export type LlmProviderFactoryPort = {
 };
 
 type ResolveLlmConfigPort = {
-  execute(userId: string): ReturnType<ResolveLlmConfigUseCase['execute']>;
+  execute(
+    userId: string,
+    preferredCapability?: ModelCapability,
+  ): ReturnType<ResolveLlmConfigUseCase['execute']>;
 };
 
 type SecretCipherPort = Pick<LlmSecretCipher, 'decrypt'>;
@@ -48,7 +51,7 @@ export class LlmProviderFactory implements LlmProviderFactoryPort {
   ) {}
 
   async getEmbeddingProvider(userId: string): Promise<EmbeddingProvider> {
-    const config = await this.getRuntimeConfig(userId);
+    const config = await this.getRuntimeConfig(userId, MODEL_CAPABILITY.EMBEDDING);
     this.assertCapability(config, MODEL_CAPABILITY.EMBEDDING);
 
     if (config.provider === MODEL_PROVIDER.OLLAMA) {
@@ -84,7 +87,7 @@ export class LlmProviderFactory implements LlmProviderFactoryPort {
   }
 
   async getGenerationProvider(userId: string): Promise<LLMProvider> {
-    const config = await this.getRuntimeConfig(userId);
+    const config = await this.getRuntimeConfig(userId, MODEL_CAPABILITY.CHAT);
     this.assertCapability(config, MODEL_CAPABILITY.CHAT);
 
     if (config.provider === MODEL_PROVIDER.OLLAMA) {
@@ -121,8 +124,9 @@ export class LlmProviderFactory implements LlmProviderFactoryPort {
 
   private async getRuntimeConfig(
     userId: string,
+    preferredCapability: ModelCapability,
   ): Promise<ProviderRuntimeConfig> {
-    const config = await this.resolveConfig.execute(userId);
+    const config = await this.resolveConfig.execute(userId, preferredCapability);
 
     return {
       provider: config.provider,

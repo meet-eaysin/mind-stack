@@ -43,7 +43,8 @@ export async function resolveUserLlmConfig(
     openaiBaseUrl: string | undefined;
     openrouterBaseUrl: string | undefined;
     geminiBaseUrl: string | undefined;
-    model: string;
+    chatModel: string;
+    embeddingModel: string;
     encryptionKey: string | undefined;
   },
   capability: ModelCapability,
@@ -79,7 +80,10 @@ export async function resolveUserLlmConfig(
   return {
     userId,
     provider: MODEL_PROVIDER.OLLAMA,
-    model: defaults.model,
+    model:
+      capability === MODEL_CAPABILITY.EMBEDDING
+        ? defaults.embeddingModel
+        : defaults.chatModel,
     baseUrl: defaults.ollamaBaseUrl,
     apiKey: null,
     enabledCapabilities: [MODEL_CAPABILITY.CHAT, MODEL_CAPABILITY.EMBEDDING],

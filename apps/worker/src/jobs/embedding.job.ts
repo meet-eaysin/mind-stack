@@ -73,7 +73,8 @@ export async function handleEmbeddingJob(
     openaiBaseUrl: string | undefined;
     openrouterBaseUrl: string | undefined;
     geminiBaseUrl: string | undefined;
-    model: string;
+    chatModel: string;
+    embeddingModel: string;
     encryptionKey: string | undefined;
   },
   createEmbeddingProvider: (config: {
@@ -84,7 +85,7 @@ export async function handleEmbeddingJob(
   }) => EmbeddingProvider,
 ): Promise<void> {
   const { documentId } = job.data;
-  let activeModel = defaults.model;
+  let activeModel = defaults.embeddingModel;
 
   const document = await prisma.document.findUnique({
     where: { id: documentId },

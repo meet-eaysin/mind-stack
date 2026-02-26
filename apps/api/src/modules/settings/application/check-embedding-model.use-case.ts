@@ -4,7 +4,10 @@ import type { ResolveLlmConfigUseCase } from './resolve-llm-config.use-case.js';
 import type { LlmProviderFactory } from './llm-provider.factory.js';
 
 type ResolveLlmConfigPort = {
-  execute(userId: string): ReturnType<ResolveLlmConfigUseCase['execute']>;
+  execute(
+    userId: string,
+    preferredCapability?: (typeof MODEL_CAPABILITY)[keyof typeof MODEL_CAPABILITY],
+  ): ReturnType<ResolveLlmConfigUseCase['execute']>;
 };
 
 type LlmProviderFactoryPort = Pick<LlmProviderFactory, 'getEmbeddingProvider'>;
@@ -16,7 +19,10 @@ export class CheckEmbeddingModelUseCase {
   ) {}
 
   async execute(userId: string): Promise<EmbeddingModelHealthResponse> {
-    const config = await this.resolveConfig.execute(userId);
+    const config = await this.resolveConfig.execute(
+      userId,
+      MODEL_CAPABILITY.EMBEDDING,
+    );
 
     if (!config.enabledCapabilities.includes(MODEL_CAPABILITY.EMBEDDING)) {
       return {
