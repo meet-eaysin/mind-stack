@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import {
   IconActivity,
   IconCalendarCheck,
+  IconDashboard,
   IconFolder,
   IconFolders,
   IconGitBranch,
@@ -39,15 +40,16 @@ const data = {
 }
 
 const navIconByHref = {
-  "/search": IconSearch,
-  "/documents": IconFolder,
-  "/collections": IconFolders,
-  "/courses": IconSchool,
-  "/review": IconCalendarCheck,
-  "/graph": IconGitBranch,
-  "/health": IconActivity,
-  "/productivity": IconTrendingUp,
-  "/settings": IconSettings,
+  "/app": IconDashboard,
+  "/app/search": IconSearch,
+  "/app/documents": IconFolder,
+  "/app/collections": IconFolders,
+  "/app/courses": IconSchool,
+  "/app/review": IconCalendarCheck,
+  "/app/graph": IconGitBranch,
+  "/app/health": IconActivity,
+  "/app/productivity": IconTrendingUp,
+  "/app/settings": IconSettings,
 } as const
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -72,7 +74,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuItem>
               <SidebarMenuButton
                 tooltip="Mind Stack"
-                className="data-[slot=sidebar-menu-button]:!p-1.5"
+                className="data-[slot=sidebar-menu-button]:p-1.5!"
               >
                 <span className="text-base font-semibold">Menu</span>
               </SidebarMenuButton>

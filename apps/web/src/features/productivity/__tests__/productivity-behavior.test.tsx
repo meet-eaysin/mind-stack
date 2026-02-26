@@ -3,7 +3,7 @@ import { screen, waitFor, fireEvent } from "@testing-library/react";
 import { http, HttpResponse, delay } from "msw";
 import { render } from "@/test/test-utils";
 import { server } from "@/test/msw/server";
-import ProductivityPage from "@/app/productivity/page";
+import ProductivityPage from "@/app/(app)/app/productivity/page";
 import { z } from "zod";
 
 describe("Productivity Behavior", () => {

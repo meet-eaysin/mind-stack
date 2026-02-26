@@ -39,7 +39,7 @@ export function ChunkResult({ chunk }: { chunk: ChunkReference }) {
           className="text-xs text-primary hover:underline"
           data-testid={`open-document-${chunk.documentId}`}
           onClick={() => {
-            window.location.href = `/documents?id=${chunk.documentId}`;
+            window.location.href = `/app/documents?id=${chunk.documentId}`;
           }}
         >
           Open document

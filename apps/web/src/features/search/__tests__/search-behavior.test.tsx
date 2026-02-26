@@ -1,7 +1,7 @@
 import { screen, waitFor, fireEvent } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import { render } from "@/test/test-utils";
-import SearchPage from "@/app/search/page"; // Testing the page since it holds search logic
+import SearchPage from "@/app/(app)/app/search/page"; // Testing the page since it holds search logic
 import { server } from "@/test/msw/server";
 import { http, HttpResponse } from "msw";
 import { FilteredSearchRequestSchema } from "@/features/search/schemas/search.schemas";

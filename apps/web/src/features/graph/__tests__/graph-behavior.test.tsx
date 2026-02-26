@@ -1,7 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import { render } from "@/test/test-utils";
-import GraphPage from "@/app/graph/page";
+import GraphPage from "@/app/(app)/app/graph/page";
 import { NeighborhoodPanel } from "../components";
 import { fireEvent } from "@testing-library/react";
 

@@ -69,7 +69,7 @@ export function DocumentResult({
           className="text-xs text-primary hover:underline"
           data-testid={`open-document-${document.documentId}`}
           onClick={() => {
-            window.location.href = `/documents?id=${document.documentId}`;
+            window.location.href = `/app/documents?id=${document.documentId}`;
           }}
         >
           Open document

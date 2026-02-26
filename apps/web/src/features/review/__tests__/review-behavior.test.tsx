@@ -1,7 +1,7 @@
 import { screen, waitFor, fireEvent } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import { render } from "@/test/test-utils";
-import ReviewPage from "@/app/review/page";
+import ReviewPage from "@/app/(app)/app/review/page";
 import { server } from "@/test/msw/server";
 import { http, HttpResponse } from "msw";
 

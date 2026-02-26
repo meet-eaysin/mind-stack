@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { AppShell } from "@/components/app-shell";
 import { CollectionList } from "@/features/collections/components/collection-list";
 import { CollectionDetail } from "@/features/collections/components/collection-detail";
 
@@ -11,8 +10,7 @@ export default function CollectionsPage() {
   >(null);
 
   return (
-    <AppShell>
-      <div className="container py-8 max-w-6xl mx-auto">
+          <div className="container py-8 max-w-6xl mx-auto">
         {!selectedCollectionId ? (
           <div className="space-y-8">
             <div className="flex flex-col gap-2">
@@ -30,11 +28,10 @@ export default function CollectionsPage() {
             onBackAction={() => setSelectedCollectionId(null)}
             onDocumentSelectAction={(docId) => {
               // Navigation to document detail will happen here or via separate router push
-              window.location.href = `/documents?id=${docId}`;
+              window.location.href = `/app/documents?id=${docId}`;
             }}
           />
         )}
       </div>
-    </AppShell>
   );
 }

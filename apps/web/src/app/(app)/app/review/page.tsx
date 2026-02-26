@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { AppShell } from "@/components/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { CalendarCheck, Brain, Sparkles, Trophy } from "lucide-react";
@@ -34,8 +33,7 @@ export default function ReviewPage() {
   };
 
   return (
-    <AppShell>
-      <div className="min-h-[calc(100vh-8rem)]">
+          <div className="min-h-[calc(100vh-8rem)]">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between gap-4">
@@ -167,6 +165,5 @@ export default function ReviewPage() {
           </div>
         )}
       </div>
-    </AppShell>
   );
 }

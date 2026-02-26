@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 
-import { AppShell } from "@/components/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -164,8 +163,7 @@ export default function HealthPage() {
   };
 
   return (
-    <AppShell>
-      <div className="space-y-8">
+          <div className="space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-1">
@@ -381,6 +379,5 @@ export default function HealthPage() {
             </div>
           )}
       </div>
-    </AppShell>
   );
 }

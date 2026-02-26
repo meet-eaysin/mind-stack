@@ -3,7 +3,7 @@ import { screen, waitFor } from "@testing-library/react";
 import { http, HttpResponse, delay } from "msw";
 import { render } from "@/test/test-utils";
 import { server } from "@/test/msw/server";
-import HealthPage from "@/app/health/page";
+import HealthPage from "@/app/(app)/app/health/page";
 
 describe("Health Behavior", () => {
   it("renders healthy dashboard data", async () => {

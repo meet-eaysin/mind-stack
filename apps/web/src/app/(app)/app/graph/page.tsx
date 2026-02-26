@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
@@ -42,8 +41,7 @@ export default function GraphPage() {
   }, [data, searchQuery]);
 
   return (
-    <AppShell>
-      <div className="space-y-6">
+          <div className="space-y-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
@@ -194,6 +192,5 @@ export default function GraphPage() {
           </div>
         )}
       </div>
-    </AppShell>
   );
 }

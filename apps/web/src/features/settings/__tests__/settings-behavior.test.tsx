@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse, delay } from "msw";
 import { render } from "@/test/test-utils";
 import { server } from "@/test/msw/server";
-import SettingsPage from "@/app/settings/page";
+import SettingsPage from "@/app/(app)/app/settings/page";
 import { z } from "zod";
 
 const configSchema = z.object({

@@ -35,7 +35,7 @@ export function ApplicationHeader() {
     <header className="sticky top-0 z-20 flex h-(--header-height) w-full shrink-0 items-center border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="flex w-full items-center gap-3 px-4 lg:px-6">
         <Link
-          href="/application"
+          href="/app"
           className="flex shrink-0 items-center gap-2"
           aria-label="Go to application home"
         >

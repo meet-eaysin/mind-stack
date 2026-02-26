@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -84,8 +83,7 @@ export default function SearchPage() {
   const hasAskResult = Boolean(askQuestion.data);
 
   return (
-    <AppShell>
-      <div className="space-y-6">
+          <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Search</h1>
           <p className="text-muted-foreground">
@@ -300,6 +298,5 @@ export default function SearchPage() {
           </div>
         )}
       </div>
-    </AppShell>
   );
 }

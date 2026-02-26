@@ -2,7 +2,6 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { AppShell } from "@/components/app-shell";
 import { DocumentList, DocumentDetail } from "@/features/documents";
 
 function DocumentsPageContent() {
@@ -17,8 +16,7 @@ function DocumentsPageContent() {
   }, [docIdFromQuery]);
 
   return (
-    <AppShell>
-      <div className="space-y-6">
+          <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Documents</h1>
           <p className="text-muted-foreground">
@@ -35,7 +33,6 @@ function DocumentsPageContent() {
           <DocumentList onSelectAction={setSelectedDocId} />
         )}
       </div>
-    </AppShell>
   );
 }
 
@@ -43,8 +40,7 @@ export default function DocumentsPage() {
   return (
     <Suspense
       fallback={
-        <AppShell>
-          <div className="space-y-6">
+                  <div className="space-y-6">
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Documents</h1>
               <p className="text-muted-foreground">
@@ -52,7 +48,6 @@ export default function DocumentsPage() {
               </p>
             </div>
           </div>
-        </AppShell>
       }
     >
       <DocumentsPageContent />

@@ -3,7 +3,7 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { http, HttpResponse, delay } from "msw";
 import { server } from "@/test/msw/server";
 import { render } from "@/test/test-utils";
-import CoursesPage from "@/app/courses/page";
+import CoursesPage from "@/app/(app)/app/courses/page";
 
 describe("Courses Behavior", () => {
   it("renders course list and opens course detail", async () => {

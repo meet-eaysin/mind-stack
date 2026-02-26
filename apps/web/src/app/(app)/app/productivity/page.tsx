@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { AppShell } from "@/components/app-shell";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -98,8 +97,7 @@ export default function ProductivityPage() {
   };
 
   return (
-    <AppShell>
-      <div className="space-y-8">
+          <div className="space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-1">
@@ -421,6 +419,5 @@ export default function ProductivityPage() {
           )}
         </section>
       </div>
-    </AppShell>
   );
 }

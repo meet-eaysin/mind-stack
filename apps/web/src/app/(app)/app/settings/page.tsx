@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,8 +56,7 @@ export default function SettingsPage() {
   const showHealth = !healthQuery.isLoading && !healthQuery.error;
 
   return (
-    <AppShell>
-      <div className="max-w-3xl space-y-6">
+          <div className="max-w-3xl space-y-6">
         <div className="flex items-center gap-3">
           <div className="size-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
             <Settings className="size-5" />
@@ -203,6 +201,5 @@ export default function SettingsPage() {
           </form>
         )}
       </div>
-    </AppShell>
   );
 }

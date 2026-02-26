@@ -90,9 +90,7 @@ export function NeighborhoodPanel({
                 <div
                   key={chunk.id}
                   className="p-3 bg-background/50 border rounded-lg hover:border-primary/50 transition-colors group cursor-pointer"
-                  onClick={() =>
-                    router.push(`/documents?id=${chunk.documentId}`)
-                  }
+                  onClick={() => router.push(`/app/documents?id=${chunk.documentId}`)}
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-[10px] font-medium text-muted-foreground truncate max-w-37.5">

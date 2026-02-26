@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { AppShell } from "@/components/app-shell";
 import { useCollection, useCollections } from "@/features/collections/hooks";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -116,8 +115,7 @@ export default function CoursesPage() {
   const { data, isLoading, error } = useCollections();
 
   return (
-    <AppShell>
-      <div className="space-y-6">
+          <div className="space-y-6">
         {selectedCourseId ? (
           <CourseDetail
             courseId={selectedCourseId}
@@ -190,6 +188,5 @@ export default function CoursesPage() {
           </>
         )}
       </div>
-    </AppShell>
   );
 }

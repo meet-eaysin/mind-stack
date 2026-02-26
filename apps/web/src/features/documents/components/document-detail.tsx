@@ -969,7 +969,7 @@ export function DocumentDetail({
                             variant="outline"
                             className="h-7 text-[10px]"
                             onClick={() => {
-                              window.location.href = `/documents?id=${item.documentId}`;
+                              window.location.href = `/app/documents?id=${item.documentId}`;
                             }}
                             data-testid={`related-open-document-${item.documentId}`}
                           >
