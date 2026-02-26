@@ -8,11 +8,13 @@ import {
   IconFolder,
   IconFolders,
   IconGitBranch,
+  IconPlus,
   IconSearch,
   IconSettings,
   IconSchool,
   IconTrendingUp,
 } from "@tabler/icons-react";
+import { IngestionModal } from "@/features/ingestion/components/ingestion-modal";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -52,6 +54,7 @@ const navIconByHref = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
+  const [isIngestionOpen, setIsIngestionOpen] = React.useState(false);
 
   const navMain = React.useMemo(
     () =>
@@ -85,6 +88,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             className="ml-auto size-8 group-data-[collapsible=icon]:ml-0"
           />
         </div>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip="Add Document"
+              size="lg"
+              variant="outline"
+              onClick={() => setIsIngestionOpen(true)}
+              className="h-9 justify-center gap-2 rounded-lg border-sidebar-border/70 bg-sidebar-accent/70 px-3 font-medium text-sidebar-foreground shadow-sm hover:bg-sidebar-accent group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:rounded-md group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:[&>span:last-child]:hidden"
+            >
+              <span className="flex size-4 items-center justify-center rounded-sm group-data-[collapsible=icon]:bg-transparent">
+                <IconPlus className="size-3.5" />
+              </span>
+              <span>Add Document</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navMain} />
@@ -92,6 +111,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <NavUser user={data.user} />
       </SidebarFooter>
+      <IngestionModal
+        open={isIngestionOpen}
+        onOpenChangeAction={setIsIngestionOpen}
+      />
       <SidebarRail />
     </Sidebar>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
@@ -12,7 +12,6 @@ import {
   FileText,
   Globe,
   GraduationCap,
-  Plus,
   RefreshCw,
   StickyNote,
   Trash2,
@@ -21,8 +20,6 @@ import {
   Youtube,
 } from "lucide-react";
 
-import { IngestionModal } from "@/features/ingestion/components/ingestion-modal";
-import { useRetryIngestion } from "@/features/ingestion/hooks";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import type { DocumentListResponse } from "../types";
 import { useDeleteDocument, useDocuments } from "../hooks";
@@ -38,9 +35,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { INGESTION_STATUS } from "@repo/shared-types";
+import {
+  DOCUMENT_TYPE,
+  INGESTION_STATUS,
+  LEARNING_STATUS,
+  SOURCE_TYPE,
+} from "@repo/shared-types";
 import { cn } from "@/lib/utils";
+import { useRetryIngestion } from "@/features/ingestion/hooks";
 
 const sourceTypeIcons: Record<string, React.ElementType> = {
   URL: Globe,
@@ -71,14 +81,60 @@ const learningStatusColors: Record<string, string> = {
   PENDING_COMPLETION: "bg-amber-500/10 text-amber-500 border-amber-500/20",
 };
 
+const sourceTypeFilterOptions = [
+  SOURCE_TYPE.URL,
+  SOURCE_TYPE.YOUTUBE,
+  SOURCE_TYPE.PDF,
+  SOURCE_TYPE.TEXT,
+] as const;
+
+const documentTypeFilterOptions = [
+  DOCUMENT_TYPE.ARTICLE,
+  DOCUMENT_TYPE.VIDEO,
+  DOCUMENT_TYPE.COURSE_LESSON,
+  DOCUMENT_TYPE.BOOK,
+  DOCUMENT_TYPE.NOTE,
+  DOCUMENT_TYPE.RFC,
+  DOCUMENT_TYPE.BLOG,
+  DOCUMENT_TYPE.TRANSCRIPT,
+  DOCUMENT_TYPE.OTHER,
+] as const;
+
+const learningStatusFilterOptions = [
+  LEARNING_STATUS.TO_WATCH,
+  LEARNING_STATUS.TO_READ,
+  LEARNING_STATUS.UPCOMING,
+  LEARNING_STATUS.IN_PROGRESS,
+  LEARNING_STATUS.REVIEW,
+  LEARNING_STATUS.COMPLETED,
+  LEARNING_STATUS.PENDING_COMPLETION,
+] as const;
+
+const ingestionStatusFilterOptions = [
+  INGESTION_STATUS.INGESTED,
+  INGESTION_STATUS.INITIALIZING,
+  INGESTION_STATUS.CHUNKING,
+  INGESTION_STATUS.EMBEDDING,
+  INGESTION_STATUS.GRAPH_BUILDING,
+  INGESTION_STATUS.READY,
+  INGESTION_STATUS.FAILED,
+] as const;
+
 type DocumentListProps = {
   onSelectAction: (id: string) => void;
 };
 
+type FilterValue = "all" | string;
+
 export function DocumentList({ onSelectAction }: DocumentListProps) {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [sourceTypeFilter, setSourceTypeFilter] = useState<FilterValue>("all");
+  const [documentTypeFilter, setDocumentTypeFilter] = useState<FilterValue>("all");
+  const [learningStatusFilter, setLearningStatusFilter] =
+    useState<FilterValue>("all");
+  const [ingestionStatusFilter, setIngestionStatusFilter] =
+    useState<FilterValue>("all");
 
   const pageSize = 10;
   const queryClient = useQueryClient();
@@ -127,14 +183,49 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
   );
   const deleteDocument = useDeleteDocument();
 
-  const handleIngestionSuccess = () => {
-    setPage(1);
-    queryClient.invalidateQueries({ queryKey: ["knowledge"] });
-  };
+  const filteredDocuments = useMemo(() => {
+    if (!data) {
+      return [];
+    }
+
+    return data.documents.filter((doc) => {
+      if (sourceTypeFilter !== "all" && doc.sourceType !== sourceTypeFilter) {
+        return false;
+      }
+      if (documentTypeFilter !== "all" && doc.type !== documentTypeFilter) {
+        return false;
+      }
+      if (
+        learningStatusFilter !== "all" &&
+        doc.learningStatus !== learningStatusFilter
+      ) {
+        return false;
+      }
+      if (
+        ingestionStatusFilter !== "all" &&
+        doc.status !== ingestionStatusFilter
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [
+    data,
+    sourceTypeFilter,
+    documentTypeFilter,
+    learningStatusFilter,
+    ingestionStatusFilter,
+  ]);
+
+  const hasActiveFilters =
+    sourceTypeFilter !== "all" ||
+    documentTypeFilter !== "all" ||
+    learningStatusFilter !== "all" ||
+    ingestionStatusFilter !== "all";
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
         <Input
           placeholder="Search documents..."
           value={searchTerm}
@@ -145,21 +236,93 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
           data-testid="document-search-input"
           className="flex-1"
         />
-        <Button
-          onClick={() => setIsModalOpen(true)}
-          className="shrink-0 gap-1"
-          data-testid="add-document-btn"
-        >
-          <Plus className="size-4" />
-          Add Document
-        </Button>
+
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-4 lg:w-auto">
+          <Select value={sourceTypeFilter} onValueChange={setSourceTypeFilter}>
+            <SelectTrigger className="w-full md:w-42" size="sm">
+              <SelectValue placeholder="Source" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Sources</SelectItem>
+              {sourceTypeFilterOptions.map((value) => (
+                <SelectItem key={value} value={value}>
+                  {formatEnumLabel(value)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={documentTypeFilter} onValueChange={setDocumentTypeFilter}>
+            <SelectTrigger className="w-full md:w-42" size="sm">
+              <SelectValue placeholder="Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              {documentTypeFilterOptions.map((value) => (
+                <SelectItem key={value} value={value}>
+                  {formatEnumLabel(value)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={learningStatusFilter}
+            onValueChange={setLearningStatusFilter}
+          >
+            <SelectTrigger className="w-full md:w-42" size="sm">
+              <SelectValue placeholder="Learning" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Learning</SelectItem>
+              {learningStatusFilterOptions.map((value) => (
+                <SelectItem key={value} value={value}>
+                  {formatEnumLabel(value)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={ingestionStatusFilter}
+            onValueChange={setIngestionStatusFilter}
+          >
+            <SelectTrigger className="w-full md:w-42" size="sm">
+              <SelectValue placeholder="Processing" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Processing</SelectItem>
+              {ingestionStatusFilterOptions.map((value) => (
+                <SelectItem key={value} value={value}>
+                  {formatEnumLabel(value)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      <IngestionModal
-        open={isModalOpen}
-        onOpenChangeAction={setIsModalOpen}
-        onSuccessAction={handleIngestionSuccess}
-      />
+      {hasActiveFilters && (
+        <div className="flex items-center justify-between rounded-md border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+          <span>
+            Showing {filteredDocuments.length} filtered result
+            {filteredDocuments.length === 1 ? "" : "s"} on this page
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs"
+            onClick={() => {
+              setSourceTypeFilter("all");
+              setDocumentTypeFilter("all");
+              setLearningStatusFilter("all");
+              setIngestionStatusFilter("all");
+            }}
+          >
+            Clear filters
+          </Button>
+        </div>
+      )}
 
       {isLoading && (
         <div
@@ -192,7 +355,7 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
             className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
             data-testid="document-list"
           >
-            {data.documents.map((doc) => {
+            {filteredDocuments.map((doc) => {
               const TypeIcon = documentTypeIcons[doc.type] || File;
               const SourceIcon = sourceTypeIcons[doc.sourceType] || File;
               const isFailed = doc.status === INGESTION_STATUS.FAILED;
@@ -202,7 +365,11 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
               const youtubeEmbedUrl = getYoutubeEmbedUrl(doc.sourceUrl);
 
               return (
-                <Card key={doc.id} className="gap-2 overflow-hidden py-0" data-testid={`document-item-${doc.id}`}>
+                <Card
+                  key={doc.id}
+                  className="gap-2 overflow-hidden py-0"
+                  data-testid={`document-item-${doc.id}`}
+                >
                   <CardHeader className="gap-1.5 p-3 pb-0">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex min-w-0 items-center gap-2">
@@ -222,7 +389,7 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
                               learningStatusColors.UPCOMING,
                           )}
                         >
-                          {doc.learningStatus.replace("_", " ")}
+                          {formatEnumLabel(doc.learningStatus)}
                         </Badge>
                         {isFailed && (
                           <Badge
@@ -251,7 +418,8 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
 
                   <CardContent className="px-3">
                     <div className="overflow-hidden rounded-lg border bg-muted/20">
-                      {doc.sourceType === "YOUTUBE" && youtubeEmbedUrl ? (
+                      {doc.sourceType === SOURCE_TYPE.YOUTUBE &&
+                      youtubeEmbedUrl ? (
                         <iframe
                           title={`${doc.title} preview`}
                           src={youtubeEmbedUrl}
@@ -261,7 +429,7 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
                           referrerPolicy="strict-origin-when-cross-origin"
                           allowFullScreen
                         />
-                      ) : doc.sourceType === "URL" && doc.sourceUrl ? (
+                      ) : doc.sourceType === SOURCE_TYPE.URL && doc.sourceUrl ? (
                         <iframe
                           title={`${doc.title} source`}
                           src={doc.sourceUrl}
@@ -273,9 +441,9 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
                         <div className="flex h-32 flex-col items-center justify-center gap-1.5 px-3 text-center">
                           <TypeIcon className="size-6 text-muted-foreground" />
                           <p className="text-xs text-muted-foreground">
-                            {doc.sourceType === "PDF"
-                              ? "PDF preview available in document reader"
-                              : "Open document to view full content"}
+                            {doc.sourceType === SOURCE_TYPE.PDF
+                              ? "PDF preview available in reader"
+                              : "Open document to view content"}
                           </p>
                         </div>
                       )}
@@ -321,7 +489,7 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
                           className="h-7 gap-1 rounded-md px-1.5 text-[11px] text-muted-foreground"
                         >
                           <RefreshCw className="size-3 animate-spin" />
-                          {doc.status}
+                          {formatEnumLabel(doc.status)}
                         </Badge>
                       )}
                     </div>
@@ -353,6 +521,12 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
             })}
           </div>
 
+          {filteredDocuments.length === 0 && (
+            <div className="rounded-lg border px-4 py-8 text-center text-sm text-muted-foreground">
+              No documents match the current filters.
+            </div>
+          )}
+
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <span>
               Page {data.page} · {data.total} total
@@ -362,7 +536,9 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
                 variant="outline"
                 size="icon"
                 disabled={data.page <= 1}
-                onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
+                onClick={() =>
+                  setPage((currentPage) => Math.max(1, currentPage - 1))
+                }
                 aria-label="Previous page"
               >
                 <ChevronLeft className="size-4" />
@@ -382,6 +558,14 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
       )}
     </div>
   );
+}
+
+function formatEnumLabel(value: string): string {
+  return value
+    .toLowerCase()
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }
 
 function getYoutubeEmbedUrl(url: string | null): string | null {
