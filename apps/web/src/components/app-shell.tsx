@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Brain,
-  Search,
   FileText,
   CalendarCheck,
   Network,
@@ -16,19 +15,19 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { APP_MENU_ITEMS } from "@/lib/app-menu";
 import { cn } from "@/lib/utils";
 
-const navItems = [
-  { href: "/search", label: "Search", icon: Search },
-  { href: "/documents", label: "Documents", icon: FileText },
-  { href: "/collections", label: "Collections", icon: Folder },
-  { href: "/courses", label: "Courses", icon: GraduationCap },
-  { href: "/review", label: "Review", icon: CalendarCheck },
-  { href: "/graph", label: "Graph", icon: Network },
-  { href: "/health", label: "Health", icon: Activity },
-  { href: "/productivity", label: "Productivity", icon: TrendingUp },
-  { href: "/settings", label: "Settings", icon: Settings },
-];
+const iconByHref = {
+  "/documents": FileText,
+  "/collections": Folder,
+  "/courses": GraduationCap,
+  "/review": CalendarCheck,
+  "/graph": Network,
+  "/health": Activity,
+  "/productivity": TrendingUp,
+  "/settings": Settings,
+} as const;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -43,24 +42,27 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <span className="text-lg">Mind Stack</span>
             </Link>
             <nav className="hidden items-center gap-1 md:flex">
-              {navItems.map((item) => (
-                <Button
-                  key={item.href}
-                  variant="ghost"
-                  size="sm"
-                  asChild
-                  className={cn(
-                    "gap-1.5",
-                    pathname === item.href &&
+              {APP_MENU_ITEMS.map((item) => {
+                const Icon = iconByHref[item.href as keyof typeof iconByHref];
+                return (
+                  <Button
+                    key={item.href}
+                    variant="ghost"
+                    size="sm"
+                    asChild
+                    className={cn(
+                      "gap-1.5",
+                      pathname === item.href &&
                       "bg-accent text-accent-foreground",
-                  )}
-                >
-                  <Link href={item.href}>
-                    <item.icon className="size-4" />
-                    {item.label}
-                  </Link>
-                </Button>
-              ))}
+                    )}
+                  >
+                    <Link href={item.href}>
+                      <Icon className="size-4" />
+                      {item.label}
+                    </Link>
+                  </Button>
+                );
+              })}
             </nav>
           </div>
           <div className="flex items-center gap-2">

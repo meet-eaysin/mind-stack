@@ -3,22 +3,18 @@
 import * as React from "react"
 import { usePathname } from "next/navigation"
 import {
-  IconChartBar,
-  IconDashboard,
-  IconDatabase,
-  IconFileWord,
+  IconActivity,
+  IconCalendarCheck,
   IconFolder,
-  IconHelp,
-  IconListDetails,
-  IconReport,
+  IconFolders,
+  IconGitBranch,
   IconSearch,
   IconSettings,
-  IconUsers,
+  IconSchool,
+  IconTrendingUp,
 } from "@tabler/icons-react"
 
-import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
@@ -31,6 +27,7 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { APP_MENU_ITEMS } from "@/lib/app-menu"
 
 const data = {
   user: {
@@ -38,68 +35,20 @@ const data = {
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/application",
-      icon: IconDashboard,
-    },
-    {
-      title: "Search",
-      url: "/search",
-      icon: IconListDetails,
-    },
-    {
-      title: "Review",
-      url: "/review",
-      icon: IconChartBar,
-    },
-    {
-      title: "Documents",
-      url: "/documents",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "/courses",
-      icon: IconUsers,
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: IconSettings,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "/search",
-      icon: IconSearch,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "/documents",
-      icon: IconDatabase,
-    },
-    {
-      name: "Reports",
-      url: "/review",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "/search",
-      icon: IconFileWord,
-    },
-  ],
+  navMain: APP_MENU_ITEMS,
 }
+
+const navIconByHref = {
+  "/search": IconSearch,
+  "/documents": IconFolder,
+  "/collections": IconFolders,
+  "/courses": IconSchool,
+  "/review": IconCalendarCheck,
+  "/graph": IconGitBranch,
+  "/health": IconActivity,
+  "/productivity": IconTrendingUp,
+  "/settings": IconSettings,
+} as const
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
@@ -107,17 +56,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navMain = React.useMemo(
     () =>
       data.navMain.map((item) => ({
-        ...item,
-        isActive: pathname === item.url || pathname.startsWith(`${item.url}/`),
-      })),
-    [pathname]
-  )
-
-  const navSecondary = React.useMemo(
-    () =>
-      data.navSecondary.map((item) => ({
-        ...item,
-        isActive: pathname === item.url || pathname.startsWith(`${item.url}/`),
+        title: item.label,
+        url: item.href,
+        icon: navIconByHref[item.href as keyof typeof navIconByHref],
+        isActive: pathname === item.href || pathname.startsWith(`${item.href}/`),
       })),
     [pathname]
   )
@@ -130,7 +72,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuItem>
               <SidebarMenuButton
                 tooltip="Mind Stack"
-                className="data-[slot=sidebar-menu-button]:p-1.5!"
+                className="data-[slot=sidebar-menu-button]:!p-1.5"
               >
                 <span className="text-base font-semibold">Menu</span>
               </SidebarMenuButton>
@@ -145,8 +87,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
