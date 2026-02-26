@@ -35,3 +35,16 @@ export function useUpdateLlmConfig() {
     },
   });
 }
+
+export function useDeleteLlmConfig() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => settingsApi.deleteLlmConfig(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.SETTINGS.LLM });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.SETTINGS.EMBEDDING_HEALTH,
+      });
+    },
+  });
+}

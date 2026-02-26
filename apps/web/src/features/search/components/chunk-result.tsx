@@ -25,7 +25,9 @@ export function ChunkResult({ chunk }: { chunk: ChunkReference }) {
       <div className="mb-2 flex items-center justify-between">
         <span className="flex items-center gap-1.5 text-xs font-medium text-primary">
           {chunk.documentTitle}
-          {chunk.hasNote && <StickyNote className="size-3 text-muted-foreground" />}
+          {chunk.hasNote && (
+            <StickyNote className="size-3 text-muted-foreground" />
+          )}
         </span>
         <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
           {(chunk.score * 100).toFixed(0)}% match
@@ -35,7 +37,10 @@ export function ChunkResult({ chunk }: { chunk: ChunkReference }) {
       {chunk.tags.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {chunk.tags.map((tag) => (
-            <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-xs">
+            <span
+              key={tag}
+              className="rounded-full bg-muted px-2 py-0.5 text-xs"
+            >
               {tag}
             </span>
           ))}

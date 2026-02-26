@@ -71,6 +71,6 @@ export const ENDPOINTS = {
     REMOVE_ITEM: (itemId: string) => `/learning-goals/items/${itemId}`,
   },
   SETTINGS: {
-    LLM: "/settings/llm",
+    LLM: "/me/llm-config",
   },
 } as const;

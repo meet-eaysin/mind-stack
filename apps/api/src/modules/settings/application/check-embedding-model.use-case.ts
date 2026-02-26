@@ -1,39 +1,51 @@
 import type { EmbeddingModelHealthResponse } from '@repo/shared-types';
-import { MODEL_PROVIDER } from '@repo/shared-types';
-import { ResolveLlmConfigUseCase } from './resolve-llm-config.use-case.js';
-import type { EmbeddingModelRegistry } from './update-llm-config.use-case.js';
+import { MODEL_CAPABILITY } from '@repo/shared-types';
+import type { ResolveLlmConfigUseCase } from './resolve-llm-config.use-case.js';
+import type { LlmProviderFactory } from './llm-provider.factory.js';
 
-export type ResolveLlmConfigPort = {
+type ResolveLlmConfigPort = {
   execute(userId: string): ReturnType<ResolveLlmConfigUseCase['execute']>;
 };
+
+type LlmProviderFactoryPort = Pick<LlmProviderFactory, 'getEmbeddingProvider'>;
 
 export class CheckEmbeddingModelUseCase {
   constructor(
     private readonly resolveConfig: ResolveLlmConfigPort,
-    private readonly modelRegistry: EmbeddingModelRegistry,
+    private readonly providerFactory: LlmProviderFactoryPort,
   ) {}
 
   async execute(userId: string): Promise<EmbeddingModelHealthResponse> {
     const config = await this.resolveConfig.execute(userId);
-    if (config.embeddingProvider !== MODEL_PROVIDER.OLLAMA) {
+
+    if (!config.enabledCapabilities.includes(MODEL_CAPABILITY.EMBEDDING)) {
       return {
-        provider: config.embeddingProvider,
-        model: config.embeddingModel,
+        provider: config.provider,
+        model: config.model,
         baseUrl: config.baseUrl,
         available: false,
-        reason: 'Unsupported embedding provider',
+        reason: 'Embedding capability is disabled',
       };
     }
 
-    const available = await this.modelRegistry.hasModel(config.embeddingModel);
-    return {
-      provider: config.embeddingProvider,
-      model: config.embeddingModel,
-      baseUrl: config.baseUrl,
-      available,
-      reason: available
-        ? undefined
-        : `Embedding model not available: ${config.embeddingModel}`,
-    };
+    try {
+      const provider = await this.providerFactory.getEmbeddingProvider(userId);
+      const result = await provider.embed('health check');
+      return {
+        provider: config.provider,
+        model: config.model,
+        baseUrl: config.baseUrl,
+        available: result.embedding.length > 0,
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return {
+        provider: config.provider,
+        model: config.model,
+        baseUrl: config.baseUrl,
+        available: false,
+        reason: message,
+      };
+    }
   }
 }

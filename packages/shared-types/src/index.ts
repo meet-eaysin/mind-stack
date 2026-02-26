@@ -7,6 +7,7 @@ export {
   DOCUMENT_TYPE,
   ANNOTATION_TYPE,
   MODEL_PROVIDER,
+  MODEL_CAPABILITY,
 } from "./enums";
 export type {
   SourceType,
@@ -17,6 +18,7 @@ export type {
   DocumentType,
   AnnotationType,
   ModelProvider,
+  ModelCapability,
 } from "./enums";
 
 export type {

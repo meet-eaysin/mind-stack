@@ -1,14 +1,14 @@
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 type ContextMenuProps = {
-  id: string
-  top?: number
-  left?: number
-  right?: number
-  bottom?: number
-  onClose: () => void
-}
+  id: string;
+  top?: number;
+  left?: number;
+  right?: number;
+  bottom?: number;
+  onClose: () => void;
+};
 
 export function GraphContextMenu({
   id,
@@ -34,5 +34,5 @@ export function GraphContextMenu({
         </Button>
       </div>
     </div>
-  )
+  );
 }

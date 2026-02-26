@@ -1,12 +1,12 @@
-import { CheckCircle2, Clock3 } from "lucide-react"
+import { CheckCircle2, Clock3 } from "lucide-react";
 
 import {
   PageHeader,
   PageHeaderDescription,
   PageHeaderHeading,
-} from "@/components/page-header"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
+} from "@/components/page-header";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 const learningStatuses = [
   "To Watch",
@@ -16,13 +16,13 @@ const learningStatuses = [
   "Upcoming",
   "Completed",
   "Pending Completion",
-] as const
+] as const;
 
 const dailyReviewHighlights = [
   "Prioritized resurfacing based on your activity",
   "Quick revisit of core concepts and sources",
   "Continuous reinforcement for active projects",
-] as const
+] as const;
 
 export function DailyReviewSection() {
   return (
@@ -61,7 +61,10 @@ export function DailyReviewSection() {
             <Separator className="my-4" />
             <ul className="space-y-2 text-sm">
               {dailyReviewHighlights.map((item) => (
-                <li key={item} className="flex items-start gap-2 text-muted-foreground">
+                <li
+                  key={item}
+                  className="flex items-start gap-2 text-muted-foreground"
+                >
                   <CheckCircle2 className="mt-0.5 size-4 text-primary" />
                   <span>{item}</span>
                 </li>
@@ -71,5 +74,5 @@ export function DailyReviewSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }

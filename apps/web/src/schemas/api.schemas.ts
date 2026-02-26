@@ -6,6 +6,7 @@ import {
   LEARNING_STATUS,
   DOCUMENT_TYPE,
   ANNOTATION_TYPE,
+  MODEL_CAPABILITY,
   MODEL_PROVIDER,
 } from "@repo/shared-types";
 
@@ -24,6 +25,7 @@ export const DocumentTypeSchema = z.enum(DOCUMENT_TYPE);
 export const AnnotationTypeSchema = z.enum(ANNOTATION_TYPE);
 
 export const ModelProviderSchema = z.enum(MODEL_PROVIDER);
+export const ModelCapabilitySchema = z.enum(MODEL_CAPABILITY);
 
 // ── Shared Models ──
 

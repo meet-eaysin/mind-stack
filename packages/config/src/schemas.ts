@@ -7,6 +7,9 @@ export const serverEnvSchema = z.object({
   DATABASE_URL: z.string(),
   API_PORT: z.coerce.number().default(4000),
   OLLAMA_BASE_URL: z.string().default("http://localhost:11434"),
+  OPENAI_BASE_URL: z.string().url().optional(),
+  OPENROUTER_BASE_URL: z.string().url().optional(),
+  GEMINI_BASE_URL: z.string().url().optional(),
   OLLAMA_MODEL: z.string().min(1),
   OLLAMA_EMBED_MODEL: z.string().min(1),
   CHROMA_URL: z.string().default("http://localhost:8000"),
@@ -20,6 +23,7 @@ export const serverEnvSchema = z.object({
   YOUTUBE_PROXY_URL: z.string().url().optional(),
   WEB_URL: z.string().default("http://localhost:3000"),
   API_URL: z.string().default("http://localhost:4000"),
+  LLM_CONFIG_ENCRYPTION_KEY: z.string().min(32).optional(),
 });
 
 export const webEnvSchema = z.object({

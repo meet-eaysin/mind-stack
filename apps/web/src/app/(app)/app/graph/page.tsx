@@ -177,13 +177,17 @@ export default function GraphPage() {
                     <p className="text-[10px] font-semibold uppercase text-muted-foreground">
                       Total Nodes
                     </p>
-                    <p className="text-2xl font-semibold">{data.nodes.length}</p>
+                    <p className="text-2xl font-semibold">
+                      {data.nodes.length}
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] font-semibold uppercase text-muted-foreground">
                       Total Links
                     </p>
-                    <p className="text-2xl font-semibold">{data.edges.length}</p>
+                    <p className="text-2xl font-semibold">
+                      {data.edges.length}
+                    </p>
                   </div>
                   <div className="col-span-2 pt-2">
                     <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">

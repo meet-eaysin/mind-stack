@@ -168,11 +168,15 @@ export function DocumentDetailPage({ documentId }: { documentId: string }) {
             <Card>
               <CardHeader className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="outline">{formatEnumLabel(document.type)}</Badge>
+                  <Badge variant="outline">
+                    {formatEnumLabel(document.type)}
+                  </Badge>
                   <Badge variant="secondary">
                     {formatEnumLabel(document.learningStatus)}
                   </Badge>
-                  <Badge variant="outline">{formatEnumLabel(document.status)}</Badge>
+                  <Badge variant="outline">
+                    {formatEnumLabel(document.status)}
+                  </Badge>
                   <Badge variant="outline">{document.sourceType}</Badge>
                 </div>
                 <CardTitle className="text-2xl leading-tight">
@@ -204,7 +208,10 @@ export function DocumentDetailPage({ documentId }: { documentId: string }) {
                         type="button"
                         className="ml-0.5 text-muted-foreground hover:text-foreground"
                         onClick={() =>
-                          removeTag.mutate({ documentId: document.id, tagName: tag })
+                          removeTag.mutate({
+                            documentId: document.id,
+                            tagName: tag,
+                          })
                         }
                         aria-label={`Remove ${tag}`}
                       >
@@ -213,7 +220,9 @@ export function DocumentDetailPage({ documentId }: { documentId: string }) {
                     </Badge>
                   ))}
                   {document.tags.length === 0 && (
-                    <span className="text-xs text-muted-foreground">No tags yet</span>
+                    <span className="text-xs text-muted-foreground">
+                      No tags yet
+                    </span>
                   )}
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -272,11 +281,15 @@ export function DocumentDetailPage({ documentId }: { documentId: string }) {
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div className="grid gap-1">
-                  <span className="text-muted-foreground">Ingestion status</span>
+                  <span className="text-muted-foreground">
+                    Ingestion status
+                  </span>
                   <span>{formatEnumLabel(document.status)}</span>
                 </div>
                 <div className="grid gap-1">
-                  <span className="text-muted-foreground">Embedding status</span>
+                  <span className="text-muted-foreground">
+                    Embedding status
+                  </span>
                   <span>
                     {document.status === INGESTION_STATUS.READY
                       ? "Ready"

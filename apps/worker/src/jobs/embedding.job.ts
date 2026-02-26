@@ -1,10 +1,14 @@
-import { OllamaEmbeddingProvider } from "@repo/embeddings";
-import { OllamaModelRegistry } from "@repo/embeddings";
+import type { EmbeddingProvider } from "@repo/embeddings";
 import type { VectorStore, VectorDocument } from "@repo/vector-store";
 import { createLogger } from "@repo/logger";
 import { Job, Queue } from "bullmq";
-import { INGESTION_STATUS, JOB_TYPE } from "@repo/shared-types";
-import { resolveUserLlmConfig } from "../llm-config";
+import {
+  INGESTION_STATUS,
+  JOB_TYPE,
+  MODEL_CAPABILITY,
+  type ModelProvider,
+} from "@repo/shared-types";
+import { resolveUserLlmConfig, type StoredUserLlmConfig } from "../llm-config";
 
 const logger = createLogger("EmbeddingJob");
 
@@ -20,7 +24,10 @@ type ChunkWithDetails = {
 
 type EmbeddingJobPrisma = {
   document: {
-    findUnique: (args: { where: { id: string } }) => Promise<{
+    findUnique: (args: {
+      where: { id: string };
+      select?: { userId?: boolean };
+    }) => Promise<{
       id: string;
       status: string;
       userId: string;
@@ -48,12 +55,9 @@ type EmbeddingJobPrisma = {
     }) => Promise<ChunkWithDetails[]>;
   };
   userLlmConfig: {
-    findUnique: (args: { where: { userId: string } }) => Promise<{
-      embeddingProvider: string;
-      embeddingModel: string;
-      generationProvider: string;
-      generationModel: string;
-    } | null>;
+    findUnique: (args: {
+      where: { userId: string };
+    }) => Promise<StoredUserLlmConfig | null>;
   };
 };
 
@@ -64,14 +68,23 @@ export async function handleEmbeddingJob(
   prisma: EmbeddingJobPrisma,
   vectorStore: VectorStore,
   ingestionQueue: Queue,
-  modelRegistry: OllamaModelRegistry,
   defaults: {
-    baseUrl: string;
-    embeddingModel: string;
-    generationModel: string;
+    ollamaBaseUrl: string;
+    openaiBaseUrl: string | undefined;
+    openrouterBaseUrl: string | undefined;
+    geminiBaseUrl: string | undefined;
+    model: string;
+    encryptionKey: string | undefined;
   },
+  createEmbeddingProvider: (config: {
+    provider: ModelProvider;
+    model: string;
+    baseUrl: string;
+    apiKey: string | null;
+  }) => EmbeddingProvider,
 ): Promise<void> {
   const { documentId } = job.data;
+  let activeModel = defaults.model;
 
   const document = await prisma.document.findUnique({
     where: { id: documentId },
@@ -82,7 +95,6 @@ export async function handleEmbeddingJob(
     throw new Error(`Document not found: ${documentId}`);
   }
 
-  // Only run if we are in the correct state (or retrying)
   if (
     document.status !== INGESTION_STATUS.EMBEDDING &&
     document.status !== INGESTION_STATUS.CHUNKING
@@ -101,18 +113,25 @@ export async function handleEmbeddingJob(
 
   try {
     const userId = job.data.userId ?? document.userId;
-    const config = await resolveUserLlmConfig(prisma, userId, defaults);
+    const config = await resolveUserLlmConfig(
+      prisma,
+      userId,
+      defaults,
+      MODEL_CAPABILITY.EMBEDDING,
+    );
+    activeModel = config.model;
 
-    const modelAvailable = await modelRegistry.hasModel(config.embeddingModel);
-    if (!modelAvailable) {
+    if (!config.enabledCapabilities.includes(MODEL_CAPABILITY.EMBEDDING)) {
       throw new Error(
-        `Embedding model not available: ${config.embeddingModel}`,
+        "Embedding capability is disabled in user LLM configuration",
       );
     }
 
-    const embeddingProvider = new OllamaEmbeddingProvider({
+    const embeddingProvider = createEmbeddingProvider({
+      provider: config.provider,
+      model: config.model,
       baseUrl: config.baseUrl,
-      model: config.embeddingModel,
+      apiKey: config.apiKey,
     });
 
     const chunks = await prisma.chunk.findMany({
@@ -187,7 +206,12 @@ export async function handleEmbeddingJob(
       chunkCount: chunks.length,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const rawMessage = error instanceof Error ? error.message : String(error);
+    const message =
+      rawMessage.toLowerCase().includes("not found") &&
+      rawMessage.toLowerCase().includes("ollama")
+        ? `Ollama model '${activeModel}' is not available. Run 'ollama pull ${activeModel}' and retry.`
+        : rawMessage;
     await prisma.document.update({
       where: { id: documentId },
       data: { status: INGESTION_STATUS.FAILED, processingError: message },

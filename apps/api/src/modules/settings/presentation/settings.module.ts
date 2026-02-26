@@ -8,7 +8,9 @@ import { GetLlmConfigUseCase } from '../application/get-llm-config.use-case.js';
 import { UpdateLlmConfigUseCase } from '../application/update-llm-config.use-case.js';
 import { CheckEmbeddingModelUseCase } from '../application/check-embedding-model.use-case.js';
 import { LlmProviderFactory } from '../application/llm-provider.factory.js';
-import { OllamaModelRegistry } from '@repo/embeddings';
+import { LlmSecretCipher } from '../application/llm-secret-cipher.js';
+import { ProviderConfigValidator } from '../application/provider-config-validator.js';
+import { DeleteLlmConfigUseCase } from '../application/delete-llm-config.use-case.js';
 
 @Module({
   imports: [PrismaModule, ConfigModule],
@@ -16,9 +18,9 @@ import { OllamaModelRegistry } from '@repo/embeddings';
   providers: [
     PrismaLlmConfigRepository,
     {
-      provide: OllamaModelRegistry,
+      provide: LlmSecretCipher,
       useFactory: (config: ConfigService) =>
-        new OllamaModelRegistry(config.getOrThrow('OLLAMA_BASE_URL')),
+        new LlmSecretCipher(config.get('LLM_CONFIG_ENCRYPTION_KEY')),
       inject: [ConfigService],
     },
     {
@@ -26,6 +28,19 @@ import { OllamaModelRegistry } from '@repo/embeddings';
       useFactory: (repo: PrismaLlmConfigRepository, config: ConfigService) =>
         new ResolveLlmConfigUseCase(repo, config),
       inject: [PrismaLlmConfigRepository, ConfigService],
+    },
+    {
+      provide: ProviderConfigValidator,
+      useFactory: () => new ProviderConfigValidator(),
+      inject: [],
+    },
+    {
+      provide: LlmProviderFactory,
+      useFactory: (
+        resolveConfig: ResolveLlmConfigUseCase,
+        secretCipher: LlmSecretCipher,
+      ) => new LlmProviderFactory(resolveConfig, secretCipher),
+      inject: [ResolveLlmConfigUseCase, LlmSecretCipher],
     },
     {
       provide: GetLlmConfigUseCase,
@@ -37,29 +52,35 @@ import { OllamaModelRegistry } from '@repo/embeddings';
       provide: UpdateLlmConfigUseCase,
       useFactory: (
         repo: PrismaLlmConfigRepository,
-        registry: OllamaModelRegistry,
-      ) => new UpdateLlmConfigUseCase(repo, registry),
-      inject: [PrismaLlmConfigRepository, OllamaModelRegistry],
+        validator: ProviderConfigValidator,
+        secretCipher: LlmSecretCipher,
+      ) => new UpdateLlmConfigUseCase(repo, validator, secretCipher),
+      inject: [
+        PrismaLlmConfigRepository,
+        ProviderConfigValidator,
+        LlmSecretCipher,
+      ],
+    },
+    {
+      provide: DeleteLlmConfigUseCase,
+      useFactory: (repo: PrismaLlmConfigRepository) =>
+        new DeleteLlmConfigUseCase(repo),
+      inject: [PrismaLlmConfigRepository],
     },
     {
       provide: CheckEmbeddingModelUseCase,
       useFactory: (
         resolveConfig: ResolveLlmConfigUseCase,
-        registry: OllamaModelRegistry,
-      ) => new CheckEmbeddingModelUseCase(resolveConfig, registry),
-      inject: [ResolveLlmConfigUseCase, OllamaModelRegistry],
-    },
-    {
-      provide: LlmProviderFactory,
-      useFactory: (resolveConfig: ResolveLlmConfigUseCase) =>
-        new LlmProviderFactory(resolveConfig),
-      inject: [ResolveLlmConfigUseCase],
+        providerFactory: LlmProviderFactory,
+      ) => new CheckEmbeddingModelUseCase(resolveConfig, providerFactory),
+      inject: [ResolveLlmConfigUseCase, LlmProviderFactory],
     },
   ],
   exports: [
     ResolveLlmConfigUseCase,
     LlmProviderFactory,
     CheckEmbeddingModelUseCase,
+    LlmSecretCipher,
   ],
 })
 export class SettingsModule {}

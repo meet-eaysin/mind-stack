@@ -29,8 +29,12 @@ export function DocumentResult({
       <div className="flex flex-col gap-2">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold text-primary">{document.title}</h3>
-            {document.hasNote && <StickyNote className="size-4 text-amber-500" />}
+            <h3 className="text-lg font-semibold text-primary">
+              {document.title}
+            </h3>
+            {document.hasNote && (
+              <StickyNote className="size-4 text-amber-500" />
+            )}
           </div>
           <span className="rounded-full border bg-secondary/80 px-2.5 py-1 text-xs font-medium text-secondary-foreground">
             {(document.score * 100).toFixed(0)}% match

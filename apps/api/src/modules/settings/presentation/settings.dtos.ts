@@ -1,16 +1,35 @@
-import { IsEnum, IsString } from 'class-validator';
-import { MODEL_PROVIDER, type ModelProvider } from '@repo/shared-types';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUrl,
+} from 'class-validator';
+import {
+  MODEL_CAPABILITY,
+  MODEL_PROVIDER,
+  type ModelCapability,
+  type ModelProvider,
+} from '@repo/shared-types';
 
 export class UpdateLlmConfigDto {
   @IsEnum(MODEL_PROVIDER)
-  embeddingProvider!: ModelProvider;
+  provider!: ModelProvider;
 
   @IsString()
-  embeddingModel!: string;
+  model!: string;
 
-  @IsEnum(MODEL_PROVIDER)
-  generationProvider!: ModelProvider;
-
+  @IsOptional()
   @IsString()
-  generationModel!: string;
+  apiKey?: string;
+
+  @IsOptional()
+  @IsUrl()
+  baseUrl?: string;
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsEnum(MODEL_CAPABILITY, { each: true })
+  enabledCapabilities!: ModelCapability[];
 }

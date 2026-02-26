@@ -133,7 +133,8 @@ export function DocumentList() {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [sourceTypeFilter, setSourceTypeFilter] = useState<FilterValue>("all");
-  const [documentTypeFilter, setDocumentTypeFilter] = useState<FilterValue>("all");
+  const [documentTypeFilter, setDocumentTypeFilter] =
+    useState<FilterValue>("all");
   const [learningStatusFilter, setLearningStatusFilter] =
     useState<FilterValue>("all");
   const [ingestionStatusFilter, setIngestionStatusFilter] =
@@ -255,7 +256,10 @@ export function DocumentList() {
             </SelectContent>
           </Select>
 
-          <Select value={documentTypeFilter} onValueChange={setDocumentTypeFilter}>
+          <Select
+            value={documentTypeFilter}
+            onValueChange={setDocumentTypeFilter}
+          >
             <SelectTrigger className="w-full md:w-42" size="sm">
               <SelectValue placeholder="Type" />
             </SelectTrigger>
@@ -453,7 +457,9 @@ export function DocumentList() {
                       <span>·</span>
                       <span>{doc.chunkCount} chunks</span>
                       <span>·</span>
-                      <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
+                      <span>
+                        {new Date(doc.createdAt).toLocaleDateString()}
+                      </span>
                     </CardDescription>
                   </CardHeader>
 
@@ -470,7 +476,8 @@ export function DocumentList() {
                           referrerPolicy="strict-origin-when-cross-origin"
                           allowFullScreen
                         />
-                      ) : doc.sourceType === SOURCE_TYPE.URL && doc.sourceUrl ? (
+                      ) : doc.sourceType === SOURCE_TYPE.URL &&
+                        doc.sourceUrl ? (
                         <iframe
                           title={`${doc.title} source`}
                           src={doc.sourceUrl}

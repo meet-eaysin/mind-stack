@@ -1,11 +1,28 @@
 import { Worker, Queue, ConnectionOptions } from "bullmq";
 import { loadConfig } from "@repo/config";
 import { createLogger } from "@repo/logger";
-import { OllamaModelRegistry } from "@repo/embeddings";
-import { OllamaLLMProvider, type LLMProvider } from "@repo/llm";
+import {
+  GeminiEmbeddingProvider,
+  OllamaEmbeddingProvider,
+  OpenAIEmbeddingProvider,
+  OpenRouterEmbeddingProvider,
+  type EmbeddingProvider,
+} from "@repo/embeddings";
+import {
+  GeminiLLMProvider,
+  OllamaLLMProvider,
+  OpenAILLMProvider,
+  OpenRouterLLMProvider,
+  type LLMProvider,
+} from "@repo/llm";
 import { ChromaVectorStore } from "@repo/vector-store";
 import { PrismaClient } from "@repo/database";
-import { JOB_TYPE } from "@repo/shared-types";
+import {
+  JOB_TYPE,
+  MODEL_CAPABILITY,
+  MODEL_PROVIDER,
+  type ModelProvider,
+} from "@repo/shared-types";
 import { handleChunkingJob } from "./jobs/chunking.job";
 import { handleEmbeddingJob } from "./jobs/embedding.job";
 import { handleConceptExtractionJob } from "./jobs/concept-extraction.job";
@@ -14,6 +31,88 @@ import { handleUrlExtractionJob } from "./jobs/url-extraction.job";
 import { resolveUserLlmConfig } from "./llm-config";
 
 const logger = createLogger("Worker");
+
+type RuntimeProviderConfig = {
+  provider: ModelProvider;
+  model: string;
+  baseUrl: string;
+  apiKey: string | null;
+};
+
+function requireApiKey(config: RuntimeProviderConfig): string {
+  if (config.apiKey && config.apiKey.trim().length > 0) {
+    return config.apiKey;
+  }
+  throw new Error(`Provider ${config.provider} requires an API key`);
+}
+
+function createEmbeddingProvider(
+  config: RuntimeProviderConfig,
+): EmbeddingProvider {
+  if (config.provider === MODEL_PROVIDER.OLLAMA) {
+    return new OllamaEmbeddingProvider({
+      baseUrl: config.baseUrl,
+      model: config.model,
+    });
+  }
+
+  const apiKey = requireApiKey(config);
+
+  if (config.provider === MODEL_PROVIDER.OPENAI) {
+    return new OpenAIEmbeddingProvider({
+      baseUrl: config.baseUrl,
+      apiKey,
+      model: config.model,
+    });
+  }
+
+  if (config.provider === MODEL_PROVIDER.OPENROUTER) {
+    return new OpenRouterEmbeddingProvider({
+      baseUrl: config.baseUrl,
+      apiKey,
+      model: config.model,
+    });
+  }
+
+  return new GeminiEmbeddingProvider({
+    baseUrl: config.baseUrl,
+    apiKey,
+    model: config.model,
+  });
+}
+
+function createGenerationProvider(config: RuntimeProviderConfig): LLMProvider {
+  if (config.provider === MODEL_PROVIDER.OLLAMA) {
+    return new OllamaLLMProvider({
+      baseUrl: config.baseUrl,
+      model: config.model,
+    });
+  }
+
+  const apiKey = requireApiKey(config);
+
+  if (config.provider === MODEL_PROVIDER.OPENAI) {
+    return new OpenAILLMProvider({
+      baseUrl: config.baseUrl,
+      apiKey,
+      model: config.model,
+    });
+  }
+
+  if (config.provider === MODEL_PROVIDER.OPENROUTER) {
+    return new OpenRouterLLMProvider({
+      baseUrl: config.baseUrl,
+      apiKey,
+      model: config.model,
+    });
+  }
+
+  return new GeminiLLMProvider({
+    baseUrl: config.baseUrl,
+    apiKey,
+    model: config.model,
+  });
+}
 
 async function main(): Promise<void> {
   const config = loadConfig();
@@ -37,13 +136,6 @@ async function main(): Promise<void> {
   const ingestionQueue = new Queue("ingestion", {
     connection,
   });
-
-  const modelRegistry = new OllamaModelRegistry(config.OLLAMA_BASE_URL);
-  const llmDefaults = {
-    baseUrl: config.OLLAMA_BASE_URL,
-    embeddingModel: config.OLLAMA_EMBED_MODEL,
-    generationModel: config.OLLAMA_MODEL,
-  };
 
   const vectorStore = new ChromaVectorStore(
     config.CHROMA_URL,
@@ -71,11 +163,28 @@ async function main(): Promise<void> {
               const cfg = await resolveUserLlmConfig(
                 prisma,
                 userId,
-                llmDefaults,
+                {
+                  ollamaBaseUrl: config.OLLAMA_BASE_URL,
+                  openaiBaseUrl: config.OPENAI_BASE_URL,
+                  openrouterBaseUrl: config.OPENROUTER_BASE_URL,
+                  geminiBaseUrl: config.GEMINI_BASE_URL,
+                  model: config.OLLAMA_MODEL,
+                  encryptionKey: config.LLM_CONFIG_ENCRYPTION_KEY,
+                },
+                MODEL_CAPABILITY.CHAT,
               );
-              return new OllamaLLMProvider({
+
+              if (!cfg.enabledCapabilities.includes(MODEL_CAPABILITY.CHAT)) {
+                throw new Error(
+                  "Chat capability is disabled in user LLM configuration",
+                );
+              }
+
+              return createGenerationProvider({
+                provider: cfg.provider,
+                model: cfg.model,
                 baseUrl: cfg.baseUrl,
-                model: cfg.generationModel,
+                apiKey: cfg.apiKey,
               });
             },
             ingestionQueue,
@@ -92,20 +201,57 @@ async function main(): Promise<void> {
             prisma,
             vectorStore,
             ingestionQueue,
-            modelRegistry,
-            llmDefaults,
+            {
+              ollamaBaseUrl: config.OLLAMA_BASE_URL,
+              openaiBaseUrl: config.OPENAI_BASE_URL,
+              openrouterBaseUrl: config.OPENROUTER_BASE_URL,
+              geminiBaseUrl: config.GEMINI_BASE_URL,
+              model: config.OLLAMA_MODEL,
+              encryptionKey: config.LLM_CONFIG_ENCRYPTION_KEY,
+            },
+            createEmbeddingProvider,
           );
           break;
 
         case JOB_TYPE.CONCEPT_EXTRACTION:
-          await handleConceptExtractionJob(
-            job,
-            prisma,
-            new OllamaLLMProvider({
-              baseUrl: config.OLLAMA_BASE_URL,
-              model: config.OLLAMA_MODEL,
-            }),
-          );
+          {
+            const document = await prisma.document.findUnique({
+              where: { id: job.data.documentId },
+              select: { userId: true },
+            });
+            const userId = job.data.userId ?? document?.userId ?? "default";
+
+            const cfg = await resolveUserLlmConfig(
+              prisma,
+              userId,
+              {
+                ollamaBaseUrl: config.OLLAMA_BASE_URL,
+                openaiBaseUrl: config.OPENAI_BASE_URL,
+                openrouterBaseUrl: config.OPENROUTER_BASE_URL,
+                geminiBaseUrl: config.GEMINI_BASE_URL,
+                model: config.OLLAMA_MODEL,
+                encryptionKey: config.LLM_CONFIG_ENCRYPTION_KEY,
+              },
+              MODEL_CAPABILITY.CHAT,
+            );
+
+            if (!cfg.enabledCapabilities.includes(MODEL_CAPABILITY.CHAT)) {
+              throw new Error(
+                "Chat capability is disabled in user LLM configuration",
+              );
+            }
+
+            await handleConceptExtractionJob(
+              job,
+              prisma,
+              createGenerationProvider({
+                provider: cfg.provider,
+                model: cfg.model,
+                baseUrl: cfg.baseUrl,
+                apiKey: cfg.apiKey,
+              }),
+            );
+          }
           break;
 
         case JOB_TYPE.DAILY_REVIEW:

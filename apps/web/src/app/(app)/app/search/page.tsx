@@ -216,7 +216,10 @@ export default function SearchPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex gap-2 rounded-lg border bg-card p-3">
+        <form
+          onSubmit={handleSubmit}
+          className="flex gap-2 rounded-lg border bg-card p-3"
+        >
           <Input
             placeholder={
               mode === "ask"

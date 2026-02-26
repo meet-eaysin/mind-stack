@@ -7,12 +7,17 @@ function PageSkeleton({
   className,
   showHeader = true,
   rows = 3,
+  ...props
 }: React.ComponentProps<"div"> & {
   showHeader?: boolean;
   rows?: number;
 }) {
   return (
-    <div data-slot="page-skeleton" className={cn("space-y-6", className)}>
+    <div
+      data-slot="page-skeleton"
+      className={cn("space-y-6", className)}
+      {...props}
+    >
       {showHeader && (
         <div data-slot="page-skeleton-header" className="space-y-2">
           <Skeleton className="h-8 w-52" />

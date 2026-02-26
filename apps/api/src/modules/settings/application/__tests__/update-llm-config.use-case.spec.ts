@@ -1,5 +1,9 @@
 import { BadRequestException } from '@nestjs/common';
-import { MODEL_PROVIDER } from '@repo/shared-types';
+import {
+  MODEL_CAPABILITY,
+  MODEL_PROVIDER,
+  type ModelProvider,
+} from '@repo/shared-types';
 import { UpdateLlmConfigUseCase } from '../update-llm-config.use-case.js';
 import type { LlmConfigRepository } from '../../domain/llm-config.repository.interface.js';
 import type { LlmConfigEntity } from '../../domain/llm-config.entity.js';
@@ -11,23 +15,29 @@ class FakeLlmConfigRepository implements LlmConfigRepository {
     return this.saved;
   }
 
+  async deleteByUserId(_userId: string): Promise<void> {
+    this.saved = null;
+  }
+
   async upsertByUserId(
     userId: string,
     data: {
-      embeddingProvider: LlmConfigEntity['embeddingProvider'];
-      embeddingModel: string;
-      generationProvider: LlmConfigEntity['generationProvider'];
-      generationModel: string;
+      provider: ModelProvider;
+      model: string;
+      baseUrl: string | null;
+      encryptedApiKey: string | null;
+      enabledCapabilities: LlmConfigEntity['enabledCapabilities'];
     },
   ): Promise<LlmConfigEntity> {
     const now = new Date('2026-02-23T12:00:00Z');
     const row: LlmConfigEntity = {
       id: 'cfg-1',
       userId,
-      embeddingProvider: data.embeddingProvider,
-      embeddingModel: data.embeddingModel,
-      generationProvider: data.generationProvider,
-      generationModel: data.generationModel,
+      provider: data.provider,
+      model: data.model,
+      baseUrl: data.baseUrl,
+      encryptedApiKey: data.encryptedApiKey,
+      enabledCapabilities: data.enabledCapabilities,
       createdAt: now,
       updatedAt: now,
     };
@@ -36,72 +46,79 @@ class FakeLlmConfigRepository implements LlmConfigRepository {
   }
 }
 
-class FakeOllamaModelRegistry {
-  private available: Set<string> = new Set();
+class FakeValidator {
+  shouldThrow = false;
 
-  setAvailable(models: string[]): void {
-    this.available = new Set(models);
+  async validate(_input: {
+    provider: ModelProvider;
+    model: string;
+    baseUrl: string;
+    apiKey: string | null;
+    enabledCapabilities: LlmConfigEntity['enabledCapabilities'];
+  }): Promise<void> {
+    if (this.shouldThrow) {
+      throw new BadRequestException('Invalid provider/model configuration');
+    }
+  }
+}
+
+class FakeCipher {
+  encrypt(value: string | null | undefined): string | null {
+    if (!value) {
+      return null;
+    }
+    return `encrypted:${value}`;
   }
 
-  async hasModel(model: string): Promise<boolean> {
-    return this.available.has(model);
+  decrypt(value: string | null): string | null {
+    if (!value) {
+      return null;
+    }
+    return value.replace('encrypted:', '');
   }
 }
 
 describe('UpdateLlmConfigUseCase', () => {
-  it('saves config when embedding and generation models exist', async () => {
+  it('saves config when provider validation passes', async () => {
     const repo = new FakeLlmConfigRepository();
-    const registry = new FakeOllamaModelRegistry();
-    registry.setAvailable(['nomic-embed-text', 'llama3.2']);
+    const validator = new FakeValidator();
+    const cipher = new FakeCipher();
 
-    const useCase = new UpdateLlmConfigUseCase(repo, registry);
+    const useCase = new UpdateLlmConfigUseCase(repo, validator, cipher);
 
     await expect(
       useCase.execute('u-1', {
-        embeddingProvider: MODEL_PROVIDER.OLLAMA,
-        embeddingModel: 'nomic-embed-text',
-        generationProvider: MODEL_PROVIDER.OLLAMA,
-        generationModel: 'llama3.2',
+        provider: MODEL_PROVIDER.OPENAI,
+        model: 'gpt-4o-mini',
+        baseUrl: 'https://api.openai.com',
+        apiKey: 'sk-test',
+        enabledCapabilities: [MODEL_CAPABILITY.CHAT],
       }),
     ).resolves.toEqual({
       userId: 'u-1',
-      embeddingProvider: MODEL_PROVIDER.OLLAMA,
-      embeddingModel: 'nomic-embed-text',
-      generationProvider: MODEL_PROVIDER.OLLAMA,
-      generationModel: 'llama3.2',
+      provider: MODEL_PROVIDER.OPENAI,
+      model: 'gpt-4o-mini',
+      baseUrl: 'https://api.openai.com',
+      enabledCapabilities: [MODEL_CAPABILITY.CHAT],
+      hasApiKey: true,
     });
   });
 
-  it('fails when embedding model is unavailable', async () => {
+  it('fails when provider validation fails', async () => {
     const repo = new FakeLlmConfigRepository();
-    const registry = new FakeOllamaModelRegistry();
-    registry.setAvailable(['llama3.2']);
+    const validator = new FakeValidator();
+    validator.shouldThrow = true;
+    const cipher = new FakeCipher();
 
-    const useCase = new UpdateLlmConfigUseCase(repo, registry);
+    const useCase = new UpdateLlmConfigUseCase(repo, validator, cipher);
 
     await expect(
       useCase.execute('u-1', {
-        embeddingProvider: MODEL_PROVIDER.OLLAMA,
-        embeddingModel: 'missing-embed-model',
-        generationProvider: MODEL_PROVIDER.OLLAMA,
-        generationModel: 'llama3.2',
-      }),
-    ).rejects.toThrow(BadRequestException);
-  });
-
-  it('fails when generation model is unavailable', async () => {
-    const repo = new FakeLlmConfigRepository();
-    const registry = new FakeOllamaModelRegistry();
-    registry.setAvailable(['nomic-embed-text']);
-
-    const useCase = new UpdateLlmConfigUseCase(repo, registry);
-
-    await expect(
-      useCase.execute('u-1', {
-        embeddingProvider: MODEL_PROVIDER.OLLAMA,
-        embeddingModel: 'nomic-embed-text',
-        generationProvider: MODEL_PROVIDER.OLLAMA,
-        generationModel: 'missing-gen-model',
+        provider: MODEL_PROVIDER.OPENAI,
+        model: 'missing-model',
+        baseUrl: 'https://api.openai.com',
+        apiKey: 'sk-test',
+        enabledCapabilities: [MODEL_CAPABILITY.EMBEDDING],
       }),
     ).rejects.toThrow(BadRequestException);
   });

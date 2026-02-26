@@ -1,9 +1,9 @@
-import { HeroSection } from "@/components/landing/hero-section"
-import { FeaturesSection } from "@/components/landing/features-section"
-import { HowItWorksSection } from "@/components/landing/how-it-works-section"
-import { KnowledgeGraphSection } from "@/components/landing/knowledge-graph-section"
-import { DailyReviewSection } from "@/components/landing/daily-review-section"
-import { CallToActionSection } from "@/components/landing/call-to-action-section"
+import { HeroSection } from "@/components/landing/hero-section";
+import { FeaturesSection } from "@/components/landing/features-section";
+import { HowItWorksSection } from "@/components/landing/how-it-works-section";
+import { KnowledgeGraphSection } from "@/components/landing/knowledge-graph-section";
+import { DailyReviewSection } from "@/components/landing/daily-review-section";
+import { CallToActionSection } from "@/components/landing/call-to-action-section";
 
 export default function Home() {
   return (
@@ -15,5 +15,5 @@ export default function Home() {
       <DailyReviewSection />
       <CallToActionSection />
     </main>
-  )
+  );
 }

@@ -1,60 +1,77 @@
 import { BadRequestException } from '@nestjs/common';
 import type { LlmConfigRepository } from '../domain/llm-config.repository.interface.js';
-import type { ModelProvider } from '@repo/shared-types';
-import { MODEL_PROVIDER } from '@repo/shared-types';
-import type { UserLlmConfigResponse } from '@repo/shared-types';
+import type {
+  ModelCapability,
+  ModelProvider,
+  UserLlmConfigResponse,
+} from '@repo/shared-types';
+import type { LlmSecretCipher } from './llm-secret-cipher';
+import type { ProviderConfigValidator } from './provider-config-validator';
 
-export type EmbeddingModelRegistry = {
-  hasModel(model: string): Promise<boolean>;
-};
+type ProviderConfigValidatorPort = Pick<ProviderConfigValidator, 'validate'>;
+type LlmSecretCipherPort = Pick<LlmSecretCipher, 'decrypt' | 'encrypt'>;
 
 export class UpdateLlmConfigUseCase {
   constructor(
     private readonly repository: LlmConfigRepository,
-    private readonly modelRegistry: EmbeddingModelRegistry,
+    private readonly validator: ProviderConfigValidatorPort,
+    private readonly secretCipher: LlmSecretCipherPort,
   ) {}
 
   async execute(
     userId: string,
     input: {
-      embeddingProvider: ModelProvider;
-      embeddingModel: string;
-      generationProvider: ModelProvider;
-      generationModel: string;
+      provider: ModelProvider;
+      model: string;
+      baseUrl: string;
+      apiKey?: string | null;
+      enabledCapabilities: ModelCapability[];
     },
   ): Promise<UserLlmConfigResponse> {
-    if (input.embeddingProvider !== MODEL_PROVIDER.OLLAMA) {
-      throw new BadRequestException('Unsupported embedding provider');
-    }
-    if (input.generationProvider !== MODEL_PROVIDER.OLLAMA) {
-      throw new BadRequestException('Unsupported generation provider');
+    const model = input.model.trim();
+    if (model.length === 0) {
+      throw new BadRequestException('Model is required');
     }
 
-    const embedAvailable = await this.modelRegistry.hasModel(
-      input.embeddingModel,
-    );
-    if (!embedAvailable) {
-      throw new BadRequestException(
-        `Embedding model not available: ${input.embeddingModel}`,
-      );
+    const baseUrl = input.baseUrl.trim();
+    if (baseUrl.length === 0) {
+      throw new BadRequestException('Base URL is required');
     }
 
-    const generationAvailable = await this.modelRegistry.hasModel(
-      input.generationModel,
-    );
-    if (!generationAvailable) {
-      throw new BadRequestException(
-        `Generation model not available: ${input.generationModel}`,
-      );
-    }
+    const current = await this.repository.findByUserId(userId);
+    const effectiveApiKey =
+      input.apiKey === undefined
+        ? this.secretCipher.decrypt(current?.encryptedApiKey ?? null)
+        : (input.apiKey ?? null);
 
-    const saved = await this.repository.upsertByUserId(userId, input);
+    await this.validator.validate({
+      provider: input.provider,
+      model,
+      baseUrl,
+      apiKey: effectiveApiKey,
+      enabledCapabilities: input.enabledCapabilities,
+    });
+
+    const encryptedApiKey =
+      input.apiKey === undefined
+        ? (current?.encryptedApiKey ?? null)
+        : this.secretCipher.encrypt(input.apiKey);
+
+    const saved = await this.repository.upsertByUserId(userId, {
+      provider: input.provider,
+      model,
+      baseUrl,
+      encryptedApiKey,
+      enabledCapabilities: input.enabledCapabilities,
+    });
+
     return {
       userId: saved.userId,
-      embeddingProvider: saved.embeddingProvider,
-      embeddingModel: saved.embeddingModel,
-      generationProvider: saved.generationProvider,
-      generationModel: saved.generationModel,
+      provider: saved.provider,
+      model: saved.model,
+      baseUrl: saved.baseUrl,
+      enabledCapabilities: saved.enabledCapabilities,
+      hasApiKey: Boolean(saved.encryptedApiKey),
     };
   }
 }

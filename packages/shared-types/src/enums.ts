@@ -83,8 +83,19 @@ export type AnnotationType =
   (typeof ANNOTATION_TYPE)[keyof typeof ANNOTATION_TYPE];
 
 export const MODEL_PROVIDER = {
+  OPENROUTER: "OPENROUTER",
+  OPENAI: "OPENAI",
+  GEMINI: "GEMINI",
   OLLAMA: "OLLAMA",
 } as const;
 
 export type ModelProvider =
   (typeof MODEL_PROVIDER)[keyof typeof MODEL_PROVIDER];
+
+export const MODEL_CAPABILITY = {
+  CHAT: "CHAT",
+  EMBEDDING: "EMBEDDING",
+} as const;
+
+export type ModelCapability =
+  (typeof MODEL_CAPABILITY)[keyof typeof MODEL_CAPABILITY];

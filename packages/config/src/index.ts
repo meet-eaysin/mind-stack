@@ -87,3 +87,4 @@ export function loadRuntimeEnv(): RuntimeEnv {
 
 export { serverEnvSchema, webEnvSchema, runtimeEnvSchema } from "./schemas";
 export type { ServerEnv, WebEnv, RuntimeEnv } from "./schemas";
+export { encryptSecret, decryptSecret } from "./secret-crypto";

@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import React, { memo } from "react"
+import React, { memo } from "react";
 import {
   Background,
   BackgroundVariant,
@@ -11,12 +11,15 @@ import {
   ReactFlow,
   useEdgesState,
   useNodesState,
-} from "@xyflow/react"
-import "@xyflow/react/dist/style.css"
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
 
-import { initialEdges, initialNodes } from "@/components/landing/graph/initial-elements"
-import type { GraphNodeData } from "@/components/landing/graph/types"
-import { cn } from "@/lib/utils"
+import {
+  initialEdges,
+  initialNodes,
+} from "@/components/landing/graph/initial-elements";
+import type { GraphNodeData } from "@/components/landing/graph/types";
+import { cn } from "@/lib/utils";
 
 const hiddenHandleStyle = {
   opacity: 0,
@@ -25,41 +28,82 @@ const hiddenHandleStyle = {
   height: 8,
   borderWidth: 0,
   background: "transparent",
-}
+};
 
 function GraphNode({ data }: NodeProps<Node<GraphNodeData>>) {
-  const isRoot = data.kind === "root"
+  const isRoot = data.kind === "root";
 
   return (
     <div
       className={cn(
         "relative rounded-xl border px-3 py-2 text-xs font-medium tracking-tight text-foreground shadow-sm transition-all",
-        isRoot && "rounded-full border-primary/45 bg-primary/10 px-4 py-2.5 text-sm font-semibold",
-        !isRoot && "border-border/80 bg-card/90"
+        isRoot &&
+          "rounded-full border-primary/45 bg-primary/10 px-4 py-2.5 text-sm font-semibold",
+        !isRoot && "border-border/80 bg-card/90",
       )}
     >
       {data.label}
-      <Handle id="left-target" type="target" position={Position.Left} style={hiddenHandleStyle} />
-      <Handle id="left-source" type="source" position={Position.Left} style={hiddenHandleStyle} />
-      <Handle id="right-target" type="target" position={Position.Right} style={hiddenHandleStyle} />
-      <Handle id="right-source" type="source" position={Position.Right} style={hiddenHandleStyle} />
-      <Handle id="top-target" type="target" position={Position.Top} style={hiddenHandleStyle} />
-      <Handle id="top-source" type="source" position={Position.Top} style={hiddenHandleStyle} />
-      <Handle id="bottom-target" type="target" position={Position.Bottom} style={hiddenHandleStyle} />
-      <Handle id="bottom-source" type="source" position={Position.Bottom} style={hiddenHandleStyle} />
+      <Handle
+        id="left-target"
+        type="target"
+        position={Position.Left}
+        style={hiddenHandleStyle}
+      />
+      <Handle
+        id="left-source"
+        type="source"
+        position={Position.Left}
+        style={hiddenHandleStyle}
+      />
+      <Handle
+        id="right-target"
+        type="target"
+        position={Position.Right}
+        style={hiddenHandleStyle}
+      />
+      <Handle
+        id="right-source"
+        type="source"
+        position={Position.Right}
+        style={hiddenHandleStyle}
+      />
+      <Handle
+        id="top-target"
+        type="target"
+        position={Position.Top}
+        style={hiddenHandleStyle}
+      />
+      <Handle
+        id="top-source"
+        type="source"
+        position={Position.Top}
+        style={hiddenHandleStyle}
+      />
+      <Handle
+        id="bottom-target"
+        type="target"
+        position={Position.Bottom}
+        style={hiddenHandleStyle}
+      />
+      <Handle
+        id="bottom-source"
+        type="source"
+        position={Position.Bottom}
+        style={hiddenHandleStyle}
+      />
     </div>
-  )
+  );
 }
 
-const MemoGraphNode = memo(GraphNode)
+const MemoGraphNode = memo(GraphNode);
 
 const nodeTypes = {
   graphNode: MemoGraphNode,
-}
+};
 
 export function KnowledgeGraphFlow() {
-  const [nodes, , onNodesChange] = useNodesState(initialNodes)
-  const [edges, , onEdgesChange] = useEdgesState(initialEdges)
+  const [nodes, , onNodesChange] = useNodesState(initialNodes);
+  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
 
   return (
     <div className="knowledge-graph-flow h-85 w-full [&_.react-flow__attribution]:hidden md:h-95">
@@ -92,5 +136,5 @@ export function KnowledgeGraphFlow() {
         />
       </ReactFlow>
     </div>
-  )
+  );
 }

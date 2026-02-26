@@ -1,8 +1,8 @@
-import Link from "next/link"
-import { ArrowRightIcon } from "lucide-react"
+import Link from "next/link";
+import { ArrowRightIcon } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export function CallToActionSection() {
   return (
@@ -37,5 +37,5 @@ export function CallToActionSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }

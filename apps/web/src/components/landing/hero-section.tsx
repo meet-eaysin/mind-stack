@@ -1,14 +1,14 @@
-import Link from "next/link"
-import { ArrowRightIcon } from "lucide-react"
+import Link from "next/link";
+import { ArrowRightIcon } from "lucide-react";
 
 import {
   PageHeader,
   PageHeaderActions,
   PageHeaderDescription,
   PageHeaderHeading,
-} from "@/components/page-header"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+} from "@/components/page-header";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export function HeroSection() {
   return (
@@ -38,5 +38,5 @@ export function HeroSection() {
         </PageHeader>
       </div>
     </section>
-  )
+  );
 }

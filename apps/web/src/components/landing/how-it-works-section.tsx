@@ -6,17 +6,25 @@ import {
   MessageSquare,
   NotebookPen,
   ScanSearch,
-} from "lucide-react"
+} from "lucide-react";
 
 import {
   PageHeader,
   PageHeaderDescription,
   PageHeaderHeading,
-} from "@/components/page-header"
+} from "@/components/page-header";
 
 const workflowSteps = [
-  { title: "Capture", detail: "Add links, videos, PDFs, and notes.", icon: NotebookPen },
-  { title: "Ingest", detail: "Extract text and metadata from each source.", icon: Database },
+  {
+    title: "Capture",
+    detail: "Add links, videos, PDFs, and notes.",
+    icon: NotebookPen,
+  },
+  {
+    title: "Ingest",
+    detail: "Extract text and metadata from each source.",
+    icon: Database,
+  },
   {
     title: "Process & embed",
     detail: "Generate embeddings for semantic retrieval.",
@@ -42,7 +50,7 @@ const workflowSteps = [
     detail: "Resurface key knowledge to improve long-term retention.",
     icon: CalendarCheck,
   },
-] as const
+] as const;
 
 export function HowItWorksSection() {
   return (
@@ -70,11 +78,13 @@ export function HowItWorksSection() {
                 <step.icon className="size-4 text-muted-foreground" />
               </div>
               <h3 className="font-medium">{step.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{step.detail}</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {step.detail}
+              </p>
             </li>
           ))}
         </ol>
       </div>
     </section>
-  )
+  );
 }

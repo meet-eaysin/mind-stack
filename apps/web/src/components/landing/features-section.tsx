@@ -1,10 +1,17 @@
-import { FileSearch, FolderKanban, GitBranch, NotebookPen, Tag, Workflow } from "lucide-react"
+import {
+  FileSearch,
+  FolderKanban,
+  GitBranch,
+  NotebookPen,
+  Tag,
+  Workflow,
+} from "lucide-react";
 
 import {
   PageHeader,
   PageHeaderDescription,
   PageHeaderHeading,
-} from "@/components/page-header"
+} from "@/components/page-header";
 
 const featureItems = [
   {
@@ -27,12 +34,14 @@ const featureItems = [
   },
   {
     title: "Tag and annotate",
-    description: "Use tags and notes to build context and connect ideas over time.",
+    description:
+      "Use tags and notes to build context and connect ideas over time.",
     icon: Tag,
   },
   {
     title: "Track in folders and courses",
-    description: "Organize learning paths with collections of articles and videos.",
+    description:
+      "Organize learning paths with collections of articles and videos.",
     icon: FolderKanban,
   },
   {
@@ -41,7 +50,7 @@ const featureItems = [
       "Visualize how documents relate and discover missing links in your understanding.",
     icon: GitBranch,
   },
-] as const
+] as const;
 
 export function FeaturesSection() {
   return (
@@ -62,11 +71,13 @@ export function FeaturesSection() {
                 <item.icon className="size-5" />
               </div>
               <h3 className="text-lg font-medium">{item.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {item.description}
+              </p>
             </article>
           ))}
         </div>
       </div>
     </section>
-  )
+  );
 }

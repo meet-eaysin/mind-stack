@@ -11,8 +11,9 @@ export type OllamaEmbeddingOptions = {
   dimensions?: number;
 };
 
-const EmbeddingResponseSchema = z.object({
-  embedding: z.array(z.number()),
+const EmbedResponseSchema = z.object({
+  embeddings: z.array(z.array(z.number())).optional(),
+  embedding: z.array(z.number()).optional(),
 });
 
 const logger = createLogger("OllamaEmbeddingProvider");
@@ -34,12 +35,12 @@ export class OllamaEmbeddingProvider implements EmbeddingProvider {
   }
 
   async embed(text: string): Promise<EmbeddingResult> {
-    const response = await fetch(`${this.baseUrl}/api/embeddings`, {
+    const response = await fetch(`${this.baseUrl}/api/embed`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: this.model,
-        prompt: text,
+        input: text,
       }),
     });
 
@@ -52,10 +53,16 @@ export class OllamaEmbeddingProvider implements EmbeddingProvider {
       );
     }
 
-    const data = EmbeddingResponseSchema.parse(await response.json());
+    const data = EmbedResponseSchema.parse(await response.json());
+    const first = data.embeddings?.[0] ?? data.embedding;
+    if (!first) {
+      throw new Error(
+        "Ollama embedding failed: response missing embedding data",
+      );
+    }
 
     return {
-      embedding: data.embedding,
+      embedding: first,
       dimensions: this.dims,
     };
   }

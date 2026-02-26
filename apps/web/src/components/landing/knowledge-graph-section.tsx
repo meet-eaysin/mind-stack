@@ -2,8 +2,8 @@ import {
   SectionHeading,
   SectionHeadingBody,
   SectionHeadingTitle,
-} from "@/components/ui/section-heading"
-import { KnowledgeGraphFlow } from "@/components/landing/graph/knowledge-graph-flow"
+} from "@/components/ui/section-heading";
+import { KnowledgeGraphFlow } from "@/components/landing/graph/knowledge-graph-flow";
 
 export function KnowledgeGraphSection() {
   return (
@@ -25,5 +25,5 @@ export function KnowledgeGraphSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }

@@ -230,7 +230,7 @@ export function CollectionDetail({
                           className={cn(
                             "h-4 text-[9px] uppercase font-bold tracking-tight px-1.5 py-0 rounded",
                             learningStatusColors[item.learningStatus] ||
-                            learningStatusColors.UPCOMING,
+                              learningStatusColors.UPCOMING,
                           )}
                         >
                           {item.learningStatus.replace("_", " ")}

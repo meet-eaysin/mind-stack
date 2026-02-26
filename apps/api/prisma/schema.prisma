@@ -45,10 +45,11 @@ model Document {
 model UserLlmConfig {
   id                 String   @id @default(uuid())
   userId             String   @unique @map("user_id")
-  embeddingProvider  String   @map("embedding_provider")
-  embeddingModel     String   @map("embedding_model")
-  generationProvider String   @map("generation_provider")
-  generationModel    String   @map("generation_model")
+  provider           String   @map("provider")
+  model              String   @map("model")
+  baseUrl            String?  @map("base_url")
+  encryptedApiKey    String?  @map("encrypted_api_key")
+  enabledCapabilities String[] @map("enabled_capabilities")
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
 

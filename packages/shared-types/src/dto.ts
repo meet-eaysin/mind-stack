@@ -6,6 +6,7 @@ import type {
   AnnotationType,
   DocumentType,
   ModelProvider,
+  ModelCapability,
 } from "./enums";
 
 // ── Ingestion DTOs ──
@@ -252,17 +253,19 @@ export type StreamingAskResponseChunk =
 
 export type UserLlmConfigResponse = {
   userId: string;
-  embeddingProvider: ModelProvider;
-  embeddingModel: string;
-  generationProvider: ModelProvider;
-  generationModel: string;
+  provider: ModelProvider;
+  model: string;
+  baseUrl: string | null;
+  enabledCapabilities: ModelCapability[];
+  hasApiKey: boolean;
 };
 
 export type UpdateUserLlmConfigRequest = {
-  embeddingProvider: ModelProvider;
-  embeddingModel: string;
-  generationProvider: ModelProvider;
-  generationModel: string;
+  provider: ModelProvider;
+  model: string;
+  baseUrl?: string | null;
+  apiKey?: string | null;
+  enabledCapabilities: ModelCapability[];
 };
 
 export type EmbeddingModelHealthResponse = {
