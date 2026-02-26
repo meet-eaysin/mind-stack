@@ -1,10 +1,10 @@
 "use client";
 import React from "react";
 
-import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { PageSkeleton } from "@/components/ui/page-skeleton";
 import {
   Activity,
   AlertTriangle,
@@ -26,6 +26,15 @@ import {
 } from "@/features/health";
 import { getApiErrorMessage } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
+import {
+  AppPage,
+  AppPageActions,
+  AppPageContent,
+  AppPageDescription,
+  AppPageHeader,
+  AppPageHeading,
+  AppPageTitle,
+} from "@/components/layouts/app-page";
 
 function StatCard({
   title,
@@ -163,20 +172,19 @@ export default function HealthPage() {
   };
 
   return (
-          <div className="space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-              <Activity className="size-7 text-primary" />
-              Knowledge Health
-            </h1>
-            <p className="text-muted-foreground">
-              Monitor the integrity of your knowledge base.
-            </p>
-          </div>
-          {!isLoading && !error && (
-            <div className="flex items-center gap-2">
+    <AppPage width="wide">
+      <AppPageHeader>
+        <AppPageHeading>
+          <AppPageTitle className="flex items-center gap-3">
+            <Activity className="size-7 text-primary" />
+            Knowledge Health
+          </AppPageTitle>
+          <AppPageDescription>
+            Monitor the integrity of your knowledge base.
+          </AppPageDescription>
+        </AppPageHeading>
+        {!isLoading && !error && (
+          <AppPageActions>
               <Button
                 variant="outline"
                 size="sm"
@@ -205,20 +213,14 @@ export default function HealthPage() {
                   {totalIssues} Issue{totalIssues !== 1 ? "s" : ""} Found
                 </Badge>
               )}
-            </div>
-          )}
-        </div>
+          </AppPageActions>
+        )}
+      </AppPageHeader>
+      <AppPageContent className="gap-8">
 
         {/* Loading */}
         {isLoading && (
-          <div
-            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-            data-testid="health-loading"
-          >
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-36 rounded-xl" />
-            ))}
-          </div>
+          <PageSkeleton className="max-w-5xl" rows={4} data-testid="health-loading" />
         )}
 
         {/* Error */}
@@ -378,6 +380,7 @@ export default function HealthPage() {
               Refreshing...
             </div>
           )}
-      </div>
+      </AppPageContent>
+    </AppPage>
   );
 }

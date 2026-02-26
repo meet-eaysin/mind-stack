@@ -13,6 +13,15 @@ import {
 } from "@/features/graph";
 import { getApiErrorMessage } from "@/lib/api-client";
 import { Badge } from "@/components/ui/badge";
+import {
+  AppPage,
+  AppPageActions,
+  AppPageContent,
+  AppPageDescription,
+  AppPageHeader,
+  AppPageHeading,
+  AppPageTitle,
+} from "@/components/layouts/app-page";
 
 export default function GraphPage() {
   const { data, isLoading, error, refetch } = useGraph();
@@ -41,16 +50,17 @@ export default function GraphPage() {
   }, [data, searchQuery]);
 
   return (
-          <div className="space-y-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Knowledge Map
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              Discover connections and trace knowledge across your documents.
-            </p>
-          </div>
+    <AppPage width="wide">
+      <AppPageHeader>
+        <AppPageHeading>
+          <AppPageTitle className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            Knowledge Map
+          </AppPageTitle>
+          <AppPageDescription>
+            Discover connections and trace knowledge across your documents.
+          </AppPageDescription>
+        </AppPageHeading>
+        <AppPageActions>
           <div className="flex gap-2 shrink-0">
             <div className="relative w-64">
               <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
@@ -74,7 +84,9 @@ export default function GraphPage() {
               Sync Graph
             </Button>
           </div>
-        </div>
+        </AppPageActions>
+      </AppPageHeader>
+      <AppPageContent>
 
         {isLoading && (
           <div className="grid gap-4 lg:grid-cols-3">
@@ -191,6 +203,7 @@ export default function GraphPage() {
             </div>
           </div>
         )}
-      </div>
+      </AppPageContent>
+    </AppPage>
   );
 }

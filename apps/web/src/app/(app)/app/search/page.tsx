@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
+import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { Search as SearchIcon, Filter, MessageSquare } from "lucide-react";
 import {
   useSearch,
@@ -15,6 +15,14 @@ import { getApiErrorMessage } from "@/lib/api-client";
 import { DocumentResult } from "@/features/search/components/document-result";
 import { ChunkResult } from "@/features/search/components/chunk-result";
 import type { ChunkReference, DocumentSearchResult } from "@/types";
+import {
+  AppPage,
+  AppPageContent,
+  AppPageDescription,
+  AppPageHeader,
+  AppPageHeading,
+  AppPageTitle,
+} from "@/components/layouts/app-page";
 
 type SearchMode = "semantic" | "ask";
 
@@ -83,14 +91,17 @@ export default function SearchPage() {
   const hasAskResult = Boolean(askQuestion.data);
 
   return (
-          <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Search</h1>
-          <p className="text-muted-foreground">
+    <AppPage>
+      <AppPageHeader>
+        <AppPageHeading>
+          <AppPageTitle>Search</AppPageTitle>
+          <AppPageDescription>
             Find documents quickly or ask questions grounded in your knowledge
             base.
-          </p>
-        </div>
+          </AppPageDescription>
+        </AppPageHeading>
+      </AppPageHeader>
+      <AppPageContent>
 
         <div className="flex flex-wrap gap-2">
           <Button
@@ -228,11 +239,7 @@ export default function SearchPage() {
         <Separator />
 
         {isLoading && (
-          <div className="space-y-3" data-testid="search-loading">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <Skeleton key={index} className="h-24 w-full" />
-            ))}
-          </div>
+          <PageSkeleton rows={3} data-testid="search-loading" />
         )}
 
         {mode === "semantic" && hasSemanticResults && (
@@ -297,6 +304,7 @@ export default function SearchPage() {
             )}
           </div>
         )}
-      </div>
+      </AppPageContent>
+    </AppPage>
   );
 }

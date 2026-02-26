@@ -40,6 +40,14 @@ import {
 } from "@/features/productivity";
 import { getApiErrorMessage } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
+import {
+  AppPage,
+  AppPageContent,
+  AppPageDescription,
+  AppPageHeader,
+  AppPageHeading,
+  AppPageTitle,
+} from "@/components/layouts/app-page";
 
 function MasteryRing({
   label,
@@ -97,19 +105,19 @@ export default function ProductivityPage() {
   };
 
   return (
-          <div className="space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-              <TrendingUp className="size-7 text-primary" />
-              Learning Productivity
-            </h1>
-            <p className="text-muted-foreground">
-              Track your mastery, set goals, and measure progress.
-            </p>
-          </div>
-        </div>
+    <AppPage width="wide">
+      <AppPageHeader>
+        <AppPageHeading>
+          <AppPageTitle className="flex items-center gap-3">
+            <TrendingUp className="size-7 text-primary" />
+            Learning Productivity
+          </AppPageTitle>
+          <AppPageDescription>
+            Track your mastery, set goals, and measure progress.
+          </AppPageDescription>
+        </AppPageHeading>
+      </AppPageHeader>
+      <AppPageContent className="gap-8">
 
         {/* Topic Mastery Section */}
         <section className="space-y-4">
@@ -418,6 +426,7 @@ export default function ProductivityPage() {
             </div>
           )}
         </section>
-      </div>
+      </AppPageContent>
+    </AppPage>
   );
 }

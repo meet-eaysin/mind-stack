@@ -1,6 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import {
+  AppPage,
+  AppPageContent,
+  AppPageDescription,
+  AppPageHeader,
+  AppPageHeading,
+  AppPageTitle,
+} from "@/components/layouts/app-page";
 import { CollectionList } from "@/features/collections/components/collection-list";
 import { CollectionDetail } from "@/features/collections/components/collection-detail";
 
@@ -10,16 +18,18 @@ export default function CollectionsPage() {
   >(null);
 
   return (
-          <div className="container py-8 max-w-6xl mx-auto">
+    <AppPage>
+      <AppPageHeader>
+        <AppPageHeading>
+          <AppPageTitle>Collections</AppPageTitle>
+          <AppPageDescription>
+            Organize documents into structured learning paths and courses.
+          </AppPageDescription>
+        </AppPageHeading>
+      </AppPageHeader>
+      <AppPageContent className="max-w-6xl">
         {!selectedCollectionId ? (
           <div className="space-y-8">
-            <div className="flex flex-col gap-2">
-              <h1 className="text-4xl font-bold tracking-tight">Collections</h1>
-              <p className="text-muted-foreground text-lg">
-                Organize your documents into structured learning paths and
-                courses.
-              </p>
-            </div>
             <CollectionList onSelectAction={setSelectedCollectionId} />
           </div>
         ) : (
@@ -32,6 +42,7 @@ export default function CollectionsPage() {
             }}
           />
         )}
-      </div>
+      </AppPageContent>
+    </AppPage>
   );
 }

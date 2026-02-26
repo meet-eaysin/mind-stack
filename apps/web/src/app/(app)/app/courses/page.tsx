@@ -7,8 +7,17 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { getApiErrorMessage } from "@/lib/api-client";
-import { ArrowLeft, GraduationCap, Lock } from "lucide-react";
+import { ArrowLeft, Lock } from "lucide-react";
 import { LEARNING_STATUS } from "@repo/shared-types";
+import {
+  AppPage,
+  AppPageContent,
+  AppPageDescription,
+  AppPageHeader,
+  AppPageHeading,
+  AppPageTitle,
+} from "@/components/layouts/app-page";
+import { PageSkeleton } from "@/components/ui/page-skeleton";
 
 function CourseDetail({
   courseId,
@@ -59,7 +68,7 @@ function CourseDetail({
       </Button>
 
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold">{data.name}</h1>
+        <h2 className="text-2xl font-bold">{data.name}</h2>
         <p className="text-sm text-muted-foreground">
           {data.description ?? "No course description"}
         </p>
@@ -115,7 +124,16 @@ export default function CoursesPage() {
   const { data, isLoading, error } = useCollections();
 
   return (
-          <div className="space-y-6">
+    <AppPage>
+      <AppPageHeader>
+        <AppPageHeading>
+          <AppPageTitle>Courses</AppPageTitle>
+          <AppPageDescription>
+            Track ordered learning paths built on your collections.
+          </AppPageDescription>
+        </AppPageHeading>
+      </AppPageHeader>
+      <AppPageContent>
         {selectedCourseId ? (
           <CourseDetail
             courseId={selectedCourseId}
@@ -123,24 +141,8 @@ export default function CoursesPage() {
           />
         ) : (
           <>
-            <div>
-              <h1 className="text-2xl font-bold flex items-center gap-2">
-                <GraduationCap className="size-6 text-primary" />
-                Courses
-              </h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                Track ordered learning paths built on your collections.
-              </p>
-            </div>
-
             {isLoading && (
-              <div
-                className="grid gap-3 sm:grid-cols-2"
-                data-testid="courses-loading"
-              >
-                <Skeleton className="h-28 w-full" />
-                <Skeleton className="h-28 w-full" />
-              </div>
+              <PageSkeleton className="max-w-4xl" rows={2} data-testid="courses-loading" />
             )}
 
             {error && (
@@ -187,6 +189,7 @@ export default function CoursesPage() {
             )}
           </>
         )}
-      </div>
+      </AppPageContent>
+    </AppPage>
   );
 }

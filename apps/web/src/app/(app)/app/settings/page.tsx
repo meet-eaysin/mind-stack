@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
+import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { getApiErrorMessage } from "@/lib/api-client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,6 +21,14 @@ import {
 } from "@/features/settings/schemas/settings.schemas";
 import type { UpdateUserLlmConfig } from "@/features/settings/types";
 import { MODEL_PROVIDER } from "@repo/shared-types";
+import {
+  AppPage,
+  AppPageContent,
+  AppPageDescription,
+  AppPageHeader,
+  AppPageHeading,
+  AppPageTitle,
+} from "@/components/layouts/app-page";
 
 export default function SettingsPage() {
   const configQuery = useLlmConfig();
@@ -56,24 +64,22 @@ export default function SettingsPage() {
   const showHealth = !healthQuery.isLoading && !healthQuery.error;
 
   return (
-          <div className="max-w-3xl space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="size-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-            <Settings className="size-5" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold">Model Settings</h1>
-            <p className="text-sm text-muted-foreground">
-              Configure your embedding and generation models for this account.
-            </p>
-          </div>
-        </div>
+    <AppPage width="compact">
+      <AppPageHeader>
+        <AppPageHeading>
+          <AppPageTitle className="flex items-center gap-3">
+            <Settings className="size-5 text-primary" />
+            Model Settings
+          </AppPageTitle>
+          <AppPageDescription>
+            Configure embedding and generation models for this account.
+          </AppPageDescription>
+        </AppPageHeading>
+      </AppPageHeader>
+      <AppPageContent>
 
         {(configQuery.isLoading || healthQuery.isLoading) && (
-          <div className="space-y-3" data-testid="settings-loading">
-            <Skeleton className="h-28 w-full" />
-            <Skeleton className="h-44 w-full" />
-          </div>
+          <PageSkeleton data-testid="settings-loading" rows={2} />
         )}
 
         {(configQuery.error || healthQuery.error) && (
@@ -200,6 +206,7 @@ export default function SettingsPage() {
             </div>
           </form>
         )}
-      </div>
+      </AppPageContent>
+    </AppPage>
   );
 }

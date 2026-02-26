@@ -3,6 +3,15 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { DocumentList, DocumentDetail } from "@/features/documents";
+import {
+  AppPage,
+  AppPageContent,
+  AppPageDescription,
+  AppPageHeader,
+  AppPageHeading,
+  AppPageTitle,
+} from "@/components/layouts/app-page";
+import { PageSkeleton } from "@/components/ui/page-skeleton";
 
 function DocumentsPageContent() {
   const searchParams = useSearchParams();
@@ -16,13 +25,16 @@ function DocumentsPageContent() {
   }, [docIdFromQuery]);
 
   return (
-          <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Documents</h1>
-          <p className="text-muted-foreground">
+    <AppPage>
+      <AppPageHeader>
+        <AppPageHeading>
+          <AppPageTitle>Documents</AppPageTitle>
+          <AppPageDescription>
             Browse and manage your ingested knowledge base.
-          </p>
-        </div>
+          </AppPageDescription>
+        </AppPageHeading>
+      </AppPageHeader>
+      <AppPageContent>
 
         {selectedDocId ? (
           <DocumentDetail
@@ -32,7 +44,8 @@ function DocumentsPageContent() {
         ) : (
           <DocumentList onSelectAction={setSelectedDocId} />
         )}
-      </div>
+      </AppPageContent>
+    </AppPage>
   );
 }
 
@@ -40,14 +53,11 @@ export default function DocumentsPage() {
   return (
     <Suspense
       fallback={
-                  <div className="space-y-6">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">Documents</h1>
-              <p className="text-muted-foreground">
-                Browse and manage your ingested knowledge base.
-              </p>
-            </div>
-          </div>
+        <AppPage>
+          <AppPageContent>
+            <PageSkeleton rows={3} />
+          </AppPageContent>
+        </AppPage>
       }
     >
       <DocumentsPageContent />

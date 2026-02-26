@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { CalendarCheck, Brain, Sparkles, Trophy } from "lucide-react";
 import { useDailyReview } from "@/features/review";
@@ -9,6 +8,16 @@ import { getApiErrorMessage } from "@/lib/api-client";
 import { ReviewCard } from "@/features/review";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+  AppPage,
+  AppPageActions,
+  AppPageContent,
+  AppPageDescription,
+  AppPageHeader,
+  AppPageHeading,
+  AppPageTitle,
+} from "@/components/layouts/app-page";
+import { PageSkeleton } from "@/components/ui/page-skeleton";
 
 export default function ReviewPage() {
   const { data, isLoading, error } = useDailyReview();
@@ -33,65 +42,51 @@ export default function ReviewPage() {
   };
 
   return (
-          <div className="min-h-[calc(100vh-8rem)]">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between gap-4">
-            <div className="space-y-1">
-              <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-                <Brain className="size-7 text-primary" />
-                Daily Review
-              </h1>
-              <p className="text-muted-foreground">
-                Strengthen your knowledge through spaced repetition.
+    <AppPage>
+      <AppPageHeader>
+        <AppPageHeading>
+          <AppPageTitle className="flex items-center gap-3">
+            <Brain className="size-7 text-primary" />
+            Daily Review
+          </AppPageTitle>
+          <AppPageDescription>
+            Strengthen your knowledge through spaced repetition.
+          </AppPageDescription>
+        </AppPageHeading>
+        {data && total > 0 && (
+          <AppPageActions className="hidden text-right sm:block">
+            <div className="text-right">
+              <p className="text-sm font-medium">
+                {reviewedIds.size} of {total} reviewed
               </p>
+              <p className="text-xs text-muted-foreground">{data.date}</p>
             </div>
-            {data && total > 0 && (
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium">
-                  {reviewedIds.size} of {total} reviewed
-                </p>
-                <p className="text-xs text-muted-foreground">{data.date}</p>
-              </div>
-            )}
-          </div>
+          </AppPageActions>
+        )}
+      </AppPageHeader>
+      <AppPageContent>
 
-          {data && total > 0 && (
-            <div className="mt-4 space-y-1.5">
-              <Progress
-                value={progress}
-                className={cn(
-                  "h-2 transition-all",
-                  isComplete && "bg-emerald-100 dark:bg-emerald-900/30",
-                )}
-              />
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{Math.round(progress)}% complete</span>
-                {total - reviewedIds.size > 0 && (
-                  <span>{total - reviewedIds.size} remaining</span>
-                )}
-              </div>
+        {data && total > 0 && (
+          <div className="space-y-1.5">
+            <Progress
+              value={progress}
+              className={cn(
+                "h-2 transition-all",
+                isComplete && "bg-emerald-100 dark:bg-emerald-900/30",
+              )}
+            />
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>{Math.round(progress)}% complete</span>
+              {total - reviewedIds.size > 0 && (
+                <span>{total - reviewedIds.size} remaining</span>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Loading */}
         {isLoading && (
-          <div
-            className="mx-auto max-w-2xl space-y-6 pt-8"
-            data-testid="review-loading"
-          >
-            <div className="space-y-3">
-              <Skeleton className="h-8 w-64" />
-              <Skeleton className="h-4 w-48" />
-            </div>
-            <Skeleton className="h-64 w-full rounded-2xl" />
-            <div className="grid grid-cols-4 gap-3">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-24 rounded-xl" />
-              ))}
-            </div>
-          </div>
+          <PageSkeleton className="mx-auto max-w-2xl" data-testid="review-loading" rows={4} />
         )}
 
         {/* Error */}
@@ -164,6 +159,7 @@ export default function ReviewPage() {
             />
           </div>
         )}
-      </div>
+      </AppPageContent>
+    </AppPage>
   );
 }

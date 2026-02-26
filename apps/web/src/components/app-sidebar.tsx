@@ -74,7 +74,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuItem>
               <SidebarMenuButton
                 tooltip="Mind Stack"
-                className="data-[slot=sidebar-menu-button]:p-1.5!"
+                className="data-[slot=sidebar-menu-button]:!p-1.5"
               >
                 <span className="text-base font-semibold">Menu</span>
               </SidebarMenuButton>
