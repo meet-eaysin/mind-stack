@@ -10,9 +10,15 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/modifiers": "^9.0.0",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^5.2.2",
     "@repo/config": "*",
+    "@tabler/icons-react": "^3.37.1",
     "@tanstack/react-query": "^5.90.21",
+    "@tanstack/react-table": "^8.21.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.575.0",
@@ -24,10 +30,12 @@
     "react-hook-form": "^7.71.1",
     "react-markdown": "^10.1.0",
     "react-resizable-panels": "^4",
+    "recharts": "2.15.4",
     "remark-gfm": "^4.0.1",
     "shiki": "^3.22.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
+    "vaul": "^1.1.2",
     "zod": "^4.3.6"
   },
   "devDependencies": {
