@@ -1,99 +1,112 @@
-import Link from "next/link"
+"use client";
+
+import { ArrowRightIcon, Brain, Figma, Github, Plus } from "lucide-react";
+import Link from "next/link";
+
 import {
-  CalendarCheck,
-  FileText,
-  Folder,
-  GraduationCap,
-  Network,
-  Search,
-  Sparkles,
-} from "lucide-react"
+  PageHeader,
+  PageHeaderActions,
+  PageHeaderDescription,
+  PageHeaderHeading,
+} from "@/components/page-header";
+import { Button } from "@/components/ui/button";
 
-import { Button } from "@/components/ui/button"
-
-const features = [
-  {
-    icon: Search,
-    title: "Smart Search",
-    description: "Semantic search across your knowledge base with AI results.",
-  },
-  {
-    icon: FileText,
-    title: "Documents",
-    description: "Ingest URLs, text, PDFs, and videos in one place.",
-  },
-  {
-    icon: CalendarCheck,
-    title: "Daily Review",
-    description: "Reinforce learning with spaced repetition sessions.",
-  },
-  {
-    icon: Network,
-    title: "Knowledge Graph",
-    description: "Visualize relationships across your concepts.",
-  },
-  {
-    icon: Folder,
-    title: "Collections",
-    description: "Organize notes and docs into learning pathways.",
-  },
-  {
-    icon: GraduationCap,
-    title: "Courses",
-    description: "Track progress through structured study plans.",
-  },
-]
-
-export default function LandingPage() {
+export default function Home() {
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 md:py-16">
-      <header className="flex items-center justify-between">
-        <Link href="/" className="text-lg font-semibold">
-          Mind Stack
-        </Link>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" asChild>
-            <Link href="/login">Login</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/register">Register</Link>
-          </Button>
-        </div>
-      </header>
-
-      <section className="mt-14 text-center">
-        <div className="mx-auto inline-flex items-center gap-2 rounded-full border bg-muted px-3 py-1 text-xs text-muted-foreground">
-          <Sparkles className="size-3" />
-          Personal Knowledge Management
-        </div>
-        <h1 className="mx-auto mt-4 max-w-3xl text-4xl font-bold tracking-tight md:text-5xl">
-          Build your second brain with a secure authenticated workspace
-        </h1>
-        <p className="mx-auto mt-3 max-w-xl text-muted-foreground md:text-lg">
-          Capture, organize, search, and review knowledge with an application
-          shell designed for focused daily use.
-        </p>
-        <div className="mt-6 flex justify-center gap-3">
-          <Button size="lg" asChild>
-            <Link href="/register">Get Started</Link>
-          </Button>
-          <Button size="lg" variant="outline" asChild>
-            <Link href="/login">Sign In</Link>
-          </Button>
-        </div>
-      </section>
-
-      <section className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {features.map((feature) => (
-          <article key={feature.title} className="rounded-lg border bg-card p-5">
-            <div className="mb-3 flex items-center gap-2">
-              <feature.icon className="size-5 text-primary" />
-              <h2 className="font-semibold">{feature.title}</h2>
-            </div>
-            <p className="text-sm text-muted-foreground">{feature.description}</p>
-          </article>
-        ))}
-      </section>
+    <main className="relative isolate flex w-full flex-col gap-12 overflow-hidden px-4 pt-6 pb-12 lg:gap-16 lg:px-8 lg:pt-10 lg:pb-20">
+      <HeroSection />
+      <FreeKitCTA />
     </main>
-  )
+  );
+}
+
+function HeroSection() {
+  return (
+    <section className="relative isolate">
+      <div
+        className="mx-auto max-w-3xl"
+      >
+        <PageHeader className="relative items-center justify-center text-center">
+          <div className="flex flex-col items-center gap-2">
+            <PageHeaderHeading>
+              <span className="bg-clip-text text-primary">
+                Premium quality shadcn/ui components and blocks
+              </span>
+            </PageHeaderHeading>
+          </div>
+
+          <div className="flex flex-col items-center gap-2">
+            <PageHeaderDescription>
+              A free registry of polished shadcn/ui components and marketing blocks built
+              to production standards. Fast to use, easy to extend, and ready for any
+              modern web project.
+            </PageHeaderDescription>
+          </div>
+
+          <div className="flex items-center justify-center">
+            <PageHeaderActions className="mx-auto grid w-fit grid-cols-1 pt-4 sm:grid-cols-2">
+              <Button asChild>
+                <Link href="/ui/avatar-stack">Explore the registry</Link>
+              </Button>
+
+              <Button variant="outline" asChild>
+                <Link
+                  href="https://github.com/shadcraft/shadcraft-free"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Github className="size-4" />
+                  GitHub
+                </Link>
+              </Button>
+            </PageHeaderActions>
+          </div>
+        </PageHeader>
+      </div>
+    </section>
+  );
+}
+
+function FreeKitCTA() {
+  return (
+    <section className="relative isolate">
+      <div
+
+        className="mx-auto flex max-w-3xl flex-col gap-4 rounded-3xl bg-secondary p-6 inset-shadow-2xs inset-shadow-border"
+      >
+        <div className="flex items-center gap-2">
+          <div className="flex size-14 items-center justify-center rounded-xl bg-background p-2 inset-shadow-2xs inset-shadow-border">
+            <Brain className="size-8" />
+          </div>
+          <Plus className="size-4 text-muted-foreground" />
+          <div className="flex size-14 items-center justify-center rounded-xl bg-background p-2 inset-shadow-2xs inset-shadow-border">
+            <Figma className="size-8" />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <h2 className="text-xl font-medium text-balance">
+            Try the Free Figma and React kit
+          </h2>
+          <p className="text-balance text-muted-foreground">
+            Access a curated set of shadcn components in the Figma community library, try
+            tweakcn theming, and use the free Shadcraft registry. A simple way to trial
+            the kit before upgrading.
+          </p>
+        </div>
+
+        <div className="w-fit pt-4">
+          <Button asChild>
+            <Link
+              href="https://polar.sh/checkout/polar_c_yhJ8HZh0Hi7rTuJUM3YbSSSGJ1U4gPWHnmaym1fOkpf"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Get started <ArrowRightIcon />
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
 }

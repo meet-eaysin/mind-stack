@@ -28,6 +28,7 @@ const shadcraftLinks = [
 ];
 
 export async function Footer() {
+
   return (
     <footer
       className="relative w-full bg-background py-12 lg:py-20"
@@ -52,10 +53,7 @@ export async function Footer() {
             <ul className="grid gap-3">
               {shadcraftLinks.map((item) => {
                 return (
-                  <li
-                    key={item.label}
-                    className="text-sm text-muted-foreground"
-                  >
+                  <li key={item.label} className="text-sm text-muted-foreground">
                     <Link
                       href={item.href}
                       target="_blank"
@@ -72,19 +70,20 @@ export async function Footer() {
 
           {/* Marketing Components */}
           <div className="flex flex-col gap-6">
-            <h3 className="text-sm font-medium text-foreground">
-              Marketing Components
-            </h3>
+            <h3 className="text-sm font-medium text-foreground">Marketing Components</h3>
             <ul className="grid gap-3">
-              {Array.from({ length: 10 }).map((_, index) => {
-                const href = `/components/${index}`;
+              {Array.from({ length: 5 }).map((_, i) => {
+                const href = `/components/marketing/${i + 1}`;
+                const item = {
+                  title: `Marketing Component ${i + 1}`,
+                };
                 return (
-                  <li key={index} className="text-sm text-muted-foreground">
+                  <li key={item.title} className="text-sm text-muted-foreground">
                     <Link
                       href={href}
                       className="flex items-center gap-1 transition-all hover:text-primary"
                     >
-                      {index}
+                      {item.title}
                     </Link>
                   </li>
                 );
@@ -94,20 +93,24 @@ export async function Footer() {
 
           {/* Marketing Blocks */}
           <div className="flex flex-col gap-6 md:col-span-2">
-            <h3 className="text-sm font-medium text-foreground">
-              Marketing Blocks
-            </h3>
+            <h3 className="text-sm font-medium text-foreground">Marketing Blocks</h3>
             <ul className="grid gap-x-12 gap-y-3 md:grid-cols-2 lg:gap-x-9">
-              {Array.from({ length: 10 }).map((_, index) => (
-                <li key={index} className="text-sm text-muted-foreground">
-                  <Link
-                    href={`/blocks/${index}`}
-                    className="flex items-center gap-1 transition-all hover:text-primary"
-                  >
-                    {index}
-                  </Link>
-                </li>
-              ))}
+              {Array.from({ length: 5 }).map((_, i) => {
+                const item = {
+                  title: `Marketing Block ${i + 1}`,
+                  slug: `marketing-block-${i + 1}`,
+                };
+                return (
+                  <li key={item.slug} className="text-sm text-muted-foreground">
+                    <Link
+                      href={`/blocks/${item.slug}`}
+                      className="flex items-center gap-1 transition-all hover:text-primary"
+                    >
+                      {item.title}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </nav>
@@ -124,8 +127,7 @@ export async function Footer() {
             >
               <Logo />
               <span className="flex items-center gap-2 text-xl font-semibold lowercase">
-                shadcraft{" "}
-                <span className="code-inline translate-y-px">free</span>
+                shadcraft <span className="code-inline translate-y-px">free</span>
               </span>
             </Link>
 
