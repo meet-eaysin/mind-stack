@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { usePathname } from "next/navigation"
+import * as React from "react";
+import { usePathname } from "next/navigation";
 import {
   IconActivity,
   IconCalendarCheck,
@@ -12,10 +12,10 @@ import {
   IconSettings,
   IconSchool,
   IconTrendingUp,
-} from "@tabler/icons-react"
+} from "@tabler/icons-react";
 
-import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
+import { NavMain } from "@/components/nav-main";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -26,8 +26,8 @@ import {
   SidebarMenuItem,
   SidebarRail,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
-import { APP_MENU_ITEMS } from "@/lib/app-menu"
+} from "@/components/ui/sidebar";
+import { APP_MENU_ITEMS } from "@/lib/app-menu";
 
 const data = {
   user: {
@@ -36,7 +36,7 @@ const data = {
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: APP_MENU_ITEMS,
-}
+};
 
 const navIconByHref = {
   "/app/search": IconSearch,
@@ -48,10 +48,10 @@ const navIconByHref = {
   "/app/health": IconActivity,
   "/app/productivity": IconTrendingUp,
   "/app/settings": IconSettings,
-} as const
+} as const;
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   const navMain = React.useMemo(
     () =>
@@ -59,10 +59,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: item.label,
         url: item.href,
         icon: navIconByHref[item.href as keyof typeof navIconByHref],
-        isActive: pathname === item.href || pathname.startsWith(`${item.href}/`),
+        isActive:
+          pathname === item.href || pathname.startsWith(`${item.href}/`),
       })),
-    [pathname]
-  )
+    [pathname],
+  );
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -93,5 +94,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

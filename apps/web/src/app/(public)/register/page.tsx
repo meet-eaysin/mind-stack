@@ -1,32 +1,32 @@
-import Link from "next/link"
-import { cookies } from "next/headers"
-import { redirect } from "next/navigation"
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function RegisterPage() {
   async function registerAction(formData: FormData) {
-    "use server"
+    "use server";
 
-    const email = String(formData.get("email") ?? "")
-    const password = String(formData.get("password") ?? "")
-    const name = String(formData.get("name") ?? "")
+    const email = String(formData.get("email") ?? "");
+    const password = String(formData.get("password") ?? "");
+    const name = String(formData.get("name") ?? "");
 
     if (!name || !email || !password) {
-      return
+      return;
     }
 
-    ;(await cookies()).set("auth_token", "demo-session", {
+    (await cookies()).set("auth_token", "demo-session", {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
-    })
+    });
 
-    redirect("/app")
+    redirect("/app");
   }
 
   return (
@@ -63,5 +63,5 @@ export default function RegisterPage() {
         </p>
       </div>
     </main>
-  )
+  );
 }

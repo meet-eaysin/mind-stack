@@ -1,14 +1,14 @@
-import Link from "next/link"
+import Link from "next/link";
 import {
   IconBell,
   IconChevronDown,
   IconInnerShadowTop,
   IconSearch,
   IconSettings,
-} from "@tabler/icons-react"
+} from "@tabler/icons-react";
 
-import { ThemeToggle } from "@/components/theme-toggle"
-import { Button } from "@/components/ui/button"
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,19 +16,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   ProfileCard,
   ProfileCardAvatar,
   ProfileCardDetails,
-} from "@/components/ui/profile-card"
+} from "@/components/ui/profile-card";
 
 const user = {
   name: "shadcn",
   email: "m@example.com",
   avatar: "/avatars/shadcn.jpg",
-}
+};
 
 export function ApplicationHeader() {
   return (
@@ -40,7 +40,9 @@ export function ApplicationHeader() {
           aria-label="Go to application home"
         >
           <IconInnerShadowTop className="size-5" />
-          <span className="text-sm font-semibold sm:text-base">Application</span>
+          <span className="text-sm font-semibold sm:text-base">
+            Application
+          </span>
         </Link>
 
         <form role="search" className="w-full max-w-md">
@@ -71,7 +73,11 @@ export function ApplicationHeader() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-10 px-2">
                 <ProfileCard>
-                  <ProfileCardAvatar size="sm" src={user.avatar} name={user.name} />
+                  <ProfileCardAvatar
+                    size="sm"
+                    src={user.avatar}
+                    name={user.name}
+                  />
                   <ProfileCardDetails
                     className="hidden text-left sm:flex"
                     name={user.name}
@@ -94,5 +100,5 @@ export function ApplicationHeader() {
         </div>
       </div>
     </header>
-  )
+  );
 }

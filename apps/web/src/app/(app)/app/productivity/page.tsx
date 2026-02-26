@@ -118,7 +118,6 @@ export default function ProductivityPage() {
         </AppPageHeading>
       </AppPageHeader>
       <AppPageContent className="gap-8">
-
         {/* Topic Mastery Section */}
         <section className="space-y-4">
           <h2 className="text-lg font-semibold flex items-center gap-2">

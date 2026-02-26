@@ -87,7 +87,6 @@ export default function GraphPage() {
         </AppPageActions>
       </AppPageHeader>
       <AppPageContent>
-
         {isLoading && (
           <div className="grid gap-4 lg:grid-cols-3">
             <div className="lg:col-span-2">

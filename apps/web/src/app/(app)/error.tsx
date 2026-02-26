@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
+import { useEffect } from "react";
 
-import { AlertCircle } from "lucide-react"
+import { AlertCircle } from "lucide-react";
 
 import {
   AppPage,
@@ -11,19 +11,19 @@ import {
   AppPageHeader,
   AppPageHeading,
   AppPageTitle,
-} from "@/components/layouts/app-page"
-import { Button } from "@/components/ui/button"
+} from "@/components/layouts/app-page";
+import { Button } from "@/components/ui/button";
 
 export default function Error({
   error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error)
-  }, [error])
+    console.error(error);
+  }, [error]);
 
   return (
     <AppPage width="compact">
@@ -42,7 +42,8 @@ export default function Error({
             <div className="space-y-1">
               <p className="text-sm font-medium">Unexpected error</p>
               <p className="text-sm text-muted-foreground">
-                If this keeps happening, contact support with your latest action.
+                If this keeps happening, contact support with your latest
+                action.
               </p>
             </div>
           </div>
@@ -52,5 +53,5 @@ export default function Error({
         </div>
       </AppPageContent>
     </AppPage>
-  )
+  );
 }

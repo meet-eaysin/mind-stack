@@ -23,9 +23,7 @@ export default function Home() {
 function HeroSection() {
   return (
     <section className="relative isolate">
-      <div
-        className="mx-auto max-w-3xl"
-      >
+      <div className="mx-auto max-w-3xl">
         <PageHeader className="relative items-center justify-center text-center">
           <div className="flex flex-col items-center gap-2">
             <PageHeaderHeading>
@@ -37,9 +35,9 @@ function HeroSection() {
 
           <div className="flex flex-col items-center gap-2">
             <PageHeaderDescription>
-              A free registry of polished shadcn/ui components and marketing blocks built
-              to production standards. Fast to use, easy to extend, and ready for any
-              modern web project.
+              A free registry of polished shadcn/ui components and marketing
+              blocks built to production standards. Fast to use, easy to extend,
+              and ready for any modern web project.
             </PageHeaderDescription>
           </div>
 
@@ -70,10 +68,7 @@ function HeroSection() {
 function FreeKitCTA() {
   return (
     <section className="relative isolate">
-      <div
-
-        className="mx-auto flex max-w-3xl flex-col gap-4 rounded-3xl bg-secondary p-6 inset-shadow-2xs inset-shadow-border"
-      >
+      <div className="mx-auto flex max-w-3xl flex-col gap-4 rounded-3xl bg-secondary p-6 inset-shadow-2xs inset-shadow-border">
         <div className="flex items-center gap-2">
           <div className="flex size-14 items-center justify-center rounded-xl bg-background p-2 inset-shadow-2xs inset-shadow-border">
             <Brain className="size-8" />
@@ -89,9 +84,9 @@ function FreeKitCTA() {
             Try the Free Figma and React kit
           </h2>
           <p className="text-balance text-muted-foreground">
-            Access a curated set of shadcn components in the Figma community library, try
-            tweakcn theming, and use the free Shadcraft registry. A simple way to trial
-            the kit before upgrading.
+            Access a curated set of shadcn components in the Figma community
+            library, try tweakcn theming, and use the free Shadcraft registry. A
+            simple way to trial the kit before upgrading.
           </p>
         </div>
 

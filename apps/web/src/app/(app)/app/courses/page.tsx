@@ -142,7 +142,11 @@ export default function CoursesPage() {
         ) : (
           <>
             {isLoading && (
-              <PageSkeleton className="max-w-4xl" rows={2} data-testid="courses-loading" />
+              <PageSkeleton
+                className="max-w-4xl"
+                rows={2}
+                data-testid="courses-loading"
+              />
             )}
 
             {error && (

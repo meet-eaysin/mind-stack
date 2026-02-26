@@ -1,26 +1,32 @@
-import Link from "next/link"
+import Link from "next/link";
 
-import { Logo } from "@/components/logo"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { Button } from "@/components/ui/button"
+import { Logo } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
 
 const navItems = [
   { label: "Features", href: "/#features" },
   { label: "How it works", href: "/#how-it-works" },
-  { label: "Pricing", href: "/#pricing" },
-]
+];
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 h-(--header-height) w-full border-b bg-background/90 backdrop-blur">
+    <header className="sticky top-0 z-50 h-(--header-height) w-full bg-background/90 backdrop-blur">
       <div className="container mx-auto size-full">
         <div className="flex size-full items-center justify-between gap-3 px-4 lg:px-8">
-          <Link href="/" className="flex items-center gap-2" aria-label="Go to home page">
+          <Link
+            href="/"
+            className="flex items-center gap-2"
+            aria-label="Go to home page"
+          >
             <Logo className="size-7" />
             <span className="text-lg font-semibold sm:text-xl">Mind Stack</span>
           </Link>
 
-          <nav aria-label="Primary" className="hidden items-center gap-5 md:flex">
+          <nav
+            aria-label="Primary"
+            className="hidden items-center gap-5 md:flex"
+          >
             {navItems.map((item) => (
               <Link
                 key={item.label}
@@ -44,5 +50,5 @@ export function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }

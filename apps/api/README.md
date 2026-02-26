@@ -58,23 +58,23 @@ Cross-cutting backend concerns are centralized in:
 
 ## Environment Variables
 
-| Variable | Required | Default |
-| --- | --- | --- |
-| `NODE_ENV` | No | `development` |
-| `DATABASE_URL` | Yes | - |
-| `API_PORT` | No | `4000` |
-| `OLLAMA_BASE_URL` | No | `http://localhost:11434` |
-| `OLLAMA_MODEL` | Yes | - |
-| `OLLAMA_EMBED_MODEL` | Yes | - |
-| `CHROMA_URL` | No | `http://localhost:8000` |
-| `CHROMA_COLLECTION` | No | `mind-stack` |
-| `REDIS_URL` | No | `redis://localhost:6379` |
-| `LOG_LEVEL` | No | `info` |
-| `WEB_URL` | No | `http://localhost:3000` |
-| `API_URL` | No | `http://localhost:4000` |
-| `API_KEY` | No | unset |
-| `YOUTUBE_COOKIE` | No | unset |
-| `YOUTUBE_PROXY_URL` | No | unset |
+| Variable             | Required | Default                  |
+| -------------------- | -------- | ------------------------ |
+| `NODE_ENV`           | No       | `development`            |
+| `DATABASE_URL`       | Yes      | -                        |
+| `API_PORT`           | No       | `4000`                   |
+| `OLLAMA_BASE_URL`    | No       | `http://localhost:11434` |
+| `OLLAMA_MODEL`       | Yes      | -                        |
+| `OLLAMA_EMBED_MODEL` | Yes      | -                        |
+| `CHROMA_URL`         | No       | `http://localhost:8000`  |
+| `CHROMA_COLLECTION`  | No       | `mind-stack`             |
+| `REDIS_URL`          | No       | `redis://localhost:6379` |
+| `LOG_LEVEL`          | No       | `info`                   |
+| `WEB_URL`            | No       | `http://localhost:3000`  |
+| `API_URL`            | No       | `http://localhost:4000`  |
+| `API_KEY`            | No       | unset                    |
+| `YOUTUBE_COOKIE`     | No       | unset                    |
+| `YOUTUBE_PROXY_URL`  | No       | unset                    |
 
 Notes:
 

@@ -35,7 +35,6 @@ function DocumentsPageContent() {
         </AppPageHeading>
       </AppPageHeader>
       <AppPageContent>
-
         {selectedDocId ? (
           <DocumentDetail
             id={selectedDocId}

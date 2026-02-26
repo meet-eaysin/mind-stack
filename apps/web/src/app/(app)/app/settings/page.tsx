@@ -77,7 +77,6 @@ export default function SettingsPage() {
         </AppPageHeading>
       </AppPageHeader>
       <AppPageContent>
-
         {(configQuery.isLoading || healthQuery.isLoading) && (
           <PageSkeleton data-testid="settings-loading" rows={2} />
         )}

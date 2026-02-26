@@ -1,32 +1,32 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
-const STORAGE_KEY = "mindstack_cookie_consent"
+const STORAGE_KEY = "mindstack_cookie_consent";
 
 export function CookieConsentBanner() {
-  const [mounted, setMounted] = React.useState(false)
-  const [visible, setVisible] = React.useState(false)
+  const [mounted, setMounted] = React.useState(false);
+  const [visible, setVisible] = React.useState(false);
 
   React.useEffect(() => {
-    setMounted(true)
-    const accepted = window.localStorage.getItem(STORAGE_KEY) === "accepted"
-    setVisible(!accepted)
-  }, [])
+    setMounted(true);
+    const accepted = window.localStorage.getItem(STORAGE_KEY) === "accepted";
+    setVisible(!accepted);
+  }, []);
 
   const onAccept = React.useCallback(() => {
-    window.localStorage.setItem(STORAGE_KEY, "accepted")
-    setVisible(false)
-  }, [])
+    window.localStorage.setItem(STORAGE_KEY, "accepted");
+    setVisible(false);
+  }, []);
 
   const onDismiss = React.useCallback(() => {
-    setVisible(false)
-  }, [])
+    setVisible(false);
+  }, []);
 
   if (!mounted || !visible) {
-    return null
+    return null;
   }
 
   return (
@@ -48,5 +48,5 @@ export function CookieConsentBanner() {
         </Button>
       </div>
     </aside>
-  )
+  );
 }

@@ -65,7 +65,6 @@ export default function ReviewPage() {
         )}
       </AppPageHeader>
       <AppPageContent>
-
         {data && total > 0 && (
           <div className="space-y-1.5">
             <Progress
@@ -86,7 +85,11 @@ export default function ReviewPage() {
 
         {/* Loading */}
         {isLoading && (
-          <PageSkeleton className="mx-auto max-w-2xl" data-testid="review-loading" rows={4} />
+          <PageSkeleton
+            className="mx-auto max-w-2xl"
+            data-testid="review-loading"
+            rows={4}
+          />
         )}
 
         {/* Error */}

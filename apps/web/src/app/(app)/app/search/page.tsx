@@ -102,7 +102,6 @@ export default function SearchPage() {
         </AppPageHeading>
       </AppPageHeader>
       <AppPageContent>
-
         <div className="flex flex-wrap gap-2">
           <Button
             variant={mode === "semantic" ? "default" : "outline"}
@@ -238,9 +237,7 @@ export default function SearchPage() {
 
         <Separator />
 
-        {isLoading && (
-          <PageSkeleton rows={3} data-testid="search-loading" />
-        )}
+        {isLoading && <PageSkeleton rows={3} data-testid="search-loading" />}
 
         {mode === "semantic" && hasSemanticResults && (
           <div className="space-y-3" data-testid="search-results">

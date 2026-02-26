@@ -1,15 +1,15 @@
-import * as React from "react"
+import * as React from "react";
 
-import { cn } from "@/lib/utils"
-import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function PageSkeleton({
   className,
   showHeader = true,
   rows = 3,
 }: React.ComponentProps<"div"> & {
-  showHeader?: boolean
-  rows?: number
+  showHeader?: boolean;
+  rows?: number;
 }) {
   return (
     <div data-slot="page-skeleton" className={cn("space-y-6", className)}>
@@ -25,7 +25,7 @@ function PageSkeleton({
         ))}
       </div>
     </div>
-  )
+  );
 }
 
-export { PageSkeleton }
+export { PageSkeleton };

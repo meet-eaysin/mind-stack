@@ -185,42 +185,45 @@ export default function HealthPage() {
         </AppPageHeading>
         {!isLoading && !error && (
           <AppPageActions>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExport}
-                disabled={isExporting}
-                className="gap-2"
-              >
-                {isExporting ? (
-                  <Loader2 className="size-3.5 animate-spin" />
-                ) : (
-                  <Download className="size-3.5" />
-                )}
-                Export Brain Data
-              </Button>
-              {totalIssues === 0 ? (
-                <Badge className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 gap-1.5 px-3 py-1">
-                  <CheckCircle2 className="size-3.5" />
-                  All Systems Healthy
-                </Badge>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExport}
+              disabled={isExporting}
+              className="gap-2"
+            >
+              {isExporting ? (
+                <Loader2 className="size-3.5 animate-spin" />
               ) : (
-                <Badge
-                  variant="outline"
-                  className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20 gap-1.5 px-3 py-1"
-                >
-                  <AlertTriangle className="size-3.5" />
-                  {totalIssues} Issue{totalIssues !== 1 ? "s" : ""} Found
-                </Badge>
+                <Download className="size-3.5" />
               )}
+              Export Brain Data
+            </Button>
+            {totalIssues === 0 ? (
+              <Badge className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 gap-1.5 px-3 py-1">
+                <CheckCircle2 className="size-3.5" />
+                All Systems Healthy
+              </Badge>
+            ) : (
+              <Badge
+                variant="outline"
+                className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20 gap-1.5 px-3 py-1"
+              >
+                <AlertTriangle className="size-3.5" />
+                {totalIssues} Issue{totalIssues !== 1 ? "s" : ""} Found
+              </Badge>
+            )}
           </AppPageActions>
         )}
       </AppPageHeader>
       <AppPageContent className="gap-8">
-
         {/* Loading */}
         {isLoading && (
-          <PageSkeleton className="max-w-5xl" rows={4} data-testid="health-loading" />
+          <PageSkeleton
+            className="max-w-5xl"
+            rows={4}
+            data-testid="health-loading"
+          />
         )}
 
         {/* Error */}

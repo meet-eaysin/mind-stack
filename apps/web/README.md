@@ -60,10 +60,10 @@ src/
 
 ## Environment Variables
 
-| Variable | Required | Default |
-| --- | --- | --- |
-| `NEXT_PUBLIC_API_URL` | No | `http://localhost:4000/api/v1` |
-| `NODE_ENV` | No | `development` |
+| Variable              | Required | Default                        |
+| --------------------- | -------- | ------------------------------ |
+| `NEXT_PUBLIC_API_URL` | No       | `http://localhost:4000/api/v1` |
+| `NODE_ENV`            | No       | `development`                  |
 
 ## Local Development
 

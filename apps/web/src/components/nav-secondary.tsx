@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { type Icon } from "@tabler/icons-react"
+import * as React from "react";
+import { type Icon } from "@tabler/icons-react";
 
 import {
   SidebarGroup,
@@ -9,18 +9,18 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 export function NavSecondary({
   items,
   ...props
 }: {
   items: {
-    title: string
-    url: string
-    icon: Icon
-    isActive?: boolean
-  }[]
+    title: string;
+    url: string;
+    icon: Icon;
+    isActive?: boolean;
+  }[];
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
     <SidebarGroup {...props}>
@@ -33,7 +33,10 @@ export function NavSecondary({
                 tooltip={item.title}
                 isActive={item.isActive}
               >
-                <a href={item.url} aria-current={item.isActive ? "page" : undefined}>
+                <a
+                  href={item.url}
+                  aria-current={item.isActive ? "page" : undefined}
+                >
                   <item.icon />
                   <span>{item.title}</span>
                 </a>
@@ -43,5 +46,5 @@ export function NavSecondary({
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
-  )
+  );
 }

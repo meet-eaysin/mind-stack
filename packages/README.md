@@ -4,24 +4,24 @@ This directory contains shared libraries and build-time tooling used across the 
 
 ## Package Catalog
 
-| Package | Responsibility | Type |
-| --- | --- | --- |
-| `@repo/config` | Centralized env schemas and loaders | Runtime |
-| `@repo/database` | Prisma client and schema scripts | Runtime |
-| `@repo/embeddings` | Embedding provider interfaces and Ollama adapter | Runtime |
-| `@repo/llm` | LLM provider interfaces and Ollama adapter | Runtime |
-| `@repo/vector-store` | Vector store interface and Chroma adapter | Runtime |
-| `@repo/logger` | Shared structured logging | Runtime |
-| `@repo/shared-types` | Cross-app enums and DTO contracts | Runtime/Type |
-| `@repo/ui` | Shared React UI primitives | Runtime |
-| `@repo/eslint-config` | Shared ESLint presets | Build-time |
-| `@repo/typescript-config` | Shared TypeScript presets | Build-time |
+| Package                   | Responsibility                                   | Type         |
+| ------------------------- | ------------------------------------------------ | ------------ |
+| `@repo/config`            | Centralized env schemas and loaders              | Runtime      |
+| `@repo/database`          | Prisma client and schema scripts                 | Runtime      |
+| `@repo/embeddings`        | Embedding provider interfaces and Ollama adapter | Runtime      |
+| `@repo/llm`               | LLM provider interfaces and Ollama adapter       | Runtime      |
+| `@repo/vector-store`      | Vector store interface and Chroma adapter        | Runtime      |
+| `@repo/logger`            | Shared structured logging                        | Runtime      |
+| `@repo/shared-types`      | Cross-app enums and DTO contracts                | Runtime/Type |
+| `@repo/ui`                | Shared React UI primitives                       | Runtime      |
+| `@repo/eslint-config`     | Shared ESLint presets                            | Build-time   |
+| `@repo/typescript-config` | Shared TypeScript presets                        | Build-time   |
 
 ## Package README Template
 
 Use this template for any new package under `packages/*/README.md`.
 
-~~~md
+````md
 # `<package-name>`
 
 Short summary of what this package provides.
@@ -64,7 +64,7 @@ yarn workspace <package-name> typecheck
 
 - What this package must not import
 - Boundary rules to protect architecture
-~~~
+````
 
 ## Documentation Conventions
 

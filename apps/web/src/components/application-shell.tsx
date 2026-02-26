@@ -1,8 +1,8 @@
-import type { CSSProperties, ReactNode } from "react"
+import type { CSSProperties, ReactNode } from "react";
 
-import { AppSidebar } from "@/components/app-sidebar"
-import { ApplicationHeader } from "@/components/application-header"
-import { SidebarProvider } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/app-sidebar";
+import { ApplicationHeader } from "@/components/application-header";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 export function ApplicationShell({ children }: { children: ReactNode }) {
   return (
@@ -23,5 +23,5 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
         </main>
       </div>
     </SidebarProvider>
-  )
+  );
 }

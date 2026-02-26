@@ -1,38 +1,38 @@
-import Link from "next/link"
-import { cookies } from "next/headers"
-import { redirect } from "next/navigation"
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type LoginPageProps = {
-  searchParams: Promise<{ next?: string }>
-}
+  searchParams: Promise<{ next?: string }>;
+};
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { next } = await searchParams
-  const nextPath = next?.startsWith("/app") ? next : "/app"
+  const { next } = await searchParams;
+  const nextPath = next?.startsWith("/app") ? next : "/app";
 
   async function loginAction(formData: FormData) {
-    "use server"
+    "use server";
 
-    const email = String(formData.get("email") ?? "")
-    const password = String(formData.get("password") ?? "")
+    const email = String(formData.get("email") ?? "");
+    const password = String(formData.get("password") ?? "");
 
     if (!email || !password) {
-      return
+      return;
     }
 
-    ;(await cookies()).set("auth_token", "demo-session", {
+    (await cookies()).set("auth_token", "demo-session", {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
-    })
+    });
 
-    redirect(nextPath)
+    redirect(nextPath);
   }
 
   return (
@@ -59,11 +59,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
         <p className="mt-4 text-sm text-muted-foreground">
           New here?{" "}
-          <Link href="/register" className="font-medium text-foreground underline">
+          <Link
+            href="/register"
+            className="font-medium text-foreground underline"
+          >
             Create an account
           </Link>
         </p>
       </div>
     </main>
-  )
+  );
 }

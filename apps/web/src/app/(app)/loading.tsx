@@ -1,5 +1,5 @@
-import { AppPage, AppPageContent } from "@/components/layouts/app-page"
-import { PageSkeleton } from "@/components/ui/page-skeleton"
+import { AppPage, AppPageContent } from "@/components/layouts/app-page";
+import { PageSkeleton } from "@/components/ui/page-skeleton";
 
 export default function Loading() {
   return (
@@ -8,5 +8,5 @@ export default function Loading() {
         <PageSkeleton rows={4} />
       </AppPageContent>
     </AppPage>
-  )
+  );
 }
