@@ -1,40 +1,48 @@
-import Link from "next/link";
+import Link from "next/link"
 
-import { Logo } from "@/components/logo";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/logo"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { Button } from "@/components/ui/button"
+
+const navItems = [
+  { label: "Features", href: "/#features" },
+  { label: "How it works", href: "/#how-it-works" },
+  { label: "Pricing", href: "/#pricing" },
+]
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 h-(--header-height) w-full bg-background/90 backdrop-blur">
+    <header className="sticky top-0 z-50 h-(--header-height) w-full border-b bg-background/90 backdrop-blur">
       <div className="container mx-auto size-full">
-        <div className="flex size-full items-center justify-between gap-2 px-4 lg:px-8">
+        <div className="flex size-full items-center justify-between gap-3 px-4 lg:px-8">
           <Link href="/" className="flex items-center gap-2" aria-label="Go to home page">
-            <Logo />
-            <span className="flex items-center gap-2 text-lg font-semibold lowercase sm:text-xl">
-              shadcraft <span className="code-inline translate-y-px">free</span>
-            </span>
+            <Logo className="size-7" />
+            <span className="text-lg font-semibold sm:text-xl">Mind Stack</span>
           </Link>
 
-          <div className="flex items-center gap-3">
-            <ThemeToggle size="icon" />
-
-            <Button asChild className="gap-1.5">
+          <nav aria-label="Primary" className="hidden items-center gap-5 md:flex">
+            {navItems.map((item) => (
               <Link
-                href="https://shadcraft.com/products/pro-react-shadcn-ui-kit"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Go to Shadcraft Pro React"
+                key={item.label}
+                href={item.href}
+                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
-                <span>
-                  <span>Buy Pro </span>
-                  <span className="hidden sm:inline">React</span>
-                </span>
+                {item.label}
               </Link>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <ThemeToggle size="icon" />
+            <Button variant="ghost" asChild>
+              <Link href="/login">Sign in</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/register">Get started</Link>
             </Button>
           </div>
         </div>
       </div>
     </header>
-  );
+  )
 }

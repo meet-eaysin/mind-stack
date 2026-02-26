@@ -1,197 +1,98 @@
-import { ArrowUpRight, Globe, Twitter } from "lucide-react";
-import Link from "next/link";
+import Link from "next/link"
 
-import { Logo } from "@/components/logo";
-import { Separator } from "@/components/ui/separator";
+import { Logo } from "@/components/logo"
+import { Separator } from "@/components/ui/separator"
 
-const shadcraftLinks = [
-  {
-    label: "Home",
-    href: "https://shadcraft.com/",
-  },
-  {
-    label: "Pricing",
-    href: "https://shadcraft.com/pricing",
-  },
-  {
-    label: "Support",
-    href: "https://discord.com/invite/tzgMKeqG3s",
-  },
-  {
-    label: "Contact us",
-    href: "https://shadcraft.com/contact",
-  },
-  {
-    label: "Documentation",
-    href: "https://shadcraft.com/docs/free-registry",
-  },
-];
+const productLinks = [
+  { label: "Search", href: "/app/search" },
+  { label: "Documents", href: "/app/documents" },
+  { label: "Collections", href: "/app/collections" },
+  { label: "Daily Review", href: "/app/review" },
+]
 
-export async function Footer() {
+const accountLinks = [
+  { label: "Sign in", href: "/login" },
+  { label: "Register", href: "/register" },
+  { label: "Open app", href: "/app" },
+]
+
+const supportLinks = [
+  { label: "Help Center", href: "mailto:support@mindstack.app", external: true },
+  { label: "Privacy", href: "#privacy" },
+  { label: "Terms", href: "#terms" },
+]
+
+export function Footer() {
+  const year = new Date().getFullYear()
 
   return (
-    <footer
-      className="relative w-full bg-background py-12 lg:py-20"
-      role="contentinfo"
-      aria-label="Website footer"
-    >
-      <div className="absolute inset-x-0 top-0 flex w-full items-center gap-4">
-        <Separator className="flex-1" />
-        <Logo className="shrink-0" />
-        <Separator className="flex-1" />
-      </div>
+    <footer className="w-full border-t bg-background" role="contentinfo" aria-label="Website footer">
+      <div className="container mx-auto px-4 py-10 lg:px-8 lg:py-12">
+        <div className="grid gap-8 md:grid-cols-4">
+          <div className="md:col-span-1">
+            <Link href="/" className="flex items-center gap-2" aria-label="Go to home page">
+              <Logo className="size-7" />
+              <span className="text-base font-semibold">Mind Stack</span>
+            </Link>
+            <p className="mt-3 text-sm text-muted-foreground">
+              A focused workspace for capturing, organizing, and retaining knowledge.
+            </p>
+          </div>
 
-      <div className="container mx-auto flex w-full flex-col gap-5 px-5 lg:gap-9 lg:px-8">
-        {/* Navigation */}
-        <nav
-          className="grid gap-12 md:grid-cols-2 lg:grid-cols-4 lg:gap-9"
-          aria-label="Footer navigation"
-        >
-          {/* Shadcraft Website*/}
-          <div className="flex flex-col gap-6">
-            <h3 className="text-sm font-medium text-foreground">Shadcraft</h3>
-            <ul className="grid gap-3">
-              {shadcraftLinks.map((item) => {
-                return (
-                  <li key={item.label} className="text-sm text-muted-foreground">
+          <nav aria-label="Footer" className="md:col-span-3 grid gap-8 sm:grid-cols-3">
+            <div>
+              <h3 className="text-sm font-medium">Product</h3>
+              <ul className="mt-3 space-y-2">
+                {productLinks.map((item) => (
+                  <li key={item.label}>
+                    <Link href={item.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-medium">Account</h3>
+              <ul className="mt-3 space-y-2">
+                {accountLinks.map((item) => (
+                  <li key={item.label}>
+                    <Link href={item.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-medium">Support</h3>
+              <ul className="mt-3 space-y-2">
+                {supportLinks.map((item) => (
+                  <li key={item.label}>
                     <Link
                       href={item.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 transition-all hover:text-primary"
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      target={item.external ? "_blank" : undefined}
+                      rel={item.external ? "noopener noreferrer" : undefined}
                     >
-                      {item.label} <ArrowUpRight className="size-3" />
+                      {item.label}
                     </Link>
                   </li>
-                );
-              })}
-            </ul>
-          </div>
-
-          {/* Marketing Components */}
-          <div className="flex flex-col gap-6">
-            <h3 className="text-sm font-medium text-foreground">Marketing Components</h3>
-            <ul className="grid gap-3">
-              {Array.from({ length: 5 }).map((_, i) => {
-                const href = `/components/marketing/${i + 1}`;
-                const item = {
-                  title: `Marketing Component ${i + 1}`,
-                };
-                return (
-                  <li key={item.title} className="text-sm text-muted-foreground">
-                    <Link
-                      href={href}
-                      className="flex items-center gap-1 transition-all hover:text-primary"
-                    >
-                      {item.title}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-
-          {/* Marketing Blocks */}
-          <div className="flex flex-col gap-6 md:col-span-2">
-            <h3 className="text-sm font-medium text-foreground">Marketing Blocks</h3>
-            <ul className="grid gap-x-12 gap-y-3 md:grid-cols-2 lg:gap-x-9">
-              {Array.from({ length: 5 }).map((_, i) => {
-                const item = {
-                  title: `Marketing Block ${i + 1}`,
-                  slug: `marketing-block-${i + 1}`,
-                };
-                return (
-                  <li key={item.slug} className="text-sm text-muted-foreground">
-                    <Link
-                      href={`/blocks/${item.slug}`}
-                      className="flex items-center gap-1 transition-all hover:text-primary"
-                    >
-                      {item.title}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </nav>
-
-        <Separator role="presentation" aria-hidden="true" />
-
-        {/* Logo and Social Links and Copyright */}
-        <div className="flex w-full flex-col gap-9 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex w-full flex-col gap-4">
-            <Link
-              href="/"
-              className="flex items-center gap-2"
-              aria-label="Go to home page"
-            >
-              <Logo />
-              <span className="flex items-center gap-2 text-xl font-semibold lowercase">
-                shadcraft <span className="code-inline translate-y-px">free</span>
-              </span>
-            </Link>
-
-            <span className="text-sm font-normal text-balance text-muted-foreground">
-              This is a free and open-source project by{" "}
-              <Link
-                href="https://x.com/shadcraft_"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Go to Shadcraft Twitter"
-                className="link"
-              >
-                Shadcraft
-              </Link>
-              . You can find the source code on{" "}
-              <Link
-                href="https://github.com/shadcraft/shadcraft-free"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Go to GitHub Repository"
-                className="link"
-              >
-                GitHub
-              </Link>
-              .
-            </span>
-          </div>
-
-          {/* Social Links and Copyright */}
-          <div className="flex w-full flex-col gap-4 self-end lg:items-end">
-            <div className="flex items-center gap-3 lg:gap-4">
-              <Link
-                href="https://x.com/shadcraft_"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Go to Shadcraft Twitter"
-                className="text-muted-foreground transition-all hover:text-primary"
-              >
-                <Twitter className="size-3.5" />
-              </Link>
-
-              <Link
-                href="https://www.shadcraft.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Go to Shadcraft website"
-                className="text-muted-foreground transition-all hover:text-primary"
-              >
-                <Globe className="size-4" />
-              </Link>
+                ))}
+              </ul>
             </div>
+          </nav>
+        </div>
 
-            <div className="flex flex-row items-center justify-between gap-4 lg:flex-col lg:items-end">
-              <p className="text-sm font-normal text-muted-foreground">
-                &copy; Shadcraft {getCurrentYear()}
-              </p>
-            </div>
-          </div>
+        <Separator className="my-6" />
+
+        <div className="flex flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <p>© {year} Mind Stack. All rights reserved.</p>
+          <p>Built for focused daily learning.</p>
         </div>
       </div>
     </footer>
-  );
-}
-
-async function getCurrentYear() {
-  return new Date().getFullYear();
+  )
 }
