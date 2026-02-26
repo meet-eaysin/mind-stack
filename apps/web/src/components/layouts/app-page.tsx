@@ -3,10 +3,10 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-const appPageVariants = cva("mx-auto w-full px-4 py-6 lg:px-6", {
+const appPageVariants = cva("w-full px-4 py-5 lg:px-6 lg:py-6", {
   variants: {
     width: {
-      default: "max-w-7xl",
+      default: "max-w-none",
       compact: "max-w-3xl",
       wide: "max-w-screen-2xl",
       full: "max-w-none",
@@ -48,7 +48,7 @@ function AppPageHeading({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="app-page-heading"
-      className={cn("flex min-w-0 flex-col gap-1", className)}
+      className={cn("flex min-w-0 flex-col gap-2", className)}
       {...props}
     />
   )
@@ -58,7 +58,10 @@ function AppPageTitle({ className, ...props }: React.ComponentProps<"h1">) {
   return (
     <h1
       data-slot="app-page-title"
-      className={cn("text-2xl font-semibold tracking-tight md:text-3xl", className)}
+      className={cn(
+        "leading-tighter max-w-2xl text-3xl font-medium tracking-tight text-balance text-foreground lg:text-4xl lg:leading-[1.1]",
+        className
+      )}
       {...props}
     />
   )
@@ -68,7 +71,10 @@ function AppPageDescription({ className, ...props }: React.ComponentProps<"p">) 
   return (
     <p
       data-slot="app-page-description"
-      className={cn("text-sm text-muted-foreground md:text-base", className)}
+      className={cn(
+        "max-w-3xl text-base text-balance text-muted-foreground md:text-lg",
+        className
+      )}
       {...props}
     />
   )
@@ -88,7 +94,7 @@ function AppPageContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="app-page-content"
-      className={cn("flex min-h-0 flex-1 flex-col gap-6", className)}
+      className={cn("flex min-h-0 flex-1 flex-col gap-5", className)}
       {...props}
     />
   )
