@@ -2,14 +2,10 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { DocumentList, DocumentDetail } from "@/features/documents";
+import { DocumentDetail, DocumentList } from "@/features/documents";
 import {
   AppPage,
   AppPageContent,
-  AppPageDescription,
-  AppPageHeader,
-  AppPageHeading,
-  AppPageTitle,
 } from "@/components/layouts/app-page";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 
@@ -26,14 +22,6 @@ function DocumentsPageContent() {
 
   return (
     <AppPage>
-      <AppPageHeader>
-        <AppPageHeading>
-          <AppPageTitle>Documents</AppPageTitle>
-          <AppPageDescription>
-            Browse and manage your ingested knowledge base.
-          </AppPageDescription>
-        </AppPageHeading>
-      </AppPageHeader>
       <AppPageContent>
         {selectedDocId ? (
           <DocumentDetail

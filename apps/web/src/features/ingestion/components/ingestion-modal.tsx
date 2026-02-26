@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, useWatch, type Control } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -41,6 +41,7 @@ type IngestionModalProps = {
   open: boolean;
   onOpenChangeAction: (open: boolean) => void;
   onSuccessAction?: () => void;
+  defaultTab?: IngestionTab;
 };
 
 type UrlFormValues = {
@@ -76,7 +77,7 @@ type YoutubeFormValues = {
   url: string;
 };
 
-type IngestionTab = "url" | "text" | "pdf" | "youtube";
+export type IngestionTab = "url" | "text" | "pdf" | "youtube";
 
 function isIngestionTab(v: string): v is IngestionTab {
   return v === "url" || v === "text" || v === "pdf" || v === "youtube";
@@ -86,10 +87,17 @@ export function IngestionModal({
   open,
   onOpenChangeAction,
   onSuccessAction,
+  defaultTab = "url",
 }: IngestionModalProps) {
-  const [activeTab, setActiveTab] = useState<IngestionTab>("url");
+  const [activeTab, setActiveTab] = useState<IngestionTab>(defaultTab);
   const [clientError, setClientError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      setActiveTab(defaultTab);
+    }
+  }, [defaultTab, open]);
 
   const urlForm = useForm<UrlFormValues>({
     resolver: zodResolver(IngestUrlRequestSchema),

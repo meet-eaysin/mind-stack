@@ -2,34 +2,43 @@
 
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { IngestionModal } from "@/features/ingestion/components/ingestion-modal";
-import { useRetryIngestion } from "@/features/ingestion/hooks";
-import { Badge } from "@/components/ui/badge";
 import {
-  Globe,
-  Type,
-  File,
-  Youtube,
-  FileText,
+  AlertCircle,
   ChevronLeft,
   ChevronRight,
+  ExternalLink,
+  File,
+  FileCode,
+  FileText,
+  Globe,
+  GraduationCap,
   Plus,
   RefreshCw,
-  AlertCircle,
-  Trash2,
-  Book,
-  Video,
-  FileCode,
   StickyNote,
-  GraduationCap,
+  Trash2,
+  Type,
+  Video,
+  Youtube,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useDocuments, useDeleteDocument } from "../hooks";
-import { getApiErrorMessage } from "@/lib/api-client";
+
+import { IngestionModal } from "@/features/ingestion/components/ingestion-modal";
+import { useRetryIngestion } from "@/features/ingestion/hooks";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import type { DocumentListResponse } from "../types";
+import { useDeleteDocument, useDocuments } from "../hooks";
+import { getApiErrorMessage } from "@/lib/api-client";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { INGESTION_STATUS } from "@repo/shared-types";
 import { cn } from "@/lib/utils";
 
@@ -44,7 +53,7 @@ const documentTypeIcons: Record<string, React.ElementType> = {
   ARTICLE: FileText,
   VIDEO: Video,
   COURSE_LESSON: GraduationCap,
-  BOOK: Book,
+  BOOK: File,
   NOTE: StickyNote,
   RFC: FileCode,
   BLOG: Globe,
@@ -70,40 +79,38 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   const pageSize = 10;
   const queryClient = useQueryClient();
   const retryIngestion = useRetryIngestion<{
     previousDocs?: DocumentListResponse;
   }>({
     onMutate: async (documentId: string) => {
-      // Optimistic update
-      await queryClient.cancelQueries({
-        queryKey: ["knowledge"],
-      });
+      await queryClient.cancelQueries({ queryKey: ["knowledge"] });
       const previousDocs = queryClient.getQueryData<DocumentListResponse>(
         QUERY_KEYS.KNOWLEDGE.LIST(page, pageSize, searchTerm || undefined),
       );
+
       if (previousDocs) {
         queryClient.setQueryData(
           QUERY_KEYS.KNOWLEDGE.LIST(page, pageSize, searchTerm || undefined),
           {
             ...previousDocs,
-            documents: previousDocs.documents.map((d) =>
-              d.id === documentId
-                ? { ...d, status: INGESTION_STATUS.INGESTED }
-                : d,
+            documents: previousDocs.documents.map((doc) =>
+              doc.id === documentId
+                ? { ...doc, status: INGESTION_STATUS.INGESTED }
+                : doc,
             ),
           },
         );
       }
+
       return { previousDocs };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["knowledge"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["knowledge"] });
     },
-    onError: (_err, _documentId, context) => {
+    onError: (_error, _documentId, context) => {
       if (context?.previousDocs) {
         queryClient.setQueryData(
           QUERY_KEYS.KNOWLEDGE.LIST(page, pageSize, searchTerm || undefined),
@@ -131,8 +138,8 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
         <Input
           placeholder="Search documents..."
           value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
+          onChange={(event) => {
+            setSearchTerm(event.target.value);
             setPage(1);
           }}
           data-testid="document-search-input"
@@ -155,9 +162,17 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
       />
 
       {isLoading && (
-        <div className="space-y-3" data-testid="document-list-loading">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 w-full" />
+        <div
+          className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+          data-testid="document-list-loading"
+        >
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="space-y-2 rounded-xl border p-2.5">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
+              <Skeleton className="h-32 w-full rounded-lg" />
+              <Skeleton className="h-7 w-full" />
+            </div>
           ))}
         </div>
       )}
@@ -173,100 +188,148 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
 
       {data && (
         <>
-          <div className="space-y-2" data-testid="document-list">
+          <div
+            className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+            data-testid="document-list"
+          >
             {data.documents.map((doc) => {
               const TypeIcon = documentTypeIcons[doc.type] || File;
               const SourceIcon = sourceTypeIcons[doc.sourceType] || File;
+              const isFailed = doc.status === INGESTION_STATUS.FAILED;
+              const isProcessing =
+                doc.status !== INGESTION_STATUS.READY &&
+                doc.status !== INGESTION_STATUS.FAILED;
+              const youtubeEmbedUrl = getYoutubeEmbedUrl(doc.sourceUrl);
+
               return (
-                <div
-                  key={doc.id}
-                  className="flex w-full items-center justify-between gap-3 rounded-lg border p-3 transition-colors hover:bg-accent group"
-                  data-testid={`document-item-${doc.id}`}
-                >
-                  <button
-                    onClick={() => onSelectAction(doc.id)}
-                    className="flex min-w-0 flex-1 items-center gap-3 text-left"
-                  >
-                    <div className="relative">
-                      <div className="p-2 rounded-lg bg-primary/5 text-primary">
-                        <TypeIcon className="size-5 shrink-0" />
+                <Card key={doc.id} className="gap-2 overflow-hidden py-0" data-testid={`document-item-${doc.id}`}>
+                  <CardHeader className="gap-1.5 p-3 pb-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <div className="rounded-md bg-primary/10 p-1.5 text-primary">
+                          <TypeIcon className="size-4" />
+                        </div>
+                        <div className="rounded-full border bg-background p-1 text-muted-foreground">
+                          <SourceIcon className="size-3" />
+                        </div>
                       </div>
-                      <div className="absolute -bottom-1 -right-1 p-0.5 rounded-full bg-background border shadow-sm">
-                        <SourceIcon className="size-2 text-muted-foreground" />
-                      </div>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="truncate font-medium">{doc.title}</p>
+                      <div className="flex items-center gap-1">
                         <Badge
                           variant="outline"
                           className={cn(
-                            "h-4 text-[9px] uppercase font-bold tracking-tight px-1.5 py-0 rounded",
+                            "h-5 rounded px-1.5 py-0 text-[10px] font-semibold uppercase tracking-tight",
                             learningStatusColors[doc.learningStatus] ||
                               learningStatusColors.UPCOMING,
                           )}
                         >
                           {doc.learningStatus.replace("_", " ")}
                         </Badge>
-                        {doc.status === INGESTION_STATUS.FAILED && (
+                        {isFailed && (
                           <Badge
                             variant="destructive"
-                            className="h-4 text-[9px] px-1 py-0 gap-1 rounded"
+                            className="h-5 gap-1 rounded px-1.5 py-0 text-[10px]"
                           >
-                            <AlertCircle className="size-2.5" />{" "}
-                            {INGESTION_STATUS.FAILED}
+                            <AlertCircle className="size-2.5" />
+                            Failed
                           </Badge>
                         )}
-                        {doc.status !== INGESTION_STATUS.READY &&
-                          doc.status !== INGESTION_STATUS.FAILED && (
-                            <Badge
-                              variant="secondary"
-                              className="h-4 text-[9px] px-1 py-0 gap-1 text-muted-foreground bg-muted rounded"
-                            >
-                              <RefreshCw className="size-2.5 animate-spin" />{" "}
-                              {doc.status}
-                            </Badge>
-                          )}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
-                        <span className="capitalize">
-                          {doc.type.toLowerCase().replace("_", " ")}
-                        </span>
-                        <span>·</span>
-                        <span>{doc.chunkCount} chunks</span>
-                        <span>·</span>
-                        <span>
-                          {new Date(doc.createdAt).toLocaleDateString()}
-                        </span>
-                      </p>
                     </div>
-                  </button>
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {doc.status === INGESTION_STATUS.FAILED && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          retryIngestion.mutate(doc.id);
-                        }}
-                        disabled={
-                          retryIngestion.isPending &&
-                          retryIngestion.variables === doc.id
-                        }
-                        className="shrink-0 h-8 text-xs gap-1.5"
-                      >
-                        <RefreshCw
-                          className={`size-3 ${retryIngestion.isPending && retryIngestion.variables === doc.id ? "animate-spin" : ""}`}
+                    <CardTitle className="line-clamp-2 text-base leading-5">
+                      {doc.title}
+                    </CardTitle>
+                    <CardDescription className="flex items-center gap-1.5 text-[11px]">
+                      <span className="capitalize">
+                        {doc.type.toLowerCase().replace("_", " ")}
+                      </span>
+                      <span>·</span>
+                      <span>{doc.chunkCount} chunks</span>
+                      <span>·</span>
+                      <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
+                    </CardDescription>
+                  </CardHeader>
+
+                  <CardContent className="px-3">
+                    <div className="overflow-hidden rounded-lg border bg-muted/20">
+                      {doc.sourceType === "YOUTUBE" && youtubeEmbedUrl ? (
+                        <iframe
+                          title={`${doc.title} preview`}
+                          src={youtubeEmbedUrl}
+                          className="h-32 w-full"
+                          loading="lazy"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          referrerPolicy="strict-origin-when-cross-origin"
+                          allowFullScreen
                         />
-                        Retry
+                      ) : doc.sourceType === "URL" && doc.sourceUrl ? (
+                        <iframe
+                          title={`${doc.title} source`}
+                          src={doc.sourceUrl}
+                          className="h-32 w-full"
+                          loading="lazy"
+                          sandbox="allow-scripts allow-same-origin"
+                        />
+                      ) : (
+                        <div className="flex h-32 flex-col items-center justify-center gap-1.5 px-3 text-center">
+                          <TypeIcon className="size-6 text-muted-foreground" />
+                          <p className="text-xs text-muted-foreground">
+                            {doc.sourceType === "PDF"
+                              ? "PDF preview available in document reader"
+                              : "Open document to view full content"}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+
+                  <CardFooter className="flex items-center justify-between gap-1.5 border-t p-3">
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => onSelectAction(doc.id)}
+                        className="h-7 gap-1 px-2 text-xs"
+                      >
+                        Open
+                        <ExternalLink className="size-3" />
                       </Button>
-                    )}
+                      {isFailed && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => retryIngestion.mutate(doc.id)}
+                          disabled={
+                            retryIngestion.isPending &&
+                            retryIngestion.variables === doc.id
+                          }
+                          className="h-7 gap-1 px-2 text-xs"
+                        >
+                          <RefreshCw
+                            className={cn(
+                              "size-3",
+                              retryIngestion.isPending &&
+                                retryIngestion.variables === doc.id &&
+                                "animate-spin",
+                            )}
+                          />
+                          Retry
+                        </Button>
+                      )}
+                      {isProcessing && (
+                        <Badge
+                          variant="secondary"
+                          className="h-7 gap-1 rounded-md px-1.5 text-[11px] text-muted-foreground"
+                        >
+                          <RefreshCw className="size-3 animate-spin" />
+                          {doc.status}
+                        </Badge>
+                      )}
+                    </div>
+
                     <Button
                       variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
+                      size="icon"
+                      onClick={() => {
                         if (
                           window.confirm(
                             "Are you sure you want to delete this document?",
@@ -279,13 +342,13 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
                         deleteDocument.isPending &&
                         deleteDocument.variables === doc.id
                       }
-                      className="shrink-0 h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      className="size-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
                       data-testid={`delete-doc-${doc.id}`}
                     >
                       <Trash2 className="size-4" />
                     </Button>
-                  </div>
-                </div>
+                  </CardFooter>
+                </Card>
               );
             })}
           </div>
@@ -299,7 +362,7 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
                 variant="outline"
                 size="icon"
                 disabled={data.page <= 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
                 aria-label="Previous page"
               >
                 <ChevronLeft className="size-4" />
@@ -308,7 +371,7 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
                 variant="outline"
                 size="icon"
                 disabled={data.page * data.pageSize >= data.total}
-                onClick={() => setPage((p) => p + 1)}
+                onClick={() => setPage((currentPage) => currentPage + 1)}
                 aria-label="Next page"
               >
                 <ChevronRight className="size-4" />
@@ -319,4 +382,26 @@ export function DocumentList({ onSelectAction }: DocumentListProps) {
       )}
     </div>
   );
+}
+
+function getYoutubeEmbedUrl(url: string | null): string | null {
+  if (!url) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname.includes("youtu.be")) {
+      const videoId = parsed.pathname.replace("/", "");
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    }
+    if (parsed.hostname.includes("youtube.com")) {
+      const videoId = parsed.searchParams.get("v");
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
 }
