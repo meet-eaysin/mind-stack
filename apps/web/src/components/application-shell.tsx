@@ -17,8 +17,10 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
     >
       <ApplicationHeader />
       <div className="flex min-h-0 flex-1">
-        <AppSidebar className="[&>[data-slot=sidebar-container]]:top-(--header-height) [&>[data-slot=sidebar-container]]:h-[calc(100svh-var(--header-height))]" />
-        <main className="flex min-w-0 flex-1 flex-col overflow-auto">{children}</main>
+        <AppSidebar className="top-(--header-height)! h-[calc(100svh-var(--header-height))]!" />
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-auto">
+          {children}
+        </main>
       </div>
     </SidebarProvider>
   )
