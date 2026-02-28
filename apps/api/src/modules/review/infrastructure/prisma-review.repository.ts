@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../prisma/prisma.service.js';
+import { PrismaService } from '@/prisma/prisma.service';
 import type {
   ReviewRepository,
   ReviewEntity,
-} from '../domain/review-repository.interface.js';
+} from '@/modules/review/domain/review-repository.interface';
 
 @Injectable()
 export class PrismaReviewRepository implements ReviewRepository {

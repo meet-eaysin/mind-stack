@@ -1,6 +1,6 @@
 import { Test, type TestingModule } from '@nestjs/testing';
-import { AnalysisController } from '../analysis.controller.js';
-import { GetTopicMasteryUseCase } from '../../application/get-topic-mastery.use-case.js';
+import { AnalysisController } from '@/modules/analysis/presentation/analysis.controller';
+import { GetTopicMasteryUseCase } from '@/modules/analysis/application/get-topic-mastery.use-case';
 
 describe('AnalysisController', () => {
   let controller: AnalysisController;

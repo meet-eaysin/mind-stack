@@ -1,8 +1,8 @@
 import type { VectorStore, VectorSearchResult } from '@repo/vector-store';
-import type { QueryRepository } from '../../query/domain/query-repository.interface.js';
-import type { ChunkRepository } from '../domain/chunk-repository.interface.js';
+import type { QueryRepository } from '@/modules/query/domain/query-repository.interface';
+import type { ChunkRepository } from '@/modules/knowledge/domain/chunk-repository.interface';
 import type { ChunkReference } from '@repo/shared-types';
-import type { LlmProviderFactoryPort } from '../../settings/application/llm-provider.factory.js';
+import type { LlmProviderFactoryPort } from '@/modules/settings/application/llm-provider.factory';
 
 export class GetRelatedSuggestionsUseCase {
   constructor(

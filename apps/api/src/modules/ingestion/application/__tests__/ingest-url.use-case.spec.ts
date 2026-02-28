@@ -3,10 +3,10 @@ import {
   INGESTION_STATUS,
   type LearningStatus,
 } from '@repo/shared-types';
-import { IngestUrlUseCase } from '../ingest-url.use-case.js';
-import type { DocumentRepository } from '../../domain/document-repository.interface.js';
-import type { IngestionJobProducerPort } from '../../domain/ingestion-job-producer.port.js';
-import type { DocumentEntity } from '../../domain/document.entity.js';
+import { IngestUrlUseCase } from '@/modules/ingestion/application/ingest-url.use-case';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
+import type { IngestionJobProducerPort } from '@/modules/ingestion/domain/ingestion-job-producer.port';
+import type { DocumentEntity } from '@/modules/ingestion/domain/document.entity';
 
 jest.mock('jsdom', () => ({
   JSDOM: jest.fn().mockImplementation(() => ({

@@ -1,7 +1,7 @@
 import type {
   LearningGoalEntity,
   LearningGoalItemEntity,
-} from './learning-goal.entity.js';
+} from '@/modules/learning-goal/domain/learning-goal.entity';
 
 export type LearningGoalWithItems = LearningGoalEntity & {
   items: (LearningGoalItemEntity & {

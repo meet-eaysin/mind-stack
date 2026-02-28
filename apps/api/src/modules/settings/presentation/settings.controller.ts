@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Get, Headers, Put } from '@nestjs/common';
-import { GetLlmConfigUseCase } from '../application/get-llm-config.use-case.js';
-import { UpdateLlmConfigUseCase } from '../application/update-llm-config.use-case.js';
-import { DeleteLlmConfigUseCase } from '../application/delete-llm-config.use-case.js';
-import { ResolveLlmConfigUseCase } from '../application/resolve-llm-config.use-case.js';
-import { UpdateLlmConfigDto } from './settings.dtos.js';
-import { getUserIdFromHeader } from '../../../common/request-user.js';
+import { GetLlmConfigUseCase } from '@/modules/settings/application/get-llm-config.use-case';
+import { UpdateLlmConfigUseCase } from '@/modules/settings/application/update-llm-config.use-case';
+import { DeleteLlmConfigUseCase } from '@/modules/settings/application/delete-llm-config.use-case';
+import { ResolveLlmConfigUseCase } from '@/modules/settings/application/resolve-llm-config.use-case';
+import { UpdateLlmConfigDto } from '@/modules/settings/presentation/settings.dtos';
+import { getUserIdFromHeader } from '@/common/request-user';
 import type { UserLlmConfigResponse } from '@repo/shared-types';
 
 type ApiSuccessResponse<T> = {
@@ -38,6 +38,7 @@ export class SettingsController {
     @Headers('x-user-id') userId?: string,
   ): Promise<ApiSuccessResponse<UserLlmConfigResponse>> {
     const resolvedUserId = getUserIdFromHeader(userId);
+
     const current = await this.resolveConfig.execute(resolvedUserId);
     const candidateBaseUrl =
       dto.baseUrl ??

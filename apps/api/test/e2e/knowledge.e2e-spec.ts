@@ -2,8 +2,8 @@ import { Test, type TestingModule } from '@nestjs/testing';
 import { type INestApplication, ValidationPipe } from '@nestjs/common';
 import { Server } from 'node:http';
 import request from 'supertest';
-import { PrismaService } from '../../src/prisma/prisma.service.js';
-import { AppModule } from '../../src/app.module.js';
+import { PrismaService } from '@/prisma/prisma.service';
+import { AppModule } from '@/app.module';
 
 jest.mock('jsdom', () => ({}));
 jest.mock('pdf-parse', () => ({}));

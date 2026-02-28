@@ -8,7 +8,7 @@ import {
 import type { ApiErrorResponse } from '@repo/shared-types';
 import { createLogger } from '@repo/logger';
 import type { Request, Response } from 'express';
-import { getUserIdFromRequest } from '../request-user';
+import { getUserIdFromRequest } from '@/common/request-user';
 
 type NormalizedError = {
   statusCode: number;

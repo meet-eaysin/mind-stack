@@ -1,7 +1,7 @@
 import type {
   CollectionEntity,
   CollectionItemEntity,
-} from './collection.entity.js';
+} from '@/modules/collection/domain/collection.entity';
 
 export type CollectionWithItems = CollectionEntity & {
   items: (CollectionItemEntity & {

@@ -1,6 +1,6 @@
-import type { DocumentRepository } from '../../ingestion/domain/document-repository.interface.js';
-import type { DocumentEntity } from '../../ingestion/domain/document.entity.js';
-import type { ChunkRepository } from '../domain/chunk-repository.interface.js';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
+import type { DocumentEntity } from '@/modules/ingestion/domain/document.entity';
+import type { ChunkRepository } from '@/modules/knowledge/domain/chunk-repository.interface';
 
 export type ListDocumentsResultItem = DocumentEntity & {
   chunkCount: number;

@@ -8,20 +8,20 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { type IngestionResponse, INGESTION_STATUS } from '@repo/shared-types';
-import { IngestUrlUseCase } from '../application/ingest-url.use-case';
-import { IngestTextUseCase } from '../application/ingest-text.use-case';
-import { IngestPdfUseCase } from '../application/ingest-pdf.use-case';
-import { IngestYoutubeUseCase } from '../application/ingest-youtube.use-case';
-import { RetryIngestionUseCase } from '../application/retry-ingestion.use-case';
-import { GetIngestionJobStatusUseCase } from '../application/get-ingestion-job-status.use-case';
-import { PrismaDocumentRepository } from '../infrastructure/prisma-document.repository';
+import { IngestUrlUseCase } from '@/modules/ingestion/application/ingest-url.use-case';
+import { IngestTextUseCase } from '@/modules/ingestion/application/ingest-text.use-case';
+import { IngestPdfUseCase } from '@/modules/ingestion/application/ingest-pdf.use-case';
+import { IngestYoutubeUseCase } from '@/modules/ingestion/application/ingest-youtube.use-case';
+import { RetryIngestionUseCase } from '@/modules/ingestion/application/retry-ingestion.use-case';
+import { GetIngestionJobStatusUseCase } from '@/modules/ingestion/application/get-ingestion-job-status.use-case';
+import { PrismaDocumentRepository } from '@/modules/ingestion/infrastructure/prisma-document.repository';
 import {
   IngestUrlDto,
   IngestTextDto,
   IngestPdfDto,
   IngestYoutubeDto,
-} from './ingestion.dtos';
-import { getUserIdFromHeader } from '../../../common/request-user';
+} from '@/modules/ingestion/presentation/ingestion.dtos';
+import { getUserIdFromHeader } from '@/common/request-user';
 
 @Controller('ingest')
 export class IngestionController {

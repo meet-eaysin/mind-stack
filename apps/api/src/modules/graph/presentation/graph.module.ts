@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { GraphController } from './graph.controller.js';
-import { PrismaConceptRepository } from '../infrastructure/prisma-concept.repository.js';
-import { BuildGraphUseCase } from '../application/build-graph.use-case.js';
-import { QueryGraphUseCase } from '../application/query-graph.use-case.js';
-import { GetNeighborhoodUseCase } from '../application/get-neighborhood.use-case.js';
-import { CreateRelationUseCase } from '../application/create-relation.use-case.js';
-import { DeleteRelationUseCase } from '../application/delete-relation.use-case.js';
-import { QueryModule } from '../../query/presentation/query.module.js';
-import { PrismaDocumentRepository } from '../../ingestion/infrastructure/prisma-document.repository.js';
-import { PrismaChunkRepository } from '../../knowledge/infrastructure/prisma-chunk.repository.js';
+import { GraphController } from '@/modules/graph/presentation/graph.controller';
+import { PrismaConceptRepository } from '@/modules/graph/infrastructure/prisma-concept.repository';
+import { BuildGraphUseCase } from '@/modules/graph/application/build-graph.use-case';
+import { QueryGraphUseCase } from '@/modules/graph/application/query-graph.use-case';
+import { GetNeighborhoodUseCase } from '@/modules/graph/application/get-neighborhood.use-case';
+import { CreateRelationUseCase } from '@/modules/graph/application/create-relation.use-case';
+import { DeleteRelationUseCase } from '@/modules/graph/application/delete-relation.use-case';
+import { QueryModule } from '@/modules/query/presentation/query.module';
+import { PrismaDocumentRepository } from '@/modules/ingestion/infrastructure/prisma-document.repository';
+import { PrismaChunkRepository } from '@/modules/knowledge/infrastructure/prisma-chunk.repository';
 
 @Module({
   imports: [QueryModule],

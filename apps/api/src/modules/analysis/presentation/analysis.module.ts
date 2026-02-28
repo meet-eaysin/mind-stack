@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { AnalysisController } from './analysis.controller.js';
-import { GetTopicMasteryUseCase } from '../application/get-topic-mastery.use-case.js';
-import { PrismaModule } from '../../../prisma/prisma.module.js';
+import { AnalysisController } from '@/modules/analysis/presentation/analysis.controller';
+import { GetTopicMasteryUseCase } from '@/modules/analysis/application/get-topic-mastery.use-case';
+import { PrismaModule } from '@/prisma/prisma.module';
 
 @Module({
   imports: [PrismaModule],

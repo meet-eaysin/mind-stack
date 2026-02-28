@@ -3,7 +3,7 @@ import {
   MODEL_PROVIDER,
   type ModelProvider,
 } from '@repo/shared-types';
-import { GetLlmConfigUseCase } from '../get-llm-config.use-case.js';
+import { GetLlmConfigUseCase } from '@/modules/settings/application/get-llm-config.use-case';
 
 type ResolvedConfig = {
   userId: string;

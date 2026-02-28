@@ -1,4 +1,4 @@
-import { rankResults } from '../ranking.service.js';
+import { rankResults } from '@/modules/query/domain/ranking.service';
 
 // ── Fixtures ──
 

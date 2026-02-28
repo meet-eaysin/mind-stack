@@ -1,9 +1,9 @@
-import { ExportMarkdownUseCase } from '../export-markdown.use-case.js';
+import { ExportMarkdownUseCase } from '@/modules/export/application/export-markdown.use-case';
 import { INGESTION_STATUS } from '@repo/shared-types';
 import type {
   QueryRepository,
   QueryChunkDetail,
-} from '../../../query/domain/query-repository.interface.js';
+} from '@/modules/query/domain/query-repository.interface';
 
 // ── Fakes ──
 

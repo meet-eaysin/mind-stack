@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { PrismaService } from '../../../prisma/prisma.service.js';
-import type { ChunkRepository } from '../domain/chunk-repository.interface.js';
-import type { ChunkEntity } from '../domain/chunk.entity.js';
+import { PrismaService } from '@/prisma/prisma.service';
+import type { ChunkRepository } from '@/modules/knowledge/domain/chunk-repository.interface';
+import type { ChunkEntity } from '@/modules/knowledge/domain/chunk.entity';
 
 @Injectable()
 export class PrismaChunkRepository implements ChunkRepository {

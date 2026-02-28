@@ -1,7 +1,7 @@
-import { FilteredSearchUseCase } from '../filtered-search.use-case.js';
+import { FilteredSearchUseCase } from '@/modules/query/application/filtered-search.use-case';
 import { INGESTION_STATUS } from '@repo/shared-types';
 import type { EmbeddingProvider, EmbeddingResult } from '@repo/embeddings';
-import type { LlmProviderFactoryPort } from '../../../settings/application/llm-provider.factory.js';
+import type { LlmProviderFactoryPort } from '@/modules/settings/application/llm-provider.factory';
 import type {
   VectorStore,
   VectorDocument,
@@ -11,7 +11,7 @@ import type {
 import type {
   QueryRepository,
   QueryChunkDetail,
-} from '../../domain/query-repository.interface.js';
+} from '@/modules/query/domain/query-repository.interface';
 
 // ── Fakes ──
 

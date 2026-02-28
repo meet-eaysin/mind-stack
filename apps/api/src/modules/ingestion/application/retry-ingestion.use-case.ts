@@ -1,5 +1,5 @@
-import type { DocumentRepository } from '../domain/document-repository.interface';
-import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
+import type { IngestionJobProducerPort } from '@/modules/ingestion/domain/ingestion-job-producer.port';
 import { INGESTION_STATUS, SOURCE_TYPE } from '@repo/shared-types';
 import {
   ConflictException,

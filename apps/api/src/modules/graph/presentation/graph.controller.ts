@@ -10,17 +10,17 @@ import {
   Headers,
 } from '@nestjs/common';
 import type { GraphResponse } from '@repo/shared-types';
-import { BuildGraphUseCase } from '../application/build-graph.use-case';
-import { QueryGraphUseCase } from '../application/query-graph.use-case';
-import { GetNeighborhoodUseCase } from '../application/get-neighborhood.use-case';
-import { CreateRelationUseCase } from '../application/create-relation.use-case';
-import { DeleteRelationUseCase } from '../application/delete-relation.use-case';
+import { BuildGraphUseCase } from '@/modules/graph/application/build-graph.use-case';
+import { QueryGraphUseCase } from '@/modules/graph/application/query-graph.use-case';
+import { GetNeighborhoodUseCase } from '@/modules/graph/application/get-neighborhood.use-case';
+import { CreateRelationUseCase } from '@/modules/graph/application/create-relation.use-case';
+import { DeleteRelationUseCase } from '@/modules/graph/application/delete-relation.use-case';
 import {
   ConceptNeighborhoodDto,
   BuildGraphDto,
   CreateRelationDto,
-} from './graph.dtos';
-import { getUserIdFromHeader } from '../../../common/request-user';
+} from '@/modules/graph/presentation/graph.dtos';
+import { getUserIdFromHeader } from '@/common/request-user';
 
 @Controller('graph')
 export class GraphController {

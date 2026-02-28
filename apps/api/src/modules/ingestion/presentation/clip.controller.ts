@@ -1,8 +1,8 @@
 import { Controller, Post, Body, Headers } from '@nestjs/common';
 import { type IngestionResponse, INGESTION_STATUS } from '@repo/shared-types';
-import { IngestClipUseCase } from '../application/ingest-clip.use-case.js';
-import { IngestClipDto } from './ingestion.dtos.js';
-import { getUserIdFromHeader } from '../../../common/request-user.js';
+import { IngestClipUseCase } from '@/modules/ingestion/application/ingest-clip.use-case';
+import { IngestClipDto } from '@/modules/ingestion/presentation/ingestion.dtos';
+import { getUserIdFromHeader } from '@/common/request-user';
 
 @Controller('ingest')
 export class ClipController {

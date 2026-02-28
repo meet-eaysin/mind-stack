@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ReviewController } from './review.controller.js';
-import { PrismaReviewRepository } from '../infrastructure/prisma-review.repository.js';
-import { PrismaDocumentRepository } from '../../ingestion/infrastructure/prisma-document.repository.js';
-import { GenerateDailyReviewUseCase } from '../application/generate-daily-review.use-case.js';
-import { SubmitReviewFeedbackUseCase } from '../application/submit-review-feedback.use-case.js';
-import { IngestionModule } from '../../ingestion/presentation/ingestion.module.js';
-import { KnowledgeModule } from '../../knowledge/presentation/knowledge.module.js';
-import { PrismaTagRepository } from '../../knowledge/infrastructure/prisma-tag.repository.js';
+import { ReviewController } from '@/modules/review/presentation/review.controller';
+import { PrismaReviewRepository } from '@/modules/review/infrastructure/prisma-review.repository';
+import { PrismaDocumentRepository } from '@/modules/ingestion/infrastructure/prisma-document.repository';
+import { GenerateDailyReviewUseCase } from '@/modules/review/application/generate-daily-review.use-case';
+import { SubmitReviewFeedbackUseCase } from '@/modules/review/application/submit-review-feedback.use-case';
+import { IngestionModule } from '@/modules/ingestion/presentation/ingestion.module';
+import { KnowledgeModule } from '@/modules/knowledge/presentation/knowledge.module';
+import { PrismaTagRepository } from '@/modules/knowledge/infrastructure/prisma-tag.repository';
 
 @Module({
   imports: [IngestionModule, KnowledgeModule],

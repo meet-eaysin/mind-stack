@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, type INestApplication } from '@nestjs/common';
 import { json, urlencoded } from 'express';
-import { AppModule } from './app.module';
+import { AppModule } from '@/app.module';
 import { createLogger } from '@repo/logger';
 import { ConfigService } from '@nestjs/config';
 

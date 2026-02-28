@@ -1,5 +1,5 @@
-import type { ConceptRepository } from '../domain/concept-repository.interface';
-import type { DocumentRepository } from '../../ingestion/domain/document-repository.interface';
+import type { ConceptRepository } from '@/modules/graph/domain/concept-repository.interface';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
 import { createLogger } from '@repo/logger';
 import { RELATION_TYPE } from '@repo/shared-types';
 import {
@@ -8,7 +8,7 @@ import {
   ROOT_LABEL,
   toDocumentNodeLabel,
   parseDocumentIdFromLabel,
-} from '../domain/document-graph';
+} from '@/modules/graph/domain/document-graph';
 import { NotFoundException } from '@nestjs/common';
 
 export class BuildGraphUseCase {

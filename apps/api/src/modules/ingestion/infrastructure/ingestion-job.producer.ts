@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import type { JobsOptions, Queue } from 'bullmq';
 import { JOB_TYPE, type JobType } from '@repo/shared-types';
-import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port.js';
-import type { IngestionJobData } from '../domain/ingestion-job.types.js';
+import type { IngestionJobProducerPort } from '@/modules/ingestion/domain/ingestion-job-producer.port';
+import type { IngestionJobData } from '@/modules/ingestion/domain/ingestion-job.types';
 
 export const INGESTION_QUEUE = 'ingestion';
 

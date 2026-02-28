@@ -1,4 +1,4 @@
-import type { TagRepository } from '../domain/tag-repository.interface.js';
+import type { TagRepository } from '@/modules/knowledge/domain/tag-repository.interface';
 
 export class RemoveTagUseCase {
   constructor(private readonly tagRepository: TagRepository) {}

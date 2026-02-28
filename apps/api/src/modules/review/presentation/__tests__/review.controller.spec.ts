@@ -1,7 +1,7 @@
 import { Test, type TestingModule } from '@nestjs/testing';
-import { ReviewController } from '../review.controller.js';
-import { GenerateDailyReviewUseCase } from '../../application/generate-daily-review.use-case.js';
-import { SubmitReviewFeedbackUseCase } from '../../application/submit-review-feedback.use-case.js';
+import { ReviewController } from '@/modules/review/presentation/review.controller';
+import { GenerateDailyReviewUseCase } from '@/modules/review/application/generate-daily-review.use-case';
+import { SubmitReviewFeedbackUseCase } from '@/modules/review/application/submit-review-feedback.use-case';
 
 describe('ReviewController', () => {
   let controller: ReviewController;

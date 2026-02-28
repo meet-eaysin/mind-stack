@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../prisma/prisma.service.js';
+import { PrismaService } from '@/prisma/prisma.service';
 import type {
   LearningGoalRepository,
   LearningGoalWithItems,
-} from '../domain/learning-goal-repository.interface.js';
+} from '@/modules/learning-goal/domain/learning-goal-repository.interface';
 import type {
   LearningGoalEntity,
   LearningGoalItemEntity,
-} from '../domain/learning-goal.entity.js';
+} from '@/modules/learning-goal/domain/learning-goal.entity';
 import { Prisma } from '@repo/database';
 
 @Injectable()

@@ -1,7 +1,7 @@
 import type { EmbeddingModelHealthResponse } from '@repo/shared-types';
 import { MODEL_CAPABILITY } from '@repo/shared-types';
-import type { ResolveLlmConfigUseCase } from './resolve-llm-config.use-case.js';
-import type { LlmProviderFactory } from './llm-provider.factory.js';
+import type { ResolveLlmConfigUseCase } from '@/modules/settings/application/resolve-llm-config.use-case';
+import type { LlmProviderFactory } from '@/modules/settings/application/llm-provider.factory';
 
 type ResolveLlmConfigPort = {
   execute(

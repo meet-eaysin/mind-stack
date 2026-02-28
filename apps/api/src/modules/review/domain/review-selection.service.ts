@@ -1,4 +1,4 @@
-import type { ReviewEntity } from './review-repository.interface.js';
+import type { ReviewEntity } from '@/modules/review/domain/review-repository.interface';
 
 export type ReviewTarget =
   | { type: 'REVIEWED'; review: ReviewEntity }

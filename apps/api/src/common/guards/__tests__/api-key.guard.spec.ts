@@ -1,6 +1,6 @@
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ApiKeyGuard } from '../api-key.guard.js';
+import { ApiKeyGuard } from '@/common/guards/api-key.guard';
 
 describe('ApiKeyGuard', () => {
   let guard: ApiKeyGuard;

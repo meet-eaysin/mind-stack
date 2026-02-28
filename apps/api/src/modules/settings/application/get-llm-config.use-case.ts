@@ -1,5 +1,5 @@
 import type { UserLlmConfigResponse } from '@repo/shared-types';
-import type { ResolvedLlmConfig } from './resolve-llm-config.use-case.js';
+import type { ResolvedLlmConfig } from '@/modules/settings/application/resolve-llm-config.use-case';
 
 export class GetLlmConfigUseCase {
   constructor(

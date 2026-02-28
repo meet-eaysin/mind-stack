@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import type { DocumentRepository } from '../../ingestion/domain/document-repository.interface.js';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
 import type { LearningStatus, DocumentType } from '@repo/shared-types';
 
 @Injectable()

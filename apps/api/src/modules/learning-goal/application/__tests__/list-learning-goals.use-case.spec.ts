@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ListLearningGoalsUseCase } from '../list-learning-goals.use-case.js';
-import { PrismaLearningGoalRepository } from '../../infrastructure/prisma-learning-goal.repository.js';
+import { ListLearningGoalsUseCase } from '@/modules/learning-goal/application/list-learning-goals.use-case';
+import { PrismaLearningGoalRepository } from '@/modules/learning-goal/infrastructure/prisma-learning-goal.repository';
 
 describe('ListLearningGoalsUseCase', () => {
   let useCase: ListLearningGoalsUseCase;

@@ -1,12 +1,12 @@
 import { BadRequestException } from '@nestjs/common';
-import type { LlmConfigRepository } from '../domain/llm-config.repository.interface.js';
+import type { LlmConfigRepository } from '@/modules/settings/domain/llm-config.repository.interface';
 import type {
   ModelCapability,
   ModelProvider,
   UserLlmConfigResponse,
 } from '@repo/shared-types';
-import type { LlmSecretCipher } from './llm-secret-cipher';
-import type { ProviderConfigValidator } from './provider-config-validator';
+import type { LlmSecretCipher } from '@/modules/settings/application/llm-secret-cipher';
+import type { ProviderConfigValidator } from '@/modules/settings/application/provider-config-validator';
 
 type ProviderConfigValidatorPort = Pick<ProviderConfigValidator, 'validate'>;
 type LlmSecretCipherPort = Pick<LlmSecretCipher, 'decrypt' | 'encrypt'>;

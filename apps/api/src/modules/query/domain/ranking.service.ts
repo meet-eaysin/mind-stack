@@ -1,4 +1,4 @@
-import type { SearchResultEntity } from './query-repository.interface.js';
+import type { SearchResultEntity } from '@/modules/query/domain/query-repository.interface';
 
 const IMPORTANCE_WEIGHT = 0.2;
 const TAG_MATCH_WEIGHT = 0.15;

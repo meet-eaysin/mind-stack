@@ -1,6 +1,6 @@
-import { RemoveTagUseCase } from '../remove-tag.use-case.js';
-import type { TagRepository } from '../../domain/tag-repository.interface.js';
-import type { TagEntity } from '../../domain/tag.entity.js';
+import { RemoveTagUseCase } from '@/modules/knowledge/application/remove-tag.use-case';
+import type { TagRepository } from '@/modules/knowledge/domain/tag-repository.interface';
+import type { TagEntity } from '@/modules/knowledge/domain/tag.entity';
 
 // ── Fakes ──
 

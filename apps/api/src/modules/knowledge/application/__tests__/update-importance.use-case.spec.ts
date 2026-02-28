@@ -1,6 +1,6 @@
-import { UpdateImportanceUseCase } from '../update-importance.use-case.js';
-import type { DocumentRepository } from '../../../ingestion/domain/document-repository.interface.js';
-import type { DocumentEntity } from '../../../ingestion/domain/document.entity.js';
+import { UpdateImportanceUseCase } from '@/modules/knowledge/application/update-importance.use-case';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
+import type { DocumentEntity } from '@/modules/ingestion/domain/document.entity';
 import { type IngestionStatus, type LearningStatus } from '@repo/shared-types';
 
 // ── Fakes ──

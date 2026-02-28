@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { PrismaService } from '../../../prisma/prisma.service.js';
+import { PrismaService } from '@/prisma/prisma.service';
 import { Prisma } from '@repo/database';
-import type { NoteRepository } from '../domain/note-repository.interface.js';
-import type { NoteEntity } from '../domain/note.entity.js';
+import type { NoteRepository } from '@/modules/knowledge/domain/note-repository.interface';
+import type { NoteEntity } from '@/modules/knowledge/domain/note.entity';
 import { ANNOTATION_TYPE, type AnnotationType } from '@repo/shared-types';
 
 @Injectable()

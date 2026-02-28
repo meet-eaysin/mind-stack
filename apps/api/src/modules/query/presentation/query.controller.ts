@@ -14,17 +14,17 @@ import type {
   AskQuestionResponse,
   ChunkReference,
 } from '@repo/shared-types';
-import { SemanticSearchUseCase } from '../application/semantic-search.use-case.js';
-import { FilteredSearchUseCase } from '../application/filtered-search.use-case.js';
-import { AskQuestionUseCase } from '../application/ask-question.use-case.js';
-import { RetrieveChunksUseCase } from '../application/retrieve-chunks.use-case.js';
+import { SemanticSearchUseCase } from '@/modules/query/application/semantic-search.use-case';
+import { FilteredSearchUseCase } from '@/modules/query/application/filtered-search.use-case';
+import { AskQuestionUseCase } from '@/modules/query/application/ask-question.use-case';
+import { RetrieveChunksUseCase } from '@/modules/query/application/retrieve-chunks.use-case';
 import {
   SemanticSearchDto,
   FilteredSearchDto,
   AskQuestionDto,
-} from './query.dtos.js';
-import { groupChunksToDocuments } from '../application/group-chunks.util.js';
-import { getUserIdFromHeader } from '../../../common/request-user.js';
+} from '@/modules/query/presentation/query.dtos';
+import { groupChunksToDocuments } from '@/modules/query/application/group-chunks.util';
+import { getUserIdFromHeader } from '@/common/request-user';
 
 @Controller('query')
 export class QueryController {

@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { PDFParse } from 'pdf-parse';
-import type { DocumentRepository } from '../domain/document-repository.interface.js';
-import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port.js';
-import { createDocument } from '../domain/document.entity.js';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
+import type { IngestionJobProducerPort } from '@/modules/ingestion/domain/ingestion-job-producer.port';
+import { createDocument } from '@/modules/ingestion/domain/document.entity';
 import { SOURCE_TYPE } from '@repo/shared-types';
 
 export class IngestPdfUseCase {

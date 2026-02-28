@@ -1,7 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import type { ConceptRepository } from '../domain/concept-repository.interface.js';
-import type { DocumentRepository } from '../../ingestion/domain/document-repository.interface.js';
-import type { ChunkRepository } from '../../knowledge/domain/chunk-repository.interface.js';
+import type { ConceptRepository } from '@/modules/graph/domain/concept-repository.interface';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
+import type { ChunkRepository } from '@/modules/knowledge/domain/chunk-repository.interface';
 import type { GraphResponse } from '@repo/shared-types';
 import {
   ROOT_LABEL,
@@ -9,7 +9,7 @@ import {
   DOCUMENT_RELATION_TYPES,
   toDocumentNodeLabel,
   parseDocumentIdFromLabel,
-} from '../domain/document-graph.js';
+} from '@/modules/graph/domain/document-graph';
 
 export class GetNeighborhoodUseCase {
   constructor(

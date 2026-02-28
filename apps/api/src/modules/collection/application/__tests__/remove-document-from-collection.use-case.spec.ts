@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { RemoveDocumentFromCollectionUseCase } from '../remove-document-from-collection.use-case.js';
-import { PrismaCollectionRepository } from '../../infrastructure/prisma-collection.repository.js';
+import { RemoveDocumentFromCollectionUseCase } from '@/modules/collection/application/remove-document-from-collection.use-case';
+import { PrismaCollectionRepository } from '@/modules/collection/infrastructure/prisma-collection.repository';
 
 describe('RemoveDocumentFromCollectionUseCase', () => {
   let useCase: RemoveDocumentFromCollectionUseCase;

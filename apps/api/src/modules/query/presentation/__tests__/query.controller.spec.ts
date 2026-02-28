@@ -1,10 +1,10 @@
 import { Test, type TestingModule } from '@nestjs/testing';
 import { firstValueFrom, take, toArray } from 'rxjs';
-import { QueryController } from '../query.controller.js';
-import { SemanticSearchUseCase } from '../../application/semantic-search.use-case.js';
-import { FilteredSearchUseCase } from '../../application/filtered-search.use-case.js';
-import { AskQuestionUseCase } from '../../application/ask-question.use-case.js';
-import { RetrieveChunksUseCase } from '../../application/retrieve-chunks.use-case.js';
+import { QueryController } from '@/modules/query/presentation/query.controller';
+import { SemanticSearchUseCase } from '@/modules/query/application/semantic-search.use-case';
+import { FilteredSearchUseCase } from '@/modules/query/application/filtered-search.use-case';
+import { AskQuestionUseCase } from '@/modules/query/application/ask-question.use-case';
+import { RetrieveChunksUseCase } from '@/modules/query/application/retrieve-chunks.use-case';
 
 describe('QueryController', () => {
   let controller: QueryController;

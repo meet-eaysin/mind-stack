@@ -1,17 +1,17 @@
 import { Module } from '@nestjs/common';
-import { LearningGoalController } from './learning-goal.controller.js';
-import { PrismaLearningGoalRepository } from '../infrastructure/prisma-learning-goal.repository.js';
-import { CreateLearningGoalUseCase } from '../application/create-learning-goal.use-case.js';
-import { ListLearningGoalsUseCase } from '../application/list-learning-goals.use-case.js';
-import { GetLearningGoalUseCase } from '../application/get-learning-goal.use-case.js';
-import { UpdateLearningGoalUseCase } from '../application/update-learning-goal.use-case.js';
-import { DeleteLearningGoalUseCase } from '../application/delete-learning-goal.use-case.js';
-import { AddItemToLearningGoalUseCase } from '../application/add-item-to-learning-goal.use-case.js';
-import { RemoveItemFromLearningGoalUseCase } from '../application/remove-item-from-learning-goal.use-case.js';
-import { CollectionModule } from '../../collection/presentation/collection.module.js';
-import { IngestionModule } from '../../ingestion/presentation/ingestion.module.js';
-import { PrismaDocumentRepository } from '../../ingestion/infrastructure/prisma-document.repository.js';
-import { PrismaCollectionRepository } from '../../collection/infrastructure/prisma-collection.repository.js';
+import { LearningGoalController } from '@/modules/learning-goal/presentation/learning-goal.controller';
+import { PrismaLearningGoalRepository } from '@/modules/learning-goal/infrastructure/prisma-learning-goal.repository';
+import { CreateLearningGoalUseCase } from '@/modules/learning-goal/application/create-learning-goal.use-case';
+import { ListLearningGoalsUseCase } from '@/modules/learning-goal/application/list-learning-goals.use-case';
+import { GetLearningGoalUseCase } from '@/modules/learning-goal/application/get-learning-goal.use-case';
+import { UpdateLearningGoalUseCase } from '@/modules/learning-goal/application/update-learning-goal.use-case';
+import { DeleteLearningGoalUseCase } from '@/modules/learning-goal/application/delete-learning-goal.use-case';
+import { AddItemToLearningGoalUseCase } from '@/modules/learning-goal/application/add-item-to-learning-goal.use-case';
+import { RemoveItemFromLearningGoalUseCase } from '@/modules/learning-goal/application/remove-item-from-learning-goal.use-case';
+import { CollectionModule } from '@/modules/collection/presentation/collection.module';
+import { IngestionModule } from '@/modules/ingestion/presentation/ingestion.module';
+import { PrismaDocumentRepository } from '@/modules/ingestion/infrastructure/prisma-document.repository';
+import { PrismaCollectionRepository } from '@/modules/collection/infrastructure/prisma-collection.repository';
 
 @Module({
   imports: [CollectionModule, IngestionModule],

@@ -1,10 +1,10 @@
-import type { ReviewRepository } from '../domain/review-repository.interface.js';
-import type { DocumentRepository } from '../../ingestion/domain/document-repository.interface.js';
-import type { TagRepository } from '../../knowledge/domain/tag-repository.interface.js';
+import type { ReviewRepository } from '@/modules/review/domain/review-repository.interface';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
+import type { TagRepository } from '@/modules/knowledge/domain/tag-repository.interface';
 import {
   selectChunksForReview,
   type ReviewTarget,
-} from '../domain/review-selection.service.js';
+} from '@/modules/review/domain/review-selection.service';
 import type { DailyReviewResponse, ReviewItem } from '@repo/shared-types';
 
 export class GenerateDailyReviewUseCase {

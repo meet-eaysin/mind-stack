@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { AddDocumentToCollectionUseCase } from '../add-document-to-collection.use-case.js';
-import { PrismaCollectionRepository } from '../../infrastructure/prisma-collection.repository.js';
-import { PrismaDocumentRepository } from '../../../ingestion/infrastructure/prisma-document.repository.js';
+import { AddDocumentToCollectionUseCase } from '@/modules/collection/application/add-document-to-collection.use-case';
+import { PrismaCollectionRepository } from '@/modules/collection/infrastructure/prisma-collection.repository';
+import { PrismaDocumentRepository } from '@/modules/ingestion/infrastructure/prisma-document.repository';
 
 describe('AddDocumentToCollectionUseCase', () => {
   let useCase: AddDocumentToCollectionUseCase;

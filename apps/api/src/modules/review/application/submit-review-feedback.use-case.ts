@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type {
   ReviewRepository,
   ReviewEntity,
-} from '../domain/review-repository.interface';
+} from '@/modules/review/domain/review-repository.interface';
 import { BadRequestException } from '@nestjs/common';
 
 export class SubmitReviewFeedbackUseCase {

@@ -1,10 +1,10 @@
 import { Test, type TestingModule } from '@nestjs/testing';
-import { GraphController } from '../graph.controller';
-import { BuildGraphUseCase } from '../../application/build-graph.use-case';
-import { QueryGraphUseCase } from '../../application/query-graph.use-case';
-import { GetNeighborhoodUseCase } from '../../application/get-neighborhood.use-case';
-import { CreateRelationUseCase } from '../../application/create-relation.use-case';
-import { DeleteRelationUseCase } from '../../application/delete-relation.use-case';
+import { GraphController } from '@/modules/graph/presentation/graph.controller';
+import { BuildGraphUseCase } from '@/modules/graph/application/build-graph.use-case';
+import { QueryGraphUseCase } from '@/modules/graph/application/query-graph.use-case';
+import { GetNeighborhoodUseCase } from '@/modules/graph/application/get-neighborhood.use-case';
+import { CreateRelationUseCase } from '@/modules/graph/application/create-relation.use-case';
+import { DeleteRelationUseCase } from '@/modules/graph/application/delete-relation.use-case';
 import { RELATION_TYPE } from '@repo/shared-types';
 
 describe('GraphController', () => {

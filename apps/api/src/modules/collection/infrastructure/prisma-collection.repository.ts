@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { PrismaService } from '@/prisma/prisma.service';
 import type {
   CollectionRepository,
   CollectionWithItems,
-} from '../domain/collection-repository.interface';
+} from '@/modules/collection/domain/collection-repository.interface';
 import type {
   CollectionEntity,
   CollectionItemEntity,
-} from '../domain/collection.entity';
+} from '@/modules/collection/domain/collection.entity';
 import { Prisma } from '@prisma/client'; // Added for explicit Prisma types
 import { LEARNING_STATUS } from '@repo/shared-types';
 

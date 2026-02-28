@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExportFullUseCase } from '../export-full.use-case.js';
-import { PrismaService } from '../../../../prisma/prisma.service.js';
+import { ExportFullUseCase } from '@/modules/export/application/export-full.use-case';
+import { PrismaService } from '@/prisma/prisma.service';
 
 describe('ExportFullUseCase', () => {
   let useCase: ExportFullUseCase;

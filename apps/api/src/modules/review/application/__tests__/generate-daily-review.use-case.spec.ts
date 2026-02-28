@@ -1,13 +1,13 @@
-import { GenerateDailyReviewUseCase } from '../generate-daily-review.use-case.js';
+import { GenerateDailyReviewUseCase } from '@/modules/review/application/generate-daily-review.use-case';
 import type {
   ReviewRepository,
   ReviewEntity,
-} from '../../domain/review-repository.interface.js';
-import type { DocumentRepository } from '../../../ingestion/domain/document-repository.interface.js';
-import type { DocumentEntity } from '../../../ingestion/domain/document.entity.js';
+} from '@/modules/review/domain/review-repository.interface';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
+import type { DocumentEntity } from '@/modules/ingestion/domain/document.entity';
 import type { IngestionStatus, LearningStatus } from '@repo/shared-types';
-import type { TagRepository } from '../../../knowledge/domain/tag-repository.interface.js';
-import type { TagEntity } from '../../../knowledge/domain/tag.entity.js';
+import type { TagRepository } from '@/modules/knowledge/domain/tag-repository.interface';
+import type { TagEntity } from '@/modules/knowledge/domain/tag.entity';
 
 // ── Fixtures ──
 

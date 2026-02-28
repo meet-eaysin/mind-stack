@@ -1,7 +1,7 @@
 import { Test, type TestingModule } from '@nestjs/testing';
 import { INGESTION_STATUS } from '@repo/shared-types';
-import { ClipController } from '../clip.controller.js';
-import { IngestClipUseCase } from '../../application/ingest-clip.use-case.js';
+import { ClipController } from '@/modules/ingestion/presentation/clip.controller';
+import { IngestClipUseCase } from '@/modules/ingestion/application/ingest-clip.use-case';
 
 describe('ClipController', () => {
   let controller: ClipController;

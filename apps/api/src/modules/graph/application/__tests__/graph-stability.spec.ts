@@ -1,18 +1,18 @@
-import { BuildGraphUseCase } from '../build-graph.use-case.js';
+import { BuildGraphUseCase } from '@/modules/graph/application/build-graph.use-case';
 import type {
   ConceptRepository,
   ConceptEntity,
   ConceptRelationEntity,
-} from '../../domain/concept-repository.interface.js';
-import type { DocumentRepository } from '../../../ingestion/domain/document-repository.interface.js';
+} from '@/modules/graph/domain/concept-repository.interface';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
 import {
   createDocument,
   type DocumentEntity,
-} from '../../../ingestion/domain/document.entity.js';
+} from '@/modules/ingestion/domain/document.entity';
 import {
   ROOT_LABEL,
   toDocumentNodeLabel,
-} from '../../domain/document-graph.js';
+} from '@/modules/graph/domain/document-graph';
 import type {
   RelationType,
   IngestionStatus,

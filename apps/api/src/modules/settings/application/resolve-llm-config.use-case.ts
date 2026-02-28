@@ -1,4 +1,4 @@
-import type { LlmConfigRepository } from '../domain/llm-config.repository.interface.js';
+import type { LlmConfigRepository } from '@/modules/settings/domain/llm-config.repository.interface';
 import type { ModelCapability, ModelProvider } from '@repo/shared-types';
 import { MODEL_CAPABILITY, MODEL_PROVIDER } from '@repo/shared-types';
 import { ConfigService } from '@nestjs/config';

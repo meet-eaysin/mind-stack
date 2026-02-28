@@ -1,5 +1,5 @@
-import { selectChunksForReview } from '../review-selection.service.js';
-import type { ReviewEntity } from '../review-repository.interface.js';
+import { selectChunksForReview } from '@/modules/review/domain/review-selection.service';
+import type { ReviewEntity } from '@/modules/review/domain/review-repository.interface';
 
 // ── Fixtures ──
 

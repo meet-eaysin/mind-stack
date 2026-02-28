@@ -1,4 +1,4 @@
-import type { DocumentRepository } from '../../ingestion/domain/document-repository.interface';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
 import { BadRequestException } from '@nestjs/common';
 
 export class UpdateImportanceUseCase {

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateCollectionUseCase } from '../create-collection.use-case.js';
-import { PrismaCollectionRepository } from '../../infrastructure/prisma-collection.repository.js';
+import { CreateCollectionUseCase } from '@/modules/collection/application/create-collection.use-case';
+import { PrismaCollectionRepository } from '@/modules/collection/infrastructure/prisma-collection.repository';
 
 describe('CreateCollectionUseCase', () => {
   let useCase: CreateCollectionUseCase;

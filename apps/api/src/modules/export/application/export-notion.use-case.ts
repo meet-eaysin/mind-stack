@@ -1,5 +1,5 @@
-import type { QueryRepository } from '../../query/domain/query-repository.interface.js';
-import { chunksToNotionBlocks } from '../domain/export.service.js';
+import type { QueryRepository } from '@/modules/query/domain/query-repository.interface';
+import { chunksToNotionBlocks } from '@/modules/export/domain/export.service';
 import type { NotionBlock } from '@repo/shared-types';
 
 export class ExportNotionUseCase {

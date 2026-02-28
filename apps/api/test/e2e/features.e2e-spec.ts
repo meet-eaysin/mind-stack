@@ -3,18 +3,18 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import type { Response as SupertestResponse } from 'supertest';
-import { AppModule } from '../../src/app.module.js';
-import { PrismaService } from '../../src/prisma/prisma.service.js';
-import { INGESTION_QUEUE } from '../../src/modules/ingestion/infrastructure/ingestion-job.producer.js';
+import { AppModule } from '@/app.module';
+import { PrismaService } from '@/prisma/prisma.service';
+import { INGESTION_QUEUE } from '@/modules/ingestion/infrastructure/ingestion-job.producer';
 import { getQueueToken } from '@nestjs/bullmq';
 import {
   EMBEDDING_PROVIDER,
   LLM_PROVIDER,
   VECTOR_STORE,
-} from '../../src/common/tokens.js';
-import { PrismaQueryRepository } from '../../src/modules/query/infrastructure/prisma-query.repository.js';
-import { PrismaReviewRepository } from '../../src/modules/review/infrastructure/prisma-review.repository.js';
-import type { DocumentEntity } from '../../src/modules/ingestion/domain/document.entity.js';
+} from '@/common/tokens';
+import { PrismaQueryRepository } from '@/modules/query/infrastructure/prisma-query.repository';
+import { PrismaReviewRepository } from '@/modules/review/infrastructure/prisma-review.repository';
+import type { DocumentEntity } from '@/modules/ingestion/domain/document.entity';
 
 type MockNote = {
   id: string;

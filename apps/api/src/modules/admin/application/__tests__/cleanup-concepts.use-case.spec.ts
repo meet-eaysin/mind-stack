@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CleanupConceptsUseCase } from '../cleanup-concepts.use-case.js';
-import { PrismaService } from '../../../../prisma/prisma.service.js';
+import { CleanupConceptsUseCase } from '@/modules/admin/application/cleanup-concepts.use-case';
+import { PrismaService } from '@/prisma/prisma.service';
 
 describe('CleanupConceptsUseCase', () => {
   let useCase: CleanupConceptsUseCase;

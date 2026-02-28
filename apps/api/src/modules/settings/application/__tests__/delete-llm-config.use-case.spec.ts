@@ -1,4 +1,4 @@
-import { DeleteLlmConfigUseCase } from '../delete-llm-config.use-case.js';
+import { DeleteLlmConfigUseCase } from '@/modules/settings/application/delete-llm-config.use-case';
 
 class FakeLlmConfigRepository {
   public deletedUserIds: string[] = [];

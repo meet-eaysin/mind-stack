@@ -1,5 +1,9 @@
 {
-  "moduleFileExtensions": ["js", "json", "ts"],
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
   "rootDir": ".",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
@@ -7,8 +11,7 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "moduleNameMapper": {
-    "^@modules/(.*)$": "<rootDir>/src/modules/$1",
-    "^(\\.\\.?\\/.*)\\.js$": "$1",
+    "^@/(.*)$": "<rootDir>/src/$1",
     "^@repo/shared-types$": "<rootDir>/../../../packages/shared-types/src/index.ts",
     "^@repo/llm$": "<rootDir>/../../../packages/llm/src/index.ts",
     "^@repo/embeddings$": "<rootDir>/../../../packages/embeddings/src/index.ts",

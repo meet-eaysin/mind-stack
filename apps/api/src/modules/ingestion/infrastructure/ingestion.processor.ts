@@ -2,17 +2,17 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject } from '@nestjs/common';
 import { JOB_TYPE, INGESTION_STATUS, SOURCE_TYPE } from '@repo/shared-types';
 import type { VectorStore, VectorDocument } from '@repo/vector-store';
-import { VECTOR_STORE } from '../../../common/tokens';
-import type { IngestionJob } from '../domain/ingestion-job.types';
-import { PrismaDocumentRepository } from './prisma-document.repository';
-import { PrismaChunkRepository } from '../../knowledge/infrastructure/prisma-chunk.repository';
-import { BuildGraphUseCase } from '../../graph/application/build-graph.use-case';
+import { VECTOR_STORE } from '@/common/tokens';
+import type { IngestionJob } from '@/modules/ingestion/domain/ingestion-job.types';
+import { PrismaDocumentRepository } from '@/modules/ingestion/infrastructure/prisma-document.repository';
+import { PrismaChunkRepository } from '@/modules/knowledge/infrastructure/prisma-chunk.repository';
+import { BuildGraphUseCase } from '@/modules/graph/application/build-graph.use-case';
 import {
   IngestionJobProducer,
   INGESTION_QUEUE,
-} from './ingestion-job.producer';
-import { LlmProviderFactory } from '../../settings/application/llm-provider.factory';
-import { CheckEmbeddingModelUseCase } from '../../settings/application/check-embedding-model.use-case';
+} from '@/modules/ingestion/infrastructure/ingestion-job.producer';
+import { LlmProviderFactory } from '@/modules/settings/application/llm-provider.factory';
+import { CheckEmbeddingModelUseCase } from '@/modules/settings/application/check-embedding-model.use-case';
 import { createLogger } from '@repo/logger';
 
 const CHUNK_SIZE = 1200;

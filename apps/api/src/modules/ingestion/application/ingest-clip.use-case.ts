@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { IngestTextUseCase } from './ingest-text.use-case.js';
-import { IngestClipDto } from '../presentation/ingestion.dtos.js';
+import { IngestTextUseCase } from '@/modules/ingestion/application/ingest-text.use-case';
+import { IngestClipDto } from '@/modules/ingestion/presentation/ingestion.dtos';
 
 @Injectable()
 export class IngestClipUseCase {

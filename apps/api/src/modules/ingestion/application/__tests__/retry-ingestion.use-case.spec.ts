@@ -4,10 +4,10 @@ import {
   SOURCE_TYPE,
   type LearningStatus,
 } from '@repo/shared-types';
-import { RetryIngestionUseCase } from '../retry-ingestion.use-case.js';
-import type { DocumentRepository } from '../../domain/document-repository.interface.js';
-import type { IngestionJobProducerPort } from '../../domain/ingestion-job-producer.port.js';
-import type { DocumentEntity } from '../../domain/document.entity.js';
+import { RetryIngestionUseCase } from '@/modules/ingestion/application/retry-ingestion.use-case';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
+import type { IngestionJobProducerPort } from '@/modules/ingestion/domain/ingestion-job-producer.port';
+import type { DocumentEntity } from '@/modules/ingestion/domain/document.entity';
 
 // ── Fixtures ──
 

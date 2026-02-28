@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { GetCollectionUseCase } from '../get-collection.use-case.js';
-import { PrismaCollectionRepository } from '../../infrastructure/prisma-collection.repository.js';
+import { GetCollectionUseCase } from '@/modules/collection/application/get-collection.use-case';
+import { PrismaCollectionRepository } from '@/modules/collection/infrastructure/prisma-collection.repository';
 
 describe('GetCollectionUseCase', () => {
   let useCase: GetCollectionUseCase;

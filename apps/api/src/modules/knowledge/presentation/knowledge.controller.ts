@@ -15,16 +15,16 @@ import type {
   ChunkReference,
   AnnotationType,
 } from '@repo/shared-types';
-import { ListDocumentsUseCase } from '../application/list-documents.use-case.js';
-import { ViewDocumentUseCase } from '../application/view-document.use-case.js';
-import { DeleteDocumentUseCase } from '../application/delete-document.use-case.js';
-import { GetRelatedSuggestionsUseCase } from '../application/get-related-suggestions.use-case.js';
-import { AddTagUseCase } from '../application/add-tag.use-case.js';
-import { RemoveTagUseCase } from '../application/remove-tag.use-case.js';
-import { AddNoteUseCase } from '../application/add-note.use-case.js';
-import { UpdateNoteUseCase } from '../application/update-note.use-case.js';
-import { UpdateImportanceUseCase } from '../application/update-importance.use-case.js';
-import { UpdateDocumentUseCase } from '../application/update-document.use-case.js';
+import { ListDocumentsUseCase } from '@/modules/knowledge/application/list-documents.use-case';
+import { ViewDocumentUseCase } from '@/modules/knowledge/application/view-document.use-case';
+import { DeleteDocumentUseCase } from '@/modules/knowledge/application/delete-document.use-case';
+import { GetRelatedSuggestionsUseCase } from '@/modules/knowledge/application/get-related-suggestions.use-case';
+import { AddTagUseCase } from '@/modules/knowledge/application/add-tag.use-case';
+import { RemoveTagUseCase } from '@/modules/knowledge/application/remove-tag.use-case';
+import { AddNoteUseCase } from '@/modules/knowledge/application/add-note.use-case';
+import { UpdateNoteUseCase } from '@/modules/knowledge/application/update-note.use-case';
+import { UpdateImportanceUseCase } from '@/modules/knowledge/application/update-importance.use-case';
+import { UpdateDocumentUseCase } from '@/modules/knowledge/application/update-document.use-case';
 import {
   AddTagDto,
   RemoveTagDto,
@@ -33,9 +33,9 @@ import {
   UpdateImportanceDto,
   PaginationQueryDto,
   UpdateDocumentDto,
-} from './knowledge.dtos.js';
-import type { NoteEntity } from '../domain/note.entity.js';
-import { getUserIdFromHeader } from '../../../common/request-user.js';
+} from '@/modules/knowledge/presentation/knowledge.dtos';
+import type { NoteEntity } from '@/modules/knowledge/domain/note.entity';
+import { getUserIdFromHeader } from '@/common/request-user';
 
 @Controller('knowledge')
 export class KnowledgeController {

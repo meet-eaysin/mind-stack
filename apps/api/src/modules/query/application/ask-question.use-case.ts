@@ -3,7 +3,7 @@ import {
   type ChunkReference,
   type StreamingAskResponseChunk,
 } from '@repo/shared-types';
-import type { LlmProviderFactoryPort } from '../../settings/application/llm-provider.factory.js';
+import type { LlmProviderFactoryPort } from '@/modules/settings/application/llm-provider.factory';
 
 type SemanticSearchPort = {
   execute(input: {

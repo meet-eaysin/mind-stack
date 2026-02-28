@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../prisma/prisma.service.js';
+import { PrismaService } from '@/prisma/prisma.service';
 import type {
   QueryRepository,
   QueryChunkDetail,
-} from '../domain/query-repository.interface.js';
+} from '@/modules/query/domain/query-repository.interface';
 import type { DocumentTag, Prisma } from '@prisma/client';
 
 @Injectable()

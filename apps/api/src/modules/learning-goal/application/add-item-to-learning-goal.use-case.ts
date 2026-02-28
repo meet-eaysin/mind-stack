@@ -3,9 +3,9 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
-import { LearningGoalRepository } from '../domain/learning-goal-repository.interface.js';
-import { CollectionRepository } from '../../collection/domain/collection-repository.interface.js';
-import { DocumentRepository } from '../../ingestion/domain/document-repository.interface.js';
+import { LearningGoalRepository } from '@/modules/learning-goal/domain/learning-goal-repository.interface';
+import { CollectionRepository } from '@/modules/collection/domain/collection-repository.interface';
+import { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
 
 @Injectable()
 export class AddItemToLearningGoalUseCase {

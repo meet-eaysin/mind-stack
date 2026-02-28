@@ -6,12 +6,12 @@ import {
   INGESTION_STATUS,
   type IngestionResponse,
 } from '@repo/shared-types';
-import { ExportMarkdownUseCase } from '../application/export-markdown.use-case.js';
-import { ExportNotionUseCase } from '../application/export-notion.use-case.js';
-import { ExportFullUseCase } from '../application/export-full.use-case.js';
-import { IngestTextUseCase } from '../../ingestion/application/ingest-text.use-case.js';
-import { ExportChunksDto, NotionImportDto } from './export.dtos.js';
-import { getUserIdFromHeader } from '../../../common/request-user.js';
+import { ExportMarkdownUseCase } from '@/modules/export/application/export-markdown.use-case';
+import { ExportNotionUseCase } from '@/modules/export/application/export-notion.use-case';
+import { ExportFullUseCase } from '@/modules/export/application/export-full.use-case';
+import { IngestTextUseCase } from '@/modules/ingestion/application/ingest-text.use-case';
+import { ExportChunksDto, NotionImportDto } from '@/modules/export/presentation/export.dtos';
+import { getUserIdFromHeader } from '@/common/request-user';
 
 @Controller('export')
 export class ExportController {

@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PrismaModule } from '../../../prisma/prisma.module.js';
-import { SettingsController } from './settings.controller.js';
-import { PrismaLlmConfigRepository } from '../infrastructure/prisma-llm-config.repository.js';
-import { ResolveLlmConfigUseCase } from '../application/resolve-llm-config.use-case.js';
-import { GetLlmConfigUseCase } from '../application/get-llm-config.use-case.js';
-import { UpdateLlmConfigUseCase } from '../application/update-llm-config.use-case.js';
-import { CheckEmbeddingModelUseCase } from '../application/check-embedding-model.use-case.js';
-import { LlmProviderFactory } from '../application/llm-provider.factory.js';
-import { LlmSecretCipher } from '../application/llm-secret-cipher.js';
-import { ProviderConfigValidator } from '../application/provider-config-validator.js';
-import { DeleteLlmConfigUseCase } from '../application/delete-llm-config.use-case.js';
+import { PrismaModule } from '@/prisma/prisma.module';
+import { SettingsController } from '@/modules/settings/presentation/settings.controller';
+import { PrismaLlmConfigRepository } from '@/modules/settings/infrastructure/prisma-llm-config.repository';
+import { ResolveLlmConfigUseCase } from '@/modules/settings/application/resolve-llm-config.use-case';
+import { GetLlmConfigUseCase } from '@/modules/settings/application/get-llm-config.use-case';
+import { UpdateLlmConfigUseCase } from '@/modules/settings/application/update-llm-config.use-case';
+import { CheckEmbeddingModelUseCase } from '@/modules/settings/application/check-embedding-model.use-case';
+import { LlmProviderFactory } from '@/modules/settings/application/llm-provider.factory';
+import { LlmSecretCipher } from '@/modules/settings/application/llm-secret-cipher';
+import { ProviderConfigValidator } from '@/modules/settings/application/provider-config-validator';
+import { DeleteLlmConfigUseCase } from '@/modules/settings/application/delete-llm-config.use-case';
 
 @Module({
   imports: [PrismaModule, ConfigModule],

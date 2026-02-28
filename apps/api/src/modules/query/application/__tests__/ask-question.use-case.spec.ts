@@ -1,4 +1,4 @@
-import { AskQuestionUseCase } from '../ask-question.use-case.js';
+import { AskQuestionUseCase } from '@/modules/query/application/ask-question.use-case';
 import type {
   LLMProvider,
   GenerationRequest,

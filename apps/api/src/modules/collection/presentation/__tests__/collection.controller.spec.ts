@@ -1,13 +1,13 @@
 import { Test, type TestingModule } from '@nestjs/testing';
-import { CollectionController } from '../collection.controller.js';
-import { CreateCollectionUseCase } from '../../application/create-collection.use-case.js';
-import { ListCollectionsUseCase } from '../../application/list-collections.use-case.js';
-import { GetCollectionUseCase } from '../../application/get-collection.use-case.js';
-import { UpdateCollectionUseCase } from '../../application/update-collection.use-case.js';
-import { DeleteCollectionUseCase } from '../../application/delete-collection.use-case.js';
-import { AddDocumentToCollectionUseCase } from '../../application/add-document-to-collection.use-case.js';
-import { RemoveDocumentFromCollectionUseCase } from '../../application/remove-document-from-collection.use-case.js';
-import { ReorderCollectionItemsUseCase } from '../../application/reorder-collection-items.use-case.js';
+import { CollectionController } from '@/modules/collection/presentation/collection.controller';
+import { CreateCollectionUseCase } from '@/modules/collection/application/create-collection.use-case';
+import { ListCollectionsUseCase } from '@/modules/collection/application/list-collections.use-case';
+import { GetCollectionUseCase } from '@/modules/collection/application/get-collection.use-case';
+import { UpdateCollectionUseCase } from '@/modules/collection/application/update-collection.use-case';
+import { DeleteCollectionUseCase } from '@/modules/collection/application/delete-collection.use-case';
+import { AddDocumentToCollectionUseCase } from '@/modules/collection/application/add-document-to-collection.use-case';
+import { RemoveDocumentFromCollectionUseCase } from '@/modules/collection/application/remove-document-from-collection.use-case';
+import { ReorderCollectionItemsUseCase } from '@/modules/collection/application/reorder-collection-items.use-case';
 
 describe('CollectionController', () => {
   let controller: CollectionController;

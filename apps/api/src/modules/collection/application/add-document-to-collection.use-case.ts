@@ -3,8 +3,8 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
-import { CollectionRepository } from '../domain/collection-repository.interface.js';
-import { DocumentRepository } from '../../ingestion/domain/document-repository.interface.js';
+import { CollectionRepository } from '@/modules/collection/domain/collection-repository.interface';
+import { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
 
 @Injectable()
 export class AddDocumentToCollectionUseCase {

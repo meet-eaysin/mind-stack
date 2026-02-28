@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { RemoveItemFromLearningGoalUseCase } from '../remove-item-from-learning-goal.use-case.js';
-import { PrismaLearningGoalRepository } from '../../infrastructure/prisma-learning-goal.repository.js';
+import { RemoveItemFromLearningGoalUseCase } from '@/modules/learning-goal/application/remove-item-from-learning-goal.use-case';
+import { PrismaLearningGoalRepository } from '@/modules/learning-goal/infrastructure/prisma-learning-goal.repository';
 
 describe('RemoveItemFromLearningGoalUseCase', () => {
   let useCase: RemoveItemFromLearningGoalUseCase;

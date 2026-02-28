@@ -1,4 +1,4 @@
-import type { LlmConfigEntity } from './llm-config.entity.js';
+import type { LlmConfigEntity } from '@/modules/settings/domain/llm-config.entity';
 
 export type LlmConfigRepository = {
   findByUserId(userId: string): Promise<LlmConfigEntity | null>;

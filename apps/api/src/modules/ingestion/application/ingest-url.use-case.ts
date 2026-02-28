@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
 
-import type { DocumentRepository } from '../domain/document-repository.interface.js';
-import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port.js';
-import { createDocument } from '../domain/document.entity.js';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
+import type { IngestionJobProducerPort } from '@/modules/ingestion/domain/ingestion-job-producer.port';
+import { createDocument } from '@/modules/ingestion/domain/document.entity';
 import { SOURCE_TYPE, INGESTION_STATUS } from '@repo/shared-types';
 
 export class IngestUrlUseCase {
@@ -20,16 +20,15 @@ export class IngestUrlUseCase {
       input.url,
       input.userId,
     );
+
     if (existing) {
       if (
         existing.status !== INGESTION_STATUS.FAILED &&
         existing.status !== INGESTION_STATUS.READY
       ) {
-        // Already in progress
         return { documentId: existing.id };
       }
-      // If it's FAILED or READY (and we are re-ingesting), we might want to allow it or return existing
-      // For now, let's just return existing if it's already finished successfully
+
       if (existing.status === INGESTION_STATUS.READY) {
         return { documentId: existing.id };
       }

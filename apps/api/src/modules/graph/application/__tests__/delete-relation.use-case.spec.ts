@@ -1,11 +1,11 @@
-import { DeleteRelationUseCase } from '../delete-relation.use-case.js';
+import { DeleteRelationUseCase } from '@/modules/graph/application/delete-relation.use-case';
 import type {
   ConceptEntity,
   ConceptRelationEntity,
   ConceptRepository,
-} from '../../domain/concept-repository.interface.js';
+} from '@/modules/graph/domain/concept-repository.interface';
 import type { RelationType } from '@repo/shared-types';
-import { ROOT_LABEL } from '../../domain/document-graph.js';
+import { ROOT_LABEL } from '@/modules/graph/domain/document-graph';
 
 class FakeConceptRepository implements ConceptRepository {
   private concepts: ConceptEntity[] = [];

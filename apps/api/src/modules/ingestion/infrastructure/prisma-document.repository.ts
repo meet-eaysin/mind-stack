@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { PrismaService } from '../../../prisma/prisma.service.js';
-import type { DocumentRepository } from '../domain/document-repository.interface.js';
-import type { DocumentEntity } from '../domain/document.entity.js';
+import { PrismaService } from '@/prisma/prisma.service';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
+import type { DocumentEntity } from '@/modules/ingestion/domain/document.entity';
 import {
   INGESTION_STATUS,
   LEARNING_STATUS,

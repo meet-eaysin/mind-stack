@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { AddItemToLearningGoalUseCase } from '../add-item-to-learning-goal.use-case.js';
-import { PrismaLearningGoalRepository } from '../../infrastructure/prisma-learning-goal.repository.js';
-import { PrismaCollectionRepository } from '../../../collection/infrastructure/prisma-collection.repository.js';
-import { PrismaDocumentRepository } from '../../../ingestion/infrastructure/prisma-document.repository.js';
+import { AddItemToLearningGoalUseCase } from '@/modules/learning-goal/application/add-item-to-learning-goal.use-case';
+import { PrismaLearningGoalRepository } from '@/modules/learning-goal/infrastructure/prisma-learning-goal.repository';
+import { PrismaCollectionRepository } from '@/modules/collection/infrastructure/prisma-collection.repository';
+import { PrismaDocumentRepository } from '@/modules/ingestion/infrastructure/prisma-document.repository';
 
 describe('AddItemToLearningGoalUseCase', () => {
   let useCase: AddItemToLearningGoalUseCase;

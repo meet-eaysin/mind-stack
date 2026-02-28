@@ -1,4 +1,4 @@
-import { groupChunksToDocuments } from '../group-chunks.util.js';
+import { groupChunksToDocuments } from '@/modules/query/application/group-chunks.util';
 
 describe('groupChunksToDocuments', () => {
   it('returns aggregated document results without chunk payloads', () => {

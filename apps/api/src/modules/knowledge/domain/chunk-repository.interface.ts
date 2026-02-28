@@ -1,4 +1,4 @@
-import type { ChunkEntity } from './chunk.entity.js';
+import type { ChunkEntity } from '@/modules/knowledge/domain/chunk.entity';
 
 export type ChunkRepository = {
   findByDocumentId(documentId: string): Promise<ChunkEntity[]>;

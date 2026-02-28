@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Inject, Headers } from '@nestjs/common';
-import { GetQueueMetricsUseCase } from '../application/get-queue-metrics.use-case';
-import { CleanupConceptsUseCase } from '../application/cleanup-concepts.use-case';
-import { PrismaService } from '../../../prisma/prisma.service';
-import { VECTOR_STORE } from '../../../common/tokens';
+import { GetQueueMetricsUseCase } from '@/modules/admin/application/get-queue-metrics.use-case';
+import { CleanupConceptsUseCase } from '@/modules/admin/application/cleanup-concepts.use-case';
+import { PrismaService } from '@/prisma/prisma.service';
+import { VECTOR_STORE } from '@/common/tokens';
 import type { VectorStore } from '@repo/vector-store';
 import {
   type QueueMetricsResponse,
@@ -13,8 +13,8 @@ import {
   type EmbeddingModelHealthResponse,
   INGESTION_STATUS,
 } from '@repo/shared-types';
-import { CheckEmbeddingModelUseCase } from '../../settings/application/check-embedding-model.use-case';
-import { getUserIdFromHeader } from '../../../common/request-user';
+import { CheckEmbeddingModelUseCase } from '@/modules/settings/application/check-embedding-model.use-case';
+import { getUserIdFromHeader } from '@/common/request-user';
 
 @Controller('admin')
 export class AdminController {

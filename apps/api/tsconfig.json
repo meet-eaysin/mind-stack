@@ -1,19 +1,13 @@
 {
   "extends": "@repo/typescript-config/nestjs.json",
   "compilerOptions": {
+    "rootDir": "./src",
     "outDir": "./dist",
-    "baseUrl": "./",
+    "baseUrl": ".",
     "paths": {
-      "@modules/*": ["src/modules/*"],
-      "@repo/config": ["../../packages/config/src/index.ts"],
-      "@repo/database": ["../../packages/database/src/index.ts"],
-      "@repo/embeddings": ["../../packages/embeddings/src/index.ts"],
-      "@repo/llm": ["../../packages/llm/src/index.ts"],
-      "@repo/logger": ["../../packages/logger/src/index.ts"],
-      "@repo/shared-types": ["../../packages/shared-types/src/index.ts"],
-      "@repo/vector-store": ["../../packages/vector-store/src/index.ts"]
+      "@/*": ["src/*"]
     }
   },
-  "include": ["src/**/*", "test/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

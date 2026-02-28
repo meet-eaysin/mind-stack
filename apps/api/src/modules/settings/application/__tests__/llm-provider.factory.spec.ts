@@ -4,7 +4,7 @@ import {
   type ModelCapability,
   type ModelProvider,
 } from '@repo/shared-types';
-import { LlmProviderFactory } from '../llm-provider.factory.js';
+import { LlmProviderFactory } from '@/modules/settings/application/llm-provider.factory';
 
 class FakeResolveLlmConfigUseCase {
   config: {

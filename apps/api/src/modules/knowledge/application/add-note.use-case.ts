@@ -1,6 +1,6 @@
 import type { AnnotationType } from '@repo/shared-types';
-import type { NoteRepository } from '../domain/note-repository.interface.js';
-import type { NoteEntity } from '../domain/note.entity.js';
+import type { NoteRepository } from '@/modules/knowledge/domain/note-repository.interface';
+import type { NoteEntity } from '@/modules/knowledge/domain/note.entity';
 
 export class AddNoteUseCase {
   constructor(private readonly noteRepository: NoteRepository) {}

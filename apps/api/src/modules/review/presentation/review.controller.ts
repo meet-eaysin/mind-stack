@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import type { DailyReviewResponse } from '@repo/shared-types';
-import { GenerateDailyReviewUseCase } from '../application/generate-daily-review.use-case.js';
-import { SubmitReviewFeedbackUseCase } from '../application/submit-review-feedback.use-case.js';
-import { SubmitReviewFeedbackDto } from './review.dtos.js';
+import { GenerateDailyReviewUseCase } from '@/modules/review/application/generate-daily-review.use-case';
+import { SubmitReviewFeedbackUseCase } from '@/modules/review/application/submit-review-feedback.use-case';
+import { SubmitReviewFeedbackDto } from '@/modules/review/presentation/review.dtos';
 
 @Controller('review')
 export class ReviewController {

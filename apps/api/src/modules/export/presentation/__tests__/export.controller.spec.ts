@@ -1,10 +1,10 @@
 import { Test, type TestingModule } from '@nestjs/testing';
 import { INGESTION_STATUS } from '@repo/shared-types';
-import { ExportController } from '../export.controller.js';
-import { ExportMarkdownUseCase } from '../../application/export-markdown.use-case.js';
-import { ExportNotionUseCase } from '../../application/export-notion.use-case.js';
-import { ExportFullUseCase } from '../../application/export-full.use-case.js';
-import { IngestTextUseCase } from '../../../ingestion/application/ingest-text.use-case.js';
+import { ExportController } from '@/modules/export/presentation/export.controller';
+import { ExportMarkdownUseCase } from '@/modules/export/application/export-markdown.use-case';
+import { ExportNotionUseCase } from '@/modules/export/application/export-notion.use-case';
+import { ExportFullUseCase } from '@/modules/export/application/export-full.use-case';
+import { IngestTextUseCase } from '@/modules/ingestion/application/ingest-text.use-case';
 
 describe('ExportController', () => {
   let controller: ExportController;

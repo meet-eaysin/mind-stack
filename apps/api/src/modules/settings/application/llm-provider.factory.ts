@@ -18,9 +18,9 @@ import {
   type ModelCapability,
 } from '@repo/shared-types';
 import { BadRequestException } from '@nestjs/common';
-import type { ResolveLlmConfigUseCase } from './resolve-llm-config.use-case';
-import type { LlmSecretCipher } from './llm-secret-cipher';
-import { providerSupportsCapability } from '../domain/provider-catalog';
+import type { ResolveLlmConfigUseCase } from '@/modules/settings/application/resolve-llm-config.use-case';
+import type { LlmSecretCipher } from '@/modules/settings/application/llm-secret-cipher';
+import { providerSupportsCapability } from '@/modules/settings/domain/provider-catalog';
 
 export type LlmProviderFactoryPort = {
   getEmbeddingProvider(userId: string): Promise<EmbeddingProvider>;

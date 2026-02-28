@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { GetTopicMasteryUseCase } from '../get-topic-mastery.use-case.js';
-import { PrismaService } from '../../../../prisma/prisma.service.js';
+import { GetTopicMasteryUseCase } from '@/modules/analysis/application/get-topic-mastery.use-case';
+import { PrismaService } from '@/prisma/prisma.service';
 
 describe('GetTopicMasteryUseCase', () => {
   let useCase: GetTopicMasteryUseCase;

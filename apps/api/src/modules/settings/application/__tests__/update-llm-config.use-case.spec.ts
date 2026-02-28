@@ -4,9 +4,9 @@ import {
   MODEL_PROVIDER,
   type ModelProvider,
 } from '@repo/shared-types';
-import { UpdateLlmConfigUseCase } from '../update-llm-config.use-case.js';
-import type { LlmConfigRepository } from '../../domain/llm-config.repository.interface.js';
-import type { LlmConfigEntity } from '../../domain/llm-config.entity.js';
+import { UpdateLlmConfigUseCase } from '@/modules/settings/application/update-llm-config.use-case';
+import type { LlmConfigRepository } from '@/modules/settings/domain/llm-config.repository.interface';
+import type { LlmConfigEntity } from '@/modules/settings/domain/llm-config.entity';
 
 class FakeLlmConfigRepository implements LlmConfigRepository {
   public saved: LlmConfigEntity | null = null;

@@ -1,9 +1,9 @@
-import { ExportNotionUseCase } from '../export-notion.use-case.js';
+import { ExportNotionUseCase } from '@/modules/export/application/export-notion.use-case';
 import { INGESTION_STATUS } from '@repo/shared-types';
 import type {
   QueryRepository,
   QueryChunkDetail,
-} from '../../../query/domain/query-repository.interface.js';
+} from '@/modules/query/domain/query-repository.interface';
 
 // ── Fakes ──
 

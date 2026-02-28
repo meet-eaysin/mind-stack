@@ -4,7 +4,7 @@ import {
   type ModelCapability,
   type ModelProvider,
 } from '@repo/shared-types';
-import { CheckEmbeddingModelUseCase } from '../check-embedding-model.use-case.js';
+import { CheckEmbeddingModelUseCase } from '@/modules/settings/application/check-embedding-model.use-case';
 
 class FakeResolveLlmConfigUseCase {
   private config: {

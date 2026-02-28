@@ -1,13 +1,13 @@
 import { Test, type TestingModule } from '@nestjs/testing';
 import { INGESTION_STATUS } from '@repo/shared-types';
-import { IngestionController } from '../ingestion.controller.js';
-import { IngestUrlUseCase } from '../../application/ingest-url.use-case.js';
-import { IngestTextUseCase } from '../../application/ingest-text.use-case.js';
-import { IngestPdfUseCase } from '../../application/ingest-pdf.use-case.js';
-import { IngestYoutubeUseCase } from '../../application/ingest-youtube.use-case.js';
-import { RetryIngestionUseCase } from '../../application/retry-ingestion.use-case.js';
-import { GetIngestionJobStatusUseCase } from '../../application/get-ingestion-job-status.use-case.js';
-import { PrismaDocumentRepository } from '../../infrastructure/prisma-document.repository.js';
+import { IngestionController } from '@/modules/ingestion/presentation/ingestion.controller';
+import { IngestUrlUseCase } from '@/modules/ingestion/application/ingest-url.use-case';
+import { IngestTextUseCase } from '@/modules/ingestion/application/ingest-text.use-case';
+import { IngestPdfUseCase } from '@/modules/ingestion/application/ingest-pdf.use-case';
+import { IngestYoutubeUseCase } from '@/modules/ingestion/application/ingest-youtube.use-case';
+import { RetryIngestionUseCase } from '@/modules/ingestion/application/retry-ingestion.use-case';
+import { GetIngestionJobStatusUseCase } from '@/modules/ingestion/application/get-ingestion-job-status.use-case';
+import { PrismaDocumentRepository } from '@/modules/ingestion/infrastructure/prisma-document.repository';
 
 describe('IngestionController', () => {
   let controller: IngestionController;

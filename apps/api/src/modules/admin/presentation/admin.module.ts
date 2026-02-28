@@ -1,11 +1,11 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
-import { AdminController } from './admin.controller.js';
-import { GetQueueMetricsUseCase } from '../application/get-queue-metrics.use-case.js';
-import { CleanupConceptsUseCase } from '../application/cleanup-concepts.use-case.js';
-import { PrismaModule } from '../../../prisma/prisma.module.js';
-import { QueryModule } from '../../query/presentation/query.module.js';
-import { SettingsModule } from '../../settings/presentation/settings.module.js';
+import { AdminController } from '@/modules/admin/presentation/admin.controller';
+import { GetQueueMetricsUseCase } from '@/modules/admin/application/get-queue-metrics.use-case';
+import { CleanupConceptsUseCase } from '@/modules/admin/application/cleanup-concepts.use-case';
+import { PrismaModule } from '@/prisma/prisma.module';
+import { QueryModule } from '@/modules/query/presentation/query.module';
+import { SettingsModule } from '@/modules/settings/presentation/settings.module';
 
 @Module({
   imports: [

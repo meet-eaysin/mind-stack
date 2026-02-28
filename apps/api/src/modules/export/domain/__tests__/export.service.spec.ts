@@ -1,4 +1,4 @@
-import { chunksToMarkdown, chunksToNotionBlocks } from '../export.service.js';
+import { chunksToMarkdown, chunksToNotionBlocks } from '@/modules/export/domain/export.service';
 
 // ── Fixtures ──
 

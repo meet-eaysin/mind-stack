@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IngestionJobProducer } from '../infrastructure/ingestion-job.producer.js';
+import { IngestionJobProducer } from '@/modules/ingestion/infrastructure/ingestion-job.producer';
 import type { IngestionJobStatusResponse } from '@repo/shared-types';
 
 @Injectable()

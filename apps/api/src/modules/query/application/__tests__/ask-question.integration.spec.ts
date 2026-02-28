@@ -1,5 +1,5 @@
-import { AskQuestionUseCase } from '../ask-question.use-case.js';
-import { LlmProviderFactory } from '../../../settings/application/llm-provider.factory.js';
+import { AskQuestionUseCase } from '@/modules/query/application/ask-question.use-case';
+import { LlmProviderFactory } from '@/modules/settings/application/llm-provider.factory';
 import { MODEL_CAPABILITY, MODEL_PROVIDER } from '@repo/shared-types';
 
 class FakeResolveConfig {

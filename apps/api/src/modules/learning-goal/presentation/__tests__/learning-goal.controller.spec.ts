@@ -1,12 +1,12 @@
 import { Test, type TestingModule } from '@nestjs/testing';
-import { LearningGoalController } from '../learning-goal.controller.js';
-import { CreateLearningGoalUseCase } from '../../application/create-learning-goal.use-case.js';
-import { ListLearningGoalsUseCase } from '../../application/list-learning-goals.use-case.js';
-import { GetLearningGoalUseCase } from '../../application/get-learning-goal.use-case.js';
-import { UpdateLearningGoalUseCase } from '../../application/update-learning-goal.use-case.js';
-import { DeleteLearningGoalUseCase } from '../../application/delete-learning-goal.use-case.js';
-import { AddItemToLearningGoalUseCase } from '../../application/add-item-to-learning-goal.use-case.js';
-import { RemoveItemFromLearningGoalUseCase } from '../../application/remove-item-from-learning-goal.use-case.js';
+import { LearningGoalController } from '@/modules/learning-goal/presentation/learning-goal.controller';
+import { CreateLearningGoalUseCase } from '@/modules/learning-goal/application/create-learning-goal.use-case';
+import { ListLearningGoalsUseCase } from '@/modules/learning-goal/application/list-learning-goals.use-case';
+import { GetLearningGoalUseCase } from '@/modules/learning-goal/application/get-learning-goal.use-case';
+import { UpdateLearningGoalUseCase } from '@/modules/learning-goal/application/update-learning-goal.use-case';
+import { DeleteLearningGoalUseCase } from '@/modules/learning-goal/application/delete-learning-goal.use-case';
+import { AddItemToLearningGoalUseCase } from '@/modules/learning-goal/application/add-item-to-learning-goal.use-case';
+import { RemoveItemFromLearningGoalUseCase } from '@/modules/learning-goal/application/remove-item-from-learning-goal.use-case';
 
 describe('LearningGoalController', () => {
   let controller: LearningGoalController;

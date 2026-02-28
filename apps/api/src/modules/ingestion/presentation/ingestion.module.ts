@@ -1,26 +1,26 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
-import { IngestionController } from './ingestion.controller.js';
-import { PrismaDocumentRepository } from '../infrastructure/prisma-document.repository.js';
+import { IngestionController } from '@/modules/ingestion/presentation/ingestion.controller';
+import { PrismaDocumentRepository } from '@/modules/ingestion/infrastructure/prisma-document.repository';
 import {
   IngestionJobProducer,
   INGESTION_QUEUE,
-} from '../infrastructure/ingestion-job.producer.js';
-import { IngestionProcessor } from '../infrastructure/ingestion.processor.js';
-import { IngestUrlUseCase } from '../application/ingest-url.use-case.js';
-import { IngestTextUseCase } from '../application/ingest-text.use-case.js';
-import { IngestPdfUseCase } from '../application/ingest-pdf.use-case.js';
-import { IngestYoutubeUseCase } from '../application/ingest-youtube.use-case.js';
-import { IngestClipUseCase } from '../application/ingest-clip.use-case.js';
-import { RetryIngestionUseCase } from '../application/retry-ingestion.use-case.js';
-import { GetIngestionJobStatusUseCase } from '../application/get-ingestion-job-status.use-case.js';
-import { ClipController } from './clip.controller.js';
+} from '@/modules/ingestion/infrastructure/ingestion-job.producer';
+import { IngestionProcessor } from '@/modules/ingestion/infrastructure/ingestion.processor';
+import { IngestUrlUseCase } from '@/modules/ingestion/application/ingest-url.use-case';
+import { IngestTextUseCase } from '@/modules/ingestion/application/ingest-text.use-case';
+import { IngestPdfUseCase } from '@/modules/ingestion/application/ingest-pdf.use-case';
+import { IngestYoutubeUseCase } from '@/modules/ingestion/application/ingest-youtube.use-case';
+import { IngestClipUseCase } from '@/modules/ingestion/application/ingest-clip.use-case';
+import { RetryIngestionUseCase } from '@/modules/ingestion/application/retry-ingestion.use-case';
+import { GetIngestionJobStatusUseCase } from '@/modules/ingestion/application/get-ingestion-job-status.use-case';
+import { ClipController } from '@/modules/ingestion/presentation/clip.controller';
 
-import { KnowledgeModule } from '../../knowledge/presentation/knowledge.module.js';
-import { GraphModule } from '../../graph/presentation/graph.module.js';
-import { QueryModule } from '../../query/presentation/query.module.js';
-import { SettingsModule } from '../../settings/presentation/settings.module.js';
+import { KnowledgeModule } from '@/modules/knowledge/presentation/knowledge.module';
+import { GraphModule } from '@/modules/graph/presentation/graph.module';
+import { QueryModule } from '@/modules/query/presentation/query.module';
+import { SettingsModule } from '@/modules/settings/presentation/settings.module';
 
 @Module({
   imports: [

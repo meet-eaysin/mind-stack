@@ -1,10 +1,10 @@
 import { Test, type TestingModule } from '@nestjs/testing';
-import { AdminController } from '../admin.controller.js';
-import { GetQueueMetricsUseCase } from '../../application/get-queue-metrics.use-case.js';
-import { CleanupConceptsUseCase } from '../../application/cleanup-concepts.use-case.js';
-import { CheckEmbeddingModelUseCase } from '../../../settings/application/check-embedding-model.use-case.js';
-import { PrismaService } from '../../../../prisma/prisma.service.js';
-import { VECTOR_STORE } from '../../../../common/tokens.js';
+import { AdminController } from '@/modules/admin/presentation/admin.controller';
+import { GetQueueMetricsUseCase } from '@/modules/admin/application/get-queue-metrics.use-case';
+import { CleanupConceptsUseCase } from '@/modules/admin/application/cleanup-concepts.use-case';
+import { CheckEmbeddingModelUseCase } from '@/modules/settings/application/check-embedding-model.use-case';
+import { PrismaService } from '@/prisma/prisma.service';
+import { VECTOR_STORE } from '@/common/tokens';
 
 describe('AdminController', () => {
   let controller: AdminController;

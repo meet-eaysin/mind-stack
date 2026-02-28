@@ -1,9 +1,9 @@
 import { Test, type TestingModule } from '@nestjs/testing';
-import { SettingsController } from '../settings.controller.js';
-import { GetLlmConfigUseCase } from '../../application/get-llm-config.use-case.js';
-import { UpdateLlmConfigUseCase } from '../../application/update-llm-config.use-case.js';
-import { DeleteLlmConfigUseCase } from '../../application/delete-llm-config.use-case.js';
-import { ResolveLlmConfigUseCase } from '../../application/resolve-llm-config.use-case.js';
+import { SettingsController } from '@/modules/settings/presentation/settings.controller';
+import { GetLlmConfigUseCase } from '@/modules/settings/application/get-llm-config.use-case';
+import { UpdateLlmConfigUseCase } from '@/modules/settings/application/update-llm-config.use-case';
+import { DeleteLlmConfigUseCase } from '@/modules/settings/application/delete-llm-config.use-case';
+import { ResolveLlmConfigUseCase } from '@/modules/settings/application/resolve-llm-config.use-case';
 import { MODEL_CAPABILITY, MODEL_PROVIDER } from '@repo/shared-types';
 
 describe('SettingsController', () => {

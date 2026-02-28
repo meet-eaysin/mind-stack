@@ -1,11 +1,11 @@
-import type { DocumentRepository } from '../../ingestion/domain/document-repository.interface.js';
-import type { ChunkRepository } from '../domain/chunk-repository.interface.js';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
+import type { ChunkRepository } from '@/modules/knowledge/domain/chunk-repository.interface';
 import type { VectorStore } from '@repo/vector-store';
-import type { ConceptRepository } from '../../graph/domain/concept-repository.interface.js';
+import type { ConceptRepository } from '@/modules/graph/domain/concept-repository.interface';
 import {
   HIERARCHY_RELATION_TYPES,
   toDocumentNodeLabel,
-} from '../../graph/domain/document-graph.js';
+} from '@/modules/graph/domain/document-graph';
 
 export class DeleteDocumentUseCase {
   constructor(

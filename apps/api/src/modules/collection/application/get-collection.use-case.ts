@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CollectionRepository } from '../domain/collection-repository.interface.js';
+import { CollectionRepository } from '@/modules/collection/domain/collection-repository.interface';
 import type { CollectionDetailResponse } from '@repo/shared-types';
 
 @Injectable()

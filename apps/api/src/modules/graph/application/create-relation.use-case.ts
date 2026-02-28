@@ -1,13 +1,13 @@
 import { BadRequestException } from '@nestjs/common';
-import type { ConceptRepository } from '../domain/concept-repository.interface.js';
-import type { DocumentRepository } from '../../ingestion/domain/document-repository.interface.js';
+import type { ConceptRepository } from '@/modules/graph/domain/concept-repository.interface';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
 import type { RelationType } from '@repo/shared-types';
 import {
   DOCUMENT_RELATION_TYPES,
   HIERARCHY_RELATION_TYPES,
   ROOT_NODE_ID,
   toDocumentNodeLabel,
-} from '../domain/document-graph.js';
+} from '@/modules/graph/domain/document-graph';
 
 export class CreateRelationUseCase {
   constructor(

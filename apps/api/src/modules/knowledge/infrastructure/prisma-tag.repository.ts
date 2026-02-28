@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { PrismaService } from '../../../prisma/prisma.service.js';
-import type { TagRepository } from '../domain/tag-repository.interface.js';
-import type { TagEntity } from '../domain/tag.entity.js';
+import { PrismaService } from '@/prisma/prisma.service';
+import type { TagRepository } from '@/modules/knowledge/domain/tag-repository.interface';
+import type { TagEntity } from '@/modules/knowledge/domain/tag.entity';
 
 @Injectable()
 export class PrismaTagRepository implements TagRepository {

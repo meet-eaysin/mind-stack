@@ -1,8 +1,8 @@
-import { SubmitReviewFeedbackUseCase } from '../submit-review-feedback.use-case.js';
+import { SubmitReviewFeedbackUseCase } from '@/modules/review/application/submit-review-feedback.use-case';
 import type {
   ReviewRepository,
   ReviewEntity,
-} from '../../domain/review-repository.interface.js';
+} from '@/modules/review/domain/review-repository.interface';
 
 // ── Fakes ──
 

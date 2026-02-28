@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { MODEL_CAPABILITY, MODEL_PROVIDER } from '@repo/shared-types';
-import { ProviderConfigValidator } from '../provider-config-validator.js';
+import { ProviderConfigValidator } from '@/modules/settings/application/provider-config-validator';
 
 describe('ProviderConfigValidator', () => {
   const originalFetch = global.fetch;

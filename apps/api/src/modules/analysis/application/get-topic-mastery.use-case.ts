@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { type TopicMasteryData } from '@repo/shared-types';
-import { PrismaService } from '../../../prisma/prisma.service.js';
+import { PrismaService } from '@/prisma/prisma.service';
 
 @Injectable()
 export class GetTopicMasteryUseCase {

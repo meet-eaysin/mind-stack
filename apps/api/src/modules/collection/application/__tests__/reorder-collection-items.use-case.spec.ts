@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { ReorderCollectionItemsUseCase } from '../reorder-collection-items.use-case.js';
-import { PrismaCollectionRepository } from '../../infrastructure/prisma-collection.repository.js';
+import { ReorderCollectionItemsUseCase } from '@/modules/collection/application/reorder-collection-items.use-case';
+import { PrismaCollectionRepository } from '@/modules/collection/infrastructure/prisma-collection.repository';
 
 describe('ReorderCollectionItemsUseCase', () => {
   let useCase: ReorderCollectionItemsUseCase;

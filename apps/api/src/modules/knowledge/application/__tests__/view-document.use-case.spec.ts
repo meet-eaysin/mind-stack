@@ -1,12 +1,12 @@
-import { ViewDocumentUseCase } from '../view-document.use-case.js';
-import type { DocumentRepository } from '../../../ingestion/domain/document-repository.interface.js';
-import type { DocumentEntity } from '../../../ingestion/domain/document.entity.js';
-import type { ChunkRepository } from '../../domain/chunk-repository.interface.js';
-import type { ChunkEntity } from '../../domain/chunk.entity.js';
-import type { TagRepository } from '../../domain/tag-repository.interface.js';
-import type { TagEntity } from '../../domain/tag.entity.js';
-import type { NoteRepository } from '../../domain/note-repository.interface.js';
-import type { NoteEntity } from '../../domain/note.entity.js';
+import { ViewDocumentUseCase } from '@/modules/knowledge/application/view-document.use-case';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
+import type { DocumentEntity } from '@/modules/ingestion/domain/document.entity';
+import type { ChunkRepository } from '@/modules/knowledge/domain/chunk-repository.interface';
+import type { ChunkEntity } from '@/modules/knowledge/domain/chunk.entity';
+import type { TagRepository } from '@/modules/knowledge/domain/tag-repository.interface';
+import type { TagEntity } from '@/modules/knowledge/domain/tag.entity';
+import type { NoteRepository } from '@/modules/knowledge/domain/note-repository.interface';
+import type { NoteEntity } from '@/modules/knowledge/domain/note.entity';
 import {
   type IngestionStatus,
   type AnnotationType,

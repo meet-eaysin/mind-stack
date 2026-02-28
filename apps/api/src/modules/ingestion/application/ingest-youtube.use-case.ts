@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
-import type { DocumentRepository } from '../domain/document-repository.interface';
-import type { IngestionJobProducerPort } from '../domain/ingestion-job-producer.port';
-import { createDocument } from '../domain/document.entity';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
+import type { IngestionJobProducerPort } from '@/modules/ingestion/domain/ingestion-job-producer.port';
+import { createDocument } from '@/modules/ingestion/domain/document.entity';
 import { SOURCE_TYPE, INGESTION_STATUS } from '@repo/shared-types';
 import {
   BadRequestException,

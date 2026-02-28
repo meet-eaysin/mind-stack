@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { GetTopicMasteryUseCase } from '../application/get-topic-mastery.use-case.js';
+import { GetTopicMasteryUseCase } from '@/modules/analysis/application/get-topic-mastery.use-case';
 import { type TopicMasteryData } from '@repo/shared-types';
 
 @Controller('analysis')

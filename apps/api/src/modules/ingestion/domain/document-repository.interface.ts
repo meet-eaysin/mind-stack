@@ -1,4 +1,4 @@
-import type { DocumentEntity } from './document.entity.js';
+import type { DocumentEntity } from '@/modules/ingestion/domain/document.entity';
 import type { IngestionStatus, LearningStatus } from '@repo/shared-types';
 
 export type DocumentRepository = {

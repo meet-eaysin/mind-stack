@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ListCollectionsUseCase } from '../list-collections.use-case.js';
-import { PrismaCollectionRepository } from '../../infrastructure/prisma-collection.repository.js';
+import { ListCollectionsUseCase } from '@/modules/collection/application/list-collections.use-case';
+import { PrismaCollectionRepository } from '@/modules/collection/infrastructure/prisma-collection.repository';
 
 describe('ListCollectionsUseCase', () => {
   let useCase: ListCollectionsUseCase;

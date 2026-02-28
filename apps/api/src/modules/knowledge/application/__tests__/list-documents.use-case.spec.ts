@@ -1,8 +1,8 @@
-import { ListDocumentsUseCase } from '../list-documents.use-case.js';
-import type { DocumentRepository } from '../../../ingestion/domain/document-repository.interface.js';
-import type { DocumentEntity } from '../../../ingestion/domain/document.entity.js';
-import type { ChunkRepository } from '../../domain/chunk-repository.interface.js';
-import type { ChunkEntity } from '../../domain/chunk.entity.js';
+import { ListDocumentsUseCase } from '@/modules/knowledge/application/list-documents.use-case';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
+import type { DocumentEntity } from '@/modules/ingestion/domain/document.entity';
+import type { ChunkRepository } from '@/modules/knowledge/domain/chunk-repository.interface';
+import type { ChunkEntity } from '@/modules/knowledge/domain/chunk.entity';
 import type { IngestionStatus, LearningStatus } from '@repo/shared-types';
 
 // ── Fixtures ──

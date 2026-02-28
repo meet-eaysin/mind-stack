@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { GetQueueMetricsUseCase } from '../get-queue-metrics.use-case.js';
+import { GetQueueMetricsUseCase } from '@/modules/admin/application/get-queue-metrics.use-case';
 import { getQueueToken } from '@nestjs/bullmq';
 
 describe('GetQueueMetricsUseCase', () => {

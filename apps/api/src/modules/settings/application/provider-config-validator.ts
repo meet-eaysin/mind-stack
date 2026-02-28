@@ -19,7 +19,7 @@ import {
   OpenRouterLLMProvider,
   type LLMProvider,
 } from '@repo/llm';
-import { providerSupportsCapability } from '../domain/provider-catalog';
+import { providerSupportsCapability } from '@/modules/settings/domain/provider-catalog';
 
 export type ProviderValidationInput = {
   provider: ModelProvider;

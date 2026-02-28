@@ -1,19 +1,19 @@
-import { QueryGraphUseCase } from '../query-graph.use-case.js';
+import { QueryGraphUseCase } from '@/modules/graph/application/query-graph.use-case';
 import type {
   ConceptRepository,
   ConceptEntity,
   ConceptRelationEntity,
-} from '../../domain/concept-repository.interface.js';
-import type { DocumentRepository } from '../../../ingestion/domain/document-repository.interface.js';
-import type { ChunkRepository } from '../../../knowledge/domain/chunk-repository.interface.js';
+} from '@/modules/graph/domain/concept-repository.interface';
+import type { DocumentRepository } from '@/modules/ingestion/domain/document-repository.interface';
+import type { ChunkRepository } from '@/modules/knowledge/domain/chunk-repository.interface';
 import {
   createDocument,
   type DocumentEntity,
-} from '../../../ingestion/domain/document.entity.js';
+} from '@/modules/ingestion/domain/document.entity';
 import {
   ROOT_LABEL,
   toDocumentNodeLabel,
-} from '../../domain/document-graph.js';
+} from '@/modules/graph/domain/document-graph';
 import type {
   RelationType,
   IngestionStatus,

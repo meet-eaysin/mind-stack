@@ -7,7 +7,7 @@ import {
 import { createLogger } from '@repo/logger';
 import type { Request, Response } from 'express';
 import { tap, type Observable } from 'rxjs';
-import { getUserIdFromRequest } from '../request-user';
+import { getUserIdFromRequest } from '@/common/request-user';
 
 const logger = createLogger('APIHttp');
 

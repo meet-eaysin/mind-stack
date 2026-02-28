@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { GetLearningGoalUseCase } from '../get-learning-goal.use-case.js';
-import { PrismaLearningGoalRepository } from '../../infrastructure/prisma-learning-goal.repository.js';
+import { GetLearningGoalUseCase } from '@/modules/learning-goal/application/get-learning-goal.use-case';
+import { PrismaLearningGoalRepository } from '@/modules/learning-goal/infrastructure/prisma-learning-goal.repository';
 
 describe('GetLearningGoalUseCase', () => {
   let useCase: GetLearningGoalUseCase;

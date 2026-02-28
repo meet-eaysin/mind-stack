@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { LearningGoalRepository } from '../domain/learning-goal-repository.interface.js';
-import type { LearningGoalEntity } from '../domain/learning-goal.entity.js';
+import { LearningGoalRepository } from '@/modules/learning-goal/domain/learning-goal-repository.interface';
+import type { LearningGoalEntity } from '@/modules/learning-goal/domain/learning-goal.entity';
 
 @Injectable()
 export class CreateLearningGoalUseCase {

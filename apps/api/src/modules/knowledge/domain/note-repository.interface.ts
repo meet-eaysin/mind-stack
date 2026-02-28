@@ -1,5 +1,5 @@
 import type { AnnotationType } from '@repo/shared-types';
-import type { NoteEntity } from './note.entity.js';
+import type { NoteEntity } from '@/modules/knowledge/domain/note.entity';
 
 export type NoteRepository = {
   createForDocument(

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@repo/database';
 import { randomUUID } from 'node:crypto';
-import { PrismaService } from '../../../prisma/prisma.service.js';
-import type { LlmConfigRepository } from '../domain/llm-config.repository.interface.js';
-import type { LlmConfigEntity } from '../domain/llm-config.entity.js';
+import { PrismaService } from '@/prisma/prisma.service';
+import type { LlmConfigRepository } from '@/modules/settings/domain/llm-config.repository.interface';
+import type { LlmConfigEntity } from '@/modules/settings/domain/llm-config.entity';
 import {
   MODEL_CAPABILITY,
   MODEL_PROVIDER,

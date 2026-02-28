@@ -1,7 +1,7 @@
 import { Module, Global } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ChromaVectorStore } from '@repo/vector-store';
-import { VECTOR_STORE } from './tokens.js';
+import { VECTOR_STORE } from '@/common/tokens';
 
 @Global()
 @Module({

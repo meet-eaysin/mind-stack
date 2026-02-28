@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CollectionRepository } from '../domain/collection-repository.interface.js';
-import { CollectionEntity } from '../domain/collection.entity.js';
+import { CollectionRepository } from '@/modules/collection/domain/collection-repository.interface';
+import { CollectionEntity } from '@/modules/collection/domain/collection.entity';
 
 @Injectable()
 export class UpdateCollectionUseCase {

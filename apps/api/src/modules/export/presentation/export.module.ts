@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ExportController } from './export.controller.js';
-import { PrismaQueryRepository } from '../../query/infrastructure/prisma-query.repository.js';
-import { ExportMarkdownUseCase } from '../application/export-markdown.use-case.js';
-import { ExportNotionUseCase } from '../application/export-notion.use-case.js';
-import { QueryModule } from '../../query/presentation/query.module.js';
-import { ExportFullUseCase } from '../application/export-full.use-case.js';
-import { PrismaService } from '../../../prisma/prisma.service.js';
-import { IngestionModule } from '../../ingestion/presentation/ingestion.module.js';
+import { ExportController } from '@/modules/export/presentation/export.controller';
+import { PrismaQueryRepository } from '@/modules/query/infrastructure/prisma-query.repository';
+import { ExportMarkdownUseCase } from '@/modules/export/application/export-markdown.use-case';
+import { ExportNotionUseCase } from '@/modules/export/application/export-notion.use-case';
+import { QueryModule } from '@/modules/query/presentation/query.module';
+import { ExportFullUseCase } from '@/modules/export/application/export-full.use-case';
+import { PrismaService } from '@/prisma/prisma.service';
+import { IngestionModule } from '@/modules/ingestion/presentation/ingestion.module';
 
 @Module({
   imports: [QueryModule, IngestionModule],

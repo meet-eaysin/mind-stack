@@ -1,4 +1,4 @@
-import type { ConceptRepository } from '../domain/concept-repository.interface';
+import type { ConceptRepository } from '@/modules/graph/domain/concept-repository.interface';
 import { RELATION_TYPE } from '@repo/shared-types';
 
 const isHierarchyRelationType = (value: string): boolean =>

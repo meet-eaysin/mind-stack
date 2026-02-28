@@ -1,9 +1,9 @@
 import type { VectorStore } from '@repo/vector-store';
-import type { QueryRepository } from '../domain/query-repository.interface.js';
-import { rankResults } from '../domain/ranking.service.js';
+import type { QueryRepository } from '@/modules/query/domain/query-repository.interface';
+import { rankResults } from '@/modules/query/domain/ranking.service';
 import type { ChunkReference } from '@repo/shared-types';
 import { INGESTION_STATUS } from '@repo/shared-types';
-import type { LlmProviderFactoryPort } from '../../settings/application/llm-provider.factory.js';
+import type { LlmProviderFactoryPort } from '@/modules/settings/application/llm-provider.factory';
 
 export class FilteredSearchUseCase {
   constructor(
