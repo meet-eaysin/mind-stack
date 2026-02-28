@@ -3,7 +3,7 @@
  * This allows use-case tests to use fake implementations
  * without depending on the concrete BullMQ-based producer.
  */
-export type IngestionJobProducerPort = {
+export interface IngestionJobProducerPort {
   enqueueUrlExtractionJob(documentId: string, userId: string): Promise<string>;
   enqueueChunkingJob(documentId: string, userId: string): Promise<string>;
   enqueueEmbeddingJob(documentId: string, userId: string): Promise<string>;
@@ -11,4 +11,4 @@ export type IngestionJobProducerPort = {
     documentId: string,
     userId: string,
   ): Promise<string>;
-};
+}

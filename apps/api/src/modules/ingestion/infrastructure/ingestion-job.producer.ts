@@ -58,7 +58,6 @@ export class IngestionJobProducer implements IngestionJobProducerPort {
     };
 
     if (type === JOB_TYPE.CHUNKING) {
-      // Chunking errors are usually deterministic (e.g. empty content).
       return {
         ...base,
         attempts: 1,
@@ -66,7 +65,6 @@ export class IngestionJobProducer implements IngestionJobProducerPort {
     }
 
     if (type === JOB_TYPE.EMBEDDING) {
-      // Embedding may need extra time while model bootstrapping/pull completes.
       return {
         ...base,
         attempts: 20,
